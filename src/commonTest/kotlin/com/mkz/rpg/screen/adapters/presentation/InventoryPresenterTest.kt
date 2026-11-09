@@ -75,7 +75,7 @@ class InventoryPresenterTest {
                     consumableLootableItem(id = "teleport-essence", consumable = consumable(effectIds = setOf("learn-teleport"))).toDto(),
                     consumableLootableItem(id = "bee-essence", consumable = consumable(effectIds = setOf("learn-bee"))).toDto(),
                 ),
-            units = listOf(unit(id = "knight", healthPoints = 100, abilities = listOf("bee"), startingGold = 20).toDto(), unit(id = "rat").toDto(), unit(id = "bee").toDto()),
+            units = listOf(unit(id = "knight", baseMaximumHealth = 100, startingAbilities = listOf("bee"), startingGold = 20).toDto(), unit(id = "rat").toDto(), unit(id = "bee").toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
             // The rats drop nothing, so the items lying on the battlefield are only the ones the test places, as dropped by a rat.
             lootTables = listOf(lootTable(id = "rat-loot", entries = listOf(nothingEntry())).toDto()),

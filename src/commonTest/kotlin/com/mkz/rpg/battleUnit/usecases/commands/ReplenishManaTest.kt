@@ -16,7 +16,7 @@ class ReplenishManaTest {
     fun `should replenish mana when the battle unit has mana below the maximum`() {
         // Given
         val unit =
-            unit(manaPoints = 20, abilities = listOf("ability-1"))
+            unit(baseMaximumMana = 20, startingAbilities = listOf("ability-1"))
                 .toDto()
         val player =
             player(id = "player-1")
@@ -38,7 +38,7 @@ class ReplenishManaTest {
     @Test
     fun `should not exceed maximum mana when replenishing`() {
         // Given
-        val unit = unit(manaPoints = 12, abilities = listOf("ability-1")).toDto()
+        val unit = unit(baseMaximumMana = 12, startingAbilities = listOf("ability-1")).toDto()
         val player = player(id = "player-1").toDto()
         val depletedBattleUnit =
             com.mkz.rpg.battleUnit.domain.BattleUnitMother
@@ -57,7 +57,7 @@ class ReplenishManaTest {
     @Test
     fun `should not replenish mana when the battle unit is not in the battle`() {
         // Given
-        val unit = unit(manaPoints = 20, abilities = listOf("ability-1")).toDto()
+        val unit = unit(baseMaximumMana = 20, startingAbilities = listOf("ability-1")).toDto()
         val player = player(id = "player-1").toDto()
         val depletedBattleUnit =
             com.mkz.rpg.battleUnit.domain.BattleUnitMother

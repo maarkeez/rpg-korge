@@ -21,7 +21,7 @@ class RemoveEquippedEffectsTest {
     fun `should remove the item effects and publish the equipped effects removed event when the item is unequipped`() {
         // Given
         battleUnitRepository.create(
-            battleUnit(id = "knight-1", unit = unit(healthPoints = 100).toDto())
+            battleUnit(id = "knight-1", unit = unit(baseMaximumHealth = 100).toDto())
                 .applyEquippedEffect(lootableItemId = "hammer", effect = increaseMaximumHealthEffect(maximumHealth = 20).toDto())
                 .pullEvents()
                 .second,

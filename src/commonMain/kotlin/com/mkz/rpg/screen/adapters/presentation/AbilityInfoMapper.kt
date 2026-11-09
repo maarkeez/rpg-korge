@@ -80,7 +80,7 @@ internal object AbilityInfoMapper {
                 val unitId = outcome.summon!!.unitId
                 val unit = searchUnit(unitId) ?: error("The ability '${ability.id}' summons the unit '$unitId', which does not exist")
                 val turns = ability.summonDuration ?: error("The ability '${ability.id}' summons the unit '$unitId' with no summonDuration")
-                AbilityInfo.Effect.Summon(unitId = unitId, turns = turns, healthPoints = unit.healthPoints)
+                AbilityInfo.Effect.Summon(unitId = unitId, turns = turns, baseMaximumHealth = unit.baseMaximumHealth)
             }
             outcome.type == EffectOutcomeDto.TypeDto.TELEPORT && timing.type == TimingTypeDto.IMMEDIATELY -> AbilityInfo.Effect.Teleport
             outcome.type == EffectOutcomeDto.TypeDto.APPLY_EFFECT_TO_ADJACENT_ALLIES && timing.type == TimingTypeDto.ON_DEFEATED -> {

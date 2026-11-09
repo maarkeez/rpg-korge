@@ -33,7 +33,7 @@ class CastAbilityTest {
     fun `should cast ability when the position is a valid cast position`() {
         // Given
         queries.abilityRepository.create(ability(id = "ability-1", manaCost = 0, cooldown = 0, targeting = CASTER))
-        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(abilities = listOf("ability-1"), manaPoints = 10).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(startingAbilities = listOf("ability-1"), baseMaximumMana = 10).toDto()))
         queries.battlefieldRepository.create(battlefield("K .", occupants = mapOf('K' to "knight-1")))
         val castGroup = WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(0, 0)))
         // When
@@ -72,7 +72,7 @@ class CastAbilityTest {
     fun `should throw can not cast error when the battle unit can not cast the ability`() {
         // Given
         queries.abilityRepository.create(ability(id = "ability-1"))
-        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(abilities = listOf("other-ability"), manaPoints = 10).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(startingAbilities = listOf("other-ability"), baseMaximumMana = 10).toDto()))
         // When
         val error =
             shouldThrowAny {
@@ -86,7 +86,7 @@ class CastAbilityTest {
     fun `should throw invalid cast position error when the position is not a valid cast position`() {
         // Given
         queries.abilityRepository.create(ability(id = "ability-1", manaCost = 0, cooldown = 0, targeting = CASTER))
-        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(abilities = listOf("ability-1"), manaPoints = 10).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(startingAbilities = listOf("ability-1"), baseMaximumMana = 10).toDto()))
         // The ability can only be cast on the knight own tile.
         queries.battlefieldRepository.create(battlefield(". K", occupants = mapOf('K' to "knight-1")))
         // When

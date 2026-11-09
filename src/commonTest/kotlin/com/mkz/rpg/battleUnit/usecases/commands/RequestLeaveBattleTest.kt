@@ -17,7 +17,7 @@ class RequestLeaveBattleTest {
     @Test
     fun `should request the battle unit to leave the battle and its player to be defeated when all their battle units are defeated`() {
         // Given
-        queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = player(id = "cpu").toDto(), unit = unit(healthPoints = 0).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = player(id = "cpu").toDto(), unit = unit(baseMaximumHealth = 0).toDto()))
         // When
         requestLeaveBattle(playerId = "cpu", battleUnitId = "rat-1")
         // Then
@@ -27,8 +27,8 @@ class RequestLeaveBattleTest {
     @Test
     fun `should only request the battle unit to leave the battle when other battle units of its player are not defeated`() {
         // Given
-        queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = player(id = "cpu").toDto(), unit = unit(healthPoints = 0).toDto()))
-        queries.battleUnitRepository.create(battleUnit(id = "rat-2", player = player(id = "cpu").toDto(), unit = unit(healthPoints = 10).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = player(id = "cpu").toDto(), unit = unit(baseMaximumHealth = 0).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "rat-2", player = player(id = "cpu").toDto(), unit = unit(baseMaximumHealth = 10).toDto()))
         // When
         requestLeaveBattle(playerId = "cpu", battleUnitId = "rat-1")
         // Then

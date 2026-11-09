@@ -84,18 +84,18 @@ class MushroomAbilityAcceptanceTest {
         val knight =
             UnitMother.unit(
                 id = knightUnitId,
-                healthPoints = 100,
-                manaPoints = 30,
-                abilities = listOf(mushroomAbilityId),
-                movementRange = 3,
+                baseMaximumHealth = 100,
+                baseMaximumMana = 30,
+                startingAbilities = listOf(mushroomAbilityId),
+                maximumSteps = 3,
             )
         val rat =
             UnitMother.unit(
                 id = ratUnitId,
-                healthPoints = 20,
-                manaPoints = 10,
-                abilities = emptyList(),
-                movementRange = 3,
+                baseMaximumHealth = 20,
+                baseMaximumMana = 10,
+                startingAbilities = emptyList(),
+                maximumSteps = 3,
             )
         unitApi.requestUnitCreation(knight.toDto())
         unitApi.requestUnitCreation(rat.toDto())

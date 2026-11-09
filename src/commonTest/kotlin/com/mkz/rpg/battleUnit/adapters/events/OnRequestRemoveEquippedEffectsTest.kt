@@ -19,7 +19,7 @@ class OnRequestRemoveEquippedEffectsTest {
     fun `should remove the item effects from the battle unit when the removal of the equipped effects is requested`() {
         // Given
         battleUnitRepository.create(
-            battleUnit(id = "knight-1", unit = unit(healthPoints = 100).toDto())
+            battleUnit(id = "knight-1", unit = unit(baseMaximumHealth = 100).toDto())
                 .applyEquippedEffect(lootableItemId = "hammer", effect = increaseMaximumHealthEffect(maximumHealth = 20).toDto())
                 .pullEvents()
                 .second,

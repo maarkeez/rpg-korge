@@ -1,5 +1,5 @@
-healthPoints = 150
-manaPoints = 30
-movementRange = 3
-abilities = ["sword", "cleave"]
+baseMaximumHealth = 150
+baseMaximumMana = 30
+maximumSteps = 3
+startingAbilities = ["sword", "cleave"]
 startingGold = 20

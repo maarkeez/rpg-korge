@@ -22,7 +22,7 @@ import io.kotest.matchers.string.shouldContain
 import kotlin.test.Test
 
 class LoadBattleUnitsSnapshotTest {
-    private val knightUnit = unit(id = "knight", healthPoints = 30, abilities = listOf("slash"))
+    private val knightUnit = unit(id = "knight", baseMaximumHealth = 30, startingAbilities = listOf("slash"))
     private val knight = knightUnit.toDto()
     private val human = player(id = "human").toDto()
     private val effectRepository = InMemoryEffectRepository().apply { listOf(increaseMaximumHealthEffect(id = "iron-helmet"), healEffect(id = "regeneration")).forEach(::create) }
@@ -55,7 +55,7 @@ class LoadBattleUnitsSnapshotTest {
         loadBattleUnitsSnapshot(knights.map(BattleUnit::toSnapshot))
         // Then
         battleUnitRepository.searchAll().shouldContainExactlyInAnyOrder(knights)
-        battleUnitRepository.searchById("knight-1")!!.toDto().maximumHealth shouldBe knight.healthPoints + 10
+        battleUnitRepository.searchById("knight-1")!!.toDto().maximumHealth shouldBe knight.baseMaximumHealth + 10
     }
 
     @Test

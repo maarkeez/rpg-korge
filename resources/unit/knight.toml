@@ -1,5 +1,5 @@
-healthPoints = 100
-manaPoints = 30
-movementRange = 3
-abilities = ["poisoned-sword", "mushroom", "skull", "teleport", "bee", "heal"]
+baseMaximumHealth = 100
+baseMaximumMana = 30
+maximumSteps = 3
+startingAbilities = ["poisoned-sword", "mushroom", "skull", "teleport", "bee", "heal"]
 startingGold = 20

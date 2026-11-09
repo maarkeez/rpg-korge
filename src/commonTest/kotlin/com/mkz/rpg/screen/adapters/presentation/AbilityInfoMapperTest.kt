@@ -84,12 +84,12 @@ class AbilityInfoMapperTest {
     fun `AbilityInfoMapper should map a deployed battle unit to a summon with its turns and health`() {
         // Given
         val deployBat = summonEffect(id = "deploy-bat", unitId = "bat").toDto()
-        val bat = unit(id = "bat", healthPoints = 10).toDto()
+        val bat = unit(id = "bat", baseMaximumHealth = 10).toDto()
         val batAbility = ability(targeting = TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER, abilityEffects = listOf(abilityEffect("deploy-bat", TARGETED_TILE)), summonDuration = 5).toDto()
         // When
         val abilityInfo = abilityInfo(batAbility, deployBat, units = listOf(bat))
         // Then
-        abilityInfo.effects shouldBe listOf(AbilityInfo.Effect.Summon(unitId = "bat", turns = 5, healthPoints = 10))
+        abilityInfo.effects shouldBe listOf(AbilityInfo.Effect.Summon(unitId = "bat", turns = 5, baseMaximumHealth = 10))
     }
 
     @Test

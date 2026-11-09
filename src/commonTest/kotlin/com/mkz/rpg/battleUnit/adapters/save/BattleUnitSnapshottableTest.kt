@@ -24,7 +24,7 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class BattleUnitSnapshottableTest {
-    private val knightUnit = unit(id = "knight", healthPoints = 30, abilities = listOf("slash"))
+    private val knightUnit = unit(id = "knight", baseMaximumHealth = 30, startingAbilities = listOf("slash"))
     private val knight = knightUnit.toDto()
     private val human = player(id = "human").toDto()
     private val unitRepository = InMemoryUnitRepository().apply { create(knightUnit) }

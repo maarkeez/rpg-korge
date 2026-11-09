@@ -100,7 +100,7 @@ open class AbilityInfoView(
             data class Summon(
                 val unitId: String,
                 val turns: Int,
-                val healthPoints: Int,
+                val baseMaximumHealth: Int,
             ) : Effect
 
             data object Teleport : Effect
@@ -257,7 +257,7 @@ open class AbilityInfoView(
             is AbilityInfo.Effect.HealCaster -> messages[UiMessage.ABILITY_INFO_HEAL_CASTER, "heal" to effect.healing]
             is AbilityInfo.Effect.HealAdjacentAllies -> messages[UiMessage.ABILITY_INFO_HEAL_ADJACENT_ALLIES, "heal" to effect.healing]
             is AbilityInfo.Effect.Summon ->
-                messages.plural(UiMessage.ABILITY_INFO_SUMMON, effect.turns, "unit" to messages.unitName(effect.unitId), "turns" to effect.turns, "health" to effect.healthPoints)
+                messages.plural(UiMessage.ABILITY_INFO_SUMMON, effect.turns, "unit" to messages.unitName(effect.unitId), "turns" to effect.turns, "health" to effect.baseMaximumHealth)
             is AbilityInfo.Effect.Teleport -> messages[UiMessage.ABILITY_INFO_TELEPORT]
             is AbilityInfo.Effect.OnDefeatedDamageAdjacentAllies ->
                 messages.plural(UiMessage.ABILITY_INFO_ON_DEFEATED_DAMAGE_ADJACENT_ALLIES, effect.turns, "damage" to effect.damage, "turns" to effect.turns)

@@ -31,7 +31,7 @@ class TriggerOnPlayerTurnStartedEffectsTest {
         // Given
         val effectId = "effect-1"
         queries.effectRepository.create(damageEffect(id = effectId, damage = 3, timingType = "ON_PLAYER_TURN_STARTED"))
-        val unit = unit(healthPoints = 10).toDto()
+        val unit = unit(baseMaximumHealth = 10).toDto()
         val player = player(id = "player-1").toDto()
         val battleUnit =
             battleUnit(id = "knight-1", unit = unit, player = player)
@@ -77,7 +77,7 @@ class TriggerOnPlayerTurnStartedEffectsTest {
         val effectId = "effect-1"
         queries.effectRepository.create(damageEffect(id = effectId, damage = 3, timingType = "ON_PLAYER_TURN_STARTED"))
         val battleUnit =
-            battleUnit(id = "knight-1", unit = unit(healthPoints = 10).toDto(), player = player(id = "player-1").toDto())
+            battleUnit(id = "knight-1", unit = unit(baseMaximumHealth = 10).toDto(), player = player(id = "player-1").toDto())
                 .receiveOnPlayerTurnStartedEffect(effectId = effectId, remainingDuration = 1)
                 .pullEvents()
                 .second

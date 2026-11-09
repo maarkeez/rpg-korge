@@ -36,7 +36,7 @@ class OnPlayerTurnStartedTest {
     @Test
     fun `should reset actions, trigger the on player turn started effects and replenish mana when a player turn starts`() {
         // Given
-        val knight = unit(id = "knight", healthPoints = 20, manaPoints = 30, abilities = listOf("sword"))
+        val knight = unit(id = "knight", baseMaximumHealth = 20, baseMaximumMana = 30, startingAbilities = listOf("sword"))
         queries.unitRepository.create(knight)
         queries.effectRepository.create(damageEffect(id = "venom", damage = 3))
         queries.battlefieldRepository.create(battlefield("K .", occupants = mapOf('K' to "knight-1")))

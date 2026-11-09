@@ -131,16 +131,16 @@ weight = 5
 ### `unit/<unit id>.toml`
 
 ```toml
-healthPoints = 100
-manaPoints = 30
-movementRange = 3
-abilities = ["poisoned-sword", "heal"]
+baseMaximumHealth = 100
+baseMaximumMana = 30
+maximumSteps = 3
+startingAbilities = ["poisoned-sword", "heal"]
 startingGold = 20
 ```
 
 `startingGold` is optional, 0 by default: the gold each battle unit of the unit carries once deployed, never negative (`NegativeStartingGold`). It must also fit the inventory's 99,999, which `Unit` does not know: `InventoryUnitResourcesTest` checks it in CI. Only the battle units of the human player carry gold, see [Inventory](inventory.md#gold).
 
-A unit has 6 `abilities` at most, one per button of the ability bar (`Unit.maximumAbilities()`, `AbilitiesAboveLimit`), checked in CI by `UnitResourcesTest`. Its battle units can learn more abilities, up to the same 6: `BattleUnitDeployment` reads it with `SearchMaximumAbilities` and gives it to the battle unit, which keeps it, and saves it.
+A unit has 6 `startingAbilities` at most, one per button of the ability bar (`Unit.maximumAbilities()`, `StartingAbilitiesAboveMaximum`), checked in CI by `UnitResourcesTest`. Its battle units can learn more abilities, up to the same 6: `BattleUnitDeployment` reads it with `SearchMaximumAbilities` and gives it to the battle unit, which keeps it, and saves it.
 
 ### `lootDrop/<unit id>.toml`
 

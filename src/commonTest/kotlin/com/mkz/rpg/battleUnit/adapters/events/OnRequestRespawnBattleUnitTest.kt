@@ -28,7 +28,7 @@ class OnRequestRespawnBattleUnitTest {
     @Test
     fun `should respawn the battle unit when its respawn is requested`() {
         // Given
-        val rat = unit(id = "rat", healthPoints = 20)
+        val rat = unit(id = "rat", baseMaximumHealth = 20)
         unitRepository.create(rat)
         battlefieldRepository.create(battlefield(". . ."))
         battleUnitRepository.create(battleUnit(id = "rat-1", unit = rat.toDto(), remainingHealth = 0))

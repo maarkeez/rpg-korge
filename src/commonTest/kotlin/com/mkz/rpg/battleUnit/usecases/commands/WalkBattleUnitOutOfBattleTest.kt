@@ -27,7 +27,7 @@ class WalkBattleUnitOutOfBattleTest {
     @Test
     fun `should walk the battle unit along the shortest path without spending steps when the tile can be reached`() {
         // Given
-        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(movementRange = 1).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(maximumSteps = 1).toDto()))
         queries.battlefieldRepository.create(
             battlefield(
                 """

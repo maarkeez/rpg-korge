@@ -16,8 +16,8 @@ class CanMemberLearnAbilityTest {
     // The knight explores and knows sword. The rat knows nothing, and is no party member.
     @BeforeTest
     fun setUp() {
-        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(abilities = listOf("sword")).toDto()))
-        queries.battleUnitRepository.create(battleUnit(id = "rat-1", unit = unit(abilities = emptyList()).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(startingAbilities = listOf("sword")).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "rat-1", unit = unit(startingAbilities = emptyList()).toDto()))
     }
 
     @Test

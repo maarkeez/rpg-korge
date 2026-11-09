@@ -85,18 +85,18 @@ class DeployBattleUnitEffectAcceptanceTest {
         val deployerUnit =
             UnitMother.unit(
                 id = deployerUnitId,
-                healthPoints = 100,
-                manaPoints = 30,
-                abilities = listOf(deployAbilityId),
-                movementRange = 3,
+                baseMaximumHealth = 100,
+                baseMaximumMana = 30,
+                startingAbilities = listOf(deployAbilityId),
+                maximumSteps = 3,
             )
         val summonUnit =
             UnitMother.unit(
                 id = summonUnitId,
-                healthPoints = 20,
-                manaPoints = 10,
-                abilities = emptyList(),
-                movementRange = 3,
+                baseMaximumHealth = 20,
+                baseMaximumMana = 10,
+                startingAbilities = emptyList(),
+                maximumSteps = 3,
             )
         unitApi.requestUnitCreation(deployerUnit.toDto())
         unitApi.requestUnitCreation(summonUnit.toDto())

@@ -25,19 +25,19 @@ class ResourcesUnitLoader(
 
     @Serializable
     data class UnitDefinition(
-        val healthPoints: Int,
-        val manaPoints: Int,
-        val movementRange: Int,
-        val abilities: List<String>,
+        val baseMaximumHealth: Int,
+        val baseMaximumMana: Int,
+        val maximumSteps: Int,
+        val startingAbilities: List<String>,
         val startingGold: Int = 0,
     ) {
         fun toDto(unitId: String): Unit.Dto =
             Unit.Dto(
                 id = unitId,
-                healthPoints = healthPoints,
-                manaPoints = manaPoints,
-                abilities = abilities,
-                movementRange = movementRange,
+                baseMaximumHealth = baseMaximumHealth,
+                baseMaximumMana = baseMaximumMana,
+                startingAbilities = startingAbilities,
+                maximumSteps = maximumSteps,
                 startingGold = startingGold,
             )
     }

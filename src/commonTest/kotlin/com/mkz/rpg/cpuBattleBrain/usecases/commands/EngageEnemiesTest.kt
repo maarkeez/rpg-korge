@@ -48,7 +48,7 @@ class EngageEnemiesTest {
     fun `should engage every living battle unit of the exploring player`() {
         // Given
         givenRatsAt(". . . . . R K . . . . . S")
-        queries.battleUnitRepository.create(battleUnit(id = "knight-2", player = human.toDto(), unit = unit(healthPoints = 0).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-2", player = human.toDto(), unit = unit(baseMaximumHealth = 0).toDto()))
         // When
         engageEnemies(exploringPlayerId = "human")
         // Then

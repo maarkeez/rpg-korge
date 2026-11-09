@@ -95,19 +95,19 @@ class SimpleBattleAcceptanceTest {
         val knight =
             Unit.Dto(
                 id = knightUnitId,
-                healthPoints = 100,
-                manaPoints = 30,
-                abilities = listOf(sword.id),
-                movementRange = 3,
+                baseMaximumHealth = 100,
+                baseMaximumMana = 30,
+                startingAbilities = listOf(sword.id),
+                maximumSteps = 3,
                 startingGold = 0,
             )
         val weakKnight =
             Unit.Dto(
                 id = weakKnightUnitId,
-                healthPoints = 1,
-                manaPoints = 1,
-                abilities = listOf(sword.id),
-                movementRange = 3,
+                baseMaximumHealth = 1,
+                baseMaximumMana = 1,
+                startingAbilities = listOf(sword.id),
+                maximumSteps = 3,
                 startingGold = 0,
             )
         unitApi.requestUnitCreation(knight)

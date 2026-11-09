@@ -46,7 +46,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // Given
         val effectId = "effect-1"
         val effect = damageEffect(id = effectId, damage = 3, timingType = "IMMEDIATELY").toDto()
-        val unit = unit(healthPoints = 10).toDto()
+        val unit = unit(baseMaximumHealth = 10).toDto()
         val player = player(id = "player-1").toDto()
         val battleUnit = battleUnit(unit = unit, player = player)
         battleUnitRepository.create(battleUnit)
@@ -78,7 +78,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // Given
         val effectId = "effect-1"
         val effect = summonEffect(id = effectId, unitId = "summoned-unit").toDto()
-        val unit = unit(healthPoints = 10).toDto()
+        val unit = unit(baseMaximumHealth = 10).toDto()
         val player = player(id = "player-1").toDto()
         val battleUnit = battleUnit(unit = unit, player = player)
         battleUnitRepository.create(battleUnit)
@@ -114,7 +114,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // Given
         val effectId = "effect-1"
         val effect = damageEffect(id = effectId, damage = 3, timingType = "IMMEDIATELY").toDto()
-        val enemyUnit = unit(healthPoints = 10).toDto()
+        val enemyUnit = unit(baseMaximumHealth = 10).toDto()
         val player = player(id = "player-1").toDto()
         val opponent = player(id = "player-2").toDto()
         val battleUnit = battleUnit(player = player)
@@ -157,7 +157,7 @@ class RequestEffectApplicationToCastTargetsTest {
             damageEffect(id = effectId, damage = 3)
                 .toDto()
                 .copy(timing = TimingDto(type = TimingTypeDto.ON_DEFEATED, onPlayerTurnStarted = null, beforeApplyingEffect = null))
-        val unit = unit(healthPoints = 10).toDto()
+        val unit = unit(baseMaximumHealth = 10).toDto()
         val player = player(id = "player-1").toDto()
         val battleUnit = battleUnit(unit = unit, player = player)
         battleUnitRepository.create(battleUnit)
@@ -189,7 +189,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // Given
         val effectId = "effect-1"
         val effect = teleportEffect(id = effectId).toDto()
-        val unit = unit(healthPoints = 10).toDto()
+        val unit = unit(baseMaximumHealth = 10).toDto()
         val player = player(id = "player-1").toDto()
         val battleUnit = battleUnit(unit = unit, player = player)
         battleUnitRepository.create(battleUnit)
@@ -225,7 +225,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // Given
         val effectId = "effect-1"
         val effect = damageEffect(id = effectId, damage = 10, timingType = "IMMEDIATELY").toDto()
-        val enemyUnit = unit(healthPoints = 3).toDto()
+        val enemyUnit = unit(baseMaximumHealth = 3).toDto()
         val player = player(id = "player-1").toDto()
         val opponent = player(id = "player-2").toDto()
         val battleUnit = battleUnit(player = player)
@@ -292,8 +292,8 @@ class RequestEffectApplicationToCastTargetsTest {
         val casterDamageEffectId = "caster-damage-effect"
         val enemyDamageEffect = damageEffect(id = enemyDamageEffectId, damage = 10, timingType = "IMMEDIATELY").toDto()
         val casterDamageEffect = damageEffect(id = casterDamageEffectId, damage = 5, timingType = "IMMEDIATELY").toDto()
-        val casterUnit = unit(healthPoints = 10).toDto()
-        val enemyUnit = unit(healthPoints = 20).toDto()
+        val casterUnit = unit(baseMaximumHealth = 10).toDto()
+        val enemyUnit = unit(baseMaximumHealth = 20).toDto()
         val player = player(id = "player-1").toDto()
         val opponent = player(id = "player-2").toDto()
         val caster = battleUnit(unit = casterUnit, player = player)
@@ -347,8 +347,8 @@ class RequestEffectApplicationToCastTargetsTest {
         // Given
         val healEffectId = "heal-effect"
         val healEffect = healEffect(id = healEffectId, healing = 10).toDto()
-        val casterUnit = unit(healthPoints = 10).toDto()
-        val enemyUnit = unit(healthPoints = 20).toDto()
+        val casterUnit = unit(baseMaximumHealth = 10).toDto()
+        val enemyUnit = unit(baseMaximumHealth = 20).toDto()
         val player = player(id = "player-1").toDto()
         val opponent = player(id = "player-2").toDto()
         val caster = battleUnit(unit = casterUnit, player = player)
@@ -390,8 +390,8 @@ class RequestEffectApplicationToCastTargetsTest {
         val healEffectId = "heal-effect"
         val damageEffect = damageEffect(id = damageEffectId, damage = 10, timingType = "IMMEDIATELY").toDto()
         val healEffect = healEffect(id = healEffectId, healing = 5).toDto()
-        val casterUnit = unit(healthPoints = 10).toDto()
-        val enemyUnit = unit(healthPoints = 20).toDto()
+        val casterUnit = unit(baseMaximumHealth = 10).toDto()
+        val enemyUnit = unit(baseMaximumHealth = 20).toDto()
         val player = player(id = "player-1").toDto()
         val opponent = player(id = "player-2").toDto()
         val caster = battleUnit(unit = casterUnit, player = player)

@@ -9,7 +9,7 @@ import kotlin.test.Test
 class RecoverBattleUnitsTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
     private val recoverBattleUnits = RecoverBattleUnits(battleUnitRepository)
-    private val rat = unit(id = "rat", healthPoints = 20).toDto()
+    private val rat = unit(id = "rat", baseMaximumHealth = 20).toDto()
 
     private fun healthOf(battleUnitId: String) = battleUnitRepository.searchById(battleUnitId)!!.toDto().remainingHealth
 

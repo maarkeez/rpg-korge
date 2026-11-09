@@ -15,7 +15,7 @@ class CanWalkToTest {
     @Test
     fun `should return true when the shortest path is within the remaining steps`() {
         // Given
-        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(movementRange = 3).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(maximumSteps = 3).toDto()))
         queries.battlefieldRepository.create(
             battlefield(
                 """
@@ -36,7 +36,7 @@ class CanWalkToTest {
     @Test
     fun `should return false when the shortest path exceeds the remaining steps`() {
         // Given
-        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(movementRange = 2).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(maximumSteps = 2).toDto()))
         queries.battlefieldRepository.create(
             battlefield(
                 """
@@ -57,7 +57,7 @@ class CanWalkToTest {
     @Test
     fun `should return false when there is no path to the destination`() {
         // Given
-        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(movementRange = 3).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(maximumSteps = 3).toDto()))
         queries.battlefieldRepository.create(
             battlefield(
                 """

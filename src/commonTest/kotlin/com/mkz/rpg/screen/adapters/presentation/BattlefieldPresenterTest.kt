@@ -88,8 +88,8 @@ class BattlefieldPresenterTest {
             terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
             units =
                 listOf(
-                    unit(id = "knight", movementRange = 3, healthPoints = 30, manaPoints = 4, abilities = listOf("mushroom", "heal", "bee")).toDto(),
-                    unit(id = "rat", healthPoints = 21).toDto(),
+                    unit(id = "knight", maximumSteps = 3, baseMaximumHealth = 30, baseMaximumMana = 4, startingAbilities = listOf("mushroom", "heal", "bee")).toDto(),
+                    unit(id = "rat", baseMaximumHealth = 21).toDto(),
                 ),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
             // The rats drop nothing, so the items lying on the battlefield are only the ones the test places, as dropped by a rat.
@@ -328,8 +328,8 @@ class BattlefieldPresenterTest {
         terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
         units =
             listOf(
-                unit(id = "knight", movementRange = 3, healthPoints = 30, manaPoints = 4, abilities = abilities.map(Ability.Dto::id)).toDto(),
-                unit(id = "rat", movementRange = 2).toDto(),
+                unit(id = "knight", maximumSteps = 3, baseMaximumHealth = 30, baseMaximumMana = 4, startingAbilities = abilities.map(Ability.Dto::id)).toDto(),
+                unit(id = "rat", maximumSteps = 2).toDto(),
             ),
         effects = effects,
         abilities = abilities,
@@ -1229,7 +1229,7 @@ class BattlefieldPresenterTest {
         val battlingApis =
             SubdomainApis(
                 terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
-                units = listOf(unit(id = "knight", movementRange = 3).toDto(), unit(id = "rat").toDto()),
+                units = listOf(unit(id = "knight", maximumSteps = 3).toDto(), unit(id = "rat").toDto()),
                 players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
                 tiles = List(4) { List(4) { "sand" } },
                 deployments = partyOfTwoKnights + Deployment(battleUnitId = "rat-1", unitId = "rat", playerId = "cpu", row = 1, column = 3),

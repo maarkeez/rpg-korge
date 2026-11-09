@@ -67,7 +67,7 @@ class ProcessTileSelectedTest {
         val battleUnits = mapOf('K' to "battle-unit-1", 'S' to "battle-unit-2", 'E' to "enemy-battle-unit-1", 'F' to "enemy-battle-unit-2")
         if (isBattleStarted) queries.battleRepository.create(battle(players = playerOrder, battleUnitIds = battleUnits.values.toSet() - outOfBattle))
         battleUnits.forEach { (letter, battleUnitId) ->
-            queries.battleUnitRepository.create(battleUnit(id = battleUnitId, unit = unit(movementRange = 1).toDto(), player = if (letter in "EF") opponent else player))
+            queries.battleUnitRepository.create(battleUnit(id = battleUnitId, unit = unit(maximumSteps = 1).toDto(), player = if (letter in "EF") opponent else player))
         }
         queries.battlefieldRepository.create(battlefield(map, occupants = battleUnits.filterKeys { letter -> letter in map }))
     }

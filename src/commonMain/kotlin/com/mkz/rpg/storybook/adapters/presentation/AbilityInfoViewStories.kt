@@ -27,7 +27,7 @@ object AbilityInfoViewStories : StoryBinding {
         listOf(
             AbilityInfo("sword", manaCost = 0, cooldown = 0, Targeting.ADJACENT_ENEMY, listOf(Effect.Damage(10))),
             AbilityInfo("skull", manaCost = 10, cooldown = 0, Targeting.ADJACENT_ENEMY, listOf(Effect.Damage(10), Effect.OnDefeatedDamageAdjacentAllies(damage = 3, turns = 5))),
-            AbilityInfo("bat", manaCost = 10, cooldown = 0, Targeting.VACANT_TILE_ADJACENT_TO_CASTER, listOf(Effect.Summon(unitId = "bat", turns = 5, healthPoints = 10))),
+            AbilityInfo("bat", manaCost = 10, cooldown = 0, Targeting.VACANT_TILE_ADJACENT_TO_CASTER, listOf(Effect.Summon(unitId = "bat", turns = 5, baseMaximumHealth = 10))),
             AbilityInfo("mending", manaCost = 10, cooldown = 2, Targeting.CASTER, listOf(Effect.HealCaster(15), Effect.HealAdjacentAllies(15))),
             AbilityInfo("teleport", manaCost = 5, cooldown = 1, Targeting.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT, listOf(Effect.Teleport)),
             AbilityInfo("cleave", manaCost = 5, cooldown = 1, Targeting.ALL_ADJACENT_ENEMIES, listOf(Effect.Damage(15))),
@@ -35,7 +35,7 @@ object AbilityInfoViewStories : StoryBinding {
             AbilityInfo("poisoned-sword", manaCost = 5, cooldown = 1, Targeting.ADJACENT_ENEMY, listOf(Effect.DamageOnPlayerTurnStarted(damage = 3, turns = 5))),
             AbilityInfo("mushroom", manaCost = 10, cooldown = 0, Targeting.ALL_ADJACENT_ENEMIES, listOf(Effect.DamageOnPlayerTurnStarted(damage = 3, turns = 5))),
             AbilityInfo("heal", manaCost = 10, cooldown = 2, Targeting.CASTER, listOf(Effect.HealCaster(20))),
-            AbilityInfo("bee", manaCost = 10, cooldown = 0, Targeting.VACANT_TILE_ADJACENT_TO_CASTER, listOf(Effect.Summon(unitId = "bee", turns = 5, healthPoints = 10))),
+            AbilityInfo("bee", manaCost = 10, cooldown = 0, Targeting.VACANT_TILE_ADJACENT_TO_CASTER, listOf(Effect.Summon(unitId = "bee", turns = 5, baseMaximumHealth = 10))),
         ).associateBy(AbilityInfo::abilityId)
 
     private val sword = StoryDto(id = "screen-ability-info--sword", name = "Sword", description = "One effect, free and with no cooldown: no cooldown pill.", args = emptyMap())

@@ -62,7 +62,7 @@ class ConsumeItemTest {
     fun setUp() {
         battleRepository.create(battle(players = listOf("human", "cpu")))
         partyRepository.save(party(playerId = "human", battleUnitIds = listOf("knight-1")))
-        battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(abilities = listOf("teleport")).toDto()))
+        battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(startingAbilities = listOf("teleport")).toDto()))
         lootableItemRepository.create(consumableLootableItem(id = "health-potion", consumable = consumable(effectIds = setOf("heal", "cure"))))
         lootableItemRepository.create(equippableLootableItem(id = "helmet"))
         effectRepository.create(learnAbilityEffect(id = "learn-teleport", abilityId = "teleport"))

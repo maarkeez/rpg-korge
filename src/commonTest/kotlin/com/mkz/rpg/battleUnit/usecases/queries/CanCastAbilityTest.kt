@@ -16,7 +16,7 @@ class CanCastAbilityTest {
     fun `should return true when the battle unit can cast the ability`() {
         // Given
         queries.abilityRepository.create(ability(id = "ability-1", manaCost = 0, cooldown = 0))
-        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(abilities = listOf("ability-1"), manaPoints = 10).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(startingAbilities = listOf("ability-1"), baseMaximumMana = 10).toDto()))
         // When
         val result = canCastAbility(battleUnitId = "knight-1", abilityId = "ability-1")
         // Then
@@ -37,7 +37,7 @@ class CanCastAbilityTest {
     fun `should return false when the battle unit does not have the ability`() {
         // Given
         queries.abilityRepository.create(ability(id = "ability-1"))
-        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(abilities = listOf("other-ability"), manaPoints = 10).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(startingAbilities = listOf("other-ability"), baseMaximumMana = 10).toDto()))
         // When
         val result = canCastAbility(battleUnitId = "knight-1", abilityId = "ability-1")
         // Then

@@ -5,5 +5,5 @@ sealed class UnitError(
 ) : Throwable(message = message) {
     class NegativeStartingGold : UnitError("Unit starting gold is negative")
 
-    class AbilitiesAboveLimit : UnitError("Unit abilities are above their limit")
+    class StartingAbilitiesAboveMaximum : UnitError("Unit starting abilities are above the maximum abilities")
 }

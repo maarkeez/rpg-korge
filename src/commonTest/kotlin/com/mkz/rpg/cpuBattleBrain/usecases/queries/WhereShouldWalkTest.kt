@@ -32,7 +32,7 @@ class WhereShouldWalkTest {
         remainingHealth: Int,
         maxHealthPoints: Int = 10,
     ) {
-        val unit = unit(id = "unit-1", healthPoints = maxHealthPoints, movementRange = 2).also(queries.unitRepository::create)
+        val unit = unit(id = "unit-1", baseMaximumHealth = maxHealthPoints, maximumSteps = 2).also(queries.unitRepository::create)
         queries.battleUnitRepository.create(battleUnit(id = id, unit = unit.toDto(), player = player(id = playerId).toDto(), remainingHealth = remainingHealth))
     }
 

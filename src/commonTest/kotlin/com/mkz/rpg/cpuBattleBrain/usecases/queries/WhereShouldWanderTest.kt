@@ -55,7 +55,7 @@ class WhereShouldWanderTest {
         remainingHealth: Int = 10,
     ) {
         givens += { queries ->
-            val unit = unit(id = "unit-rat", healthPoints = 10).also(queries.unitRepository::create)
+            val unit = unit(id = "unit-rat", baseMaximumHealth = 10).also(queries.unitRepository::create)
             ids.forEach { id ->
                 queries.battleUnitRepository.create(battleUnit(id = id, unit = unit.toDto(), player = player(id = "player-2").toDto(), remainingHealth = remainingHealth))
             }

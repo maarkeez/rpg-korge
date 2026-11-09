@@ -34,23 +34,23 @@ class UnitTest {
     }
 
     @Test
-    fun `Create should create a unit with up to 6 abilities, one per button of the ability bar`() {
+    fun `Create should create a unit with up to 6 starting abilities, one per button of the ability bar`() {
         // Given
-        val abilities = List(6) { index -> "ability-$index" }
+        val startingAbilities = List(6) { index -> "ability-$index" }
         // When
-        val unit = UnitMother.unit(abilities = abilities)
+        val unit = UnitMother.unit(startingAbilities = startingAbilities)
         // Then
-        unit.toDto().abilities shouldBe abilities
+        unit.toDto().startingAbilities shouldBe startingAbilities
     }
 
     @Test
-    fun `Create should fail when the unit has more than 6 abilities`() {
+    fun `Create should fail when the unit has more than 6 starting abilities`() {
         // Given
-        val abilities = List(7) { index -> "ability-$index" }
+        val startingAbilities = List(7) { index -> "ability-$index" }
         // When
-        val result = runCatching { UnitMother.unit(abilities = abilities) }
+        val result = runCatching { UnitMother.unit(startingAbilities = startingAbilities) }
         // Then
-        result.exceptionOrNull().shouldBeTypeOf<UnitError.AbilitiesAboveLimit>()
+        result.exceptionOrNull().shouldBeTypeOf<UnitError.StartingAbilitiesAboveMaximum>()
     }
 
     @Test
@@ -79,10 +79,10 @@ class UnitTest {
         val unit =
             UnitMother.unit(
                 id = "unit-1",
-                healthPoints = 10,
-                manaPoints = 5,
-                abilities = listOf("ability-1"),
-                movementRange = 3,
+                baseMaximumHealth = 10,
+                baseMaximumMana = 5,
+                startingAbilities = listOf("ability-1"),
+                maximumSteps = 3,
             )
         // When
         val result = unit.toDto()
@@ -90,10 +90,10 @@ class UnitTest {
         result shouldBe
             Unit.Dto(
                 id = "unit-1",
-                healthPoints = 10,
-                manaPoints = 5,
-                abilities = listOf("ability-1"),
-                movementRange = 3,
+                baseMaximumHealth = 10,
+                baseMaximumMana = 5,
+                startingAbilities = listOf("ability-1"),
+                maximumSteps = 3,
                 startingGold = 0,
             )
     }

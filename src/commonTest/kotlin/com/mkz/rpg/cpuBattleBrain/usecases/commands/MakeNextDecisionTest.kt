@@ -52,8 +52,8 @@ class MakeNextDecisionTest {
         map: String,
         ratAbilities: List<String> = emptyList(),
     ) {
-        val ratUnit = unit(id = "rat", healthPoints = 20, movementRange = 2, abilities = ratAbilities).also(queries.unitRepository::create)
-        val knightUnit = unit(id = "knight", healthPoints = 100).also(queries.unitRepository::create)
+        val ratUnit = unit(id = "rat", baseMaximumHealth = 20, maximumSteps = 2, startingAbilities = ratAbilities).also(queries.unitRepository::create)
+        val knightUnit = unit(id = "knight", baseMaximumHealth = 100).also(queries.unitRepository::create)
         queries.battleUnitRepository.create(battleUnit(id = "unit-1", unit = ratUnit.toDto(), player = cpu))
         queries.battleUnitRepository.create(battleUnit(id = "unit-2", unit = ratUnit.toDto(), player = cpu))
         queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = knightUnit.toDto(), player = human))

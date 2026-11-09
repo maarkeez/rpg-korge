@@ -27,7 +27,7 @@ class WalkBattleUnitInBattleTest {
     @Test
     fun `should walk battle unit along the shortest path when a reachable position is provided`() {
         // Given
-        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(movementRange = 5).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(maximumSteps = 5).toDto()))
         queries.battlefieldRepository.create(
             battlefield(
                 """
@@ -52,7 +52,7 @@ class WalkBattleUnitInBattleTest {
     @Test
     fun `should spend a step per tile walked when the path is longer than the straight line distance`() {
         // Given
-        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(movementRange = 5).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(maximumSteps = 5).toDto()))
         queries.battlefieldRepository.create(
             battlefield(
                 """
@@ -72,7 +72,7 @@ class WalkBattleUnitInBattleTest {
     @Test
     fun `should not walk battle unit when there is no path to the destination`() {
         // Given
-        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(movementRange = 5).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(maximumSteps = 5).toDto()))
         queries.battlefieldRepository.create(
             battlefield(
                 """

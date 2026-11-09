@@ -95,9 +95,9 @@ class SummonLootingAcceptanceTest {
                     summonDuration = 5,
                 ).toDto(),
         )
-        unitApi.requestUnitCreation(UnitMother.unit(id = "knight", healthPoints = 20, manaPoints = 10, abilities = listOf("summon"), movementRange = 3).toDto())
-        unitApi.requestUnitCreation(UnitMother.unit(id = "summon", healthPoints = 20, manaPoints = 10, abilities = emptyList(), movementRange = 3).toDto())
-        unitApi.requestUnitCreation(UnitMother.unit(id = "enemy", healthPoints = 20, manaPoints = 10, abilities = emptyList(), movementRange = 3).toDto())
+        unitApi.requestUnitCreation(UnitMother.unit(id = "knight", baseMaximumHealth = 20, baseMaximumMana = 10, startingAbilities = listOf("summon"), maximumSteps = 3).toDto())
+        unitApi.requestUnitCreation(UnitMother.unit(id = "summon", baseMaximumHealth = 20, baseMaximumMana = 10, startingAbilities = emptyList(), maximumSteps = 3).toDto())
+        unitApi.requestUnitCreation(UnitMother.unit(id = "enemy", baseMaximumHealth = 20, baseMaximumMana = 10, startingAbilities = emptyList(), maximumSteps = 3).toDto())
         lootTableApi.initialiseLootTables()
         lootDropApi.initialiseLootDrops()
 

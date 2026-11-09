@@ -22,7 +22,7 @@ class AreAllBattleUnitsDefeatedTest {
                 battleUnit(
                     player = player.toDto(),
                     unit =
-                        unit(healthPoints = 0)
+                        unit(baseMaximumHealth = 0)
                             .toDto(),
                 ),
             )
@@ -40,13 +40,13 @@ class AreAllBattleUnitsDefeatedTest {
         battleUnitRepository.create(
             battleUnit(
                 player = player.toDto(),
-                unit = unit(healthPoints = 0).toDto(),
+                unit = unit(baseMaximumHealth = 0).toDto(),
             ),
         )
         battleUnitRepository.create(
             battleUnit(
                 player = player.toDto(),
-                unit = unit(healthPoints = 10).toDto(),
+                unit = unit(baseMaximumHealth = 10).toDto(),
             ),
         )
         // When

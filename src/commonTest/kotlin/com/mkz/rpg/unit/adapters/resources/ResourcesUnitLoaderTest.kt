@@ -16,7 +16,7 @@ class ResourcesUnitLoaderTest {
             // Given
             val unitRoot =
                 MemoryVfsMix(
-                    "unit/knight.toml" to "healthPoints = 100\nmanaPoints = 30\nmovementRange = 3\nabilities = [\"sword\", \"heal\"]\n",
+                    "unit/knight.toml" to "baseMaximumHealth = 100\nbaseMaximumMana = 30\nmaximumSteps = 3\nstartingAbilities = [\"sword\", \"heal\"]\n",
                     "unit/knight.png" to "not a toml file",
                 )["unit"]
             val loader = ResourcesUnitLoader(unitRoot = unitRoot)
@@ -24,7 +24,7 @@ class ResourcesUnitLoaderTest {
             loader.initResources()
             // Then
             loader.loadUnits().shouldContainExactly(
-                unit(id = "knight", healthPoints = 100, manaPoints = 30, abilities = listOf("sword", "heal"), movementRange = 3).toDto(),
+                unit(id = "knight", baseMaximumHealth = 100, baseMaximumMana = 30, startingAbilities = listOf("sword", "heal"), maximumSteps = 3).toDto(),
             )
         }
 
@@ -34,8 +34,8 @@ class ResourcesUnitLoaderTest {
             // Given
             val unitRoot =
                 MemoryVfsMix(
-                    "unit/viking.toml" to "healthPoints = 150\nmanaPoints = 30\nmovementRange = 3\nabilities = [\"sword\"]\nstartingGold = 100\n",
-                    "unit/rat.toml" to "healthPoints = 20\nmanaPoints = 10\nmovementRange = 3\nabilities = [\"sword\"]\n",
+                    "unit/viking.toml" to "baseMaximumHealth = 150\nbaseMaximumMana = 30\nmaximumSteps = 3\nstartingAbilities = [\"sword\"]\nstartingGold = 100\n",
+                    "unit/rat.toml" to "baseMaximumHealth = 20\nbaseMaximumMana = 10\nmaximumSteps = 3\nstartingAbilities = [\"sword\"]\n",
                 )["unit"]
             val loader = ResourcesUnitLoader(unitRoot = unitRoot)
             // When

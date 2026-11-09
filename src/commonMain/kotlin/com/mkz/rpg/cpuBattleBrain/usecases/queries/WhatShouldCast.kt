@@ -148,7 +148,7 @@ class WhatShouldCast(
     ): Double {
         val deployedUnit = searchUnitById(id = deployedUnitId) ?: return 0.0
         val damage =
-            deployedUnit.abilities
+            deployedUnit.startingAbilities
                 .mapNotNull { abilityId -> searchAbilityById(abilityId) }
                 .maxOfOrNull { ability -> expectedAmount(effectsOf(ability), target = EffectTargetDto.Type.TARGETED_BATTLE_UNIT, outcome = TypeDto.DAMAGE) }
                 ?: 0.0
@@ -161,9 +161,9 @@ class WhatShouldCast(
         if (damage <= 0 || nearestEnemy == null) return 0.0
         val (enemy, distance) = nearestEnemy
         val tilesToWalk = distance - 1
-        if (tilesToWalk > 0 && deployedUnit.movementRange <= 0) return 0.0
+        if (tilesToWalk > 0 && deployedUnit.maximumSteps <= 0) return 0.0
         // It walks and casts in the same player turn, so it deals damage in the player turn it walks its last tile.
-        val playerTurnsToDamage = if (tilesToWalk <= 0) 1 else (tilesToWalk + deployedUnit.movementRange - 1) / deployedUnit.movementRange
+        val playerTurnsToDamage = if (tilesToWalk <= 0) 1 else (tilesToWalk + deployedUnit.maximumSteps - 1) / deployedUnit.maximumSteps
         val casterHealthRatio = caster.remainingHealth.toDouble() / casterMaxHealth
         return casterHealthRatio * PLAYER_TURN_DISCOUNT.pow(playerTurnsToDamage) * min(damage, enemy.remainingHealth.toDouble()) / enemy.remainingHealth
     }

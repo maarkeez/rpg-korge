@@ -145,7 +145,11 @@ class QuestAcceptanceTest {
             terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
             effects = listOf(healEffect(id = "cure").toDto(), damageEffect(id = "smite", damage = 100, timingType = "IMMEDIATELY").toDto()),
             lootableItems = listOf(consumableLootableItem(id = "health-potion", consumable = consumable(effectIds = setOf("cure"))).toDto()),
-            units = listOf(unit(id = "knight", healthPoints = 30, abilities = emptyList(), movementRange = 3).toDto(), unit(id = "rat", healthPoints = 8, abilities = emptyList()).toDto()),
+            units =
+                listOf(
+                    unit(id = "knight", baseMaximumHealth = 30, startingAbilities = emptyList(), maximumSteps = 3).toDto(),
+                    unit(id = "rat", baseMaximumHealth = 8, startingAbilities = emptyList()).toDto(),
+                ),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
             tiles = List(3) { List(6) { "sand" } },
             deployments =

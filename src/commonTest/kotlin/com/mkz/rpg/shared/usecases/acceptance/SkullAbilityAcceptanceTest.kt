@@ -117,34 +117,34 @@ class SkullAbilityAcceptanceTest {
         val skullUnit =
             UnitMother.unit(
                 id = skullUnitId,
-                healthPoints = 100,
-                manaPoints = 30,
-                abilities = listOf(skullAbilityId),
-                movementRange = 3,
+                baseMaximumHealth = 100,
+                baseMaximumMana = 30,
+                startingAbilities = listOf(skullAbilityId),
+                maximumSteps = 3,
             )
         val swordUnit =
             UnitMother.unit(
                 id = swordUnitId,
-                healthPoints = 100,
-                manaPoints = 30,
-                abilities = listOf(swordAbilityId),
-                movementRange = 3,
+                baseMaximumHealth = 100,
+                baseMaximumMana = 30,
+                startingAbilities = listOf(swordAbilityId),
+                maximumSteps = 3,
             )
         val enemyUnit =
             UnitMother.unit(
                 id = enemyUnitId,
-                healthPoints = 5,
-                manaPoints = 1,
-                abilities = emptyList(),
-                movementRange = 3,
+                baseMaximumHealth = 5,
+                baseMaximumMana = 1,
+                startingAbilities = emptyList(),
+                maximumSteps = 3,
             )
         val allyUnit =
             UnitMother.unit(
                 id = allyUnitId,
-                healthPoints = 100,
-                manaPoints = 30,
-                abilities = listOf(healAbilityId),
-                movementRange = 3,
+                baseMaximumHealth = 100,
+                baseMaximumMana = 30,
+                startingAbilities = listOf(healAbilityId),
+                maximumSteps = 3,
             )
         unitApi.requestUnitCreation(skullUnit.toDto())
         unitApi.requestUnitCreation(swordUnit.toDto())

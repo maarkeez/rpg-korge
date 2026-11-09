@@ -86,13 +86,13 @@ class TerrainEffectAcceptanceTest {
         battlefieldApi.requestBattlefieldCreation(8, 8, tiles)
 
         unitApi.requestUnitCreation(
-            UnitMother.unit(id = "unit-sand-1", healthPoints = 20, manaPoints = 10, abilities = emptyList(), movementRange = 3).toDto(),
+            UnitMother.unit(id = "unit-sand-1", baseMaximumHealth = 20, baseMaximumMana = 10, startingAbilities = emptyList(), maximumSteps = 3).toDto(),
         )
         unitApi.requestUnitCreation(
-            UnitMother.unit(id = "unit-sand-2", healthPoints = 40, manaPoints = 10, abilities = emptyList(), movementRange = 3).toDto(),
+            UnitMother.unit(id = "unit-sand-2", baseMaximumHealth = 40, baseMaximumMana = 10, startingAbilities = emptyList(), maximumSteps = 3).toDto(),
         )
         unitApi.requestUnitCreation(
-            UnitMother.unit(id = "unit-forest", healthPoints = 30, manaPoints = 10, abilities = emptyList(), movementRange = 3).toDto(),
+            UnitMother.unit(id = "unit-forest", baseMaximumHealth = 30, baseMaximumMana = 10, startingAbilities = emptyList(), maximumSteps = 3).toDto(),
         )
 
         battleUnitApi.deployBattleUnit(

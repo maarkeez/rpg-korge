@@ -40,7 +40,7 @@ class WhatShouldCastTest {
     private val south = WhereCanCast.PositionDto(row = 1, column = 0)
     private val cpu = player(id = "cpu", type = CPU).also(queries.playerRepository::create).toDto()
     private val human = player(id = "human").also(queries.playerRepository::create).toDto()
-    private val knightUnit = unit(id = "knight", healthPoints = 100).toDto()
+    private val knightUnit = unit(id = "knight", baseMaximumHealth = 100).toDto()
 
     private val sword = ability(id = "sword", manaCost = 0, cooldown = 0, targeting = ADJACENT_ENEMY, abilityEffects = listOf(abilityEffect("damage", TARGETED_BATTLE_UNIT)))
     private val bigSword = ability(id = "big-sword", manaCost = 0, cooldown = 0, targeting = ADJACENT_ENEMY, abilityEffects = listOf(abilityEffect("big-damage", TARGETED_BATTLE_UNIT)))
@@ -68,8 +68,8 @@ class WhatShouldCastTest {
         queries.effectRepository.create(summonEffect(id = "deploy-bat", unitId = "bat"))
         queries.effectRepository.create(summonEffect(id = "deploy-scarecrow", unitId = "scarecrow"))
         queries.abilityRepository.create(sword)
-        queries.unitRepository.create(unit(id = "bat", movementRange = 2, abilities = listOf("sword")))
-        queries.unitRepository.create(unit(id = "scarecrow", movementRange = 2, abilities = listOf("heal")))
+        queries.unitRepository.create(unit(id = "bat", maximumSteps = 2, startingAbilities = listOf("sword")))
+        queries.unitRepository.create(unit(id = "scarecrow", maximumSteps = 2, startingAbilities = listOf("heal")))
         queries.battlefieldRepository.create(
             battlefield(
                 """
@@ -95,7 +95,7 @@ class WhatShouldCastTest {
         remainingCasts: Int = 1,
     ) {
         abilities.forEach(queries.abilityRepository::create)
-        val ratUnit = unit(id = "rat", healthPoints = 20, manaPoints = 10, abilities = abilities.map { it.toDto().id }).also(queries.unitRepository::create)
+        val ratUnit = unit(id = "rat", baseMaximumHealth = 20, baseMaximumMana = 10, startingAbilities = abilities.map { it.toDto().id }).also(queries.unitRepository::create)
         val rat = battleUnit(id = ratId, unit = ratUnit.toDto(), player = cpu, remainingHealth = remainingHealth)
         // A rat with no casts left has already cast an ability this turn.
         val castRat = if (remainingCasts == 0) rat.castAbility(abilityId = "sword", abilityCooldown = 0, abilityManaCost = 0, castGroup = emptyList()).pullEvents().second else rat

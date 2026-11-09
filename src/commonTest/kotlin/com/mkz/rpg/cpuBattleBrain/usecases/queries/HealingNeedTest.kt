@@ -17,7 +17,7 @@ class HealingNeedTest {
         remainingHealth: Int,
         maxHealthPoints: Int,
     ) {
-        val unit = unit(id = "unit-1", healthPoints = maxHealthPoints).also(queries.unitRepository::create)
+        val unit = unit(id = "unit-1", baseMaximumHealth = maxHealthPoints).also(queries.unitRepository::create)
         queries.battleUnitRepository.create(battleUnit(id = id, unit = unit.toDto(), player = player().toDto(), remainingHealth = remainingHealth))
     }
 

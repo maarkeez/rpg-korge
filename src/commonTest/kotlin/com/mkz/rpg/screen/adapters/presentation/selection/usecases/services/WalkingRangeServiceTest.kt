@@ -21,7 +21,7 @@ class WalkingRangeServiceTest {
     @Test
     fun `should return only the tiles the battle unit can move to when computing the tiles where it can move`() {
         // Given
-        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(movementRange = 2).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(maximumSteps = 2).toDto()))
         // The bottom right tile is in range, but too far to walk to.
         queries.battlefieldRepository.create(
             battlefield(

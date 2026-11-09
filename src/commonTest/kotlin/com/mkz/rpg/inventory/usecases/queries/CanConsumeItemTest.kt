@@ -35,7 +35,7 @@ class CanConsumeItemTest {
         queries.lootableItemRepository.create(consumableLootableItem(id = "teleport-essence", consumable = consumable(effectIds = setOf("learn-teleport"))))
         queries.lootableItemRepository.create(consumableLootableItem(id = "health-potion", consumable = consumable(effectIds = setOf("heal"))))
         queries.lootableItemRepository.create(equippableLootableItem(id = "hammer"))
-        queries.battleUnitRepository.create(battleUnit(id = "viking-1", unit = unit(abilities = listOf("sword")).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "viking-1", unit = unit(startingAbilities = listOf("sword")).toDto()))
         queries.partyRepository.save(party(battleUnitIds = listOf("viking-1", "knight-1")))
     }
 
@@ -62,7 +62,7 @@ class CanConsumeItemTest {
     @Test
     fun `should not allow consuming when the battle unit already knows the ability it teaches`() {
         // Given
-        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(abilities = listOf("sword", "teleport")).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(startingAbilities = listOf("sword", "teleport")).toDto()))
         inventoryRepository.create(inventory(battleUnitId = "knight-1", storedItems = listOf("teleport-essence")))
         // When
         val result = canConsumeItem(battleUnitId = "knight-1", lootableItemId = "teleport-essence")
@@ -73,7 +73,7 @@ class CanConsumeItemTest {
     @Test
     fun `should not allow consuming when the battle unit already knows 6 abilities`() {
         // Given
-        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(abilities = List(6) { index -> "ability-$index" }).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(startingAbilities = List(6) { index -> "ability-$index" }).toDto()))
         inventoryRepository.create(inventory(battleUnitId = "knight-1", storedItems = listOf("teleport-essence")))
         // When
         val result = canConsumeItem(battleUnitId = "knight-1", lootableItemId = "teleport-essence")
@@ -84,7 +84,7 @@ class CanConsumeItemTest {
     @Test
     fun `should not allow consuming a consumable that teaches an ability when the battle unit is no party member`() {
         // Given
-        queries.battleUnitRepository.create(battleUnit(id = "rat-1", unit = unit(abilities = emptyList()).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "rat-1", unit = unit(startingAbilities = emptyList()).toDto()))
         inventoryRepository.create(inventory(battleUnitId = "rat-1", storedItems = listOf("teleport-essence")))
         // When
         val result = canConsumeItem(battleUnitId = "rat-1", lootableItemId = "teleport-essence")

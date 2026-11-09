@@ -1,4 +1,4 @@
-healthPoints = 150
-manaPoints = 60
-movementRange = 2
-abilities = ["sword", "bat", "teleport", "heal"]
+baseMaximumHealth = 150
+baseMaximumMana = 60
+maximumSteps = 2
+startingAbilities = ["sword", "bat", "teleport", "heal"]

@@ -88,9 +88,9 @@ class SummonVanishingAcceptanceTest {
                     targeting = TargetingDto.ADJACENT_ENEMY,
                 ).toDto(),
         )
-        unitApi.requestUnitCreation(UnitMother.unit(id = "summoner", healthPoints = 20, manaPoints = 10, abilities = listOf("summon"), movementRange = 3).toDto())
-        unitApi.requestUnitCreation(UnitMother.unit(id = "summon", healthPoints = 20, manaPoints = 10, abilities = emptyList(), movementRange = 3).toDto())
-        unitApi.requestUnitCreation(UnitMother.unit(id = "enemy", healthPoints = 20, manaPoints = 10, abilities = listOf("deadly-strike"), movementRange = 3).toDto())
+        unitApi.requestUnitCreation(UnitMother.unit(id = "summoner", baseMaximumHealth = 20, baseMaximumMana = 10, startingAbilities = listOf("summon"), maximumSteps = 3).toDto())
+        unitApi.requestUnitCreation(UnitMother.unit(id = "summon", baseMaximumHealth = 20, baseMaximumMana = 10, startingAbilities = emptyList(), maximumSteps = 3).toDto())
+        unitApi.requestUnitCreation(UnitMother.unit(id = "enemy", baseMaximumHealth = 20, baseMaximumMana = 10, startingAbilities = listOf("deadly-strike"), maximumSteps = 3).toDto())
 
         battleUnitApi.deployBattleUnit(battleUnitId = summonerId, unitId = "summoner", playerId = summonerPlayerId, deployAtRow = 2, deployAtColumn = 2)
         battleUnitApi.deployBattleUnit(battleUnitId = enemyId, unitId = "enemy", playerId = opponentId, deployAtRow = 2, deployAtColumn = 3)

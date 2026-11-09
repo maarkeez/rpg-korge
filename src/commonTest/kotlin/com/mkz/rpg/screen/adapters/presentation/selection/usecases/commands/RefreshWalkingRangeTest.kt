@@ -43,7 +43,7 @@ class RefreshWalkingRangeTest {
         queries.battleRepository.create(battle(battleUnitIds = setOf("battle-unit-1")))
         // The battle unit has moved from where the selection displays it.
         selectionRepository.create(battleUnitSelected(tile = tile(0, 0), battleUnitId = "battle-unit-1"))
-        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(movementRange = 1).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(maximumSteps = 1).toDto()))
         queries.battlefieldRepository.create(battlefield(". K .", occupants = mapOf('K' to "battle-unit-1")))
         val newTiles = setOf(tile(0, 0), tile(0, 2))
         // When
@@ -59,7 +59,7 @@ class RefreshWalkingRangeTest {
     fun `should display the current tile of the selected battle unit with no walking range when it has moved out of the battles`() {
         // Given
         selectionRepository.create(battleUnitSelected(tile = tile(0, 0), battleUnitId = "battle-unit-1", walkingRange = emptySet()))
-        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(movementRange = 1).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(maximumSteps = 1).toDto()))
         queries.battlefieldRepository.create(battlefield(". K .", occupants = mapOf('K' to "battle-unit-1")))
         // When
         refreshWalkingRange()
@@ -76,7 +76,7 @@ class RefreshWalkingRangeTest {
         // E.g.: a CPU battle unit wandering next to it while its inventory is displayed.
         val selection = battleUnitSelected(tile = tile(0, 1), battleUnitId = "battle-unit-1", walkingRange = emptySet())
         selectionRepository.create(selection)
-        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(movementRange = 1).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(maximumSteps = 1).toDto()))
         queries.battlefieldRepository.create(battlefield(". K .", occupants = mapOf('K' to "battle-unit-1")))
         // When
         refreshWalkingRange()

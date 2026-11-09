@@ -14,7 +14,7 @@ class CanLearnAbilityTest {
     @Test
     fun `should return true when the battle unit can learn the ability`() {
         // Given
-        queries.battleUnitRepository.create(battleUnit(id = "viking-1", unit = unit(abilities = listOf("sword")).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "viking-1", unit = unit(startingAbilities = listOf("sword")).toDto()))
         // When
         val result = canLearnAbility(battleUnitId = "viking-1", abilityId = "teleport")
         // Then
@@ -24,7 +24,7 @@ class CanLearnAbilityTest {
     @Test
     fun `should return false when the battle unit already knows the ability`() {
         // Given
-        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(abilities = listOf("sword", "teleport")).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(startingAbilities = listOf("sword", "teleport")).toDto()))
         // When
         val result = canLearnAbility(battleUnitId = "knight-1", abilityId = "teleport")
         // Then

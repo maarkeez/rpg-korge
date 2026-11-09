@@ -40,7 +40,7 @@ class PreviewCastRemainingHealthTest {
     private fun givenBattle(map: String) {
         val player = player(id = "player-1").toDto()
         val opponent = player(id = "player-2").toDto()
-        val unit = unit(healthPoints = 20).toDto()
+        val unit = unit(baseMaximumHealth = 20).toDto()
         queries.battleUnitRepository.create(battleUnit(id = "caster", unit = unit, player = player, remainingHealth = 10))
         queries.battleUnitRepository.create(battleUnit(id = "enemy-1", unit = unit, player = opponent))
         queries.battleUnitRepository.create(battleUnit(id = "enemy-2", unit = unit, player = opponent))

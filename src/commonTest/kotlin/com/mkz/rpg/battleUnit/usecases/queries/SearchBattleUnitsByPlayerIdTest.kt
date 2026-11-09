@@ -37,12 +37,12 @@ class SearchBattleUnitsByPlayerIdTest {
         val aliveBattleUnit =
             battleUnit(
                 player = player.toDto(),
-                unit = unit(healthPoints = 10).toDto(),
+                unit = unit(baseMaximumHealth = 10).toDto(),
             )
         val defeatedBattleUnit =
             battleUnit(
                 player = player.toDto(),
-                unit = unit(healthPoints = 0).toDto(),
+                unit = unit(baseMaximumHealth = 0).toDto(),
             )
         battleUnitRepository.create(aliveBattleUnit)
         battleUnitRepository.create(defeatedBattleUnit)

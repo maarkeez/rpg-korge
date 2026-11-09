@@ -64,8 +64,8 @@ class SaveFixtureTest {
                 lootTables = listOf(lootTable(id = "rat-loot", entries = listOf(lootableItemEntry(lootableItemId = "health-potion"), nothingEntry())).toDto()),
                 units =
                     listOf(
-                        unit(id = "knight", healthPoints = 30, manaPoints = 10, abilities = emptyList(), movementRange = 3, startingGold = 40).toDto(),
-                        unit(id = "rat", healthPoints = 8, manaPoints = 0, abilities = emptyList(), movementRange = 1).toDto(),
+                        unit(id = "knight", baseMaximumHealth = 30, baseMaximumMana = 10, startingAbilities = emptyList(), maximumSteps = 3, startingGold = 40).toDto(),
+                        unit(id = "rat", baseMaximumHealth = 8, baseMaximumMana = 0, startingAbilities = emptyList(), maximumSteps = 1).toDto(),
                     ),
                 lootDrops = listOf(lootDrop(unitId = "rat", lootTableIds = listOf("rat-loot")).toDto()),
                 players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),

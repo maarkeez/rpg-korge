@@ -51,7 +51,7 @@ class DeployBattleUnitTest {
         storedBattleUnit.shouldNotBeNull()
         storedBattleUnit.playerId shouldBe player.id
         storedBattleUnit.unitId shouldBe unit.id
-        storedBattleUnit.remainingHealth shouldBe unit.healthPoints
+        storedBattleUnit.remainingHealth shouldBe unit.baseMaximumHealth
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.BattleUnitDeployed(playerId = player.id, battleUnitId = "battle-unit-1", row = 0, column = 0),
             BattlefieldEvent.RequestOccupyTile(occupantId = "battle-unit-1", row = 0, column = 0),

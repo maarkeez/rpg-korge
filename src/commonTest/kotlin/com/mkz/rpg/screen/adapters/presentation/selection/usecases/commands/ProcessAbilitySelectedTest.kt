@@ -69,8 +69,8 @@ class ProcessAbilitySelectedTest {
                 )
             BattleState.NONE -> Unit
         }
-        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(abilities = knightAbilities, manaPoints = 4).toDto(), player = human))
-        queries.battleUnitRepository.create(battleUnit(id = "rat-1", unit = unit(abilities = knightAbilities).toDto(), player = cpu))
+        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(startingAbilities = knightAbilities, baseMaximumMana = 4).toDto(), player = human))
+        queries.battleUnitRepository.create(battleUnit(id = "rat-1", unit = unit(startingAbilities = knightAbilities).toDto(), player = cpu))
         queries.battleUnitRepository.create(battleUnit(id = "rat-2", player = cpu))
         queries.battlefieldRepository.create(
             battlefield(

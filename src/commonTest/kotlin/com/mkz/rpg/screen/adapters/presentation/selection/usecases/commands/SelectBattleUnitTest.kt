@@ -40,7 +40,7 @@ class SelectBattleUnitTest {
     private val walkingRange = setOf(tile(0, 0), tile(0, 2))
 
     init {
-        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(movementRange = 1).toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(maximumSteps = 1).toDto()))
         queries.battlefieldRepository.create(battlefield(". K .", occupants = mapOf('K' to "battle-unit-1")))
     }
 

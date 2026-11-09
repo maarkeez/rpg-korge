@@ -17,7 +17,7 @@ class OnRequestRecoverBattleUnitsTest {
     @Test
     fun `should recover the battle units when their recovery is requested`() {
         // Given
-        battleUnitRepository.create(battleUnit(id = "rat-1", unit = unit(id = "rat", healthPoints = 20).toDto(), remainingHealth = 10))
+        battleUnitRepository.create(battleUnit(id = "rat-1", unit = unit(id = "rat", baseMaximumHealth = 20).toDto(), remainingHealth = 10))
         eventBus.publish(BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1"), percentage = 10))
         // When
         eventBus.dispatch()

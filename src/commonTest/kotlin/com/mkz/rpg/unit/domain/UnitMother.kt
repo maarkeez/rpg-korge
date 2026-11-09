@@ -7,20 +7,20 @@ import kotlin.random.Random
 object UnitMother {
     fun unit(
         id: String = id(),
-        healthPoints: Int = healthPoints(),
-        manaPoints: Int = manaPoints(),
-        abilities: List<String> = abilities(),
-        movementRange: Int = movementRange(),
+        baseMaximumHealth: Int = baseMaximumHealth(),
+        baseMaximumMana: Int = baseMaximumMana(),
+        startingAbilities: List<String> = startingAbilities(),
+        maximumSteps: Int = maximumSteps(),
         startingGold: Int = 0,
     ) = Unit
         .create(
             unitDto =
                 Unit.Dto(
                     id = id,
-                    healthPoints = healthPoints,
-                    manaPoints = manaPoints,
-                    abilities = abilities,
-                    movementRange = movementRange,
+                    baseMaximumHealth = baseMaximumHealth,
+                    baseMaximumMana = baseMaximumMana,
+                    startingAbilities = startingAbilities,
+                    maximumSteps = maximumSteps,
                     startingGold = startingGold,
                 ),
         ).pullEvents()
@@ -28,11 +28,11 @@ object UnitMother {
 
     fun id() = "unit-${UUID.randomUUID()}"
 
-    fun healthPoints() = Random.nextInt(1, 99)
+    fun baseMaximumHealth() = Random.nextInt(1, 99)
 
-    fun manaPoints() = Random.nextInt(0, 99)
+    fun baseMaximumMana() = Random.nextInt(0, 99)
 
-    fun abilities() = List(Random.nextInt(1, 4)) { ability().toDto().id }
+    fun startingAbilities() = List(Random.nextInt(1, 4)) { ability().toDto().id }
 
-    fun movementRange() = Random.nextInt(1, 5)
+    fun maximumSteps() = Random.nextInt(1, 5)
 }

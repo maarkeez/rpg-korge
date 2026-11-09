@@ -16,7 +16,7 @@ class ResetBattleUnitActionsAndReduceCooldownsTest {
     @Test
     fun `should reset actions and reduce cooldowns for player battle units`() {
         // Given
-        val unit = unit(movementRange = 4, abilities = listOf("ability-1")).toDto()
+        val unit = unit(maximumSteps = 4, startingAbilities = listOf("ability-1")).toDto()
         val player = player(id = "player-1").toDto()
         val exhaustedBattleUnit =
             com.mkz.rpg.battleUnit.domain.BattleUnitMother
@@ -38,7 +38,7 @@ class ResetBattleUnitActionsAndReduceCooldownsTest {
     @Test
     fun `should not reset actions nor reduce cooldowns when the battle unit is not in the battle`() {
         // Given
-        val unit = unit(movementRange = 4, abilities = listOf("ability-1")).toDto()
+        val unit = unit(maximumSteps = 4, startingAbilities = listOf("ability-1")).toDto()
         val player = player(id = "player-1").toDto()
         val exhaustedBattleUnit =
             com.mkz.rpg.battleUnit.domain.BattleUnitMother

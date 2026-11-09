@@ -27,7 +27,7 @@ class OnRequestDeployBattleUnitTest {
     @Test
     fun `should deploy the battle unit, which never vanishes, when its deployment is requested`() {
         // Given
-        queries.unitRepository.create(unit(id = "viking", healthPoints = 150))
+        queries.unitRepository.create(unit(id = "viking", baseMaximumHealth = 150))
         queries.playerRepository.create(player(id = "human"))
         queries.battlefieldRepository.create(battlefield(". . ."))
         eventBus.publish(BattleUnitEvent.RequestDeployBattleUnit(battleUnitId = "viking", unitId = "viking", playerId = "human", row = 0, column = 2))
