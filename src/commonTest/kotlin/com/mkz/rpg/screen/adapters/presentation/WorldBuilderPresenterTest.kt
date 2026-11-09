@@ -46,7 +46,7 @@ class WorldBuilderPresenterTest {
             worldBuilderApi = worldBuilderApi,
             battlefieldApi = apis.battlefieldApi,
             terrainApi = apis.terrainApi,
-            texts = TextsMother.texts(),
+            messages = MessagesMother.messages(),
             clipboard = clipboard,
             worldFilePicker = worldFilePicker,
             coroutineScope = CoroutineScope(Dispatchers.Unconfined),

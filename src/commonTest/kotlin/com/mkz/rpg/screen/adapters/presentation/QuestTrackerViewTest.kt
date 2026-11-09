@@ -29,7 +29,7 @@ class QuestTrackerViewTest : ViewsForTesting() {
     fun `display should draw the task when the quest is active`() =
         sharedViewsTest {
             // Given
-            val trackerView = QuestTrackerView(TextsMother.texts())
+            val trackerView = QuestTrackerView(MessagesMother.messages())
             // When
             trackerView.display(questInfo())
             // Then
@@ -43,7 +43,7 @@ class QuestTrackerViewTest : ViewsForTesting() {
     fun `display should draw the pin when a side quest is pinned`() =
         sharedViewsTest {
             // Given
-            val trackerView = QuestTrackerView(TextsMother.texts())
+            val trackerView = QuestTrackerView(MessagesMother.messages())
             // When
             trackerView.display(questInfo(isMain = false, isPinned = true))
             val rightEdge = trackerView.capsuleRightEdge()
@@ -59,7 +59,7 @@ class QuestTrackerViewTest : ViewsForTesting() {
     fun `display should cut the task with an ellipsis when it is longer than 200`() =
         sharedViewsTest {
             // Given
-            val trackerView = QuestTrackerView(TextsMother.texts())
+            val trackerView = QuestTrackerView(MessagesMother.messages())
             // When
             trackerView.display(questInfo(tasks = listOf(task(text = "Derrota al mago cabra de la guarida del sur de las montañas"))))
             // Then
@@ -71,9 +71,9 @@ class QuestTrackerViewTest : ViewsForTesting() {
     fun `display should draw the count only when the task counts above 1`() =
         sharedViewsTest {
             // Given
-            val trackerView = QuestTrackerView(TextsMother.texts())
+            val trackerView = QuestTrackerView(MessagesMother.messages())
             // When
-            trackerView.display(questInfo(tasks = listOf(task(text = "Defeat 5 Rats", progress = 3, count = 5))))
+            trackerView.display(questInfo(tasks = listOf(task(text = "Defeat 5 Rats", defeatsCounted = 3, requiredDefeats = 5))))
             val counted = trackerView.displayedCount()
             trackerView.display(questInfo())
             // Then
@@ -85,7 +85,7 @@ class QuestTrackerViewTest : ViewsForTesting() {
     fun `display should draw Quest completed and a tick when the quest is completed`() =
         sharedViewsTest {
             // Given
-            val trackerView = QuestTrackerView(TextsMother.texts())
+            val trackerView = QuestTrackerView(MessagesMother.messages())
             // When
             trackerView.display(completedQuestInfo())
             // Then
@@ -99,7 +99,7 @@ class QuestTrackerViewTest : ViewsForTesting() {
     fun `setTappable should hide the chevron and keep the right edge when it is not tappable`() =
         sharedViewsTest {
             // Given
-            val trackerView = QuestTrackerView(TextsMother.texts())
+            val trackerView = QuestTrackerView(MessagesMother.messages())
             trackerView.display(questInfo())
             val rightEdge = trackerView.capsuleRightEdge()
             // When
@@ -114,7 +114,7 @@ class QuestTrackerViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val delegate = RecordingDelegate()
-            val trackerView = QuestTrackerView(TextsMother.texts())
+            val trackerView = QuestTrackerView(MessagesMother.messages())
             trackerView.setDelegate(delegate)
             trackerView.display(questInfo())
             addChild(trackerView)
@@ -129,7 +129,7 @@ class QuestTrackerViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val delegate = RecordingDelegate()
-            val trackerView = QuestTrackerView(TextsMother.texts())
+            val trackerView = QuestTrackerView(MessagesMother.messages())
             trackerView.setDelegate(delegate)
             trackerView.display(questInfo())
             trackerView.setTappable(false)
@@ -144,7 +144,7 @@ class QuestTrackerViewTest : ViewsForTesting() {
     fun `pop should grow the capsule and shrink it back`() =
         sharedViewsTest {
             // Given
-            val trackerView = QuestTrackerView(TextsMother.texts())
+            val trackerView = QuestTrackerView(MessagesMother.messages())
             trackerView.display(questInfo())
             addChild(trackerView)
             // When
@@ -159,7 +159,7 @@ class QuestTrackerViewTest : ViewsForTesting() {
     fun `hide should keep it hidden when a quest is displayed afterwards`() =
         sharedViewsTest {
             // Given
-            val trackerView = QuestTrackerView(TextsMother.texts())
+            val trackerView = QuestTrackerView(MessagesMother.messages())
             addChild(trackerView)
             // When
             trackerView.hide()

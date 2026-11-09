@@ -33,8 +33,8 @@ import kotlin.math.abs
  * place when it is displayed again. Tapping a row opens the quest, and tapping its pin makes the tracker name it.
  */
 class QuestJournalView(
-    private val resourcesLoader: BattleSceneResourcesLoader,
-    private val texts: Texts,
+    private val resourcesLoader: GameSceneResourcesLoader,
+    private val messages: Messages,
 ) : Container() {
     companion object {
         const val WIDTH = 378.0
@@ -124,7 +124,7 @@ class QuestJournalView(
             xy(PADDING - 1, FOOTER_Y)
             mouseEnabled = true
         }
-        text(texts[UiText.QUEST_JOURNAL_TITLE], textSize = TITLE_SIZE, color = Colors.WHITE) { xy(PADDING, TITLE_Y) }
+        text(messages[UiMessage.QUEST_JOURNAL_TITLE], textSize = TITLE_SIZE, color = Colors.WHITE) { xy(PADDING, TITLE_Y) }
         activeText = text("", textSize = ACTIVE_SIZE, color = HudStyle.FAINT)
         // The distance so far is measured from where the drag started, against the rows, so a tap, which does not move, keeps the scroll.
         var draggedY = 0.0
@@ -152,7 +152,7 @@ class QuestJournalView(
         rowsView.foreachDescendant { view -> (view as? ShapeView)?.renderer = GraphicsRenderer.SYSTEM }
         contentHeight = (quests.size * (ROW_HEIGHT + ROW_SPACING) - ROW_SPACING).coerceAtLeast(0.0)
         val active = quests.count { quest -> !quest.isCompleted }
-        activeText.text = texts.plural(UiText.QUEST_JOURNAL_ACTIVE, active, "quests" to active)
+        activeText.text = messages.plural(UiMessage.QUEST_JOURNAL_ACTIVE, active, "quests" to active)
         activeText.xy(WIDTH - PADDING - widthOf(activeText.text, ACTIVE_SIZE), ACTIVE_Y)
         scrollbar.removeChildren()
         if (contentHeight > LIST_HEIGHT) {
@@ -187,7 +187,7 @@ class QuestJournalView(
         rowY: Double,
     ): Row {
         val task = quest.currentTask
-        val isCounted = !quest.isCompleted && task.count > 1
+        val isCounted = !quest.isCompleted && task.requiredDefeats > 1
         lateinit var row: Row
         container {
             xy(PADDING, rowY)
@@ -197,12 +197,12 @@ class QuestJournalView(
                 panel(Size(CONTENT_WIDTH, ROW_HEIGHT), fill = HudStyle.PANEL_RAISED, radius = HudStyle.SLOT_RADIUS)
                 targetSlot(task, resourcesLoader, TARGET_X, TARGET_Y, TARGET_SIZE, portraitScale = 1.0, ring = if (quest.isCompleted) HudStyle.ALLY else ringOf(task))
                 if (quest.isCompleted) tickDisc(TARGET_X + TARGET_TICK_OFFSET, TARGET_Y + TARGET_TICK_OFFSET, TARGET_TICK_SIZE)
-                // What ends the row, from the right, up to where the texts have to stop.
+                // What ends the row, from the right, up to where the messages have to stop.
                 var right = CONTENT_WIDTH - END_PADDING - CHEVRON_SIZE
                 chevron(right, (ROW_HEIGHT - CHEVRON_SIZE) / 2, CHEVRON_SIZE, HudStyle.MUTED)
                 val countText =
                     if (isCounted) {
-                        val count = "${task.progress}/${task.count}"
+                        val count = "${task.defeatsCounted}/${task.requiredDefeats}"
                         right -= END_SPACING + widthOf(count, COUNT_SIZE)
                         val countX = right
                         text(count, textSize = COUNT_SIZE, color = HudStyle.SELECTION) { xy(countX, (ROW_HEIGHT - COUNT_SIZE) / 2 - 1) }
@@ -211,7 +211,7 @@ class QuestJournalView(
                     }
                 val pill =
                     if (quest.isRepeatable) {
-                        repeatablePill(0.0, (ROW_HEIGHT - PILL_HEIGHT) / 2, texts).also { pill ->
+                        repeatablePill(0.0, (ROW_HEIGHT - PILL_HEIGHT) / 2, messages).also { pill ->
                             right -= END_SPACING + pill.width
                             pill.x = right
                         }
@@ -228,9 +228,9 @@ class QuestJournalView(
                 val textWidth = right - END_SPACING - TEXT_X
                 val sectionText = text(sectionOf(quest), textSize = SECTION_SIZE, color = HudStyle.FAINT) { xy(TEXT_X, SECTION_Y) }
                 val nameText = text(fitted(quest.name, NAME_SIZE, textWidth), textSize = NAME_SIZE, color = if (quest.isCompleted) HudStyle.MUTED else Colors.WHITE) { xy(TEXT_X, NAME_Y) }
-                val taskLine = if (quest.isCompleted) texts[UiText.QUEST_TRACKER_COMPLETED] else task.text
+                val taskLine = if (quest.isCompleted) messages[UiMessage.QUEST_TRACKER_COMPLETED] else task.text
                 val taskText = text(fitted(taskLine, TASK_SIZE, textWidth), textSize = TASK_SIZE, color = HudStyle.MUTED) { xy(TEXT_X, TASK_Y) }
-                val bar = if (isCounted) container { progressBar(TEXT_X, BAR_Y, textWidth, BAR_HEIGHT, task.progress, task.count) } else null
+                val bar = if (isCounted) container { progressBar(TEXT_X, BAR_Y, textWidth, BAR_HEIGHT, task.defeatsCounted, task.requiredDefeats) } else null
                 onClick { if (!hasDragged) delegate?.questJournalSelected(quest.id) }
                 row = Row(quest.id, rowView, body, pin, quest.isPinned, sectionText, nameText, taskText, countText, pill, bar)
             }
@@ -251,11 +251,11 @@ class QuestJournalView(
         }
 
     private fun sectionOf(quest: QuestInfo): String =
-        texts[
+        messages[
             when {
-                quest.isCompleted -> UiText.QUEST_JOURNAL_COMPLETED
-                quest.isMain -> UiText.QUEST_DETAIL_MAIN_QUEST
-                else -> UiText.QUEST_DETAIL_SIDE_QUEST
+                quest.isCompleted -> UiMessage.QUEST_JOURNAL_COMPLETED
+                quest.isMain -> UiMessage.QUEST_DETAIL_MAIN_QUEST
+                else -> UiMessage.QUEST_DETAIL_SIDE_QUEST
             },
         ]
 }

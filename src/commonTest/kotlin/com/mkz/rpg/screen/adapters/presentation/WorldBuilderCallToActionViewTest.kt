@@ -13,7 +13,7 @@ class WorldBuilderCallToActionViewTest : ViewsForTesting() {
     fun `DisplayExportAndBack should display going back and exporting when it is displayed`() =
         sharedViewsTest {
             // Given
-            val callToActionView = WorldBuilderCallToActionView(TextsMother.texts())
+            val callToActionView = WorldBuilderCallToActionView(MessagesMother.messages())
             // When
             callToActionView.displayExportAndBack(onExported = {}, onBack = {})
             // Then
@@ -24,7 +24,7 @@ class WorldBuilderCallToActionViewTest : ViewsForTesting() {
     fun `DisplayExportAndBack should export and go back when they are clicked`() =
         sharedViewsTest {
             // Given
-            val callToActionView = WorldBuilderCallToActionView(TextsMother.texts())
+            val callToActionView = WorldBuilderCallToActionView(MessagesMother.messages())
             callToActionView.displayExportAndBack(onExported = { actions += "export" }, onBack = { actions += "back" })
             addChild(callToActionView)
             // When
@@ -38,7 +38,7 @@ class WorldBuilderCallToActionViewTest : ViewsForTesting() {
     fun `DisplayLeaveConfirmation should replace the actions with staying and leaving when it is displayed`() =
         sharedViewsTest {
             // Given
-            val callToActionView = WorldBuilderCallToActionView(TextsMother.texts())
+            val callToActionView = WorldBuilderCallToActionView(MessagesMother.messages())
             callToActionView.displayExportAndBack(onExported = {}, onBack = {})
             // When
             callToActionView.displayLeaveConfirmation(onLeft = {}, onStayed = {})
@@ -50,7 +50,7 @@ class WorldBuilderCallToActionViewTest : ViewsForTesting() {
     fun `DisplayLeaveConfirmation should leave and stay when they are clicked`() =
         sharedViewsTest {
             // Given
-            val callToActionView = WorldBuilderCallToActionView(TextsMother.texts())
+            val callToActionView = WorldBuilderCallToActionView(MessagesMother.messages())
             callToActionView.displayLeaveConfirmation(onLeft = { actions += "leave" }, onStayed = { actions += "stay" })
             addChild(callToActionView)
             // When

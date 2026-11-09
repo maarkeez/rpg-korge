@@ -21,7 +21,7 @@ import korlibs.time.seconds
 
 /** The world builder header: its title, and a subtitle with the world size, which messages replace for a while. */
 open class WorldBuilderInfoView(
-    private val texts: Texts,
+    private val messages: Messages,
 ) : UIContainer(Size(width = 390, height = 33)) {
     companion object {
         // FamiCube palette colours of the messages.
@@ -35,7 +35,7 @@ open class WorldBuilderInfoView(
     }
 
     internal val title =
-        uiText(text = texts[UiText.WORLD_BUILDER_INFO_TITLE], size = Size(width = width, height = 18)) {
+        uiText(text = messages[UiMessage.WORLD_BUILDER_INFO_TITLE], size = Size(width = width, height = 18)) {
             styles.textAlignment = TextAlignment.MIDDLE_LEFT
             styles.textSize = 18.0
         }
@@ -62,7 +62,7 @@ open class WorldBuilderInfoView(
         rows: Int,
         columns: Int,
     ) {
-        sizeText = texts[UiText.WORLD_BUILDER_INFO_SIZE, "rows" to rows, "columns" to columns]
+        sizeText = messages[UiMessage.WORLD_BUILDER_INFO_SIZE, "rows" to rows, "columns" to columns]
         if (messageAnimator == null) displaySizeText()
     }
 

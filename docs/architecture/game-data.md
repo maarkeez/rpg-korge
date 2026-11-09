@@ -4,7 +4,7 @@ The game is defined by TOML files under [`resources`](../../resources). No game 
 
 ## How the game is set up
 
-1. `BattleScene` calls `init()` on each subdomain API. It reads that subdomain's TOML files from the resources bundle (see [Assets](assets.md#how-resources-are-bundled)): a new TOML file is bundled without any change. Reading resources is asynchronous, so it happens before the game is set up.
+1. `GameScene` calls `init()` on each subdomain API. It reads that subdomain's TOML files from the resources bundle (see [Assets](assets.md#how-resources-are-bundled)): a new TOML file is bundled without any change. Reading resources is asynchronous, so it happens before the game is set up.
 2. `SetUpGame` publishes one `RequestInitialise<Subdomain>` event per subdomain, in this order, and finally starts exploring and the main quest:
 
 | #  | Event                            | Creates                        | Requires                       |

@@ -1,7 +1,7 @@
 package com.mkz.rpg.shared.adapters.e2e
 
 import com.mkz.rpg.STORYBOOK_WINDOW_SIZE
-import com.mkz.rpg.screen.adapters.presentation.ActionRowView
+import com.mkz.rpg.screen.adapters.presentation.ButtonRowView
 import com.mkz.rpg.screen.adapters.presentation.ConfirmButton
 import com.mkz.rpg.screen.adapters.presentation.HealthBarView
 import com.mkz.rpg.screen.adapters.presentation.ShopView
@@ -177,12 +177,12 @@ class StorybookEndToEndTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE
         }
 
     @Test
-    fun `should only log a callback that changes no arg, the newest first, when a button of the action row is tapped`() =
+    fun `should only log a callback that changes no arg, the newest first, when a button of the button row is tapped`() =
         sharedViewsTest {
             // Given
             startStorybook(FakeStoryLocation(requestedStoryId = "screen-action-row--two-actions"))
-            waitUntil { stage.phoneFrameView()?.displayedView() is ActionRowView }
-            val rowView = stage.phoneFrameView()?.displayedView() as ActionRowView
+            waitUntil { stage.phoneFrameView()?.displayedView() is ButtonRowView }
+            val rowView = stage.phoneFrameView()?.displayedView() as ButtonRowView
             // When
             clickOn(rowView.buttons.first())
             clickOn(rowView.buttons.last())
@@ -193,13 +193,13 @@ class StorybookEndToEndTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE
         }
 
     @Test
-    fun `should display the last button of the action row in blue when the story has it primary`() =
+    fun `should display the last button of the button row in blue when the story has it primary`() =
         sharedViewsTest {
             // When
             startStorybook(FakeStoryLocation(requestedStoryId = "screen-action-row--three-actions"))
-            waitUntil { stage.phoneFrameView()?.displayedView() is ActionRowView }
+            waitUntil { stage.phoneFrameView()?.displayedView() is ButtonRowView }
             // Then
-            val rowView = stage.phoneFrameView()?.displayedView() as ActionRowView
+            val rowView = stage.phoneFrameView()?.displayedView() as ButtonRowView
             rowView.buttons.map { button -> button.text }.shouldContainExactly("Leave", "Sell", "Buy")
             rowView.buttons.map { button -> button.bgColorOut }.shouldContainExactly(GameButton.GREY, GameButton.GREY, ConfirmButton.COLOR)
         }

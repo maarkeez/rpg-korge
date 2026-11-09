@@ -1,14 +1,14 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.GiveGoldRefusalView
-import com.mkz.rpg.screen.adapters.presentation.UiText
+import com.mkz.rpg.screen.adapters.presentation.UiMessage
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import korlibs.korge.view.View
 
-/** The stories of [GiveGoldRefusalView], at the width of the screen, with the texts of the language global. */
+/** The stories of [GiveGoldRefusalView], at the width of the screen, with the messages of the language global. */
 object GiveGoldRefusalViewStories : StoryBinding {
     private const val REASON = "reason"
 
@@ -18,14 +18,14 @@ object GiveGoldRefusalViewStories : StoryBinding {
             id = "screen-give-gold-refusal--no-one",
             name = "No one",
             description = "The giver is alone in the party.",
-            args = mapOf(REASON to ArgDto.text(UiText.GIVE_GOLD_NO_ONE.name)),
+            args = mapOf(REASON to ArgDto.text(UiMessage.GIVE_GOLD_NO_ONE.name)),
         )
     private val goldFull =
         StoryDto(
             id = "screen-give-gold-refusal--gold-full",
             name = "Gold full",
             description = "Every other party member carries the most gold possible.",
-            args = mapOf(REASON to ArgDto.text(UiText.GIVE_GOLD_GOLD_FULL.name)),
+            args = mapOf(REASON to ArgDto.text(UiMessage.GIVE_GOLD_GOLD_FULL.name)),
         )
 
     override fun component(context: StoryContext) =
@@ -34,13 +34,13 @@ object GiveGoldRefusalViewStories : StoryBinding {
             group = "Screen",
             title = "Give gold refusal",
             description = "Why no gold can be given, with OK, read after tapping the faded gold button.",
-            controls = listOf(ControlDto.enum(REASON, listOf(UiText.GIVE_GOLD_NO_GOLD.name, UiText.GIVE_GOLD_NO_ONE.name, UiText.GIVE_GOLD_GOLD_FULL.name))),
-            args = mapOf(REASON to ArgDto.text(UiText.GIVE_GOLD_NO_GOLD.name)),
+            controls = listOf(ControlDto.enum(REASON, listOf(UiMessage.GIVE_GOLD_NO_GOLD.name, UiMessage.GIVE_GOLD_NO_ONE.name, UiMessage.GIVE_GOLD_GOLD_FULL.name))),
+            args = mapOf(REASON to ArgDto.text(UiMessage.GIVE_GOLD_NO_GOLD.name)),
             stories = listOf(noGold, noOne, goldFull),
         )
 
     override fun render(
         args: Args,
         context: StoryContext,
-    ): View = GiveGoldRefusalView(context.texts[UiText.valueOf(args.text(REASON))], context.texts[UiText.GIVE_GOLD_OK], onDismissed = { context.action("onDismissed") })
+    ): View = GiveGoldRefusalView(context.messages[UiMessage.valueOf(args.text(REASON))], context.messages[UiMessage.GIVE_GOLD_OK], onDismissed = { context.action("onDismissed") })
 }

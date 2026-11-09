@@ -5,7 +5,7 @@ import korlibs.korge.view.View
 
 /** The world builder actions: exporting the world, or going back to the menu once the player confirms leaving it. */
 open class WorldBuilderCallToActionView(
-    private val texts: Texts,
+    private val messages: Messages,
 ) : Container() {
     companion object {
         const val CALL_TO_ACTION = "CALL_TO_ACTION"
@@ -15,7 +15,7 @@ open class WorldBuilderCallToActionView(
         onExported: () -> Unit,
         onBack: () -> Unit,
     ) {
-        display(CancelAndConfirmView(onCancelled = onBack, onConfirmed = onExported, cancelLabel = texts[UiText.WORLD_BUILDER_BACK], confirmLabel = texts[UiText.WORLD_BUILDER_EXPORT]))
+        display(CancelAndConfirmView(onCancelled = onBack, onConfirmed = onExported, cancelLabel = messages[UiMessage.WORLD_BUILDER_BACK], confirmLabel = messages[UiMessage.WORLD_BUILDER_EXPORT]))
     }
 
     /** Asks the player to confirm leaving, as the world is lost. */
@@ -23,7 +23,7 @@ open class WorldBuilderCallToActionView(
         onLeft: () -> Unit,
         onStayed: () -> Unit,
     ) {
-        display(CancelAndConfirmView(onCancelled = onStayed, onConfirmed = onLeft, cancelLabel = texts[UiText.WORLD_BUILDER_STAY], confirmLabel = texts[UiText.WORLD_BUILDER_LEAVE]))
+        display(CancelAndConfirmView(onCancelled = onStayed, onConfirmed = onLeft, cancelLabel = messages[UiMessage.WORLD_BUILDER_STAY], confirmLabel = messages[UiMessage.WORLD_BUILDER_LEAVE]))
     }
 
     internal val callToAction: CancelAndConfirmView?

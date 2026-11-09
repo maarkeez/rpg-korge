@@ -178,8 +178,8 @@ object BattlefieldViewStories : StoryBinding {
             args.text(NPC).takeUnless { npcId -> npcId == NONE }?.let { npcId -> displayNpc(NPC_TILE.row, NPC_TILE.column, npcId, unitId = null) }
             displayBattleUnit(BATTLE_UNIT_TILE.row, BATTLE_UNIT_TILE.column, args.text(UNIT))
             displayBattleUnit(OTHER_BATTLE_UNIT_TILE.row, OTHER_BATTLE_UNIT_TILE.column, OTHER_UNIT)
-            displayLoot(LOOT_TILE.row, LOOT_TILE.column, listOf(args.text(LOOT)))
-            displayLoot(CHEST_TILE.row, CHEST_TILE.column, List(CHEST_ITEMS) { args.text(LOOT) })
+            displayDroppedItems(LOOT_TILE.row, LOOT_TILE.column, listOf(args.text(LOOT)))
+            displayDroppedItems(CHEST_TILE.row, CHEST_TILE.column, List(CHEST_ITEMS) { args.text(LOOT) })
             val selected = selectedTile(args.text(SELECTED_TILE))
             when (Layer.valueOf(args.text(LAYER))) {
                 Layer.NONE -> Unit

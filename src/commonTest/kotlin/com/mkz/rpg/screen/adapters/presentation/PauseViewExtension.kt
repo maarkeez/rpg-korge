@@ -7,7 +7,7 @@ import korlibs.korge.view.Stage
 
 // Page object of [PauseView].
 
-/** The pause screen of the battle scene, or `null` when the scene is not displayed yet. */
+/** The pause screen of the game screen, or `null` when the scene is not displayed yet. */
 fun Stage.pauseView(): PauseView? = descendants().filterIsInstance<PauseView>().firstOrNull()
 
 /** The labels of the options, from the top, e.g.: `Resume`. */

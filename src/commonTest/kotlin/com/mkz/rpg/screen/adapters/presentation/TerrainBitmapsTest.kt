@@ -1,6 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import com.mkz.rpg.screen.adapters.presentation.GameSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import io.kotest.matchers.booleans.shouldBeTrue

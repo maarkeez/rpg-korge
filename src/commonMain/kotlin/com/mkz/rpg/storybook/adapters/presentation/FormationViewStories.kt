@@ -1,7 +1,7 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.FormationView
-import com.mkz.rpg.screen.adapters.presentation.UiText
+import com.mkz.rpg.screen.adapters.presentation.UiMessage
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
@@ -81,7 +81,7 @@ object FormationViewStories : StoryBinding {
                 val unitId = unitIds[index % unitIds.size]
                 FormationView.Row(
                     unitId = unitId,
-                    name = context.texts.unitName(unitId),
+                    name = context.messages.unitName(unitId),
                     remainingHealth = if (isHurt) MAXIMUM_HEALTH / (index + 2) else MAXIMUM_HEALTH,
                     maximumHealth = MAXIMUM_HEALTH,
                     remainingMana = if (isHurt) MAXIMUM_MANA / (index + 2) else MAXIMUM_MANA,
@@ -103,9 +103,9 @@ object FormationViewStories : StoryBinding {
             selectRow(selectedRow)
             displayHint(
                 if (selectedRow == null) {
-                    context.texts[UiText.FORMATION_TAP_TO_SELECT]
+                    context.messages[UiMessage.FORMATION_TAP_TO_SELECT]
                 } else {
-                    context.texts[UiText.FORMATION_TAP_TO_REORDER, "name" to rows[selectedRow].name]
+                    context.messages[UiMessage.FORMATION_TAP_TO_REORDER, "name" to rows[selectedRow].name]
                 },
             )
         }

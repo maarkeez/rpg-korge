@@ -16,7 +16,7 @@ import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
 import korlibs.math.geom.degrees
 
-/** What the quest views draw with: fitted and wrapped texts, vector glyphs, the slot of the target, progress bars and the reward. */
+/** What the quest views draw with: fitted and wrapped messages, vector glyphs, the slot of the target, progress bars and the reward. */
 internal object QuestViewParts {
     const val CAPTION_SIZE = 11.0
     const val REWARD_ROW_HEIGHT = 28.0
@@ -132,7 +132,7 @@ internal object QuestViewParts {
                 roundRect(Size(side, side * 0.68), RectCorners(side * 0.2), fill = color) { xy(x, y + side * 0.06) }
                 arm(x + side * 0.24, y + side * 0.66, side * 0.3, side * 0.22, 60.degrees, color)
             }
-            QuestInfo.Kind.REACH -> {
+            QuestInfo.Kind.VISIT -> {
                 solidRect(Size(side * 0.14, side), color) { xy(x + side * 0.16, y) }
                 solidRect(Size(side * 0.62, side * 0.42), color) { xy(x + side * 0.3, y + side * 0.04) }
             }
@@ -145,7 +145,7 @@ internal object QuestViewParts {
      */
     fun Container.targetSlot(
         task: QuestInfo.Task,
-        resourcesLoader: BattleSceneResourcesLoader,
+        resourcesLoader: GameSceneResourcesLoader,
         x: Double,
         y: Double,
         side: Double,
@@ -173,7 +173,7 @@ internal object QuestViewParts {
         when (task.kind) {
             QuestInfo.Kind.DEFEAT -> HudStyle.ENEMY
             QuestInfo.Kind.TALK -> HudStyle.ALLY
-            QuestInfo.Kind.REACH -> HudStyle.SELECTION
+            QuestInfo.Kind.VISIT -> HudStyle.SELECTION
         }
 
     /** A bar, cut into a segment per unit up to [MAXIMUM_SEGMENTS], so 3 of 5 reads at a glance. */
@@ -202,13 +202,13 @@ internal object QuestViewParts {
         quest: QuestInfo,
         x: Double,
         y: Double,
-        resourcesLoader: BattleSceneResourcesLoader,
-        texts: Texts,
+        resourcesLoader: GameSceneResourcesLoader,
+        messages: Messages,
     ): Double {
         var cursor = x
         if (quest.gold > 0) {
             val pill = PillView(color = HudStyle.SELECTION, glyph = PillView.Glyph.GOLD)
-            pill.display(texts.gold(quest.gold))
+            pill.display(messages.gold(quest.gold))
             addChild(pill)
             pill.xy(cursor, y + (REWARD_ROW_HEIGHT - pill.pillHeight) / 2)
             cursor += pill.width + REWARD_GAP
@@ -247,10 +247,10 @@ internal object QuestViewParts {
     fun Container.repeatablePill(
         x: Double,
         y: Double,
-        texts: Texts,
+        messages: Messages,
     ): PillView {
         val pill = PillView(color = HudStyle.MANA, textSize = PILL_TEXT_SIZE)
-        pill.display(texts[UiText.QUEST_REPEATABLE])
+        pill.display(messages[UiMessage.QUEST_REPEATABLE])
         addChild(pill)
         pill.xy(x, y)
         return pill
@@ -261,7 +261,7 @@ internal object QuestViewParts {
         item: QuestInfo.RewardItem,
         x: Double,
         y: Double,
-        resourcesLoader: BattleSceneResourcesLoader,
+        resourcesLoader: GameSceneResourcesLoader,
     ) {
         panel(Size(REWARD_ROW_HEIGHT, REWARD_ROW_HEIGHT), fill = HudStyle.PANEL_RAISED, radius = HudStyle.SLOT_RADIUS).xy(x, y)
         resourcesLoader.bitmapOrNull("lootableItem/${item.id}.png")?.let { bitmap ->

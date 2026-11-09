@@ -2,6 +2,7 @@ package com.mkz.rpg.shared.adapters.e2e
 
 import com.mkz.rpg.GAME_WINDOW_SIZE
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
+import com.mkz.rpg.screen.adapters.presentation.callToActionView
 import com.mkz.rpg.screen.adapters.presentation.clickConfirmation
 import com.mkz.rpg.screen.adapters.presentation.clickQuit
 import com.mkz.rpg.screen.adapters.presentation.clickResume
@@ -14,7 +15,6 @@ import com.mkz.rpg.screen.adapters.presentation.isPadShown
 import com.mkz.rpg.screen.adapters.presentation.isSavedShown
 import com.mkz.rpg.screen.adapters.presentation.menuView
 import com.mkz.rpg.screen.adapters.presentation.pauseView
-import com.mkz.rpg.screen.adapters.presentation.playerCallToActionView
 import com.mkz.rpg.screen.adapters.presentation.saveSlotsView
 import com.mkz.rpg.screen.adapters.presentation.virtualPadView
 import com.mkz.rpg.shared.adapters.presentation.isShown
@@ -69,7 +69,7 @@ class PauseEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             clickQuit(requireNotNull(pauseView()))
             waitUntil { confirmDialogView()?.isShown() == true }
             // When
-            clickConfirmation(requireNotNull(stage.playerCallToActionView()))
+            clickConfirmation(requireNotNull(stage.callToActionView()))
             // Then
             waitUntil { menuView() != null }
             withClue("Expected the menu to be displayed") { menuView().shouldNotBeNull() }

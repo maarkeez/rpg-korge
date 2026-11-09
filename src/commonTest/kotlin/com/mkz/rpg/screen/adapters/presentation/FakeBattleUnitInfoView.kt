@@ -1,7 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 // Records what the presenters ask the battle unit info view to display, instead of drawing it.
-class FakeBattleUnitInfoView : BattleUnitInfoView(BattleSceneResourcesLoader(), TextsMother.texts()) {
+class FakeBattleUnitInfoView : BattleUnitInfoView(GameSceneResourcesLoader(), MessagesMother.messages()) {
     data class DisplayedBattleUnit(
         val battleUnit: BattleUnitInfo,
         val turnActions: TurnActions,
@@ -19,8 +19,8 @@ class FakeBattleUnitInfoView : BattleUnitInfoView(BattleSceneResourcesLoader(), 
     var hideCount = 0
         private set
 
-    // The bag the player can click, or `null` while it is hidden.
-    var onBagSelected: (() -> kotlin.Unit)? = null
+    // The inventory button the player can click, or `null` while it is hidden.
+    var onInventoryButtonSelected: (() -> kotlin.Unit)? = null
         private set
 
     override fun setDelegate(delegate: AbilityButtonView.Delegate) {
@@ -48,12 +48,12 @@ class FakeBattleUnitInfoView : BattleUnitInfoView(BattleSceneResourcesLoader(), 
         hideAbilityInfoCount++
     }
 
-    override fun displayBag(onBagSelected: () -> kotlin.Unit) {
-        this.onBagSelected = onBagSelected
+    override fun displayInventoryButton(onInventoryButtonSelected: () -> kotlin.Unit) {
+        this.onInventoryButtonSelected = onInventoryButtonSelected
     }
 
-    override fun hideBag() {
-        onBagSelected = null
+    override fun hideInventoryButton() {
+        onInventoryButtonSelected = null
     }
 
     override fun hide() {

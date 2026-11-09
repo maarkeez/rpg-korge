@@ -5,7 +5,7 @@ import com.mkz.rpg.screen.adapters.presentation.AbilityInfoView.AbilityInfo.Effe
 import com.mkz.rpg.screen.adapters.presentation.AbilityInfoView.AbilityInfo.Reason
 import com.mkz.rpg.screen.adapters.presentation.AbilityInfoView.AbilityInfo.Targeting
 import com.mkz.rpg.screen.adapters.presentation.AbilityInfoView.Mark
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import com.mkz.rpg.screen.adapters.presentation.GameSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -17,7 +17,7 @@ import kotlin.test.Test
 
 class AbilityInfoViewTest : ViewsForTesting() {
     // The height left under the ability buttons once the header of the battle unit info is collapsed, in the
-    // 300-high battle HUD.
+    // 300-high HUD.
     private val heightUnderFocusedHeader = 178.0
 
     private val skull =
@@ -26,7 +26,7 @@ class AbilityInfoViewTest : ViewsForTesting() {
             manaCost = 10,
             cooldown = 0,
             targeting = Targeting.ADJACENT_ENEMY,
-            effects = listOf(Effect.Damage(10), Effect.OnDefeatedPoisonAllies(damage = 3, turns = 5)),
+            effects = listOf(Effect.Damage(10), Effect.OnDefeatedDamageAdjacentAllies(damage = 3, turns = 5)),
         )
     private val mending =
         AbilityInfo(
@@ -34,10 +34,10 @@ class AbilityInfoViewTest : ViewsForTesting() {
             manaCost = 10,
             cooldown = 2,
             targeting = Targeting.CASTER,
-            effects = listOf(Effect.HealSelf(15), Effect.HealAdjacentAllies(15)),
+            effects = listOf(Effect.HealCaster(15), Effect.HealAdjacentAllies(15)),
         )
 
-    private suspend fun abilityInfoView() = AbilityInfoView(AbilityInfoView.WIDTH, loadedResourcesLoader(), TextsMother.texts())
+    private suspend fun abilityInfoView() = AbilityInfoView(AbilityInfoView.WIDTH, loadedResourcesLoader(), MessagesMother.messages())
 
     @Test
     fun `AbilityInfoView should display the mana cost and cooldown as pills when it displays an ability`() =
@@ -126,7 +126,7 @@ class AbilityInfoViewTest : ViewsForTesting() {
             // Then
             abilityInfoView.casterMark() shouldBe Mark.CASTER
             abilityInfoView.adjacentMarks() shouldBe List(4) { Mark.ENEMY }
-            abilityInfoView.isOneOfTheNeighbours.shouldBeFalse()
+            abilityInfoView.isOneOfTheAdjacentTiles.shouldBeFalse()
         }
 
     @Test
@@ -137,7 +137,7 @@ class AbilityInfoViewTest : ViewsForTesting() {
             // When
             abilityInfoView.display(
                 skull.copy(
-                    effects = skull.effects + Effect.DamageEachTurn(damage = 3, turns = 5),
+                    effects = skull.effects + Effect.DamageOnPlayerTurnStarted(damage = 3, turns = 5),
                     reason = Reason.NotEnoughMana(manaCost = 10, remainingMana = 4),
                 ),
             )
@@ -149,7 +149,7 @@ class AbilityInfoViewTest : ViewsForTesting() {
     fun `AbilityInfoView should translate the sentences when the language is Spanish`() =
         sharedViewsTest {
             // Given
-            val abilityInfoView = AbilityInfoView(AbilityInfoView.WIDTH, loadedResourcesLoader(), TextsMother.texts("es"))
+            val abilityInfoView = AbilityInfoView(AbilityInfoView.WIDTH, loadedResourcesLoader(), MessagesMother.messages("es"))
             // When
             abilityInfoView.display(mending.copy(reason = Reason.Cooldown(turnsLeft = 2)))
             // Then

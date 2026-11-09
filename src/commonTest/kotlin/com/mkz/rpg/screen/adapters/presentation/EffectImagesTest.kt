@@ -2,7 +2,7 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battleUnit.usecases.queries.PreviewCastOngoingEffects
 import com.mkz.rpg.effect.adapters.resources.ResourcesEffectLoader
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import com.mkz.rpg.screen.adapters.presentation.GameSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty

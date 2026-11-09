@@ -1,9 +1,9 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoader
+import com.mkz.rpg.screen.adapters.presentation.GameSceneResourcesLoader
 import com.mkz.rpg.screen.adapters.presentation.HealthBarView
-import com.mkz.rpg.screen.adapters.presentation.TextsMother
-import com.mkz.rpg.screen.adapters.presentation.UiText
+import com.mkz.rpg.screen.adapters.presentation.MessagesMother
+import com.mkz.rpg.screen.adapters.presentation.UiMessage
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.adapters.presentation.labelText
 import com.mkz.rpg.storybook.adapters.page.FakeStorybookPage
@@ -29,7 +29,7 @@ class StorybookPresenterTest {
     private val storybookPage = FakeStorybookPage()
 
     // The health bar needs no image, so the resources are not loaded.
-    private val storyContext = StoryContext(BattleSceneResourcesLoader(), TextsMother.texts())
+    private val storyContext = StoryContext(GameSceneResourcesLoader(), MessagesMother.messages())
 
     private fun startStorybook(storyLocation: FakeStoryLocation = FakeStoryLocation()): StorybookApi {
         val storybookApi = StorybookApi(eventBus, storyLocation, storyBindings = listOf(HealthBarViewStories))
@@ -62,7 +62,7 @@ class StorybookPresenterTest {
         storyInfoView.displayedStories.map { (component, story) -> component.title to story.name }.shouldContainExactly("Health bar" to "Half")
         controlsView.displayedControls.map { control -> control.name }.shouldContainExactly("remaining", "maximum")
         controlsView.displayedArgs.shouldContainExactly(mapOf("remaining" to ArgDto.int(15), "maximum" to ArgDto.int(30)))
-        toolbarView.displayedLanguages.map { language -> language.code } shouldBe storyContext.texts.languages().map { language -> language.code }
+        toolbarView.displayedLanguages.map { language -> language.code } shouldBe storyContext.messages.languages().map { language -> language.code }
         toolbarView.selectedLanguageCodes.shouldContainExactly("en")
         phoneFrameView.displayedViews.size shouldBe 1
         displayedHealthBarLabel() shouldBe "15/30"
@@ -77,7 +77,7 @@ class StorybookPresenterTest {
         // Then
         displayedHealthBarLabel() shouldBe "15/40"
         toolbarView.selectedLanguageCodes.shouldContainExactly("es")
-        storyContext.texts[UiText.SHOP_NOT_ENOUGH_GOLD] shouldBe "No hay suficiente oro"
+        storyContext.messages[UiMessage.SHOP_NOT_ENOUGH_GOLD] shouldBe "No hay suficiente oro"
     }
 
     @Test
@@ -132,7 +132,7 @@ class StorybookPresenterTest {
         // Then
         toolbarView.selectedLanguageCodes.shouldContainExactly("en", "es")
         phoneFrameView.displayedViews.size shouldBe 2
-        storyContext.texts[UiText.SHOP_NOT_ENOUGH_GOLD] shouldBe "No hay suficiente oro"
+        storyContext.messages[UiMessage.SHOP_NOT_ENOUGH_GOLD] shouldBe "No hay suficiente oro"
         storyLocation.keptLocations.shouldContainExactly(location(storyId = "screen-health-bar--full", globals = mapOf("language" to "es")))
     }
 

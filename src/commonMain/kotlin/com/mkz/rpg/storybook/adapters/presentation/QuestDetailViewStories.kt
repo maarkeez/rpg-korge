@@ -45,7 +45,7 @@ object QuestDetailViewStories : StoryBinding {
         args: Args,
         context: StoryContext,
     ): View =
-        QuestDetailView(context.resourcesLoader, context.texts).apply {
-            display(QuestSample.valueOf(args.text(QUEST)).quest(context.texts))
+        QuestDetailView(context.resourcesLoader, context.messages).apply {
+            display(QuestSample.valueOf(args.text(QUEST)).quest(context.messages))
         }
 }

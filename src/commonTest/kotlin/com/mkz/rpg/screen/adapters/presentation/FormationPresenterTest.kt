@@ -5,8 +5,8 @@ import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
+import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.gameSceneTimeline
+import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.playLongStep
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.shared.domain.subscribe
 import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
@@ -34,11 +34,11 @@ class FormationPresenterTest {
                 ),
         ).also(SubdomainApis::initialise)
     private val eventBus = apis.eventBus
-    private val formationView = FormationView(BattleSceneResourcesLoader())
+    private val formationView = FormationView(GameSceneResourcesLoader())
     private val battlefieldView = FakeBattlefieldView()
-    private val timeline = battleSceneTimeline()
-    private val callToActionView = FakePlayerCallToActionView()
-    private val presenter = FormationPresenter(formationView, battlefieldView, callToActionView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, TextsMother.texts(), timeline)
+    private val timeline = gameSceneTimeline()
+    private val callToActionView = FakeCallToActionView()
+    private val presenter = FormationPresenter(formationView, battlefieldView, callToActionView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, MessagesMother.messages(), timeline)
 
     private val knightTile = TilePosition(row = 1, column = 1)
     private val vikingTile = TilePosition(row = 2, column = 1)
@@ -88,7 +88,7 @@ class FormationPresenterTest {
     }
 
     @Test
-    fun `FormationRowSelected should swap both members and clear the selection when another member is tapped`() {
+    fun `FormationRowSelected should reorder both members and clear the selection when another member is tapped`() {
         // Given
         openTheFormation()
         presenter.formationRowSelected(2)

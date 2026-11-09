@@ -9,7 +9,7 @@ import korlibs.math.geom.Size
  * and Back and Discard, in red, the row below.
  */
 class DiscardQuestionView(
-    texts: Texts,
+    messages: Messages,
     itemName: String,
     onBack: () -> Unit,
     onDiscarded: () -> Unit,
@@ -22,16 +22,16 @@ class DiscardQuestionView(
 
     internal val questionView = UnitNameView(Size(WIDTH, LINE_HEIGHT))
     internal val rowView =
-        ActionRowView(
+        ButtonRowView(
             listOf(
-                ActionRowView.Action(texts[UiText.ITEM_ACTIONS_BACK], onSelected = onBack),
-                ActionRowView.Action(texts[UiText.ITEM_ACTIONS_DISCARD], HudStyle.DANGER, HudStyle.DANGER_PRESSED, onSelected = onDiscarded),
+                ButtonRowView.Action(messages[UiMessage.ITEM_BUTTONS_BACK], onSelected = onBack),
+                ButtonRowView.Action(messages[UiMessage.ITEM_BUTTONS_DISCARD], HudStyle.DANGER, HudStyle.DANGER_PRESSED, onSelected = onDiscarded),
             ),
         )
 
     init {
         addChild(questionView)
         addChild(rowView.xy(0.0, LINE_HEIGHT + SPACING))
-        questionView.display(texts[UiText.ITEM_ACTIONS_DISCARD_QUESTION, "item" to itemName])
+        questionView.display(messages[UiMessage.ITEM_BUTTONS_DISCARD_QUESTION, "item" to itemName])
     }
 }

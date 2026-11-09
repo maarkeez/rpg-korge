@@ -45,12 +45,12 @@ import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
 open class BattlefieldView(
-    private val resourcesLoader: BattleSceneResourcesLoader,
+    private val resourcesLoader: GameSceneResourcesLoader,
 ) : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPORT_HEIGHT)) {
     companion object {
         const val TERRAIN = "TERRAIN"
-        const val LOOT = "LOOT"
-        const val PICKED_UP_LOOT = "PICKED_UP_LOOT"
+        const val DROPPED_ITEMS = "DROPPED_ITEMS"
+        const val LOOTED_ITEM = "LOOTED_ITEM"
         const val BATTLE_UNIT = "BATTLE_UNIT"
         const val NPC = "NPC"
         const val QUEST_MARKER = "QUEST_MARKER"
@@ -72,10 +72,10 @@ open class BattlefieldView(
 
         // A tile holding one of these layers keeps them while it is out of the window. The other tiles are created again
         // from the battlefield when they come back into it.
-        private val KEPT_LAYERS = setOf(BUILDING, LOOT, BATTLE_UNIT, NPC, QUEST_MARKER, SELECTION, HEALTH_PREVIEW, FLASH, HEALTH_FLASH, PICKED_UP_LOOT)
+        private val KEPT_LAYERS = setOf(BUILDING, DROPPED_ITEMS, BATTLE_UNIT, NPC, QUEST_MARKER, SELECTION, HEALTH_PREVIEW, FLASH, HEALTH_FLASH, LOOTED_ITEM)
 
         // A tile animating one of these layers stays on the screen until it is done, as its animation only plays there.
-        private val ANIMATED_LAYERS = setOf(FLASH, HEALTH_FLASH, PICKED_UP_LOOT)
+        private val ANIMATED_LAYERS = setOf(FLASH, HEALTH_FLASH, LOOTED_ITEM)
 
         // A tile is 64px, so all its art is drawn at a whole scale: its 16x16 art (the terrain, most units and npcs) at 4x,
         // and its 32x32 art at 2x.
@@ -86,13 +86,13 @@ open class BattlefieldView(
         const val VIEWPORT_HEIGHT = TILE_SIZE * VISIBLE_TILES
 
         // The loot is drawn smaller than the battle units, so the terrain shows around it.
-        const val LOOT_SCALE = 2.0
+        const val DROPPED_ITEM_SCALE = 2.0
         const val CHEST_PATH = "battlefield/chest.png"
 
-        // A picked up item rises this far from the center of its tile, growing to this scale while it fades out.
-        const val PICK_UP_RISE = TILE_SIZE / 2.0
-        const val PICK_UP_SCALE = 3.0
-        val PICK_UP_DURATION = 400.milliseconds
+        // A looted item rises this far from the center of its tile, growing to this scale while it fades out.
+        const val LOOTED_ITEM_RISE = TILE_SIZE / 2.0
+        const val LOOTED_ITEM_SCALE = 3.0
+        val LOOTED_ITEM_DURATION = 400.milliseconds
 
         // How long a moving battle unit glides from one tile of its path to the next.
         val MOVE_STEP_DURATION = 150.milliseconds
@@ -151,7 +151,7 @@ open class BattlefieldView(
     // The health flashed while exploring, wherever it is (e.g.: gliding with its battle unit), until it is removed.
     private val healthFlashes = mutableSetOf<BattlefieldHealthBarPreviewView>()
 
-    // The picked up items rising from their tile, drawn at whole pixels like the other views moving on the battlefield.
+    // the looted items rising from their tile, drawn at whole pixels like the other views moving on the battlefield.
     private val risingLoot = mutableSetOf<View>()
 
     // A battlefield smaller than the viewport can not be scrolled.
@@ -229,8 +229,8 @@ open class BattlefieldView(
      * it is replaced, keeping how far it was scrolled as far as the new size allows.
      */
     open fun displayBattlefield(battlefield: BattlefieldTerrain) {
-        val mapHeight = TILE_SIZE * battlefield.rows
-        val mapWidth = TILE_SIZE * battlefield.columns
+        val battlefieldHeight = TILE_SIZE * battlefield.rows
+        val battlefieldWidth = TILE_SIZE * battlefield.columns
         val previousScroll = if (isDisplayed) battlefieldGrid.x to battlefieldGrid.y else 0.0 to 0.0
         if (isDisplayed) {
             battlefieldAnimator.cancel()
@@ -245,8 +245,8 @@ open class BattlefieldView(
         windowScroll = null
         trailedView = null
         this.battlefield = battlefield
-        minScrollX = minOf(0, VIEWPORT_WIDTH - mapWidth).toDouble()
-        minScrollY = minOf(0, VIEWPORT_HEIGHT - mapHeight).toDouble()
+        minScrollX = minOf(0, VIEWPORT_WIDTH - battlefieldWidth).toDouble()
+        minScrollY = minOf(0, VIEWPORT_HEIGHT - battlefieldHeight).toDouble()
         battlefieldGrid =
             viewport.container {
                 name = BATTLEFIELD
@@ -302,7 +302,7 @@ open class BattlefieldView(
                 if (tileButton.parent == null) battlefieldGrid.addChild(tileButton)
             }
         }
-        // Each row is drawn over the previous one, e.g.: so a picked up item rises over the tile above.
+        // Each row is drawn over the previous one, e.g.: so a looted item rises over the tile above.
         battlefieldGrid.sortChildrenBy(compareBy<View>({ view -> view.y }, { view -> view.x }))
     }
 
@@ -314,7 +314,7 @@ open class BattlefieldView(
         tileButton.bgColorOver = Colors.TRANSPARENT
         tileButton.background.borderColor = Colors.TRANSPARENT
         tileButton.background.bgColor = Colors.TRANSPARENT
-        // Without a shadow, as each tile's shadow would draw a line over the borders of its neighbours, like a grid.
+        // Without a shadow, as each tile's shadow would draw a line over the borders of the tiles adjacent to it, like a grid.
         tileButton.elevation = false
         tileButton.name = tileName(position.row, position.column)
         tileButton.x = position.column * TILE_SIZE.toDouble()
@@ -334,7 +334,7 @@ open class BattlefieldView(
     }
 
     /**
-     * Draws again the terrain of the tiles, e.g.: a painted tile and its neighbours, whose transitions may have changed.
+     * Draws again the terrain of the tiles, e.g.: a painted tile and the tiles adjacent to it, whose transitions may have changed.
      * The tiles not created yet will be created with it.
      */
     open fun updateTerrain(
@@ -457,13 +457,13 @@ open class BattlefieldView(
      * Displays the items lying on the tile, below the battle unit standing on it: the item icon when there is one, or
      * a chest when there are several. Nothing is displayed when there are none.
      */
-    open fun displayLoot(
+    open fun displayDroppedItems(
         row: Int,
         column: Int,
         lootableItemIds: List<String>,
     ) {
         val tileButton = tile(row, column)
-        tileButton.findViewByName(LOOT)?.removeFromParent()
+        tileButton.findViewByName(DROPPED_ITEMS)?.removeFromParent()
         val lootBitmap =
             when (lootableItemIds.size) {
                 0 -> return
@@ -471,32 +471,32 @@ open class BattlefieldView(
                 else -> resourcesLoader.bitmap(CHEST_PATH)
             }
         val terrainIndex = tileButton.children.indexOfFirst { child -> child.name == TERRAIN }
-        tileButton.addImage(lootBitmap, LOOT, scale = LOOT_SCALE)
+        tileButton.addImage(lootBitmap, DROPPED_ITEMS, scale = DROPPED_ITEM_SCALE)
         // Moved right above the terrain, so the battle units and the selection are drawn over it.
-        val lootView = tileButton.findViewByName(LOOT)!!
+        val lootView = tileButton.findViewByName(DROPPED_ITEMS)!!
         lootView.removeFromParent()
         tileButton.addChildAt(lootView, terrainIndex + 1)
     }
 
     /**
-     * Lifts the picked up item off its tile, after scrolling the battlefield so the tile is visible: its icon rises over
+     * Lifts the looted item off its tile, after scrolling the battlefield so the tile is visible: its icon rises over
      * the battle unit, growing and fading out, while the tile displays the items left on it. Nothing is lifted when the
      * item has no image.
      */
-    open suspend fun pickUpLoot(
+    open suspend fun lootDroppedItem(
         row: Int,
         column: Int,
         lootableItemId: String,
         remainingLootableItemIds: List<String>,
     ) {
-        displayLoot(row = row, column = column, lootableItemIds = remainingLootableItemIds)
+        displayDroppedItems(row = row, column = column, lootableItemIds = remainingLootableItemIds)
         val itemBitmap = resourcesLoader.bitmapOrNull("lootableItem/$lootableItemId.png") ?: return
         followTile(row, column)
         // Anchored on its center, so it grows around it.
         val pickedUpView =
             tile(row, column).image(itemBitmap) {
-                name = PICKED_UP_LOOT
-                scale = LOOT_SCALE
+                name = LOOTED_ITEM
+                scale = DROPPED_ITEM_SCALE
                 smoothing = false
                 anchor(Anchor.CENTER)
                 x = TILE_SIZE / 2.0
@@ -506,9 +506,9 @@ open class BattlefieldView(
         try {
             pickedUpView
                 .animator(parallel = true) {
-                    moveBy(pickedUpView, x = 0.0, y = -PICK_UP_RISE, time = PICK_UP_DURATION, easing = Easing.EASE_OUT_QUAD)
-                    scaleTo(pickedUpView, PICK_UP_SCALE, time = PICK_UP_DURATION)
-                    alpha(pickedUpView, 0.0, time = PICK_UP_DURATION, easing = Easing.EASE_IN_QUAD)
+                    moveBy(pickedUpView, x = 0.0, y = -LOOTED_ITEM_RISE, time = LOOTED_ITEM_DURATION, easing = Easing.EASE_OUT_QUAD)
+                    scaleTo(pickedUpView, LOOTED_ITEM_SCALE, time = LOOTED_ITEM_DURATION)
+                    alpha(pickedUpView, 0.0, time = LOOTED_ITEM_DURATION, easing = Easing.EASE_IN_QUAD)
                 }.awaitComplete()
         } finally {
             risingLoot -= pickedUpView

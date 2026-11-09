@@ -12,7 +12,7 @@ import kotlin.test.Test
  * constructor is its only one and none of its parameters has a default value (see docs/architecture/package-structure.md).
  */
 class ApiConstructorArchitectureTest {
-    // The presentation Apis, e.g.: `BattlefieldApi`, and the nested `BattlefieldHudApi`.
+    // The presentation Apis, e.g.: `BattlefieldApi`, and the nested `SelectionApi`.
     private val apis =
         Konsist
             .scopeFromProduction()

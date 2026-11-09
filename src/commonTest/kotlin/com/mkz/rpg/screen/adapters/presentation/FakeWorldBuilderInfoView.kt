@@ -1,7 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 // Records what the presenter asks the world builder header to display, instead of drawing it.
-class FakeWorldBuilderInfoView : WorldBuilderInfoView(TextsMother.texts()) {
+class FakeWorldBuilderInfoView : WorldBuilderInfoView(MessagesMother.messages()) {
     var displayedSize: Pair<Int, Int>? = null
         private set
     val errors = mutableListOf<String>()

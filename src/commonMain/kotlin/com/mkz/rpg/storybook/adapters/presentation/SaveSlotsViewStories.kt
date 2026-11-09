@@ -1,7 +1,7 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.SaveSlotsView
-import com.mkz.rpg.screen.adapters.presentation.UiText
+import com.mkz.rpg.screen.adapters.presentation.UiMessage
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
@@ -59,26 +59,26 @@ object SaveSlotsViewStories : StoryBinding {
                 val label =
                     when (state) {
                         SAVED ->
-                            context.texts[
-                                UiText.SAVE_SLOTS_SAVED,
+                            context.messages[
+                                UiMessage.SAVE_SLOTS_SUMMARY,
                                 "date" to "2026-10-30 18:4$index",
-                                "leader" to context.texts.unitName(unitIds[index % unitIds.size]),
+                                "leader" to context.messages.unitName(unitIds[index % unitIds.size]),
                                 "members" to index + 2,
                             ]
-                        INCOMPATIBLE -> context.texts[UiText.SAVE_SLOTS_INCOMPATIBLE]
-                        else -> context.texts[UiText.SAVE_SLOTS_EMPTY]
+                        INCOMPATIBLE -> context.messages[UiMessage.SAVE_SLOTS_INCOMPATIBLE]
+                        else -> context.messages[UiMessage.SAVE_SLOTS_EMPTY]
                     }
                 SaveSlotsView.Slot(number = index + 1, label = label, isEnabled = !isLoading || state == SAVED, isDeletable = isLoading && state != EMPTY)
             }
-        return SaveSlotsView(context.texts).apply {
+        return SaveSlotsView(context.messages).apply {
             setDelegate(
                 object : SaveSlotsView.Delegate {
                     override fun saveSlotSelected(number: Int) = context.action("saveSlotSelected", number)
 
-                    override fun saveSlotDeleteSelected(number: Int) = context.action("saveSlotDeleteSelected", number)
+                    override fun deleteSaveSelected(number: Int) = context.action("deleteSaveSelected", number)
                 },
             )
-            display(title = context.texts[if (isLoading) UiText.SAVE_SLOTS_LOAD_TITLE else UiText.SAVE_SLOTS_SAVE_TITLE], slots = slots)
+            display(title = context.messages[if (isLoading) UiMessage.SAVE_SLOTS_LOAD_TITLE else UiMessage.SAVE_SLOTS_SAVE_TITLE], slots = slots)
         }
     }
 }

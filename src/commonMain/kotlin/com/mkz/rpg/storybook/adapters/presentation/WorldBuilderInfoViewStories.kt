@@ -86,7 +86,7 @@ object WorldBuilderInfoViewStories : StoryBinding {
         args: Args,
         context: StoryContext,
     ): View =
-        WorldBuilderInfoView(context.texts).apply {
+        WorldBuilderInfoView(context.messages).apply {
             displaySize(rows = args.int(ROWS), columns = args.int(COLUMNS))
             when (MessageKind.valueOf(args.text(MESSAGE_KIND))) {
                 MessageKind.NONE -> Unit

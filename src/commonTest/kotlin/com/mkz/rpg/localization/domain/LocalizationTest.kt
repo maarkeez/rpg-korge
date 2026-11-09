@@ -80,12 +80,12 @@ class LocalizationTest {
 
     @Test
     fun `Translate should replace the placeholders by their arguments`() {
-        localization(selectedLanguageCode = "es").translate("ui.battleInfo.round", mapOf("round" to "3")) shouldBe "Ronda 3"
+        localization(selectedLanguageCode = "es").translate("ui.banner.round", mapOf("round" to "3")) shouldBe "Ronda 3"
     }
 
     @Test
     fun `Translate should leave a placeholder as it is when it has no argument`() {
-        localization().translate("ui.battleInfo.round", mapOf("turn" to "3")) shouldBe "Round {round}"
+        localization().translate("ui.banner.round", mapOf("turn" to "3")) shouldBe "Round {round}"
     }
 
     @Test

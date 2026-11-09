@@ -37,5 +37,5 @@ object GoldButtonViewStories : StoryBinding {
     override fun render(
         args: Args,
         context: StoryContext,
-    ): View = GoldButtonView(onSelected = { context.action("onSelected") }).apply { display(context.texts.gold(args.int(GOLD)), isFaded = args.boolean(FADED)) }
+    ): View = GoldButtonView(onSelected = { context.action("onSelected") }).apply { display(context.messages.gold(args.int(GOLD)), isFaded = args.boolean(FADED)) }
 }

@@ -5,7 +5,7 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.party.usecases.queries.SearchParty
 
 /** The tiles the camera shows on each axis, as the battlefield view does (`BattlefieldView.VISIBLE_TILES`). */
-const val VIEW_TILES = 6
+const val VISIBLE_TILES = 6
 
 /** The tiles around the ones the camera can show where the battle units are still in sight, as they may step into view. */
 const val SIGHT_MARGIN = 1
@@ -13,7 +13,7 @@ const val SIGHT_MARGIN = 1
 /**
  * Whether the battle unit stands where the player may see it: around the party leader, on the tiles the camera can show,
  * and [SIGHT_MARGIN] tiles around them. The camera keeps the leader in its 2x2 centre, so on each axis it shows from
- * `VIEW_TILES / 2` tiles before to `VIEW_TILES / 2` tiles after the leader. Near a border, the camera stops scrolling, so
+ * `VISIBLE_TILES / 2` tiles before to `VISIBLE_TILES / 2` tiles after the leader. Near a border, the camera stops scrolling, so
  * the area shifts to stay inside the battlefield.
  *
  * It is not without a party leader, or when either of them is not on the battlefield.
@@ -37,8 +37,8 @@ class IsInSight(
         leaderTile: Int,
         tiles: Int,
     ): Boolean {
-        val sightTiles = VIEW_TILES + 1
-        val firstTile = (leaderTile - VIEW_TILES / 2).coerceAtMost(tiles - sightTiles).coerceAtLeast(0)
+        val sightTiles = VISIBLE_TILES + 1
+        val firstTile = (leaderTile - VISIBLE_TILES / 2).coerceAtMost(tiles - sightTiles).coerceAtLeast(0)
         return tile in (firstTile - SIGHT_MARGIN)..(firstTile + sightTiles - 1 + SIGHT_MARGIN)
     }
 }

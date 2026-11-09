@@ -1,10 +1,10 @@
 # Presentation timeline
 
-The game resolves its events instantly: a whole CPU turn, with every move and cast, is played within a single frame. The battle scene replays those events in order, at a pace the player can follow, through the [`BattleSceneTimeline`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/BattleSceneTimeline.kt).
+The game resolves its events instantly: a whole CPU turn, with every move and cast, is played within a single frame. The game screen replays those events in order, at a pace the player can follow, through the [`GameSceneTimeline`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/GameSceneTimeline.kt).
 
 ## How it works
 
-- `BattleScene` creates a single timeline and passes it to every presenter.
+- `GameScene` creates a single timeline and passes it to every presenter.
 - Presenters never draw an event straight away. They add a **step** to the timeline with `play { ... }`.
 - The timeline plays its steps one after another, in the order they are added. A step may take time, e.g.: a battle unit walking tile by tile. The following steps wait for it to finish.
 - When the timeline is idle, a new step starts straight away, so instant steps (e.g.: hiding the HUD) are displayed as soon as their event arrives.
@@ -16,20 +16,20 @@ For example, when the CPU moves two rats and the turn passes back to the human p
 |------------------------------------|-----------------------------------------------------|
 | `BattleUnitMoved` (first rat)      | The first rat walks its path                        |
 | `BattleUnitMoved` (second rat)     | Then, the second rat walks its path                 |
-| `PlayerTurnStarted` (human player) | Then, the battle info displays the human player turn |
+| `PlayerTurnStarted` (human player) | Then, the banner displays the human player turn |
 
-The timeline plays its steps on the scene coroutines, which `BattleScene` runs on the game window event loop, like the frames. Hence, the views are only changed from that loop. KorGE does so when running the game, but not in the headless tests (`ViewsForTesting`), which would otherwise play the steps on `Dispatchers.Default` while the frames are rendered, making the end-to-end tests flaky.
+The timeline plays its steps on the scene coroutines, which `GameScene` runs on the game window event loop, like the frames. Hence, the views are only changed from that loop. KorGE does so when running the game, but not in the headless tests (`ViewsForTesting`), which would otherwise play the steps on `Dispatchers.Default` while the frames are rendered, making the end-to-end tests flaky.
 
 ## Rules
 
 - Presenters MUST read what a step needs when its event arrives, and only draw it inside the step. By the time the step is played, the battle may have moved on, e.g.: a battle unit that walks is defeated later in the same CPU turn, so it can no longer be found.
 - Every visual change caused by a battle event MUST go through the timeline, so the scene never displays a later state before an earlier one.
 - The player MUST NOT act while the timeline is playing (`isPlaying`): selecting tiles or abilities, cancelling or confirming a cast, finishing the turn and walking the party while exploring are ignored. The scene still displays a past state of the battle meanwhile. The virtual pad is the exception: its last press is kept, and acted on once the timeline is idle (see [Exploration](exploration.md#walking)).
-- The finish turn button shows it: [`FinishTurnPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/FinishTurnPresenter.kt) displays it during the battles only, from `BattleStarted` to `BattleFinishedWithoutWinner`, as there are no turns while exploring. It keeps it disabled (faded, see [Buttons](buttons.md)) unless the scene displays a human player turn and the timeline is idle. It listens to `onPlayingChanged` to enable it again as soon as the timeline stops playing, and disables it as soon as it is clicked.
+- The finish turn button shows it: [`FinishPlayerTurnPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/FinishPlayerTurnPresenter.kt) displays it during the battles only, from `BattleStarted` to `BattleFinishedWithoutWinner`, as there are no turns while exploring. It keeps it disabled (faded, see [Buttons](buttons.md)) unless the scene displays a human player turn and the timeline is idle. It listens to `onPlayingChanged` to enable it again as soon as the timeline stops playing, and disables it as soon as it is clicked.
 
 ## Announcing a quest
 
-`QuestPresenter` turns `QuestStarted` and `QuestCompleted` of any quest into a step of the timeline, which draws the tracker for the main quest and adds a [toast](quests.md#the-announcements) to a queue. The queue plays with `playAlongside`, one toast at a time, so **it never holds the timeline**: the party walks and the battle ends under it. A toast still appears once the timeline reaches its event, so it never announces a later state before an earlier one is displayed.
+`QuestPresenter` turns `QuestStarted` and `QuestCompleted` of any quest into a step of the timeline, which draws the tracker for the main quest and adds an [announcement](quests.md#the-announcements) to a queue. The queue plays with `playAlongside`, one announcement at a time, so **it never holds the timeline**: the party walks and the battle ends under it. A announcement still appears once the timeline reaches its event, so it never announces a later state before an earlier one is displayed.
 
 The tracker's pop when a task changes does the same: the step draws it and plays `pop` with `playAlongside`. A last defeat publishes `DefeatCounted`, `TaskCompleted` and `QuestCompleted` in one chain of events, each read when it arrives: the first two find the quest completed and draw nothing, as the third one announces it.
 
@@ -37,10 +37,10 @@ The tracker's pop when a task changes does the same: the step draws it and plays
 
 When a player turn starts, two animations play together, in the colour of the player turn: blue (`HUMAN_TURN_COLOR`, `#0084FF`) for the human player and red (`CPU_TURN_COLOR`, `#E03C28`) for the CPU player. Both colours are part of the FamiCube palette.
 
-- `BattleInfoView.announceTurn` displays the turn in the header with the turn colour, and pops it: it grows to `POP_SCALE` (1.3) and shrinks back within `POP_DURATION` (400ms). The round pops as well when it has changed, including the first turn of the battle.
+- `BannerView.announcePlayerTurn` displays the turn in the banner with the turn colour, and pops it: it grows to `POP_SCALE` (1.3) and shrinks back within `POP_DURATION` (400ms). The round pops as well when it has changed, including the first turn of the battle.
 - `BattlefieldView.tint` covers the visible battlefield with the turn colour, fading it up to `TINT_ALPHA` (0.4) and back within `TINT_DURATION` (500ms). The camera does not move.
 
-`BattleInfoPresenter` plays both in a single step and waits for both, so the effects applied at the start of the turn and the CPU actions are displayed afterwards. The player can not act until the turn has been announced.
+`BannerPresenter` plays both in a single step and waits for both, so the effects applied at the start of the turn and the CPU actions are displayed afterwards. The player can not act until the turn has been announced.
 
 ## Moving battle units
 
@@ -65,22 +65,22 @@ A battle unit blinks in white every time an effect is applied to it:
 
 While exploring, the flash of an `EffectReceived` is played alongside the timeline (`playAlongside`), as the CPU battle units wander, so it never holds the party. Played in the timeline, the terrain effects of three battle units standing on water flashed for 1440ms every second, so the timeline was never idle, and the party never walked again. A flash stops as soon as its battle unit leaves its tile (`removeBattleUnit`, e.g.: a step or a swap), so it never blinks over an empty tile, or over the follower stepping on it. In a battle, every flash is still played in the timeline.
 
-While exploring, a battle unit whose health changes (`BattleUnitDamaged`, `BattleUnitHealed`, e.g.: standing on lava or water, or drinking a potion) also displays its health over its tile, alongside the timeline, so the player sees what the effect does. `BattlefieldView.flashHealth` draws the health bar of the attack preview (`BattlefieldHealthBarPreviewView`, in thirds of its maximum health) with the health left, on its own `HEALTH_FLASH` layer, so the selection of the tile is kept. It lasts 1.5s (`HEALTH_FLASH_DURATION`): the third left blinks as long as the battle unit flashes, then stays still, and the bar fades out in its last 200ms. The next health change on the tile replaces it, for 1.5s again, so standing on lava it never goes away. It follows its battle unit when it moves (a step, a swap, a wander), gliding with it, unless its destination displays a newer one, and is removed when the battle unit is removed from its tile (e.g.: defeated), and when a battle starts (`ExplorationInterrupted`). A heal at full health displays the bar full. In a battle, the health changes only flash.
+While exploring, a battle unit whose health changes (`BattleUnitDamaged`, `BattleUnitHealed`, e.g.: standing on lava or water, or drinking a potion) also displays its health over its tile, alongside the timeline, so the player sees what the effect does. `BattlefieldView.flashHealth` draws the health bar of the cast preview (`BattlefieldHealthBarPreviewView`, in thirds of its maximum health) with the health left, on its own `HEALTH_FLASH` layer, so the selection of the tile is kept. It lasts 1.5s (`HEALTH_FLASH_DURATION`): the third left blinks as long as the battle unit flashes, then stays still, and the bar fades out in its last 200ms. The next health change on the tile replaces it, for 1.5s again, so standing on lava it never goes away. It follows its battle unit when it moves (a step, a swap, a wander), gliding with it, unless its destination displays a newer one, and is removed when the battle unit is removed from its tile (e.g.: defeated), and when a battle starts (`ExplorationInterrupted`). A heal at full health displays the bar full. In a battle, the health changes only flash.
 
 ## Selecting tiles
 
-Each battlefield tile draws its content as named layers, from bottom to top: `TERRAIN`, `LOOT` (the dropped items, see [Loot](#loot)), `BATTLE_UNIT`, `SELECTION` (the tile frames) and `DIM`.
+Each battlefield tile draws its content as named layers, from bottom to top: `TERRAIN`, `DROPPED_ITEMS` (see [Dropped items](#dropped-items)), `BATTLE_UNIT`, `SELECTION` (the tile frames) and `DIM`.
 
 When the player selects a battle unit or an ability, the tiles that can be selected keep their frames, and every other tile is darkened with a black mask (`DIM`, at `DIM_ALPHA` 0.4 opacity) by `BattlefieldView.dimTilesExcept`, including the battle units on them:
 
 | Selection   | Tiles that are not darkened                              |
 |-------------|----------------------------------------------------------|
-| Battle unit | Its movement range and the selected battle unit tile      |
+| Battle unit | Its walking range and the selected battle unit tile      |
 | Ability     | Every tile where it can be cast and the caster tile       |
 
 `BattlefieldView.resetTiles` removes the frames and the mask, e.g.: when the selection is cleared or a battle unit moves.
 
-The movement range of the selected battle unit is refreshed (`RefreshMovementRange`) whenever it may change: when a tile is occupied (`TileOccupied`, e.g.: a battle unit moved or deployed) or an occupant removed (`OccupantRemoved`, e.g.: a battle unit defeated), and when a cast has been resolved. A cast resolves before its consequences reach the battlefield (e.g.: the deployed bee, or the defeated enemy leaving its tile), so refreshing on the occupancy changes is what keeps the range right.
+The walking range of the selected battle unit is refreshed (`RefreshWalkingRange`) whenever it may change: when a tile is occupied (`TileOccupied`, e.g.: a battle unit moved or deployed) or an occupant removed (`OccupantRemoved`, e.g.: a battle unit defeated), and when a cast has been resolved. A cast resolves before its consequences reach the battlefield (e.g.: the deployed bee, or the defeated enemy leaving its tile), so refreshing on the occupancy changes is what keeps the range right.
 
 When a turn starts, the selection is cleared (`DeselectBattleUnit`), so a selection from a previous turn can not be acted on.
 
@@ -91,14 +91,14 @@ The selected battle unit stays selected while the player casts an ability with i
 - Selecting an ability collapses the header of the battle unit info to a strip of what a cast spends (the portrait,
   health, mana, steps and casts), and the ability buttons and the ability info slide up
   under it in 150ms (`BattleUnitInfoView.FOCUS_DURATION`), outside the timeline, as a view's own animation.
-- Choosing where to cast previews it as a forecast ([`AttackPreviewView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/AttackPreviewView.kt)):
+- Choosing where to cast previews it as a forecast ([`CastPreviewView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/CastPreviewView.kt)):
   the ability and its caster on a line, with the mana it spends (e.g.: `Mushroom`, `by Mage`, `-10 mana`), then a row
   per battle unit the cast changes: the caster first, only when the cast changes its health or effects (e.g.: a heal),
   then the receivers. Each row tells the change of health, large, red for a loss (`-12`) and green for a gain (`+5`),
   the health from before to after (`30 → 18`), and `KO` when it would be left with no health. A cast reaches at most
   the caster and its 4 adjacent tiles, so the rows are all in sight, with no scroll.
 
-- Confirming the cast keeps the preview displayed while the cast is played, e.g.: the target blinking. Once the cast has been resolved (`AbilityCastResolved`), the caster is displayed selected again, with its movement range read after the cast (e.g.: its mana spent, or its new tile when teleported).
+- Confirming the cast keeps the preview displayed while the cast is played, e.g.: the target blinking. Once the cast has been resolved (`AbilityCastResolved`), the caster is displayed selected again, with its walking range read after the cast (e.g.: its mana spent, or its new tile when teleported).
 - Cancelling the cast goes back to choosing where to cast the same ability.
 
 ## Remaining actions
@@ -107,14 +107,14 @@ The selected battle unit info displays its remaining actions without text, with 
 
 | Points | Colour (FamiCube palette) | Maximum                          |
 |--------|---------------------------|----------------------------------|
-| Steps  | White `#FFFFFF`           | The unit movement range          |
+| Steps  | White `#FFFFFF`           | The battle unit maximum steps          |
 | Casts  | Gold `#FFBB31`            | The casts per turn (currently 1) |
 
 For example, a knight that walked 1 of its 3 steps and has not cast yet displays ▬▬▭ ▬. Both maximums come from the battle unit (`RemainingActionsDto`).
 
-## Loot
+## Dropped items
 
-The items lying on a tile are drawn on its `LOOT` layer by `BattlefieldView.displayLoot`, at 2x (32px) centred on the tile, so the terrain shows around them and a battle unit standing on the tile is drawn over them:
+The items lying on a tile are drawn on its `DROPPED_ITEMS` layer by `BattlefieldView.displayDroppedItems`, at 2x (32px) centred on the tile, so the terrain shows around them and a battle unit standing on the tile is drawn over them:
 
 | Items on the tile | Drawn as                              |
 |-------------------|---------------------------------------|
@@ -131,7 +131,7 @@ The items lying on a tile are drawn on its `LOOT` layer by `BattlefieldView.disp
 
 ## Inventory
 
-The selected battle unit info displays a bag (the chest icon) next to its abilities, only for the battle units of the human player. Clicking it opens the inventory of the battle unit in the HUD, instead of its info, through [`InventoryPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/InventoryPresenter.kt):
+The selected battle unit info displays the inventory button (the chest icon) next to its abilities, only for the battle units of the human player. Clicking it opens the inventory of the battle unit in the HUD, instead of its info, through [`InventoryPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/InventoryPresenter.kt):
 
 - [`InventoryView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/InventoryView.kt) displays one slot per storage space (12, in 2 rows of 6), with the stored items in order and the equipped copy of each equipped item framed in gold (`#FFBB31`).
 - Its title line reads `Inventory` and the gold in a battle. While exploring, it names the party member between the arrows that switch to the previous or next member instead (see [Inventory while exploring](exploration.md#inventory)): the presenter selects that member on the battlefield, and opens its inventory once its selection has displayed its info.
@@ -157,14 +157,14 @@ The selected battle unit info displays a bag (the chest icon) next to its abilit
 While exploring, the gold button opens [`GiveGoldView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/GiveGoldView.kt) in the HUD instead of the inventory, and the call to action displays Cancel, All and Give (`displayGiveGold`), as tall as the finish turn, so the panel keeps the height of the HUD.
 
 - The slider follows the finger on its own, and only `updateGiveGold` writes the amount on Give, as displaying the panel again would end the drag. Anything else that changes the panel (All, a receiver chosen, a reward) displays it again.
-- Give only acts while the timeline is idle, as Cancel does. `GoldGiven` displays the bag again in timeline order, redrawn with the new gold, and `GoldReceived` flashes the receiver alongside the timeline, so the next give can start straight away.
-- Taking the bag off the stage ends no swipe, so the inventory ignores a swipe that started before it was last displayed: the tap on the gold button would otherwise end as a swipe on the tap on Give.
+- Give only acts while the timeline is idle, as Cancel does. `GoldGiven` displays the inventory again in timeline order, redrawn with the new gold, and `GoldReceived` flashes the receiver alongside the timeline, so the next give can start straight away.
+- Taking the inventory off the stage ends no swipe, so the inventory ignores a swipe that started before it was last displayed: the tap on the gold button would otherwise end as a swipe on the tap on Give.
 
 ### The panels and their row
 
-The panels that take the place of the pad (the quests, the save slots, a question, the formation, the shop and the merchant's dialog) keep their buttons in the [action row](buttons.md#the-action-row) of the call to action. Their presenters display it while the panel is displayed, in timeline order, and each tap only acts while the timeline is idle, as the panel's own taps do.
+The panels that take the place of the pad (the quests, the save slots, a question, the formation, the shop and the merchant's talk panel) keep their buttons in the [button row](buttons.md#the-button-row) of the call to action. Their presenters display it while the panel is displayed, in timeline order, and each tap only acts while the timeline is idle, as the panel's own taps do.
 
-`ExplorationPresenter` clears it: displaying or hiding the pad calls `hideActions()`, as does `PlayerVictory`, so a battle starting never leaves an old Back on the screen, and Finish turn is displayed again when the battle has one. `hideActions()` removes only the row, so the step waiting for the player to choose with an inventory full is not disturbed.
+`ExplorationPresenter` clears it: displaying or hiding the pad calls `hideButtons()`, as does `PlayerVictory`, so a battle starting never leaves an old Back on the screen, and Finish turn is displayed again when the battle has one. `hideButtons()` removes only the row, so the step waiting for the player to choose with an inventory full is not disturbed.
 
 ### Inventory full
 

@@ -121,7 +121,7 @@ class LootDroppedItemsAcceptanceTest {
         }
 
     @Test
-    fun `should store a dropped reward item and clear its tile when the knight walks back onto it with space in its bag`() =
+    fun `should store a dropped reward item and clear its tile when the knight walks back onto it with storage space left in its inventory`() =
         scenarioTest(::setUp) {
             // Given
             eventBus.publish(RequestGrantReward(playerOneKnightBattleUnitId, gold = 0, lootableItemIds = List(13) { "health-potion" }, row = 2, column = 1))

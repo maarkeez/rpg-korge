@@ -34,5 +34,5 @@ object GiveItemViewStories : StoryBinding {
     override fun render(
         args: Args,
         context: StoryContext,
-    ): View = GiveItemView(context.texts, itemName = args.text(ITEM_NAME), onCancelled = { context.action("onCancelled") })
+    ): View = GiveItemView(context.messages, itemName = args.text(ITEM_NAME), onCancelled = { context.action("onCancelled") })
 }

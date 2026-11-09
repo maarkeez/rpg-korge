@@ -1,7 +1,7 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.ConfirmDialogView
-import com.mkz.rpg.screen.adapters.presentation.UiText
+import com.mkz.rpg.screen.adapters.presentation.UiMessage
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
@@ -15,12 +15,12 @@ object ConfirmDialogViewStories : StoryBinding {
 
     // The questions the game asks.
     private enum class Question(
-        val message: UiText,
+        val message: UiMessage,
     ) {
-        QUIT(UiText.PAUSE_QUIT_CONFIRMATION),
-        OVERWRITE(UiText.SAVE_SLOTS_OVERWRITE_CONFIRMATION),
-        DELETE(UiText.SAVE_SLOTS_DELETE_CONFIRMATION),
-        ABANDON(UiText.QUEST_ABANDON_QUESTION),
+        QUIT(UiMessage.PAUSE_QUIT_CONFIRMATION),
+        OVERWRITE(UiMessage.SAVE_SLOTS_OVERWRITE_CONFIRMATION),
+        DELETE(UiMessage.SAVE_SLOTS_DELETE_CONFIRMATION),
+        ABANDON(UiMessage.QUEST_ABANDON_QUESTION),
     }
 
     private val delete =
@@ -71,6 +71,6 @@ object ConfirmDialogViewStories : StoryBinding {
         context: StoryContext,
     ): View {
         val question = Question.valueOf(args.text(QUESTION).uppercase())
-        return ConfirmDialogView().apply { display(context.texts[question.message, "slot" to 2, "quest" to QUEST_NAME]) }
+        return ConfirmDialogView().apply { display(context.messages[question.message, "slot" to 2, "quest" to QUEST_NAME]) }
     }
 }

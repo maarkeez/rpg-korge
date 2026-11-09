@@ -75,7 +75,7 @@ Play the game as in any end-to-end test, and call `takeSnapshot` at the step to 
 
 ```kotlin
 @Test
-fun `should take a snapshot of the battle scene when the knight is selected`() =
+fun `should take a snapshot of the game screen when the knight is selected`() =
     viewsTest {
         startApp()
         waitUntil { battlefieldView()?.hasBattleUnitAt(6, 6) == true && canHumanPlayerAct() }
@@ -100,7 +100,7 @@ Delete the test class once you have the snapshots. The snapshots stay in `build/
 
 ## Verify
 
-Open `build/snapshots/knight-selected.png`. It is a 390x844 image of the battle scene, as in the game: the dark background, the battle info, the battlefield with the knight selected and its movement range, and the knight info.
+Open `build/snapshots/knight-selected.png`. It is a 390x844 image of the game screen, as in the game: the dark background, the banner, the battlefield with the knight selected and its walking range, and the knight info.
 
 ## Troubleshooting
 

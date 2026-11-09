@@ -3,20 +3,20 @@ package com.mkz.rpg.screen.adapters.presentation
 object BattleUnitInfoMother {
     fun battleUnitInfo(
         unitId: String = "knight",
-        remainingHealthPoints: Int = 20,
-        maximumHealthPoints: Int = 20,
-        remainingManaPoints: Int = 10,
-        maximumManaPoints: Int = 10,
+        remainingHealth: Int = 20,
+        maximumHealth: Int = 20,
+        remainingMana: Int = 10,
+        maximumMana: Int = 10,
         effectIds: List<String> = emptyList(),
-        isAlly: Boolean = true,
+        isHumanPlayers: Boolean = true,
     ) = BattleUnitInfo(
         unitId = unitId,
-        remainingHealthPoints = remainingHealthPoints,
-        maximumHealthPoints = maximumHealthPoints,
-        remainingManaPoints = remainingManaPoints,
-        maximumManaPoints = maximumManaPoints,
+        remainingHealth = remainingHealth,
+        maximumHealth = maximumHealth,
+        remainingMana = remainingMana,
+        maximumMana = maximumMana,
         effectIds = effectIds,
-        isAlly = isAlly,
+        isHumanPlayers = isHumanPlayers,
     )
 
     fun turnActions(

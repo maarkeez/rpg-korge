@@ -16,7 +16,7 @@ class TranslateTest {
         // Given
         localizationRepository.save(localization(selectedLanguageCode = "es"))
         // When
-        val text = translate("ui.battleInfo.round", mapOf("round" to "2"))
+        val text = translate("ui.banner.round", mapOf("round" to "2"))
         // Then
         text shouldBe "Ronda 2"
     }

@@ -44,7 +44,7 @@ object PauseViewStories : StoryBinding {
         args: Args,
         context: StoryContext,
     ): View =
-        PauseView(context.texts).apply {
+        PauseView(context.messages).apply {
             setDelegate(
                 object : PauseView.Delegate {
                     override fun pauseResumeSelected() = context.action("pauseResumeSelected")

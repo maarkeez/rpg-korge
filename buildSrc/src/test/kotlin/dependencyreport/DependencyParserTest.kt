@@ -77,7 +77,7 @@ class DependencyParserTest {
         // Given
         val hudFile =
             kotlinFile(
-                "$BASE_PACKAGE.screen.adapters.presentation.battlefieldHud.usecases.commands",
+                "$BASE_PACKAGE.screen.adapters.presentation.selection.usecases.commands",
                 imports = listOf("$BASE_PACKAGE.screen.adapters.presentation.BattlefieldView", "$BASE_PACKAGE.battle.usecases.queries.SearchBattle"),
             )
         val screenFile = subdomainFile("screen", layer = "adapters")

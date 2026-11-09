@@ -51,13 +51,13 @@ object QuestTrackerViewStories : StoryBinding {
         args: Args,
         context: StoryContext,
     ): View =
-        QuestTrackerView(context.texts).apply {
+        QuestTrackerView(context.messages).apply {
             setDelegate(
                 object : QuestTrackerView.Delegate {
                     override fun questTrackerSelected() = context.action("questTrackerSelected")
                 },
             )
             setTappable(args.boolean(TAPPABLE))
-            display(QuestSample.valueOf(args.text(QUEST)).quest(context.texts))
+            display(QuestSample.valueOf(args.text(QUEST)).quest(context.messages))
         }
 }

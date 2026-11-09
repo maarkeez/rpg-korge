@@ -10,10 +10,10 @@ import kotlin.test.Test
 class MenuViewTest : ViewsForTesting() {
     private val selections = mutableListOf<String>()
 
-    private val texts = TextsMother.texts()
+    private val messages = MessagesMother.messages()
 
     private fun newMenuView() =
-        MenuView(texts, onNewGameSelected = { selections += "new game" }, onLoadGameSelected = { selections += "load game" }, onWorldBuilderSelected = { selections += "world builder" })
+        MenuView(messages, onNewGameSelected = { selections += "new game" }, onLoadGameSelected = { selections += "load game" }, onWorldBuilderSelected = { selections += "world builder" })
 
     @Test
     fun `MenuView should display playing a new game, building a world and the language when it is displayed`() =
@@ -58,7 +58,7 @@ class MenuViewTest : ViewsForTesting() {
             menuView.languageLabel() shouldBe "Idioma"
             menuView.areOptionsShown() shouldBe true
             menuView.areLanguagesShown() shouldBe false
-            texts[UiText.BATTLE_INFO_EXPLORING] shouldBe "Explorando"
+            messages[UiMessage.BANNER_EXPLORING] shouldBe "Explorando"
         }
 
     @Test
@@ -74,7 +74,7 @@ class MenuViewTest : ViewsForTesting() {
             pickLanguage(menuView, "English")
             // Then
             menuView.playNewGameLabel() shouldBe "Play new game"
-            texts[UiText.BATTLE_INFO_EXPLORING] shouldBe "Exploring"
+            messages[UiMessage.BANNER_EXPLORING] shouldBe "Exploring"
         }
 
     @Test

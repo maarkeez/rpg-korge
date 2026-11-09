@@ -10,13 +10,13 @@ import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumableLootableItem
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
-import com.mkz.rpg.screen.adapters.presentation.FakeBattleHudView.Display
+import com.mkz.rpg.screen.adapters.presentation.FakeHudView.Display
+import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.gameSceneTimeline
+import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.playLongStep
 import com.mkz.rpg.screen.adapters.presentation.InventoryView.Owner
 import com.mkz.rpg.screen.adapters.presentation.InventoryView.Slot
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
+import com.mkz.rpg.screen.adapters.presentation.selection.domain.Selection.Dto.TileDto
+import com.mkz.rpg.screen.adapters.presentation.selection.domain.SelectionEvent
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
 import com.mkz.rpg.unit.domain.UnitMother.unit
@@ -58,11 +58,11 @@ class InventoryPresenterSwitchTest {
     private val eventBus = apis.eventBus
     private val inventoryView = FakeInventoryView()
     private val battleUnitInfoView = FakeBattleUnitInfoView()
-    private val battleHudView = FakeBattleHudView()
-    private val playerCallToActionView = FakePlayerCallToActionView()
-    private val timeline = battleSceneTimeline()
+    private val hudView = FakeHudView()
+    private val callToActionView = FakeCallToActionView()
+    private val timeline = gameSceneTimeline()
 
-    // The battle units the inventory selects on the battlefield, as the battlefield HUD would.
+    // The battle units the inventory selects on the battlefield, as the selection would.
     private val selectedBattleUnitIds = mutableListOf<String>()
 
     private val inventoryPresenter =
@@ -70,8 +70,8 @@ class InventoryPresenterSwitchTest {
             inventoryView = inventoryView,
             giveGoldView = FakeGiveGoldView(),
             battleUnitInfoView = battleUnitInfoView,
-            battleHudView = battleHudView,
-            playerCallToActionView = playerCallToActionView,
+            hudView = hudView,
+            callToActionView = callToActionView,
             inventoryApi = apis.inventoryApi,
             lootableItemApi = apis.lootableItemApi,
             battleUnitApi = apis.battleUnitApi,
@@ -80,14 +80,14 @@ class InventoryPresenterSwitchTest {
             partyApi = apis.partyApi,
             battlefieldApi = apis.battlefieldApi,
             battlefieldView = FakeBattlefieldView(),
-            texts = TextsMother.texts(),
+            messages = MessagesMother.messages(),
             timeline = timeline,
             eventBus = eventBus,
         ).apply {
             setBattleUnitSelector { battleUnitId ->
                 selectedBattleUnitIds += battleUnitId
                 val position = apis.battlefieldApi.searchPosition(battleUnitId).shouldNotBeNull()
-                eventBus.publish(BattlefieldHudEvent.SelectedBattleUnit(tile = TileDto(position.row, position.column), battleUnitId = battleUnitId, tilesWhereCanBeMoved = emptySet()))
+                eventBus.publish(SelectionEvent.BattleUnitSelected(tile = TileDto(position.row, position.column), battleUnitId = battleUnitId, walkingRange = emptySet()))
             }
         }
 
@@ -102,12 +102,12 @@ class InventoryPresenterSwitchTest {
         eventBus.dispatch()
     }
 
-    // The player taps the tile of the battle unit and opens its bag.
+    // The player taps the tile of the battle unit and opens its inventory.
     private fun openInventoryOf(battleUnitId: String) {
         val position = apis.battlefieldApi.searchPosition(battleUnitId).shouldNotBeNull()
-        eventBus.publish(BattlefieldHudEvent.SelectedBattleUnit(tile = TileDto(position.row, position.column), battleUnitId = battleUnitId, tilesWhereCanBeMoved = emptySet()))
+        eventBus.publish(SelectionEvent.BattleUnitSelected(tile = TileDto(position.row, position.column), battleUnitId = battleUnitId, walkingRange = emptySet()))
         eventBus.dispatch()
-        battleUnitInfoView.onBagSelected.shouldNotBeNull().invoke()
+        battleUnitInfoView.onInventoryButtonSelected.shouldNotBeNull().invoke()
         eventBus.dispatch()
     }
 
@@ -123,7 +123,7 @@ class InventoryPresenterSwitchTest {
         openInventoryOf("knight-1")
         // Then
         selectedBattleUnitIds.shouldBeEmpty()
-        battleHudView.displays.last() shouldBe Display.INVENTORY
+        hudView.displays.last() shouldBe Display.INVENTORY
     }
 
     @Test
@@ -140,7 +140,7 @@ class InventoryPresenterSwitchTest {
         // Given
         loot("viking-1", "health-potion")
         openInventoryOf("knight-1")
-        battleHudView.displays.clear()
+        hudView.displays.clear()
         // When
         step(1)
         // Then
@@ -148,7 +148,7 @@ class InventoryPresenterSwitchTest {
         inventoryView.displayedSlots.last().shouldContainExactly(Slot("health-potion", isEquipped = false))
         inventoryView.displayedGold shouldBe 30
         inventoryView.displayedOwner shouldBe Owner(name = "Viking", partyIndex = 1, partySize = 3, canGiveGold = true)
-        battleHudView.displays.last() shouldBe Display.INVENTORY
+        hudView.displays.last() shouldBe Display.INVENTORY
     }
 
     @Test
@@ -191,7 +191,7 @@ class InventoryPresenterSwitchTest {
         openInventoryOf("knight-1")
         inventoryView.delegate.shouldNotBeNull().slotSelected(0)
         eventBus.dispatch()
-        playerCallToActionView.displayedItemActions
+        callToActionView.displayedItemButtons
             .shouldNotBeNull()
             .actions
             .single { action -> action.label == "Give" }
@@ -204,18 +204,18 @@ class InventoryPresenterSwitchTest {
     }
 
     @Test
-    fun `SelectedBattleUnit should display the info of a party member selected on its tile once the inventory has switched`() {
+    fun `BattleUnitSelected should display the info of a party member selected on its tile once the inventory has switched`() {
         // Given
         openInventoryOf("knight-1")
         step(1)
-        battleHudView.displays.clear()
+        hudView.displays.clear()
         val displayCount = inventoryView.displayedSlots.size
         // When
         val mageTile = apis.battlefieldApi.searchPosition("mage-1").shouldNotBeNull()
-        eventBus.publish(BattlefieldHudEvent.SelectedBattleUnit(tile = TileDto(mageTile.row, mageTile.column), battleUnitId = "mage-1", tilesWhereCanBeMoved = emptySet()))
+        eventBus.publish(SelectionEvent.BattleUnitSelected(tile = TileDto(mageTile.row, mageTile.column), battleUnitId = "mage-1", walkingRange = emptySet()))
         eventBus.dispatch()
         // Then
-        battleHudView.displays.shouldBeEmpty()
+        hudView.displays.shouldBeEmpty()
         inventoryView.displayedSlots.size shouldBe displayCount
     }
 }

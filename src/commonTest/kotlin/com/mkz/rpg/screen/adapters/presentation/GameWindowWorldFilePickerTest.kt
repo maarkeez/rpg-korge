@@ -40,7 +40,7 @@ class GameWindowWorldFilePickerTest {
             // Given
             val gameWindow = FakeFileDialogGameWindow(listOf(files["world.toml"]))
             // When
-            val picker = GameWindowWorldFilePicker(gameWindow, TextsMother.texts())
+            val picker = GameWindowWorldFilePicker(gameWindow, MessagesMother.messages())
             val text = picker.pickWorld()
             // Then
             text shouldBe "tiles = [[\"sand\"]]"
@@ -53,7 +53,7 @@ class GameWindowWorldFilePickerTest {
             // Given
             val gameWindow = FakeFileDialogGameWindow(emptyList())
             // When
-            val text = GameWindowWorldFilePicker(gameWindow, TextsMother.texts()).pickWorld()
+            val text = GameWindowWorldFilePicker(gameWindow, MessagesMother.messages()).pickWorld()
             // Then
             text shouldBe null
         }
@@ -64,7 +64,7 @@ class GameWindowWorldFilePickerTest {
             // Given
             val gameWindow = FakeFileDialogGameWindow(listOf(files["missing.toml"]))
             // When
-            val picking = suspend { GameWindowWorldFilePicker(gameWindow, TextsMother.texts()).pickWorld() }
+            val picking = suspend { GameWindowWorldFilePicker(gameWindow, MessagesMother.messages()).pickWorld() }
             // Then
             shouldThrow<Exception> { picking() }
         }

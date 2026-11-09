@@ -12,7 +12,7 @@ import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
 
 /**
- * The gold of a party member on the title line of the bag while exploring, looking like the buttons next to it, so the
+ * The gold of a party member on the title line of the inventory while exploring, looking like the buttons next to it, so the
  * player expects to tap it to give gold. A faded one can not give any, but can still be tapped, to read why.
  */
 class GoldButtonView(

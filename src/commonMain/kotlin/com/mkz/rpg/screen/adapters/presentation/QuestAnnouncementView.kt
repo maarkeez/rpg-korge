@@ -23,12 +23,12 @@ import korlibs.time.milliseconds
 import korlibs.time.seconds
 
 /**
- * A toast over the top of the battlefield, announcing that a quest started, with its goal, or completed, with its reward.
+ * A announcement over the top of the battlefield, announcing that a quest started, with its goal, or completed, with its reward.
  * It fades by itself and takes no taps, so whatever is under it can be pressed.
  */
 open class QuestAnnouncementView(
-    private val resourcesLoader: BattleSceneResourcesLoader,
-    private val texts: Texts,
+    private val resourcesLoader: GameSceneResourcesLoader,
+    private val messages: Messages,
 ) : UIContainer(Size(SCREEN_WIDTH, SCREEN_HEIGHT)) {
     companion object {
         const val SCREEN_WIDTH = 390.0
@@ -37,11 +37,11 @@ open class QuestAnnouncementView(
         val HOLD_DURATION = 4.seconds
         val FADE_DURATION = 500.milliseconds
 
-        private const val TOAST_X = 12.0
-        private const val TOAST_Y = 54.0
-        private const val TOAST_WIDTH = 366.0
-        private const val TOAST_HEIGHT = 76.0
-        private const val TOAST_RADIUS = 12.0
+        private const val ANNOUNCEMENT_X = 12.0
+        private const val ANNOUNCEMENT_Y = 54.0
+        private const val ANNOUNCEMENT_WIDTH = 366.0
+        private const val ANNOUNCEMENT_HEIGHT = 76.0
+        private const val ANNOUNCEMENT_RADIUS = 12.0
         private const val TARGET_X = 10.0
         private const val TARGET_Y = 10.0
         private const val TARGET_SIZE = 56.0
@@ -72,7 +72,7 @@ open class QuestAnnouncementView(
         visible = false
     }
 
-    /** Draws the toast, holds it and fades it, hiding it once it has faded. */
+    /** Draws the announcement, holds it and fades it, hiding it once it has faded. */
     open suspend fun announce(
         moment: Moment,
         quest: QuestInfo,
@@ -87,7 +87,7 @@ open class QuestAnnouncementView(
         visible = false
     }
 
-    /** Draws the toast and shows it, held for as long as it is looked at. */
+    /** Draws the announcement and shows it, held for as long as it is looked at. */
     fun display(
         moment: Moment,
         quest: QuestInfo,
@@ -95,8 +95,8 @@ open class QuestAnnouncementView(
         removeChildren()
         val isCompleted = moment == Moment.COMPLETED
         container {
-            xy(TOAST_X, TOAST_Y)
-            background = panel(Size(TOAST_WIDTH, TOAST_HEIGHT), radius = TOAST_RADIUS, stroke = if (isCompleted) HudStyle.ALLY else HudStyle.SELECTION)
+            xy(ANNOUNCEMENT_X, ANNOUNCEMENT_Y)
+            background = panel(Size(ANNOUNCEMENT_WIDTH, ANNOUNCEMENT_HEIGHT), radius = ANNOUNCEMENT_RADIUS, stroke = if (isCompleted) HudStyle.ALLY else HudStyle.SELECTION)
             drawHeader(isCompleted, quest)
             when (moment) {
                 Moment.STARTED -> drawGoal(quest)
@@ -114,20 +114,20 @@ open class QuestAnnouncementView(
         val task = quest.currentTask
         targetSlot(task, resourcesLoader, TARGET_X, TARGET_Y, TARGET_SIZE, portraitScale = 1.0, ring = if (isCompleted) HudStyle.ALLY else ringOf(task))
         targetTick = if (isCompleted) container { tickDisc(TARGET_TICK_AT, TARGET_TICK_AT, TARGET_TICK_SIZE) } else null
-        val title = texts[if (isCompleted) UiText.QUEST_ANNOUNCEMENT_COMPLETED else UiText.QUEST_ANNOUNCEMENT_STARTED]
+        val title = messages[if (isCompleted) UiMessage.QUEST_ANNOUNCEMENT_COMPLETED else UiMessage.QUEST_ANNOUNCEMENT_STARTED]
         titleText = text(title, textSize = QuestViewParts.CAPTION_SIZE, color = if (isCompleted) HudStyle.ALLY else HudStyle.SELECTION) { xy(TEXT_X, TITLE_Y) }
-        nameText = text(fitted(quest.name, NAME_SIZE, TOAST_WIDTH - TEXT_X - RIGHT_PADDING), textSize = NAME_SIZE, color = Colors.WHITE) { xy(TEXT_X, NAME_Y) }
+        nameText = text(fitted(quest.name, NAME_SIZE, ANNOUNCEMENT_WIDTH - TEXT_X - RIGHT_PADDING), textSize = NAME_SIZE, color = Colors.WHITE) { xy(TEXT_X, NAME_Y) }
     }
 
     private fun Container.drawGoal(quest: QuestInfo) {
         val task = quest.currentTask
         taskGlyph(task.kind, TEXT_X, GOAL_Y, GOAL_GLYPH_SIZE, HudStyle.SELECTION)
-        taskText = text(fitted(task.text, GOAL_TEXT_SIZE, TOAST_WIDTH - GOAL_TEXT_X - RIGHT_PADDING), textSize = GOAL_TEXT_SIZE, color = HudStyle.MUTED) { xy(GOAL_TEXT_X, GOAL_Y - 1) }
+        taskText = text(fitted(task.text, GOAL_TEXT_SIZE, ANNOUNCEMENT_WIDTH - GOAL_TEXT_X - RIGHT_PADDING), textSize = GOAL_TEXT_SIZE, color = HudStyle.MUTED) { xy(GOAL_TEXT_X, GOAL_Y - 1) }
         rewardView = null
     }
 
     private fun Container.drawReward(quest: QuestInfo) {
-        rewardView = container { rewardRow(quest, TEXT_X, REWARD_Y, resourcesLoader, texts) }
+        rewardView = container { rewardRow(quest, TEXT_X, REWARD_Y, resourcesLoader, messages) }
         taskText = null
     }
 }

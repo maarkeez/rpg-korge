@@ -186,11 +186,11 @@ class QuestAcceptanceTest {
         eventBus.dispatch()
     }
 
-    // One more than a bag holds.
+    // One more than an inventory stores.
     private val thirteenPotions = reward(gold = 0, lootableItemIds = List(13) { "health-potion" })
 
     @Test
-    fun `A reward item should lie on the leader's tile and be stored when it walks back when the bag is full`() {
+    fun `A reward item should lie on the leader's tile and be stored when it walks back when the inventory is full`() {
         // Given
         val apis = smallGame(mainQuest(tasks = listOf(defeat(unitId = "rat")), reward = thirteenPotions).toDto())
         // When

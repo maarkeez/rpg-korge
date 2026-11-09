@@ -7,7 +7,7 @@ import korlibs.image.bitmap.Bitmap
  * its tiles, the first and the last ones being the pure terrain tiles. They are split the first time they are asked for.
  */
 class TerrainBitmaps(
-    private val resourcesLoader: BattleSceneResourcesLoader,
+    private val resourcesLoader: GameSceneResourcesLoader,
 ) {
     private companion object {
         const val TRANSITIONS_DIRECTORY = "terrain/transitions"

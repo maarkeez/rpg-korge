@@ -16,10 +16,10 @@ interface WorldFilePicker {
 /** The file picker of the device the game runs on: the system file dialog, or the file picker of the browser. */
 class GameWindowWorldFilePicker(
     private val gameWindow: GameWindow,
-    texts: Texts,
+    messages: Messages,
 ) : WorldFilePicker {
     // Only the system file dialog filters the files: the browser offers them all.
-    internal val worldFiles = FileFilter(texts[UiText.WORLD_FILE_PICKER_WORLDS] to listOf("*.toml"))
+    internal val worldFiles = FileFilter(messages[UiMessage.WORLD_FILE_PICKER_WORLDS] to listOf("*.toml"))
 
     override suspend fun pickWorld(): String? = gameWindow.openFileDialog(worldFiles).firstOrNull()?.readString()
 }

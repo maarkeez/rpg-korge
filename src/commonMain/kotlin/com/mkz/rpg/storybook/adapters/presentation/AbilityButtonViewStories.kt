@@ -73,7 +73,7 @@ object AbilityButtonViewStories : StoryBinding {
                     override fun abilitySelected(abilityId: String) = context.action("abilitySelected", abilityId, setArg = SELECTED to ArgDto.boolean(true))
                 },
             )
-            display(abilityId = args.text(ABILITY), cooldownTurnsLeft = args.int(COOLDOWN_TURNS_LEFT), hasEnoughMana = args.boolean(HAS_ENOUGH_MANA), manaCost = args.int(MANA_COST))
+            display(abilityId = args.text(ABILITY), remainingCooldown = args.int(COOLDOWN_TURNS_LEFT), hasEnoughMana = args.boolean(HAS_ENOUGH_MANA), manaCost = args.int(MANA_COST))
             if (args.boolean(SELECTED)) select()
         }
 }

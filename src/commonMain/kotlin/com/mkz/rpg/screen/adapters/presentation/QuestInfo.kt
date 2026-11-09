@@ -16,14 +16,14 @@ data class QuestInfo(
     val isRepeatable: Boolean = false,
     val isPinned: Boolean = false,
 ) {
-    enum class Kind { DEFEAT, TALK, REACH }
+    enum class Kind { DEFEAT, TALK, VISIT }
 
-    /** Count: only above 1 for a task to defeat several. Portrait path: who the task is about, e.g.: `unit/rat_portrait.png`, or null for a place. */
+    /** Required defeats: only above 1 for a task to defeat several. Portrait path: who the task is about, e.g.: `unit/rat_portrait.png`, or null for a place. */
     data class Task(
         val kind: Kind,
         val text: String,
-        val progress: Int = 0,
-        val count: Int = 1,
+        val defeatsCounted: Int = 0,
+        val requiredDefeats: Int = 1,
         val portraitPath: String? = null,
         val isDone: Boolean = false,
     )

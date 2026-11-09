@@ -18,11 +18,11 @@ import korlibs.math.geom.Size
 /**
  * The party formation, displayed in place of the pad while the player sets the party order. A row per party member, in
  * party order: the crown on the leader, the portrait, the name, and the health and mana bars. At the bottom, a hint. Close
- * is in the row of the call to action. Tapping a row is handed to the delegate, which selects it, or swaps it with the
+ * is in the row of the call to action. Tapping a row is handed to the delegate, which selects it, or reorders it with the
  * selected one.
  */
 open class FormationView(
-    private val resourcesLoader: BattleSceneResourcesLoader,
+    private val resourcesLoader: GameSceneResourcesLoader,
 ) : Container() {
     companion object {
         /** The party members displayed: the rows that fit in place of the pad. */
@@ -89,7 +89,7 @@ open class FormationView(
         rowViews.forEachIndexed { rowIndex, rowView -> rowView.isSelected = rowIndex == index }
     }
 
-    /** Displays the [hint] under the rows, e.g.: Tap a member, then another one, to swap them. */
+    /** Displays the [hint] under the rows, e.g.: Tap two members to reorder them. */
     open fun displayHint(hint: String) {
         hintText.text = hint
     }
@@ -98,7 +98,7 @@ open class FormationView(
 /** A party member in the formation: the crown when it leads, its portrait, its name, and its health and mana bars. */
 class FormationRowView(
     size: Size,
-    private val resourcesLoader: BattleSceneResourcesLoader,
+    private val resourcesLoader: GameSceneResourcesLoader,
 ) : Container() {
     companion object {
         // FamiCube palette colours: grey, and the blue of the selected row.
@@ -126,7 +126,7 @@ class FormationRowView(
     internal val healthBarView: HealthBarView
     internal val manaBarView: ManaBarView
 
-    /** Whether the row is selected, to be swapped with the next row tapped. */
+    /** Whether the row is selected, to be reordered with the next row tapped. */
     var isSelected = false
         set(value) {
             field = value

@@ -1,38 +1,38 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
+import com.mkz.rpg.screen.adapters.presentation.Messages
 import com.mkz.rpg.screen.adapters.presentation.QuestInfo
 import com.mkz.rpg.screen.adapters.presentation.QuestInfo.Kind
 import com.mkz.rpg.screen.adapters.presentation.QuestInfo.RewardItem
 import com.mkz.rpg.screen.adapters.presentation.QuestInfo.Task
-import com.mkz.rpg.screen.adapters.presentation.Texts
 
 private const val GOAT_WIZARD_QUEST = "defeat-the-goat-wizard"
 private const val GOAT_WIZARD_PORTRAIT = "unit/goat-wizard_portrait.png"
 private const val RAT_PORTRAIT = "unit/rat_portrait.png"
 private const val ELDER_PORTRAIT = "npc/elder_portrait.png"
 
-// The quest the game ships, with the texts of the language global, which the other samples are built on.
-private fun goatWizard(texts: Texts) =
+// The quest the game ships, with the messages of the language global, which the other samples are built on.
+private fun goatWizard(messages: Messages) =
     QuestInfo(
         id = GOAT_WIZARD_QUEST,
-        name = texts.questName(GOAT_WIZARD_QUEST),
-        description = texts.questDescription(GOAT_WIZARD_QUEST),
-        tasks = listOf(goatWizardTask(texts)),
+        name = messages.questName(GOAT_WIZARD_QUEST),
+        description = messages.questDescription(GOAT_WIZARD_QUEST),
+        tasks = listOf(goatWizardTask(messages)),
         gold = 150,
         isMain = true,
         isPinned = true,
     )
 
-private fun goatWizardTask(texts: Texts) = Task(Kind.DEFEAT, texts.questTask(GOAT_WIZARD_QUEST, 0), portraitPath = GOAT_WIZARD_PORTRAIT)
+private fun goatWizardTask(messages: Messages) = Task(Kind.DEFEAT, messages.questTask(GOAT_WIZARD_QUEST, 0), portraitPath = GOAT_WIZARD_PORTRAIT)
 
-private fun completed(quest: QuestInfo) = quest.copy(isCompleted = true, tasks = quest.tasks.map { task -> task.copy(isDone = true, progress = task.count) })
+private fun completed(quest: QuestInfo) = quest.copy(isCompleted = true, tasks = quest.tasks.map { task -> task.copy(isDone = true, defeatsCounted = task.requiredDefeats) })
 
 private val rats =
     QuestInfo(
         "rats",
         "Rats in the Fields",
         "Rats keep coming back to the southern fields.",
-        listOf(Task(Kind.DEFEAT, "Defeat 5 Rats", progress = 3, count = 5, portraitPath = RAT_PORTRAIT)),
+        listOf(Task(Kind.DEFEAT, "Defeat 5 Rats", defeatsCounted = 3, requiredDefeats = 5, portraitPath = RAT_PORTRAIT)),
         gold = 40,
     )
 private val bees =
@@ -40,7 +40,7 @@ private val bees =
         "bees",
         "Honey for the Alchemist",
         "The bees guard the honey the alchemist needs. Bring some, whenever you can.",
-        listOf(Task(Kind.DEFEAT, "Defeat 3 Bees", progress = 1, count = 3, portraitPath = "unit/bee_portrait.png")),
+        listOf(Task(Kind.DEFEAT, "Defeat 3 Bees", defeatsCounted = 1, requiredDefeats = 3, portraitPath = "unit/bee_portrait.png")),
         gold = 20,
         isRepeatable = true,
     )
@@ -49,7 +49,7 @@ private val errand =
         "errand",
         "The Elder's Errand",
         "The Elder wants to know whether the path to the southern fields is still open.",
-        listOf(Task(Kind.REACH, "Visit the southern fields", progress = 1, isDone = true), Task(Kind.TALK, "Talk to the Elder", portraitPath = ELDER_PORTRAIT)),
+        listOf(Task(Kind.VISIT, "Visit the southern fields", defeatsCounted = 1, isDone = true), Task(Kind.TALK, "Talk to the Elder", portraitPath = ELDER_PORTRAIT)),
         gold = 25,
     )
 private val fields =
@@ -65,14 +65,20 @@ private val fields =
     )
 
 // A journal of 12, in the order it lists them: the main quest, the active side quests, and the completed ones.
-private fun journal(texts: Texts) =
+private fun journal(messages: Messages) =
     listOf(
-        goatWizard(texts),
+        goatWizard(messages),
         rats,
         bees,
         errand,
-        QuestInfo("bats", "Bats in the Meadow", "Bats nest in the meadow near the farm.", listOf(Task(Kind.DEFEAT, "Defeat 4 Bats", count = 4, portraitPath = "unit/bat_portrait.png")), gold = 35),
-        QuestInfo("road", "A Road Less Travelled", "Someone must see whether the old road still leads anywhere.", listOf(Task(Kind.REACH, "Visit the old bridge")), gold = 15),
+        QuestInfo(
+            "bats",
+            "Bats in the Meadow",
+            "Bats nest in the meadow near the farm.",
+            listOf(Task(Kind.DEFEAT, "Defeat 4 Bats", requiredDefeats = 4, portraitPath = "unit/bat_portrait.png")),
+            gold = 35,
+        ),
+        QuestInfo("road", "A Road Less Travelled", "Someone must see whether the old road still leads anywhere.", listOf(Task(Kind.VISIT, "Visit the old bridge")), gold = 15),
         QuestInfo(
             "princess",
             "A Word with the Princess",
@@ -105,34 +111,34 @@ private fun journal(texts: Texts) =
 enum class QuestSample(
     val title: String,
     val state: String,
-    val quest: (Texts) -> QuestInfo,
+    val quest: (Messages) -> QuestInfo,
 ) {
     GOAT_WIZARD("Goat wizard", "The quest the game ships: one task, gold only.", ::goatWizard),
     COUNTED(
         "Counted",
         "A task with a count, under way: 3 of 5.",
-        { texts -> goatWizard(texts).copy(tasks = listOf(Task(Kind.DEFEAT, "Defeat 5 Rats", progress = 3, count = 5, portraitPath = RAT_PORTRAIT))) },
+        { messages -> goatWizard(messages).copy(tasks = listOf(Task(Kind.DEFEAT, "Defeat 5 Rats", defeatsCounted = 3, requiredDefeats = 5, portraitPath = RAT_PORTRAIT))) },
     ),
     TALK(
         "Talk",
         "A task to talk to an npc.",
-        { texts -> goatWizard(texts).copy(tasks = listOf(Task(Kind.TALK, "Talk to the Elder", portraitPath = ELDER_PORTRAIT))) },
+        { messages -> goatWizard(messages).copy(tasks = listOf(Task(Kind.TALK, "Talk to the Elder", portraitPath = ELDER_PORTRAIT))) },
     ),
     REACH(
         "Reach",
         "A visit task: it has no portrait.",
-        { texts -> goatWizard(texts).copy(tasks = listOf(Task(Kind.REACH, "Visit the lair down south"))) },
+        { messages -> goatWizard(messages).copy(tasks = listOf(Task(Kind.VISIT, "Visit the lair down south"))) },
     ),
     SEVERAL_TASKS(
         "Several tasks",
         "Two tasks done and the current one: those still to come are not revealed.",
-        { texts ->
-            goatWizard(texts).copy(
+        { messages ->
+            goatWizard(messages).copy(
                 tasks =
                     listOf(
-                        Task(Kind.TALK, "Talk to the Elder", progress = 1, portraitPath = ELDER_PORTRAIT, isDone = true),
-                        Task(Kind.REACH, "Visit the lair down south", progress = 1, isDone = true),
-                        goatWizardTask(texts),
+                        Task(Kind.TALK, "Talk to the Elder", defeatsCounted = 1, portraitPath = ELDER_PORTRAIT, isDone = true),
+                        Task(Kind.VISIT, "Visit the lair down south", defeatsCounted = 1, isDone = true),
+                        goatWizardTask(messages),
                     ),
             )
         },
@@ -140,19 +146,19 @@ enum class QuestSample(
     ITEM_REWARDS(
         "Item rewards",
         "A reward of gold and items.",
-        { texts ->
-            goatWizard(texts).copy(
-                items = listOf("rune-hammer", "health-elixir", "bee-essence").map { lootableItemId -> RewardItem(lootableItemId, texts.lootableItemName(lootableItemId)) },
+        { messages ->
+            goatWizard(messages).copy(
+                items = listOf("rune-hammer", "health-elixir", "bee-essence").map { lootableItemId -> RewardItem(lootableItemId, messages.lootableItemName(lootableItemId)) },
             )
         },
     ),
     LARGE_REWARD(
         "Large reward",
         "A reward of gold and four items, the most a row has to hold.",
-        { texts ->
-            goatWizard(texts).copy(
+        { messages ->
+            goatWizard(messages).copy(
                 gold = 250,
-                items = listOf("rune-hammer", "health-elixir", "bee-essence", "health-potion").map { lootableItemId -> RewardItem(lootableItemId, texts.lootableItemName(lootableItemId)) },
+                items = listOf("rune-hammer", "health-elixir", "bee-essence", "health-potion").map { lootableItemId -> RewardItem(lootableItemId, messages.lootableItemName(lootableItemId)) },
             )
         },
     ),
@@ -162,7 +168,12 @@ enum class QuestSample(
     PINNED_WITH_LONG_TEXT(
         "Pinned with long text",
         "The longest task, with the pin, as a translation may be.",
-        { rats.copy(isPinned = true, tasks = listOf(Task(Kind.DEFEAT, "Derrota a las ratas de los campos del sur de una vez", progress = 12, count = 50, portraitPath = RAT_PORTRAIT))) },
+        {
+            rats.copy(
+                isPinned = true,
+                tasks = listOf(Task(Kind.DEFEAT, "Derrota a las ratas de los campos del sur de una vez", defeatsCounted = 12, requiredDefeats = 50, portraitPath = RAT_PORTRAIT)),
+            )
+        },
     ),
     COMPLETED_REPEATABLE("Completed, repeatable", "A completed side quest, whose quest giver can start it again.", { fields }),
     LONG_TEXT(
@@ -182,8 +193,8 @@ enum class QuestSample(
     COMPLETED(
         "Completed",
         "The goat wizard defeated and its reward paid.",
-        { texts ->
-            goatWizard(texts).let { quest -> quest.copy(isCompleted = true, tasks = quest.tasks.map { task -> task.copy(isDone = true, progress = task.count) }) }
+        { messages ->
+            goatWizard(messages).let { quest -> quest.copy(isCompleted = true, tasks = quest.tasks.map { task -> task.copy(isDone = true, defeatsCounted = task.requiredDefeats) }) }
         },
     ),
     ;
@@ -196,9 +207,9 @@ enum class QuestSample(
         fun journal(
             count: Int,
             isLong: Boolean,
-            texts: Texts,
+            messages: Messages,
         ): List<QuestInfo> =
-            journal(texts).take(count).map { quest ->
+            journal(messages).take(count).map { quest ->
                 if (isLong) {
                     quest.copy(
                         name = "$LONG_NAME_PREFIX ${quest.name}",

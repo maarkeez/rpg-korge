@@ -33,7 +33,7 @@ open class VirtualPadView(
     size: Size = SIZE,
 ) : UIContainer(size) {
     companion object {
-        // 57 taller than the battle HUD, down to the bottom of Finish turn below it.
+        // 57 taller than the HUD, down to the bottom of Finish turn below it.
         val SIZE = Size(390, 357)
 
         const val ARROW_SIZE = 64.0

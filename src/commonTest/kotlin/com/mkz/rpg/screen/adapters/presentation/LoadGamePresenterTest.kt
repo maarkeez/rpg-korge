@@ -15,7 +15,7 @@ import korlibs.time.DateTime
 import kotlin.test.Test
 
 class LoadGamePresenterTest {
-    private val texts = TextsMother.texts()
+    private val texts = MessagesMother.messages()
     private val storage = InmemoryStorage()
     private val saveApi =
         SaveApi(
@@ -30,7 +30,7 @@ class LoadGamePresenterTest {
     private val menuView = MenuView(texts, onNewGameSelected = {}, onLoadGameSelected = {}, onWorldBuilderSelected = {})
     private val saveSlotsView = SaveSlotsView(texts)
     private val confirmDialogView = ConfirmDialogView()
-    private val callToActionView = FakePlayerCallToActionView()
+    private val callToActionView = FakeCallToActionView()
     private val loadedSlots = mutableListOf<Int>()
 
     init {
@@ -100,7 +100,7 @@ class LoadGamePresenterTest {
         // Given
         val presenter = presenter().apply { open() }
         // When
-        presenter.saveSlotDeleteSelected(2)
+        presenter.deleteSaveSelected(2)
         // Then
         confirmDialogView.visible.shouldBeTrue()
         saveSlotsView.visible.shouldBeFalse()
@@ -112,7 +112,7 @@ class LoadGamePresenterTest {
     fun `LoadGamePresenter should empty the slot when its deletion is confirmed`() {
         // Given
         val presenter = presenter().apply { open() }
-        presenter.saveSlotDeleteSelected(2)
+        presenter.deleteSaveSelected(2)
         // When
         callToActionView.chooseAction("Delete")
         // Then
@@ -125,7 +125,7 @@ class LoadGamePresenterTest {
     fun `LoadGamePresenter should keep the slot when its deletion is cancelled`() {
         // Given
         val presenter = presenter().apply { open() }
-        presenter.saveSlotDeleteSelected(2)
+        presenter.deleteSaveSelected(2)
         // When
         callToActionView.chooseAction("Cancel")
         // Then
@@ -134,10 +134,10 @@ class LoadGamePresenterTest {
     }
 
     @Test
-    fun `saveSlotDeleteSelected should display the question's actions, and Cancel display Back again`() {
+    fun `deleteSaveSelected should display the question's actions, and Cancel display Back again`() {
         // Given
         val presenter = presenter().apply { open() }
-        presenter.saveSlotDeleteSelected(2)
+        presenter.deleteSaveSelected(2)
         // When
         callToActionView.chooseAction("Cancel")
         // Then

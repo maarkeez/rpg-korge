@@ -32,11 +32,11 @@ internal object AbilityInfoMapper {
     /** Why the ability can not be cast now: the cooldown wins over the lack of mana, as on the button. */
     fun reason(
         ability: Ability.Dto,
-        cooldownTurnsLeft: Int,
+        remainingCooldown: Int,
         remainingMana: Int,
     ): AbilityInfo.Reason? =
         when {
-            cooldownTurnsLeft > 0 -> AbilityInfo.Reason.Cooldown(turnsLeft = cooldownTurnsLeft)
+            remainingCooldown > 0 -> AbilityInfo.Reason.Cooldown(turnsLeft = remainingCooldown)
             remainingMana < ability.manaCost -> AbilityInfo.Reason.NotEnoughMana(manaCost = ability.manaCost, remainingMana = remainingMana)
             else -> null
         }
@@ -69,10 +69,10 @@ internal object AbilityInfoMapper {
             outcome.type == EffectOutcomeDto.TypeDto.DAMAGE && timing.type == TimingTypeDto.IMMEDIATELY ->
                 AbilityInfo.Effect.Damage(damage = outcome.damage!!.damage)
             outcome.type == EffectOutcomeDto.TypeDto.DAMAGE && timing.type == TimingTypeDto.ON_PLAYER_TURN_STARTED ->
-                AbilityInfo.Effect.DamageEachTurn(damage = outcome.damage!!.damage, turns = timing.onPlayerTurnStarted!!.duration)
+                AbilityInfo.Effect.DamageOnPlayerTurnStarted(damage = outcome.damage!!.damage, turns = timing.onPlayerTurnStarted!!.duration)
             outcome.type == EffectOutcomeDto.TypeDto.HEAL && timing.type == TimingTypeDto.IMMEDIATELY ->
                 when (abilityEffect.target.type) {
-                    EffectTargetDto.Type.CASTER -> AbilityInfo.Effect.HealSelf(healing = outcome.heal!!.healing)
+                    EffectTargetDto.Type.CASTER -> AbilityInfo.Effect.HealCaster(healing = outcome.heal!!.healing)
                     EffectTargetDto.Type.ADJACENT_ALLIES -> AbilityInfo.Effect.HealAdjacentAllies(healing = outcome.heal!!.healing)
                     else -> noSentence()
                 }
@@ -87,9 +87,9 @@ internal object AbilityInfoMapper {
                 // Expanded one level: the poison the allies get.
                 val nestedEffectId = outcome.applyEffectToAdjacentAllies!!.effectId
                 val nestedEffect = searchEffect(nestedEffectId) ?: error("The effect '${effect.id}' applies the effect '$nestedEffectId', which does not exist")
-                val isPoison = nestedEffect.outcome.type == EffectOutcomeDto.TypeDto.DAMAGE && nestedEffect.timing.type == TimingTypeDto.ON_PLAYER_TURN_STARTED
-                if (!isPoison) noSentence()
-                AbilityInfo.Effect.OnDefeatedPoisonAllies(damage = nestedEffect.outcome.damage!!.damage, turns = nestedEffect.timing.onPlayerTurnStarted!!.duration)
+                val isDamageOnPlayerTurnStarted = nestedEffect.outcome.type == EffectOutcomeDto.TypeDto.DAMAGE && nestedEffect.timing.type == TimingTypeDto.ON_PLAYER_TURN_STARTED
+                if (!isDamageOnPlayerTurnStarted) noSentence()
+                AbilityInfo.Effect.OnDefeatedDamageAdjacentAllies(damage = nestedEffect.outcome.damage!!.damage, turns = nestedEffect.timing.onPlayerTurnStarted!!.duration)
             }
             else -> noSentence()
         }

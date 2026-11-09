@@ -1,6 +1,6 @@
 # Assets
 
-The battle scene images live in the [`resources`](../../resources) folder. They are loaded by [`BattleSceneResourcesLoader`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/BattleSceneResourcesLoader.kt).
+The game screen images live in the [`resources`](../../resources) folder. They are loaded by [`GameSceneResourcesLoader`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/GameSceneResourcesLoader.kt).
 
 ## How resources are bundled
 
@@ -13,7 +13,7 @@ Contributors add, edit and remove the individual files under `resources`. The ga
 
 ## How assets are loaded
 
-- `BattleScene` creates a single `BattleSceneResourcesLoader` and calls `load()` once, when the scene is initialised.
+- `GameScene` creates a single `GameSceneResourcesLoader` and calls `load()` once, when the scene is initialised.
 - `load()` walks every folder of the resources bundle and decodes every `.png`, `.jpg` and `.jpeg` file just once. Hidden files and non-image files (e.g.: terrain `.toml` definitions) are ignored.
 - Views receive the loader through their constructor and request the images they need when displaying something:
   - `bitmap(path)` returns an image or fails when it does not exist.
@@ -47,13 +47,13 @@ Draw its source under `art` with the `pixel` tool, or drop the image in `resourc
 | Battle unit on the battlefield   | `unit/<unit id>.png`                  | `unit/knight.png`                |
 | Battle unit portrait             | `unit/<unit id>_portrait.png`         | `unit/knight_portrait.png`       |
 | Npc on the battlefield           | `npc/<npc id>.png`                    | `npc/the-guy.png`                |
-| Npc portrait (in its dialog)     | `npc/<npc id>_portrait.png`           | `npc/the-guy_portrait.png`       |
+| Npc portrait (in its talk panel)     | `npc/<npc id>_portrait.png`           | `npc/the-guy_portrait.png`       |
 | Recruitable npc (as its unit)    | `unit/<unit id>.png` and `unit/<unit id>_portrait.png` | `unit/viking.png`  |
 | Building on the battlefield      | `building/<building id>.png`, 16 pixels per tile | `building/fortress.png` |
 | Ability icon                     | `ability/<ability id>.png`            | `ability/poisoned-sword.png`     |
 | Effect icon                      | `effect/<effect id>.png`              | `effect/venom-damage.png`        |
 | Lootable item icon               | `lootableItem/<lootable item id>.png` | `lootableItem/health-potion.png` |
-| Chest (several items on a tile, and the bag) | `battlefield/chest.png`   | `battlefield/chest.png`          |
+| Chest (several items on a tile, and the inventory button) | `battlefield/chest.png`   | `battlefield/chest.png`          |
 | Crown (the leader, in the party formation) | `battlefield/crown.png`   | `battlefield/crown.png`          |
 | Terrain transition strip         | `terrain/transitions/<from>_to_<to>.png` | `terrain/transitions/sand_to_lava.png` |
 
@@ -79,13 +79,13 @@ Draw its source under `art` with the `pixel` tool, or drop the image in `resourc
 
 ## Pixel art and vector chrome
 
-The battle HUD keeps pixel art for what the artist draws, and draws the chrome around it as vectors, so the chrome needs
+The HUD keeps pixel art for what the artist draws, and draws the chrome around it as vectors, so the chrome needs
 no asset per size or state:
 
 | Drawn as  | What                                                                                                                                 |
 |-----------|--------------------------------------------------------------------------------------------------------------------------------------|
 | Pixel art | The portraits, the ability icons, the effect icons and the chest                                                                     |
-| Vectors   | The panels and slots, the bars, the points, the pills, the selection ring, the cooldown overlay, the mana cost badge, the team rings |
+| Vectors   | The panels and slots, the bars, the points, the pills, the selection ring, the cooldown overlay, the mana cost badge, the player rings |
 
 - Pixel art is only drawn at a whole scale (1x, 2x, 3x), so every pixel of the asset is the same square on screen: the
   portraits at 3x in the battle unit info and 1x in the formation, the ability icons at 3x on their buttons, the effects
@@ -93,7 +93,7 @@ no asset per size or state:
 - The palette and the panel of the chrome are
   [`HudStyle`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/HudStyle.kt): dark rounded panels
   (`#171725`) and slots (`#222236`) with a 1-pixel border (`#363650`). The FamiCube palette only binds the assets.
-- The portraits are ringed with their team's colour in a battle: green `#5AD25A` for the human player's battle units,
+- The portraits are ringed with their player's colour in a battle: green `#5AD25A` for the human player's battle units,
   red `#FF375F` for the CPU's.
 - The selected ability is ringed in gold `#FFD84A`, with a faint glow. An ability in cooldown is darkened under a dark
   overlay with the turns left in its middle; one short of mana is tinted blue, with its mana cost in a blue

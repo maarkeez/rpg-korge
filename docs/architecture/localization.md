@@ -46,7 +46,7 @@ The [game data files](game-data.md) hold no text, only ids.
   header, is evaluated at runtime, e.g.: `nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);`,
   so a new language needs no code change.
 - **Whole sentences**: the code never builds a sentence out of pieces, changes the case of a text, or puts an article
-  in front of a name. `{terrain} can not be next to {neighbour}`, not `"$terrain can not be next to ${neighbour.lowercase()}"`.
+  in front of a name. `{terrain} can not be next to {adjacentTerrain}`, not `"$terrain can not be next to ${neighbour.lowercase()}"`.
 
 ### Untranslated messages
 
@@ -65,12 +65,12 @@ enforces. The other subdomains hold ids, never text, and their events and DTOs c
   catalogs and the selected language, translates the messages, and evaluates the plural rules.
   [`PoFile`](../../src/commonMain/kotlin/com/mkz/rpg/localization/adapters/resources/PoFile.kt) is a small PO parser,
   as no Kotlin Multiplatform gettext library is mature enough. `LocalizationApi` exposes it.
-- [`UiText`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/UiText.kt): the enum of every UI key,
+- [`UiMessage`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/UiMessage.kt): the enum of every UI key,
   so a view can not ask for a key that does not exist.
-- [`Texts`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/Texts.kt): what the views translate
-  with: `texts[UiText.SHOP_NOT_ENOUGH_GOLD]`, `texts[UiText.BATTLE_INFO_ROUND, "round" to 3]`,
-  `texts.plural(UiText.REMAINING_TURNS, turns, "turns" to turns)`, and the game data from its id: `texts.unitName(unitId)`,
-  `texts.npcLine(npcId)`, ... Views and presenters receive it through their constructor.
+- [`Messages`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/Messages.kt): what the views translate
+  with: `messages[UiMessage.SHOP_NOT_ENOUGH_GOLD]`, `messages[UiMessage.BANNER_ROUND, "round" to 3]`,
+  `messages.plural(UiMessage.REMAINING_SUMMON_DURATION, turns, "turns" to turns)`, and the game data from its id: `messages.unitName(unitId)`,
+  `messages.npcLine(npcId)`, ... Views and presenters receive it through their constructor.
 - `startApp` creates the `LocalizationApi` once and reads the catalogs before displaying the menu, and every scene
   receives it, so the language selected in the menu applies to every scene opened afterwards.
 
@@ -80,7 +80,7 @@ enforces. The other subdomains hold ids, never text, and their events and DTOs c
 fails the build when:
 
 - a catalog does not parse;
-- a `UiText` key, or a game data key (one per resource file, and one per task of a quest), is missing from `messages.pot`, or a plural `UiText` is
+- a `UiMessage` key, or a game data key (one per resource file, and one per task of a quest), is missing from `messages.pot`, or a plural `UiMessage` is
   not a plural there;
 - `messages.pot` has an entry the screen does not translate;
 - a translation has an entry missing from `messages.pot`, other placeholders than its English text, or another number
@@ -94,12 +94,12 @@ The view and presenter tests translate with the real catalogs, so they keep asse
 can only read the resources asynchronously, and many tests build their views synchronously, the `testCatalogs` Gradle
 task ([`TestCatalogsTask`](../../buildSrc/src/main/kotlin/testcatalogs/TestCatalogsTask.kt)) embeds the catalogs into a
 generated `TestCatalogs` test source, which
-[`TextsMother`](../../src/commonTest/kotlin/com/mkz/rpg/screen/adapters/presentation/TextsMother.kt) reads.
+[`MessagesMother`](../../src/commonTest/kotlin/com/mkz/rpg/screen/adapters/presentation/MessagesMother.kt) reads.
 
-## How to add a UI text
+## How to add a UI message
 
-1. Add its key to [`UiText`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/UiText.kt), as
+1. Add its key to [`UiMessage`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/UiMessage.kt), as
    `ui.<view>.<message>`.
 2. Add its English text to `messages.pot`, with a `#.` comment telling translators where it is displayed when the
    text alone does not.
-3. Display it with `texts[UiText.<KEY>]`. The translations get it when they are merged next.
+3. Display it with `messages[UiMessage.<KEY>]`. The translations get it when they are merged next.

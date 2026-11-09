@@ -17,13 +17,13 @@ import korlibs.math.interpolation.Easing
 import korlibs.time.milliseconds
 
 /**
- * The selected battle unit, in a panel: its portrait at 3x ringed with its team's colour, its name and the turns it has
- * left if it is a summon, the steps and casts it has left this turn, its health and mana, and its effects, with the bag
+ * The selected battle unit, in a panel: its portrait at 3x ringed with its player's colour, its name and the turns it has
+ * left if it is a summon, the steps and casts it has left this turn, its health and mana, and its effects, with the inventory button
  * at the top right. Its six ability buttons go under the panel, and the info of the ability selected under them.
  */
 open class BattleUnitInfoView(
-    resourcesLoader: BattleSceneResourcesLoader,
-    private val texts: Texts,
+    resourcesLoader: GameSceneResourcesLoader,
+    private val messages: Messages,
 ) : Container() {
     companion object {
         // FamiCube palette colours of the remaining turn actions.
@@ -42,7 +42,7 @@ open class BattleUnitInfoView(
         private const val CAPTION_WIDTH = 24.0
         private const val CAPTION_SPACING = 6.0
         private const val TURN_ACTIONS_SPACING = 14.0
-        private const val BAG_SIZE = 40.0
+        private const val INVENTORY_BUTTON_SIZE = 40.0
 
         // Focused on an ability: the header collapses to a strip of what a cast spends.
         private const val STRIP_HEIGHT = 52.0
@@ -76,7 +76,7 @@ open class BattleUnitInfoView(
     data class Ability(
         val abilityId: String,
         // The turns left until it can be cast again, e.g.: 1 when it can be cast on the next turn.
-        val cooldownTurnsLeft: Int,
+        val remainingCooldown: Int,
         val hasEnoughMana: Boolean,
         // Told on the button while there is not enough mana.
         val manaCost: Int,
@@ -86,11 +86,11 @@ open class BattleUnitInfoView(
     internal val header: Container = container { panel(Size(PANEL_WIDTH, HEADER_HEIGHT)).xy(MARGIN, 0.0) }
     internal val unitPortraitView = UnitPortraitView(Size(PORTRAIT_SIZE, PORTRAIT_SIZE), resourcesLoader).addTo(header, MARGIN + 8, 8.0)
     internal val nameText: Text = header.text("", textSize = NAME_TEXT_SIZE, color = Colors.WHITE) { xy(CONTENT_X, 9.0) }
-    internal val remainingTurnsView = RemainingTurnsView(Size(160, 18), texts).addTo(header, CONTENT_X, 8.0)
-    internal val bagButton = BagButtonView(Size(BAG_SIZE, BAG_SIZE), resourcesLoader).addTo(header, CONTENT_RIGHT - BAG_SIZE, 8.0)
-    private val moveCaption: Text = header.caption(UiText.HUD_MOVE, CONTENT_X, 39.0)
+    internal val remainingSummonDurationView = RemainingSummonDurationView(Size(160, 18), messages).addTo(header, CONTENT_X, 8.0)
+    internal val inventoryButton = InventoryButtonView(Size(INVENTORY_BUTTON_SIZE, INVENTORY_BUTTON_SIZE), resourcesLoader).addTo(header, CONTENT_RIGHT - INVENTORY_BUTTON_SIZE, 8.0)
+    private val moveCaption: Text = header.caption(UiMessage.HUD_MOVE, CONTENT_X, 39.0)
     internal val movementPointsView = PointsView(MOVEMENT_POINTS_COLOR).addTo(header, 0.0, 41.0)
-    private val castCaption: Text = header.caption(UiText.HUD_CAST, 0.0, 39.0)
+    private val castCaption: Text = header.caption(UiMessage.HUD_CAST, 0.0, 39.0)
     internal val castPointsView = PointsView(CAST_POINTS_COLOR).addTo(header, 0.0, 41.0)
     private val healthBarView = HealthBarView(Size(CONTENT_RIGHT - CONTENT_X - CAPTION_WIDTH, 14)).addTo(header, CONTENT_X + CAPTION_WIDTH, 56.0)
     private val manaBarView = ManaBarView(Size(CONTENT_RIGHT - CONTENT_X - CAPTION_WIDTH, 14)).addTo(header, CONTENT_X + CAPTION_WIDTH, 74.0)
@@ -114,7 +114,7 @@ open class BattleUnitInfoView(
         Array(ABILITIES) { index ->
             AbilityButtonView(Size(ABILITY_BUTTON_SIZE, ABILITY_BUTTON_SIZE), resourcesLoader).addTo(body, MARGIN + index * (ABILITY_BUTTON_SIZE + ABILITY_BUTTONS_GAP), 0.0)
         }
-    internal val abilityInfoView = AbilityInfoView(AbilityInfoView.WIDTH, resourcesLoader, texts).addTo(body, (WIDTH - AbilityInfoView.WIDTH) / 2, ABILITY_BUTTON_SIZE + SPACING)
+    internal val abilityInfoView = AbilityInfoView(AbilityInfoView.WIDTH, resourcesLoader, messages).addTo(body, (WIDTH - AbilityInfoView.WIDTH) / 2, ABILITY_BUTTON_SIZE + SPACING)
 
     internal val focusAnimator: Animator = body.animator(parallel = true)
 
@@ -123,12 +123,12 @@ open class BattleUnitInfoView(
         private set
 
     init {
-        header.caption(UiText.HUD_HEALTH, CONTENT_X, 58.0)
-        header.caption(UiText.HUD_MANA, CONTENT_X, 76.0)
-        strip.caption(UiText.HUD_HEALTH, STRIP_CONTENT_X, 11.0)
-        strip.caption(UiText.HUD_MANA, STRIP_CONTENT_X, 29.0)
-        strip.caption(UiText.HUD_MOVE, STRIP_ACTIONS_X, 11.0)
-        strip.caption(UiText.HUD_CAST, STRIP_ACTIONS_X, 29.0)
+        header.caption(UiMessage.HUD_HEALTH, CONTENT_X, 58.0)
+        header.caption(UiMessage.HUD_MANA, CONTENT_X, 76.0)
+        strip.caption(UiMessage.HUD_HEALTH, STRIP_CONTENT_X, 11.0)
+        strip.caption(UiMessage.HUD_MANA, STRIP_CONTENT_X, 29.0)
+        strip.caption(UiMessage.HUD_MOVE, STRIP_ACTIONS_X, 11.0)
+        strip.caption(UiMessage.HUD_CAST, STRIP_ACTIONS_X, 29.0)
         visible = false
     }
 
@@ -149,27 +149,27 @@ open class BattleUnitInfoView(
         abilityButtons.forEach(AbilityButtonView::hide)
         abilityInfoView.hide()
         expand()
-        // Avatar, ringed with the team's colour
-        val ring = if (battleUnit.isAlly) HudStyle.ALLY else HudStyle.ENEMY
+        // Avatar, ringed with the player's colour
+        val ring = if (battleUnit.isHumanPlayers) HudStyle.ALLY else HudStyle.ENEMY
         unitPortraitView.display(battleUnit.unitId, ring = ring)
         stripPortraitView.display(battleUnit.unitId, ring = ring)
         // Name, and the turns left after it, only for the summons
-        nameText.text = texts.unitName(battleUnit.unitId)
-        if (remainingTurns != null) remainingTurnsView.display(remainingTurns) else remainingTurnsView.hide()
-        remainingTurnsView.x = nameText.x + nameText.width + 8
+        nameText.text = messages.unitName(battleUnit.unitId)
+        if (remainingTurns != null) remainingSummonDurationView.display(remainingTurns) else remainingSummonDurationView.hide()
+        remainingSummonDurationView.x = nameText.x + nameText.width + 8
         // Remaining turn actions, out of their maximum
         displayTurnActions(turnActions)
         // Health and mana
-        healthBarView.display(remaining = battleUnit.remainingHealthPoints, maximum = battleUnit.maximumHealthPoints)
-        manaBarView.display(remaining = battleUnit.remainingManaPoints, maximum = battleUnit.maximumManaPoints)
-        stripHealthBarView.display(remaining = battleUnit.remainingHealthPoints, maximum = battleUnit.maximumHealthPoints)
-        stripManaBarView.display(remaining = battleUnit.remainingManaPoints, maximum = battleUnit.maximumManaPoints)
+        healthBarView.display(remaining = battleUnit.remainingHealth, maximum = battleUnit.maximumHealth)
+        manaBarView.display(remaining = battleUnit.remainingMana, maximum = battleUnit.maximumMana)
+        stripHealthBarView.display(remaining = battleUnit.remainingHealth, maximum = battleUnit.maximumHealth)
+        stripManaBarView.display(remaining = battleUnit.remainingMana, maximum = battleUnit.maximumMana)
         // Abilities, telling apart the cooldowns from the lack of mana. No casts left darkens none, as the cast points
         // already tell it.
         abilities.forEachIndexed { index, ability ->
             abilityButtons[index].display(
                 abilityId = ability.abilityId,
-                cooldownTurnsLeft = ability.cooldownTurnsLeft,
+                remainingCooldown = ability.remainingCooldown,
                 hasEnoughMana = ability.hasEnoughMana,
                 manaCost = ability.manaCost,
             )
@@ -180,15 +180,15 @@ open class BattleUnitInfoView(
     }
 
     /**
-     * Displays the bag, which opens the inventory of the battle unit. Only the battle units of the human player have one,
+     * Displays the inventory button, which opens the inventory of the battle unit. Only the battle units of the human player have one,
      * the summoned ones excluded. While focused on an ability, it shows once the header is expanded again.
      */
-    open fun displayBag(onBagSelected: () -> kotlin.Unit) {
-        bagButton.display(onBagSelected)
+    open fun displayInventoryButton(onInventoryButtonSelected: () -> kotlin.Unit) {
+        inventoryButton.display(onInventoryButtonSelected)
     }
 
-    open fun hideBag() {
-        bagButton.hide()
+    open fun hideInventoryButton() {
+        inventoryButton.hide()
     }
 
     open fun displayAbilitySelected(index: Int) {
@@ -198,7 +198,7 @@ open class BattleUnitInfoView(
 
     /**
      * Displays what the selected ability does, under the ability buttons, collapsing the header to a strip of what a
-     * cast spends, so the info has room: the name, the turns left, the effects and the bag are hidden.
+     * cast spends, so the info has room: the name, the turns left, the effects and the inventory button are hidden.
      */
     open fun displayAbilityInfo(abilityInfo: AbilityInfoView.AbilityInfo) {
         abilityInfoView.display(abilityInfo)
@@ -247,10 +247,10 @@ open class BattleUnitInfoView(
     }
 
     private fun Container.caption(
-        text: UiText,
+        text: UiMessage,
         x: Double,
         y: Double,
-    ): Text = text(texts[text], textSize = CAPTION_TEXT_SIZE, color = HudStyle.FAINT) { xy(x, y) }
+    ): Text = text(messages[text], textSize = CAPTION_TEXT_SIZE, color = HudStyle.FAINT) { xy(x, y) }
 
     private fun <T : korlibs.korge.view.View> T.addTo(
         parent: Container,

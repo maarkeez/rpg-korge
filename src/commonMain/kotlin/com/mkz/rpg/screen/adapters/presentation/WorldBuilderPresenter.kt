@@ -26,7 +26,7 @@ class WorldBuilderPresenter(
     private val worldBuilderApi: WorldBuilderApi,
     private val battlefieldApi: BattlefieldApi,
     private val terrainApi: TerrainApi,
-    private val texts: Texts,
+    private val messages: Messages,
     private val clipboard: Clipboard,
     private val worldFilePicker: WorldFilePicker,
     private val coroutineScope: CoroutineScope,
@@ -48,7 +48,7 @@ class WorldBuilderPresenter(
             },
             eventBus.subscribe<WorldBuilderEvent.WorldImported> {
                 displayWorld()
-                infoView.displayInfo(texts[UiText.WORLD_BUILDER_WORLD_IMPORTED])
+                infoView.displayInfo(messages[UiMessage.WORLD_BUILDER_WORLD_IMPORTED])
             },
             eventBus.subscribe<WorldBuilderEvent.WorldImportRejected> { event -> infoView.displayError(importRejectedMessage(event)) },
         )
@@ -56,7 +56,7 @@ class WorldBuilderPresenter(
     init {
         battlefieldView.setDelegate(this)
         hudView.setDelegate(this)
-        menuView.displayOptions(listOf(WorldBuilderMenuView.Option(label = texts[UiText.WORLD_BUILDER_IMPORT]) { importWorld() }))
+        menuView.displayOptions(listOf(WorldBuilderMenuView.Option(label = messages[UiMessage.WORLD_BUILDER_IMPORT]) { importWorld() }))
         displayExportAndBack()
     }
 
@@ -101,7 +101,7 @@ class WorldBuilderPresenter(
         val toml = worldBuilderApi.exportWorld()
         coroutineScope.launchImmediately {
             clipboard.copy(toml)
-            infoView.displayInfo(texts[UiText.WORLD_BUILDER_WORLD_COPIED])
+            infoView.displayInfo(messages[UiMessage.WORLD_BUILDER_WORLD_COPIED])
         }
     }
 
@@ -115,7 +115,7 @@ class WorldBuilderPresenter(
                 } catch (exception: CancellationException) {
                     throw exception
                 } catch (_: Exception) {
-                    infoView.displayError(texts[UiText.WORLD_BUILDER_FILE_NOT_READ])
+                    infoView.displayError(messages[UiMessage.WORLD_BUILDER_FILE_NOT_READ])
                     return@launchImmediately
                 }
             if (text != null) worldBuilderApi.importWorld(text)
@@ -124,20 +124,20 @@ class WorldBuilderPresenter(
 
     private fun importRejectedMessage(event: WorldBuilderEvent.WorldImportRejected): String =
         when (event.reason) {
-            Reason.NOT_A_WORLD -> texts[UiText.WORLD_BUILDER_NOT_A_WORLD]
+            Reason.NOT_A_WORLD -> messages[UiMessage.WORLD_BUILDER_NOT_A_WORLD]
             Reason.SIZE_OUT_OF_RANGE ->
-                texts[UiText.WORLD_BUILDER_SIZE_OUT_OF_RANGE, "minimum" to WorldBuilder.MINIMUM_SIZE, "maximum" to WorldBuilder.MAXIMUM_SIZE]
-            Reason.UNKNOWN_TERRAIN -> texts[UiText.WORLD_BUILDER_UNKNOWN_TERRAIN, "terrain" to event.terrainId.orEmpty()]
+                messages[UiMessage.WORLD_BUILDER_SIZE_OUT_OF_RANGE, "minimum" to WorldBuilder.MINIMUM_SIZE, "maximum" to WorldBuilder.MAXIMUM_SIZE]
+            Reason.UNKNOWN_TERRAIN -> messages[UiMessage.WORLD_BUILDER_UNKNOWN_TERRAIN, "terrain" to event.terrainId.orEmpty()]
             Reason.FORBIDDEN_ADJACENT_TERRAINS -> forbiddenAdjacentTerrainsMessage(event.terrainId!!, event.adjacentTerrainId!!)
         }
 
     private fun forbiddenAdjacentTerrainsMessage(
         terrainId: String,
         adjacentTerrainId: String,
-    ): String = texts[UiText.WORLD_BUILDER_FORBIDDEN_ADJACENT_TERRAINS, "terrain" to texts.terrainName(terrainId), "neighbour" to texts.terrainName(adjacentTerrainId)]
+    ): String = messages[UiMessage.WORLD_BUILDER_FORBIDDEN_ADJACENT_TERRAINS, "terrain" to messages.terrainName(terrainId), "adjacentTerrain" to messages.terrainName(adjacentTerrainId)]
 
     private fun askToLeave() {
-        infoView.displayInfo(texts[UiText.WORLD_BUILDER_WORLD_LOST_WHEN_LEAVING])
+        infoView.displayInfo(messages[UiMessage.WORLD_BUILDER_WORLD_LOST_WHEN_LEAVING])
         callToActionView.displayLeaveConfirmation(onLeft = onLeft, onStayed = { displayExportAndBack() })
     }
 

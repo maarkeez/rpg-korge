@@ -5,8 +5,8 @@ import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.save.adapters.presentation.SaveApi
 import com.mkz.rpg.save.domain.Save.Dto.SlotStateDto
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
+import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.gameSceneTimeline
+import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.playLongStep
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
 import com.mkz.rpg.unit.domain.UnitMother.unit
@@ -40,12 +40,12 @@ class PausePresenterTest {
             partySize = { 1 },
             now = { DateTime.nowUnixMillis() },
         )
-    private val pauseView = PauseView(TextsMother.texts())
-    private val saveSlotsView = SaveSlotsView(TextsMother.texts())
+    private val pauseView = PauseView(MessagesMother.messages())
+    private val saveSlotsView = SaveSlotsView(MessagesMother.messages())
     private val confirmDialogView = ConfirmDialogView()
-    private val callToActionView = FakePlayerCallToActionView()
+    private val callToActionView = FakeCallToActionView()
     private var quits = 0
-    private val presenter = PausePresenter(pauseView, saveSlotsView, confirmDialogView, callToActionView, apis.partyApi, saveApi, TextsMother.texts(), battleSceneTimeline()) { quits++ }
+    private val presenter = PausePresenter(pauseView, saveSlotsView, confirmDialogView, callToActionView, apis.partyApi, saveApi, MessagesMother.messages(), gameSceneTimeline()) { quits++ }
 
     private fun openPause() {
         apis.partyApi.openPause()
@@ -185,8 +185,8 @@ class PausePresenterTest {
     @Test
     fun `PausePresenter should do nothing when a choice is tapped while the timeline is playing`() {
         // Given
-        val timeline = battleSceneTimeline()
-        val presenter = PausePresenter(pauseView, saveSlotsView, confirmDialogView, callToActionView, apis.partyApi, saveApi, TextsMother.texts(), timeline) { quits++ }
+        val timeline = gameSceneTimeline()
+        val presenter = PausePresenter(pauseView, saveSlotsView, confirmDialogView, callToActionView, apis.partyApi, saveApi, MessagesMother.messages(), timeline) { quits++ }
         apis.partyApi.openPause()
         apis.eventBus.dispatch()
         presenter.open()

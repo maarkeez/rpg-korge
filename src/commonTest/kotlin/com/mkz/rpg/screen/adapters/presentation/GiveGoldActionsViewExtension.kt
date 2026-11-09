@@ -13,4 +13,4 @@ fun GiveGoldActionsView.isAllEnabled(): Boolean = allButton.enabled
 fun GiveGoldActionsView.isAllFaded(): Boolean = allButton.isFaded()
 
 /** Whether every button is as tall as the finish turn, so all the actions of the game are on one level. */
-fun GiveGoldActionsView.isAsTallAsFinishTurn(): Boolean = listOf(cancelButton, allButton, giveButton).all { button -> button.height == UIButton.DEFAULT_SIZE.height }
+fun GiveGoldActionsView.isAsTallAsFinishPlayerTurn(): Boolean = listOf(cancelButton, allButton, giveButton).all { button -> button.height == UIButton.DEFAULT_SIZE.height }

@@ -136,31 +136,31 @@ object BattleUnitInfoViewStories : StoryBinding {
         val battleUnit =
             BattleUnitInfo(
                 unitId = args.text(UNIT),
-                remainingHealthPoints = args.int(HEALTH),
-                maximumHealthPoints = MAXIMUM_HEALTH,
-                remainingManaPoints = args.int(MANA),
-                maximumManaPoints = MAXIMUM_MANA,
+                remainingHealth = args.int(HEALTH),
+                maximumHealth = MAXIMUM_HEALTH,
+                remainingMana = args.int(MANA),
+                maximumMana = MAXIMUM_MANA,
                 // The effects with an icon, as many times as needed.
                 effectIds = List(args.int(EFFECTS)) { index -> effectIds[index % effectIds.size] },
-                isAlly = true,
+                isHumanPlayers = true,
             )
         val abilities =
             List(args.int(ABILITIES)) { index ->
                 BattleUnitInfoView.Ability(
                     abilityId = abilityIds[index % abilityIds.size],
-                    cooldownTurnsLeft = if (index % 3 == 1) COOLDOWN_TURNS_LEFT else 0,
+                    remainingCooldown = if (index % 3 == 1) COOLDOWN_TURNS_LEFT else 0,
                     hasEnoughMana = index % 3 != 2,
                     manaCost = MANA_COST,
                 )
             }
-        return BattleUnitInfoView(context.resourcesLoader, context.texts).apply {
+        return BattleUnitInfoView(context.resourcesLoader, context.messages).apply {
             setDelegate(
                 object : AbilityButtonView.Delegate {
                     override fun abilitySelected(abilityId: String) =
                         context.action("abilitySelected", abilityId, setArg = SELECTED_ABILITY to ArgDto.int(abilities.indexOfFirst { ability -> ability.abilityId == abilityId } + 1))
                 },
             )
-            displayBag(onBagSelected = { context.action("onBagSelected") })
+            displayInventoryButton(onInventoryButtonSelected = { context.action("onInventoryButtonSelected") })
             display(
                 battleUnit = battleUnit,
                 turnActions =
@@ -176,9 +176,9 @@ object BattleUnitInfoViewStories : StoryBinding {
             abilities.getOrNull(args.int(SELECTED_ABILITY) - 1)?.let { ability ->
                 displayAbilitySelected(abilities.indexOf(ability))
                 // Its reason as the button tells it: in cooldown, or one mana short.
-                val manaCost = AbilityInfoViewStories.abilityInfo(ability.abilityId, cooldownTurnsLeft = 0, remainingMana = Int.MAX_VALUE).manaCost
+                val manaCost = AbilityInfoViewStories.abilityInfo(ability.abilityId, remainingCooldown = 0, remainingMana = Int.MAX_VALUE).manaCost
                 val remainingMana = if (ability.hasEnoughMana) Int.MAX_VALUE else minOf(args.int(MANA), manaCost - 1)
-                displayAbilityInfo(AbilityInfoViewStories.abilityInfo(ability.abilityId, ability.cooldownTurnsLeft, remainingMana))
+                displayAbilityInfo(AbilityInfoViewStories.abilityInfo(ability.abilityId, ability.remainingCooldown, remainingMana))
             }
         }
     }

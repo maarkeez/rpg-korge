@@ -12,8 +12,8 @@ import com.mkz.rpg.npc.domain.NpcMother.npc
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
+import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.gameSceneTimeline
+import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.playLongStep
 import com.mkz.rpg.screen.adapters.presentation.ShopView.Mode
 import com.mkz.rpg.shared.adapters.presentation.GameButton
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
@@ -51,10 +51,10 @@ class ShopPresenterTest {
             npcs = listOf(merchant),
         ).also(SubdomainApis::initialise)
     private val eventBus = apis.eventBus
-    private val shopView = ShopView(BattleSceneResourcesLoader(), TextsMother.texts())
+    private val shopView = ShopView(GameSceneResourcesLoader(), MessagesMother.messages())
     private val battlefieldView = FakeBattlefieldView()
-    private val timeline = battleSceneTimeline()
-    private val callToActionView = FakePlayerCallToActionView()
+    private val timeline = gameSceneTimeline()
+    private val callToActionView = FakeCallToActionView()
     private val presenter =
         ShopPresenter(
             shopView,
@@ -65,7 +65,7 @@ class ShopPresenterTest {
             apis.lootableItemApi,
             apis.battleUnitApi,
             apis.battlefieldApi,
-            TextsMother.texts(),
+            MessagesMother.messages(),
             timeline,
             eventBus,
         )

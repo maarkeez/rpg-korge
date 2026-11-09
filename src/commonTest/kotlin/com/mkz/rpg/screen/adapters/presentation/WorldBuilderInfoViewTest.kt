@@ -32,7 +32,7 @@ class WorldBuilderInfoViewTest : ViewsForTesting() {
     fun `DisplaySize should display the title and the world size when the size is displayed`() =
         sharedViewsTest {
             // Given
-            val infoView = WorldBuilderInfoView(TextsMother.texts())
+            val infoView = WorldBuilderInfoView(MessagesMother.messages())
             // When
             infoView.displaySize(rows = 16, columns = 24)
             // Then
@@ -44,7 +44,7 @@ class WorldBuilderInfoViewTest : ViewsForTesting() {
     fun `DisplayError should pop the error in the subtitle and then display the size again when an error is displayed`() =
         sharedViewsTest {
             // Given
-            val infoView = WorldBuilderInfoView(TextsMother.texts())
+            val infoView = WorldBuilderInfoView(MessagesMother.messages())
             addChild(infoView)
             infoView.displaySize(rows = 16, columns = 16)
             // When
@@ -66,7 +66,7 @@ class WorldBuilderInfoViewTest : ViewsForTesting() {
     fun `DisplayInfo should display the information in the subtitle when information is displayed`() =
         sharedViewsTest {
             // Given
-            val infoView = WorldBuilderInfoView(TextsMother.texts())
+            val infoView = WorldBuilderInfoView(MessagesMother.messages())
             addChild(infoView)
             // When
             infoView.displayInfo("World copied to the clipboard")
@@ -79,7 +79,7 @@ class WorldBuilderInfoViewTest : ViewsForTesting() {
     fun `DisplaySize should keep the message and display the new size after it when the size changes while a message is displayed`() =
         sharedViewsTest {
             // Given
-            val infoView = WorldBuilderInfoView(TextsMother.texts())
+            val infoView = WorldBuilderInfoView(MessagesMother.messages())
             addChild(infoView)
             infoView.displaySize(rows = 16, columns = 16)
             infoView.displayError("Water can not be next to lava")
@@ -96,7 +96,7 @@ class WorldBuilderInfoViewTest : ViewsForTesting() {
     fun `DisplayError should replace the previous message when another message is displayed`() =
         sharedViewsTest {
             // Given
-            val infoView = WorldBuilderInfoView(TextsMother.texts())
+            val infoView = WorldBuilderInfoView(MessagesMother.messages())
             addChild(infoView)
             infoView.displaySize(rows = 16, columns = 16)
             infoView.displayError("Water can not be next to lava")

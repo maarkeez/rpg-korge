@@ -107,7 +107,7 @@ object InventoryViewStories : StoryBinding {
         val partySize = args.int(PARTY_SIZE)
         // The party member is one of the party, however small.
         val partyIndex = args.int(PARTY_INDEX).coerceAtMost(partySize - 1)
-        return InventoryView(context.resourcesLoader, context.texts).apply {
+        return InventoryView(context.resourcesLoader, context.messages).apply {
             setDelegate(
                 object : InventoryView.Delegate {
                     // Tapping the selected item, or an empty slot, clears the selection.

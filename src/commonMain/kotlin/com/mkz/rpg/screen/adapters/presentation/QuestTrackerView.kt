@@ -27,7 +27,7 @@ import korlibs.time.milliseconds
  * tapping it does nothing.
  */
 open class QuestTrackerView(
-    private val texts: Texts,
+    private val messages: Messages,
 ) : UIContainer(Size(390, 33)) {
     companion object {
         // When the task changes, the capsule grows to this scale and shrinks back.
@@ -105,8 +105,8 @@ open class QuestTrackerView(
 
     private fun draw(quest: QuestInfo) {
         val task = quest.currentTask
-        val label = fitted(if (quest.isCompleted) texts[UiText.QUEST_TRACKER_COMPLETED] else task.text, TEXT_SIZE, MAXIMUM_TEXT_WIDTH)
-        val count = if (!quest.isCompleted && task.count > 1) "${task.progress}/${task.count}" else null
+        val label = fitted(if (quest.isCompleted) messages[UiMessage.QUEST_TRACKER_COMPLETED] else task.text, TEXT_SIZE, MAXIMUM_TEXT_WIDTH)
+        val count = if (!quest.isCompleted && task.requiredDefeats > 1) "${task.defeatsCounted}/${task.requiredDefeats}" else null
         val labelWidth = widthOf(label, TEXT_SIZE)
         val countWidth = count?.let { value -> TEXT_SPACING + widthOf(value, TEXT_SIZE) } ?: 0.0
         val chevronWidth = if (isTappable) CHEVRON_SPACING + CHEVRON_SIZE else 0.0

@@ -1,7 +1,7 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.ShopView
-import com.mkz.rpg.screen.adapters.presentation.UiText
+import com.mkz.rpg.screen.adapters.presentation.UiMessage
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
@@ -125,7 +125,7 @@ object ShopViewStories : StoryBinding {
         // A selected slot with no item selects none.
         val selectedSlot = args.text(SELECTED_SLOT).toIntOrNull()?.takeIf { index -> index in items.indices }
         val buyerIndex = args.int(BUYER_INDEX)
-        return ShopView(context.resourcesLoader, context.texts).apply {
+        return ShopView(context.resourcesLoader, context.messages).apply {
             setDelegate(
                 object : ShopView.Delegate {
                     // As in the game, tapping the selected item, or an empty slot, clears the selection.
@@ -154,10 +154,10 @@ object ShopViewStories : StoryBinding {
                     ),
             )
             if (selectedSlot == null) {
-                displayHint(context.texts[hintOf(mode, items)])
+                displayHint(context.messages[hintOf(mode, items)])
             } else {
                 selectSlot(selectedSlot)
-                displayItem(itemName = context.texts.lootableItemName(items[selectedSlot]), itemPrice = if (mode == ShopView.Mode.BUY) BUY_PRICE else SELL_PRICE)
+                displayItem(itemName = context.messages.lootableItemName(items[selectedSlot]), itemPrice = if (mode == ShopView.Mode.BUY) BUY_PRICE else SELL_PRICE)
             }
         }
     }
@@ -166,10 +166,10 @@ object ShopViewStories : StoryBinding {
     private fun hintOf(
         mode: ShopView.Mode,
         items: List<String>,
-    ): UiText =
+    ): UiMessage =
         when {
-            mode == ShopView.Mode.BUY -> UiText.SHOP_TAP_TO_BUY
-            items.isEmpty() -> UiText.SHOP_NOTHING_TO_SELL
-            else -> UiText.SHOP_TAP_TO_SELL
+            mode == ShopView.Mode.BUY -> UiMessage.SHOP_TAP_TO_BUY
+            items.isEmpty() -> UiMessage.SHOP_NOTHING_TO_SELL
+            else -> UiMessage.SHOP_TAP_TO_SELL
         }
 }

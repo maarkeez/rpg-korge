@@ -73,7 +73,7 @@ object WorldBuilderHudViewStories : StoryBinding {
             context.terrainIds().map { terrainId ->
                 WorldBuilderHudView.TerrainOption(terrainId = terrainId, bitmap = battlefieldView.terrainTileBitmap(terrainId, terrainTransition = null))
             }
-        return WorldBuilderHudView(context.texts).apply {
+        return WorldBuilderHudView(context.messages).apply {
             setDelegate(
                 object : WorldBuilderHudView.Delegate {
                     // A step changes the rows or the columns, which the world builder allows within its sizes.

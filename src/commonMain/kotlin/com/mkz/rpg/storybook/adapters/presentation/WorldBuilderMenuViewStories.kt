@@ -1,6 +1,6 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
-import com.mkz.rpg.screen.adapters.presentation.UiText
+import com.mkz.rpg.screen.adapters.presentation.UiMessage
 import com.mkz.rpg.screen.adapters.presentation.WorldBuilderMenuView
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
@@ -12,7 +12,7 @@ import korlibs.korge.view.addUpdater
 import korlibs.math.geom.Size
 
 /**
- * The stories of [WorldBuilderMenuView], with the texts of the language global. As in the game, choosing an option closes
+ * The stories of [WorldBuilderMenuView], with the messages of the language global. As in the game, choosing an option closes
  * the menu, through its args. The menu is shown in the middle of the phone instead of its top right corner, so the
  * taps out of it, which close it in the game, do not reach the whole screen.
  */
@@ -58,7 +58,7 @@ object WorldBuilderMenuViewStories : StoryBinding {
         context: StoryContext,
     ): View {
         // The first option is the one of the world builder, the others are there to see a longer list.
-        val labels = listOf(context.texts[UiText.WORLD_BUILDER_IMPORT]) + (2..args.int(OPTIONS)).map { number -> "Option $number" }
+        val labels = listOf(context.messages[UiMessage.WORLD_BUILDER_IMPORT]) + (2..args.int(OPTIONS)).map { number -> "Option $number" }
         val menuView =
             WorldBuilderMenuView().apply {
                 displayOptions(

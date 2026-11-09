@@ -14,7 +14,7 @@ import korlibs.math.geom.Size
 /** One storage space of the inventory: empty, or the icon of the stored item, framed in gold while it is equipped. */
 class InventorySlotView(
     private val slotSize: Size,
-    private val resourcesLoader: BattleSceneResourcesLoader,
+    private val resourcesLoader: GameSceneResourcesLoader,
 ) : UIButton(slotSize) {
     companion object {
         const val ITEM = "ITEM"

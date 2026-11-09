@@ -11,7 +11,7 @@ import korlibs.math.geom.Size
 /** An effect icon at 1x in a rounded chip, outlined in gold when it is new. */
 class EffectView(
     size: Size,
-    private val resourcesLoader: BattleSceneResourcesLoader,
+    private val resourcesLoader: GameSceneResourcesLoader,
 ) : UIContainer(size) {
     companion object {
         const val EFFECT = "EFFECT"

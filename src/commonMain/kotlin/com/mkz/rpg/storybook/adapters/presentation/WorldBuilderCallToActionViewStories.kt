@@ -47,7 +47,7 @@ object WorldBuilderCallToActionViewStories : StoryBinding {
         args: Args,
         context: StoryContext,
     ): View =
-        WorldBuilderCallToActionView(context.texts).apply {
+        WorldBuilderCallToActionView(context.messages).apply {
             when (CallToAction.valueOf(args.text(CALL_TO_ACTION))) {
                 CallToAction.EXPORT_AND_BACK ->
                     displayExportAndBack(

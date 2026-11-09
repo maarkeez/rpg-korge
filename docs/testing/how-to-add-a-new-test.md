@@ -166,9 +166,9 @@ View tests are a bit different from the rest of the tests because they need to r
 
 ### View page objects
 
-Each view has a page object: a `<View>Extension.kt` file next to its test (e.g.: `BattleInfoViewExtension.kt` for `BattleInfoView`). It is the only place that knows how the view is built, so changing the view structure only requires changing its page object, not its tests.
+Each view has a page object: a `<View>Extension.kt` file next to its test (e.g.: `BannerViewExtension.kt` for `BannerView`). It is the only place that knows how the view is built, so changing the view structure only requires changing its page object, not its tests.
 
-* Queries **MUST** be extension functions on the view, named in terms of what the player sees (e.g.: `fun BattleInfoView.roundText(): String?`, `fun BattlefieldView.hasBattleUnitAt(row, column): Boolean`).
+* Queries **MUST** be extension functions on the view, named in terms of what the player sees (e.g.: `fun BannerView.roundText(): String?`, `fun BattlefieldView.hasBattleUnitAt(row, column): Boolean`).
 * Actions **MUST** be extension functions on `ViewsForTesting` that receive the view, and **MUST** click with the mouse through `clickOn(view)` (e.g.: `suspend fun ViewsForTesting.clickTile(battlefieldView, row, column)`). The view **MUST** be added to the stage (`addChild(view)`) before clicking it.
 * The view children used by the page object **SHOULD** be declared `internal` in the production code, so the page object is typed and fails to compile when the view structure changes.
 * Page objects of composite views **SHOULD** reuse the page objects of their child views (e.g.: `BattleUnitInfoView.abilityButtons()` plus `AbilityButtonView.isSelected()`).
@@ -177,31 +177,31 @@ Each view has a page object: a `<View>Extension.kt` file next to its test (e.g.:
 Here is an example of a page object:
 
 ```kotlin
-// src/commonTest/kotlin/com/mkz/rpg/screen/adapters/presentation/FinishTurnViewExtension.kt
+// src/commonTest/kotlin/com/mkz/rpg/screen/adapters/presentation/FinishPlayerTurnViewExtension.kt
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.clickOn
 import korlibs.korge.tests.ViewsForTesting
 
-// Page object of [FinishTurnView].
+// Page object of [FinishPlayerTurnView].
 
-fun FinishTurnView.buttonText(): String = button.text
+fun FinishPlayerTurnView.buttonText(): String = button.text
 
-suspend fun ViewsForTesting.clickFinishTurn(finishTurnView: FinishTurnView) = clickOn(finishTurnView.button)
+suspend fun ViewsForTesting.clickFinishPlayerTurn(finishPlayerTurnView: FinishPlayerTurnView) = clickOn(finishPlayerTurnView.button)
 ```
 
 And a view test using it:
 
 ```kotlin
-class FinishTurnViewTest : ViewsForTesting() {
+class FinishPlayerTurnViewTest : ViewsForTesting() {
     @Test
     fun `Init should display finish turn text when is initialized`() =
         sharedViewsTest {
             // Given
             // When
-            val finishTurnView = FinishTurnView(onTurnFinished = {})
+            val finishPlayerTurnView = FinishPlayerTurnView(onPlayerTurnFinished = {})
             // Then
-            finishTurnView.buttonText() shouldBe "Finish turn"
+            finishPlayerTurnView.buttonText() shouldBe "Finish turn"
         }
 
     @Test
@@ -209,10 +209,10 @@ class FinishTurnViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             var turnFinished = false
-            val finishTurnView = FinishTurnView(onTurnFinished = { turnFinished = true })
-            addChild(finishTurnView)
+            val finishPlayerTurnView = FinishPlayerTurnView(onPlayerTurnFinished = { turnFinished = true })
+            addChild(finishPlayerTurnView)
             // When
-            clickFinishTurn(finishTurnView)
+            clickFinishPlayerTurn(finishPlayerTurnView)
             // Then
             turnFinished.shouldBeTrue()
         }
@@ -230,27 +230,27 @@ Some view functions take time and suspend (e.g.: `BattlefieldView.moveBattleUnit
 ### Presenters
 
 - Presenter tests MUST use the real subdomain APIs through [`SubdomainApis`](../../src/commonTest/kotlin/com/mkz/rpg/shared/adapters/presentation/SubdomainApis.kt), which wires them on one event bus as the game does, with fake loaders that load the given data. Call `initialise()` to store the data, deploy the battle units and start the battle, before creating the presenter.
-- Presenter tests MUST use the fake views (e.g.: `FakeBattlefieldView`, `FakeBattleUnitInfoView`), and assert what the fakes recorded (e.g.: `battlefieldView.displayedBattleUnits`). The player actions are simulated by calling the delegate or the callbacks the presenter gave to the fake (e.g.: `playerCallToActionView.onTurnFinished`).
+- Presenter tests MUST use the fake views (e.g.: `FakeBattlefieldView`, `FakeBattleUnitInfoView`), and assert what the fakes recorded (e.g.: `battlefieldView.displayedBattleUnits`). The player actions are simulated by calling the delegate or the callbacks the presenter gave to the fake (e.g.: `callToActionView.onPlayerTurnFinished`).
 
 ```kotlin
-class FinishTurnPresenterTest {
+class FinishPlayerTurnPresenterTest {
     // The battle has started with the human player turn.
     private val apis =
         SubdomainApis(
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
             playerOrder = listOf("human", "cpu"),
         ).also(SubdomainApis::initialise)
-    private val playerCallToActionView = FakePlayerCallToActionView()
-    private val timeline = battleSceneTimeline()
+    private val callToActionView = FakeCallToActionView()
+    private val timeline = gameSceneTimeline()
 
     @Test
-    fun `FinishTurn should finish the player turn when the player finishes the turn`() {
+    fun `FinishPlayerTurn should finish the player turn when the player finishes the turn`() {
         // Given
-        FinishTurnPresenter(playerCallToActionView, apis.battleApi, apis.playerApi, timeline, apis.eventBus)
+        FinishPlayerTurnPresenter(callToActionView, apis.battleApi, apis.playerApi, timeline, apis.eventBus)
         apis.eventBus.publish(PlayerTurnStarted(playerId = "human", battleUnitIds = emptySet()))
         apis.eventBus.dispatch()
         // When
-        playerCallToActionView.onTurnFinished.shouldNotBeNull().invoke()
+        callToActionView.onPlayerTurnFinished.shouldNotBeNull().invoke()
         apis.eventBus.dispatch()
         // Then
         apis.battleApi.searchBattle()?.currentPlayerId shouldBe "cpu"
@@ -258,7 +258,7 @@ class FinishTurnPresenterTest {
 }
 ```
 
-Presenters draw through the [presentation timeline](../architecture/presentation-timeline.md). Their tests use `BattleSceneTimelineMother.battleSceneTimeline()`, which plays the steps straight away. To check that something waits for the previous steps, start a step that keeps the timeline playing with `timeline.playLongStep()`, and complete it later.
+Presenters draw through the [presentation timeline](../architecture/presentation-timeline.md). Their tests use `GameSceneTimelineMother.gameSceneTimeline()`, which plays the steps straight away. To check that something waits for the previous steps, start a step that keeps the timeline playing with `timeline.playLongStep()`, and complete it later.
 
 ## Test example - Use case acceptance test
 
@@ -324,8 +324,8 @@ End-to-end tests play the game as a player would: they boot the game headless, c
 - They MUST be implemented under `com.mkz.rpg.shared.adapters.e2e` test package
 - The test class MUST extend `korlibs.korge.tests.ViewsForTesting(windowSize = GAME_WINDOW_SIZE)` and each test MUST start with [`sharedViewsTest`](../../src/commonTest/kotlin/com/mkz/rpg/shared/adapters/presentation/SharedViewsTestExtension.kt), as the view tests do. It runs the game without a window or a GPU on both the JVM and JS, so it runs in the CI.
 - They MUST boot the app using `com.mkz.rpg.startApp()`, the same function used by `main`.
-- They MUST find the scene views through the [`BattleScene` page object](../../src/commonTest/kotlin/com/mkz/rpg/screen/adapters/presentation/BattleSceneExtension.kt) (e.g.: `battlefieldView()`), and interact with them and assert what is displayed through their view page objects (e.g.: `clickTile(...)`, `hasBattleUnitAt(...)`). See [View page objects](#view-page-objects).
-- They MUST wait until the human player can act (`canHumanPlayerAct()`: the turn has been announced and the finish turn is enabled) before clicking, as the player can not act on the battle scene while it replays the battle. Waiting for what is displayed only is not enough: the last animation may have finished while its timeline step has not. See [Presentation timeline](../architecture/presentation-timeline.md).
+- They MUST find the scene views through the [`GameScene` page object](../../src/commonTest/kotlin/com/mkz/rpg/screen/adapters/presentation/GameSceneExtension.kt) (e.g.: `battlefieldView()`), and interact with them and assert what is displayed through their view page objects (e.g.: `clickTile(...)`, `hasBattleUnitAt(...)`). See [View page objects](#view-page-objects).
+- They MUST wait until the human player can act (`canHumanPlayerAct()`: the turn has been announced and the finish turn is enabled) before clicking, as the player can not act on the game screen while it replays the battle. Waiting for what is displayed only is not enough: the last animation may have finished while its timeline step has not. See [Presentation timeline](../architecture/presentation-timeline.md).
 - They MUST wait for the game to react using the shared [`waitUntil`](../../src/commonTest/kotlin/com/mkz/rpg/shared/adapters/e2e/EndToEndExtension.kt) helper, which is bounded by real time. The game loads its resources asynchronously in real time, while the frames are simulated much faster than that, so a fixed number of frames is not enough.
 
 To see what the player sees at any step of an end-to-end test, see [How to take a snapshot of the game during an end-to-end test](how-to-take-a-game-snapshot.md).
@@ -371,4 +371,4 @@ The tests in `src/commonTest` run on both the JVM and JS, so they MUST only depe
 
 All the project tests can be run using `./gradlew clean` followed by `./gradlew jvmTest jsTest` (cleaning in the same run fails the JS tasks). The shared tests run on JS with `./gradlew jsTest`, which needs Chrome. Both run in the CI.
 
-A single test class can be run on JS with `./gradlew jsBrowserTest --tests '<fully qualified class name>'` (e.g.: `com.mkz.rpg.screen.adapters.presentation.FinishTurnViewTest`). Wildcards (e.g.: `'*FinishTurnViewTest'`) run no test on JS, and the build still succeeds.
+A single test class can be run on JS with `./gradlew jsBrowserTest --tests '<fully qualified class name>'` (e.g.: `com.mkz.rpg.screen.adapters.presentation.FinishPlayerTurnViewTest`). Wildcards (e.g.: `'*FinishPlayerTurnViewTest'`) run no test on JS, and the build still succeeds.

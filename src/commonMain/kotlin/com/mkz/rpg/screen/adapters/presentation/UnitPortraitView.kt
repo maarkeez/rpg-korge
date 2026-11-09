@@ -12,12 +12,12 @@ import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
 
 /**
- * The portrait of a unit in a dark rounded slot, ringed with a colour when given, e.g.: its team's. Portrait scale: how
+ * The portrait of a unit in a dark rounded slot, ringed with a colour when given, e.g.: its player's. Portrait scale: how
  * many screen pixels each pixel of the 32x32 portrait takes, a whole number so it stays sharp.
  */
 class UnitPortraitView(
     size: Size,
-    private val resourcesLoader: BattleSceneResourcesLoader,
+    private val resourcesLoader: GameSceneResourcesLoader,
     private val portraitScale: Double = 3.0,
 ) : UIContainer(size) {
     companion object {

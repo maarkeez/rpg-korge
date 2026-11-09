@@ -40,8 +40,8 @@ class StorybookPresenter(
             eventBus.subscribe<ArgChanged> { displayStory() },
             eventBus.subscribe<ArgsReset> { displayStory() },
             eventBus.subscribe<GlobalChanged> { displayStory() },
-            eventBus.subscribe<ActionRecorded> { displayActions() },
-            eventBus.subscribe<ActionsCleared> { displayActions() },
+            eventBus.subscribe<ActionRecorded> { displayButtons() },
+            eventBus.subscribe<ActionsCleared> { displayButtons() },
         )
 
     init {
@@ -89,17 +89,17 @@ class StorybookPresenter(
         val component = storybookApi.searchCatalogue().first { component -> story in component.stories }
         val args = storybookApi.searchArgs()
         val languageCode = requireNotNull(storybookApi.searchGlobals().getValue(StorybookApi.LANGUAGE_GLOBAL).text)
-        storyContext.texts.selectLanguage(languageCode)
+        storyContext.messages.selectLanguage(languageCode)
         sidebarView.selectStory(story.id)
-        toolbarView.display(storyContext.texts.languages(), languageCode)
+        toolbarView.display(storyContext.messages.languages(), languageCode)
         storyInfoView.display(component, story)
         controlsView.display(component.controls, args)
-        displayActions()
+        displayButtons()
         phoneFrameView.display(storybookApi.bindingOf(component.id).render(Args(args), storyContext))
         storybookPage.storyRendered(story.id)
     }
 
-    private fun displayActions() {
+    private fun displayButtons() {
         actionsView.display(storybookApi.searchActions())
     }
 

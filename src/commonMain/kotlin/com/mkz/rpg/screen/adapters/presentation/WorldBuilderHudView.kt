@@ -25,7 +25,7 @@ import korlibs.math.geom.Size
 
 /** The world builder controls: the world size, and the terrain the tiles are painted with. */
 open class WorldBuilderHudView(
-    texts: Texts,
+    messages: Messages,
 ) : UIContainer(Size(width = 390, height = 300)) {
     companion object {
         // The steps a size stepper changes the size by, so a large world takes a few taps.
@@ -71,9 +71,9 @@ open class WorldBuilderHudView(
         lateinit var rowsStepper: Pair<UIText, Map<Int, GameButton>>
         lateinit var columnsStepper: Pair<UIText, Map<Int, GameButton>>
         uiVerticalStack(padding = 10.0) {
-            rowsStepper = stepper(label = texts[UiText.WORLD_BUILDER_HUD_ROWS]) { step -> delegate?.sizeChanged(rows = rows + step, columns = columns) }
-            columnsStepper = stepper(label = texts[UiText.WORLD_BUILDER_HUD_COLUMNS]) { step -> delegate?.sizeChanged(rows = rows, columns = columns + step) }
-            uiText(text = texts[UiText.WORLD_BUILDER_HUD_TERRAIN], size = Size(width = LABEL_WIDTH, height = 20)) { styles.textSize = 15.0 }
+            rowsStepper = stepper(label = messages[UiMessage.WORLD_BUILDER_HUD_ROWS]) { step -> delegate?.sizeChanged(rows = rows + step, columns = columns) }
+            columnsStepper = stepper(label = messages[UiMessage.WORLD_BUILDER_HUD_COLUMNS]) { step -> delegate?.sizeChanged(rows = rows, columns = columns + step) }
+            uiText(text = messages[UiMessage.WORLD_BUILDER_HUD_TERRAIN], size = Size(width = LABEL_WIDTH, height = 20)) { styles.textSize = 15.0 }
             terrainPalette = container()
         }
         rowsValue = rowsStepper.first

@@ -31,15 +31,15 @@ class WorldBuilderScene(
         const val MENU_MARGIN = 6.0
     }
 
-    // Like the battle scene, the scene coroutines run on the game window event loop, also in the headless tests.
+    // Like the game scene, the scene coroutines run on the game window event loop, also in the headless tests.
     override val coroutineContext by lazy { super.coroutineContext + views.gameWindow.coroutineDispatcher }
 
-    private val texts = Texts(localizationApi)
-    private val resourcesLoader = BattleSceneResourcesLoader()
+    private val messages = Messages(localizationApi)
+    private val resourcesLoader = GameSceneResourcesLoader()
     val battlefieldView = BattlefieldView(resourcesLoader)
-    val infoView = WorldBuilderInfoView(texts)
-    val hudView = WorldBuilderHudView(texts)
-    val callToActionView = WorldBuilderCallToActionView(texts)
+    val infoView = WorldBuilderInfoView(messages)
+    val hudView = WorldBuilderHudView(messages)
+    val callToActionView = WorldBuilderCallToActionView(messages)
     val menuView = WorldBuilderMenuView()
 
     override suspend fun SContainer.sceneInit() {
@@ -69,9 +69,9 @@ class WorldBuilderScene(
             worldBuilderApi = worldBuilderApi,
             battlefieldApi = battlefieldApi,
             terrainApi = terrainApi,
-            texts = texts,
+            messages = messages,
             clipboard = GameWindowClipboard(views.gameWindow),
-            worldFilePicker = GameWindowWorldFilePicker(views.gameWindow, texts),
+            worldFilePicker = GameWindowWorldFilePicker(views.gameWindow, messages),
             coroutineScope = this@WorldBuilderScene,
             onLeft = { launchImmediately { sceneContainer.changeTo { MenuScene(localizationApi, storage) } } },
             eventBus = eventBus,

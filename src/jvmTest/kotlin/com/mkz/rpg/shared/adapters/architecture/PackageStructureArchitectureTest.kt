@@ -9,11 +9,11 @@ import kotlin.test.Test
 
 class PackageStructureArchitectureTest {
     // Each subdomain lives in `com.mkz.rpg.<subdomain>`.
-    // `battlefieldHud` is a presentation-only subdomain nested in the `screen` presentation adapter.
+    // `selection` is a presentation-only subdomain nested in the `screen` presentation adapter.
     private val subdomainRoots =
         listOf(
             """com\.mkz\.rpg\.[^.]+""",
-            """com\.mkz\.rpg\.screen\.adapters\.presentation\.battlefieldHud""",
+            """com\.mkz\.rpg\.screen\.adapters\.presentation\.selection""",
         )
 
     private val layerPackages =

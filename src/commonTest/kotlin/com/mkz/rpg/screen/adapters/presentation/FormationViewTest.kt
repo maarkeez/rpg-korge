@@ -1,7 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.screen.adapters.presentation.FormationView.Row
+import com.mkz.rpg.screen.adapters.presentation.GameSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty

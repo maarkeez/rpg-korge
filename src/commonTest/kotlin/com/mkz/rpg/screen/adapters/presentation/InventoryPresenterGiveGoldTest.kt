@@ -12,12 +12,12 @@ import com.mkz.rpg.party.domain.PartyEvent.ExplorationInterrupted
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
-import com.mkz.rpg.screen.adapters.presentation.FakeBattleHudView.Display
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.BattleUnitAt
+import com.mkz.rpg.screen.adapters.presentation.FakeHudView.Display
+import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.gameSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.GiveGoldView.Member
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
+import com.mkz.rpg.screen.adapters.presentation.selection.domain.Selection.Dto.TileDto
+import com.mkz.rpg.screen.adapters.presentation.selection.domain.SelectionEvent
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
@@ -71,17 +71,17 @@ class InventoryPresenterGiveGoldTest {
         val eventBus = apis.eventBus
         val inventoryView = FakeInventoryView()
         val giveGoldView = FakeGiveGoldView()
-        val battleHudView = FakeBattleHudView()
+        val hudView = FakeHudView()
         val battleUnitInfoView = FakeBattleUnitInfoView()
-        val playerCallToActionView = FakePlayerCallToActionView()
+        val callToActionView = FakeCallToActionView()
         val battlefieldView = FakeBattlefieldView()
         val inventoryPresenter =
             InventoryPresenter(
                 inventoryView = inventoryView,
                 giveGoldView = giveGoldView,
                 battleUnitInfoView = battleUnitInfoView,
-                battleHudView = battleHudView,
-                playerCallToActionView = playerCallToActionView,
+                hudView = hudView,
+                callToActionView = callToActionView,
                 inventoryApi = apis.inventoryApi,
                 lootableItemApi = apis.lootableItemApi,
                 battleUnitApi = apis.battleUnitApi,
@@ -90,8 +90,8 @@ class InventoryPresenterGiveGoldTest {
                 partyApi = apis.partyApi,
                 battlefieldApi = apis.battlefieldApi,
                 battlefieldView = battlefieldView,
-                texts = TextsMother.texts(),
-                timeline = battleSceneTimeline(),
+                messages = MessagesMother.messages(),
+                timeline = gameSceneTimeline(),
                 eventBus = eventBus,
             )
 
@@ -100,10 +100,10 @@ class InventoryPresenterGiveGoldTest {
             eventBus.dispatch()
         }
 
-        // The player selects the knight and opens its bag.
-        fun openKnightBag() {
-            publish(BattlefieldHudEvent.SelectedBattleUnit(tile = TileDto(1, 1), battleUnitId = "knight-1", tilesWhereCanBeMoved = emptySet()))
-            battleUnitInfoView.onBagSelected.shouldNotBeNull().invoke()
+        // The player selects the knight and opens its inventory.
+        fun openKnightInventory() {
+            publish(SelectionEvent.BattleUnitSelected(tile = TileDto(1, 1), battleUnitId = "knight-1", walkingRange = emptySet()))
+            battleUnitInfoView.onInventoryButtonSelected.shouldNotBeNull().invoke()
             eventBus.dispatch()
         }
 
@@ -113,11 +113,11 @@ class InventoryPresenterGiveGoldTest {
         }
 
         fun openPanel() {
-            openKnightBag()
+            openKnightInventory()
             tapGold()
         }
 
-        fun buttons() = playerCallToActionView.displayedGiveGold.shouldNotBeNull()
+        fun buttons() = callToActionView.displayedGiveGold.shouldNotBeNull()
 
         fun give() {
             buttons().onGiven()
@@ -137,7 +137,7 @@ class InventoryPresenterGiveGoldTest {
     fun `GoldSelected should open the panel with the first member with room, starting at 1, and dim every tile but the receivers'`() {
         // Given
         val scene = Scene()
-        scene.openKnightBag()
+        scene.openKnightInventory()
         // When
         scene.tapGold()
         // Then
@@ -148,7 +148,7 @@ class InventoryPresenterGiveGoldTest {
         panel.maximum shouldBe 120
         panel.canStepToPrevious.shouldBeFalse()
         panel.canStepToNext.shouldBeTrue()
-        scene.battleHudView.displays.last() shouldBe Display.GIVE_GOLD
+        scene.hudView.displays.last() shouldBe Display.GIVE_GOLD
         scene.buttons().amount shouldBe 1
         scene.battlefieldView.tilesNotDimmed.last() shouldBe setOf(vikingTile, mageTile)
         scene.battlefieldView.tileSelections.last() shouldBe vikingTile
@@ -169,7 +169,7 @@ class InventoryPresenterGiveGoldTest {
     fun `GoldSelected should clear the selected item when one is selected`() {
         // Given
         val scene = Scene()
-        scene.openKnightBag()
+        scene.openKnightInventory()
         scene.apis.lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "health-potion", row = 1, column = 1)
         scene.apis.inventoryApi.storeLootedItem(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 1)
         scene.eventBus.dispatch()
@@ -182,42 +182,42 @@ class InventoryPresenterGiveGoldTest {
         scene.tapGold()
         // Then
         scene.inventoryView.selectedSlot.shouldBeNull()
-        scene.playerCallToActionView.displayedItemActions.shouldBeNull()
+        scene.callToActionView.displayedItemButtons.shouldBeNull()
     }
 
     @Test
     fun `GoldSelected should display why, opening nothing, when the giver carries no gold`() {
         // Given
         val scene = Scene(apis(knightGold = 0))
-        scene.openKnightBag()
+        scene.openKnightInventory()
         // When
         scene.tapGold()
         // Then
-        scene.playerCallToActionView.displayedGiveGoldRefusal
+        scene.callToActionView.displayedGiveGoldRefusal
             .shouldNotBeNull()
             .message shouldBe "No gold to give"
         scene.giveGoldView.displays.shouldBeEmpty()
-        scene.battleHudView.displays.last() shouldBe Display.INVENTORY
+        scene.hudView.displays.last() shouldBe Display.INVENTORY
     }
 
     @Test
     fun `GoldSelected should display why when the giver is alone, or every other member is at the limit`() {
         // Given
         val alone = Scene(apis(party = listOf("knight-1" to "knight")))
-        alone.openKnightBag()
+        alone.openKnightInventory()
         // When
         alone.tapGold()
         // Then
-        alone.playerCallToActionView.displayedGiveGoldRefusal
+        alone.callToActionView.displayedGiveGoldRefusal
             .shouldNotBeNull()
             .message shouldBe "No one to give gold to"
         // Given
         val full = Scene(apis(vikingGold = 99_999, mageGold = 99_999))
-        full.openKnightBag()
+        full.openKnightInventory()
         // When
         full.tapGold()
         // Then
-        full.playerCallToActionView.displayedGiveGoldRefusal
+        full.callToActionView.displayedGiveGoldRefusal
             .shouldNotBeNull()
             .message shouldBe "Everyone's gold is full"
     }
@@ -226,7 +226,7 @@ class InventoryPresenterGiveGoldTest {
     fun `GoldSelected should be ignored while giving an item`() {
         // Given
         val scene = Scene()
-        scene.openKnightBag()
+        scene.openKnightInventory()
         scene.apis.lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "health-potion", row = 1, column = 1)
         scene.apis.inventoryApi.storeLootedItem(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 1)
         scene.eventBus.dispatch()
@@ -234,7 +234,7 @@ class InventoryPresenterGiveGoldTest {
             .shouldNotBeNull()
             .slotSelected(0)
         scene.eventBus.dispatch()
-        scene.playerCallToActionView.displayedItemActions
+        scene.callToActionView.displayedItemButtons
             .shouldNotBeNull()
             .actions
             .single { action -> action.label == "Give" }
@@ -244,28 +244,28 @@ class InventoryPresenterGiveGoldTest {
         scene.tapGold()
         // Then
         scene.giveGoldView.displays.shouldBeEmpty()
-        scene.playerCallToActionView.displayedGiveItem.shouldNotBeNull()
+        scene.callToActionView.displayedGiveItem.shouldNotBeNull()
     }
 
     @Test
     fun `OK should dismiss the reason`() {
         // Given
         val scene = Scene(apis(knightGold = 0))
-        scene.openKnightBag()
+        scene.openKnightInventory()
         scene.tapGold()
         // When
-        scene.playerCallToActionView.displayedGiveGoldRefusal
+        scene.callToActionView.displayedGiveGoldRefusal
             .shouldNotBeNull()
             .onDismissed()
         // Then
-        scene.playerCallToActionView.displayedGiveGoldRefusal.shouldBeNull()
+        scene.callToActionView.displayedGiveGoldRefusal.shouldBeNull()
     }
 
     @Test
     fun `InventoryClosed should dismiss the reason`() {
         // Given
         val scene = Scene(apis(knightGold = 0))
-        scene.openKnightBag()
+        scene.openKnightInventory()
         scene.tapGold()
         // When
         scene.inventoryView.delegate
@@ -273,7 +273,7 @@ class InventoryPresenterGiveGoldTest {
             .inventoryClosed()
         scene.eventBus.dispatch()
         // Then
-        scene.playerCallToActionView.displayedGiveGoldRefusal.shouldBeNull()
+        scene.callToActionView.displayedGiveGoldRefusal.shouldBeNull()
     }
 
     @Test
@@ -354,7 +354,7 @@ class InventoryPresenterGiveGoldTest {
     }
 
     @Test
-    fun `Give should move the gold, display the bag again with the new gold, and flash the receiver`() {
+    fun `Give should move the gold, display the inventory again with the new gold, and flash the receiver`() {
         // Given
         val scene = Scene()
         scene.openPanel()
@@ -371,8 +371,8 @@ class InventoryPresenterGiveGoldTest {
             .shouldNotBeNull()
             .canGiveGold
             .shouldBeTrue()
-        scene.battleHudView.displays.last() shouldBe Display.INVENTORY
-        scene.playerCallToActionView.displayedGiveGold.shouldBeNull()
+        scene.hudView.displays.last() shouldBe Display.INVENTORY
+        scene.callToActionView.displayedGiveGold.shouldBeNull()
         scene.battlefieldView.flashedBattleUnits.last() shouldBe BattleUnitAt(row = 1, column = 2, unitId = "viking")
         scene.battlefieldView.tileSelections.last() shouldBe knightTile
         scene.battlefieldView.tilesNotDimmed.last() shouldBe setOf(knightTile)
@@ -410,7 +410,7 @@ class InventoryPresenterGiveGoldTest {
     }
 
     @Test
-    fun `Cancel should display the bag again with nothing moved, the giver selected`() {
+    fun `Cancel should display the inventory again with nothing moved, the giver selected`() {
         // Given
         val scene = Scene()
         scene.openPanel()
@@ -422,18 +422,18 @@ class InventoryPresenterGiveGoldTest {
         // Then
         scene.gold("knight-1") shouldBe 120
         scene.gold("viking-1") shouldBe 100
-        scene.battleHudView.displays.last() shouldBe Display.INVENTORY
-        scene.playerCallToActionView.displayedGiveGold.shouldBeNull()
+        scene.hudView.displays.last() shouldBe Display.INVENTORY
+        scene.callToActionView.displayedGiveGold.shouldBeNull()
         scene.battlefieldView.tileSelections.last() shouldBe knightTile
         scene.battlefieldView.tilesNotDimmed.last() shouldBe setOf(knightTile)
     }
 
     @Test
-    fun `The bag should ignore its slots, arrows and close while the panel is on show`() {
+    fun `The inventory should ignore its slots, arrows and close while the panel is on show`() {
         // Given
         val scene = Scene()
         scene.openPanel()
-        val hudDisplays = scene.battleHudView.displays.size
+        val hudDisplays = scene.hudView.displays.size
         // When
         scene.inventoryView.delegate
             .shouldNotBeNull()
@@ -446,8 +446,8 @@ class InventoryPresenterGiveGoldTest {
             .inventoryClosed()
         scene.eventBus.dispatch()
         // Then
-        scene.battleHudView.displays.size shouldBe hudDisplays
-        scene.playerCallToActionView.displayedGiveGold.shouldNotBeNull()
+        scene.hudView.displays.size shouldBe hudDisplays
+        scene.callToActionView.displayedGiveGold.shouldNotBeNull()
     }
 
     @Test
@@ -459,8 +459,8 @@ class InventoryPresenterGiveGoldTest {
         // When
         scene.publish(ExplorationInterrupted(playerId = "human"))
         // Then
-        scene.playerCallToActionView.displayedGiveGold.shouldBeNull()
-        scene.battleHudView.displays.last() shouldBe Display.INVENTORY
+        scene.callToActionView.displayedGiveGold.shouldBeNull()
+        scene.hudView.displays.last() shouldBe Display.INVENTORY
         scene.battlefieldView.resetTilesCount shouldBe resets + 1
         scene.gold("knight-1") shouldBe 120
     }
@@ -473,12 +473,12 @@ class InventoryPresenterGiveGoldTest {
         // When
         scene.publish(BattleUnitDefeated(playerId = "human", battleUnitId = "knight-1", unitId = "knight", defeatedAtRow = 1, defeatedAtColumn = 1))
         // Then
-        scene.playerCallToActionView.displayedGiveGold.shouldBeNull()
-        scene.battleHudView.displays.last() shouldBe Display.INVENTORY
+        scene.callToActionView.displayedGiveGold.shouldBeNull()
+        scene.hudView.displays.last() shouldBe Display.INVENTORY
     }
 
     @Test
-    fun `Give gold should choose the next receiver when the chosen one is defeated, or go back to the bag when none is left`() {
+    fun `Give gold should choose the next receiver when the chosen one is defeated, or go back to the inventory when none is left`() {
         // Given
         val scene = Scene()
         scene.openPanel()
@@ -492,8 +492,8 @@ class InventoryPresenterGiveGoldTest {
         // When
         scene.publish(BattleUnitDefeated(playerId = "human", battleUnitId = "mage-1", unitId = "mage", defeatedAtRow = 2, defeatedAtColumn = 1))
         // Then
-        scene.playerCallToActionView.displayedGiveGold.shouldBeNull()
-        scene.battleHudView.displays.last() shouldBe Display.INVENTORY
+        scene.callToActionView.displayedGiveGold.shouldBeNull()
+        scene.hudView.displays.last() shouldBe Display.INVENTORY
     }
 
     @Test

@@ -28,7 +28,7 @@ class QuestMapperTest {
         currentTaskDefeats: Int = 0,
     ): QuestInfo {
         val id = quest.toDto().id
-        return QuestMapper.questInfos(listOf(quest.restoreProgress(ProgressDto(id, status, currentTaskIndex, currentTaskDefeats, isPinned = false)).toDto()), TextsMother.texts()).single()
+        return QuestMapper.questInfos(listOf(quest.restoreProgress(ProgressDto(id, status, currentTaskIndex, currentTaskDefeats, isPinned = false)).toDto()), MessagesMother.messages()).single()
     }
 
     @Test
@@ -36,7 +36,7 @@ class QuestMapperTest {
         // Given
         val quest = mainQuest(id = goatWizardQuestId, tasks = listOf(defeat()))
         // When
-        val spanish = QuestMapper.questInfos(listOf(quest.toDto()), TextsMother.texts("es")).single()
+        val spanish = QuestMapper.questInfos(listOf(quest.toDto()), MessagesMother.messages("es")).single()
         val english = questInfo(quest)
         // Then
         english.name shouldBe "The Goat Wizard's Lair"
@@ -57,7 +57,7 @@ class QuestMapperTest {
         info.tasks.map { task -> task.isDone }.shouldContainExactly(true, false)
         info.doneTasks.map { task -> task.kind }.shouldContainExactly(Kind.TALK)
         info.currentTask.kind shouldBe Kind.DEFEAT
-        info.currentTask.progress shouldBe 3
+        info.currentTask.defeatsCounted shouldBe 3
     }
 
     @Test
@@ -69,18 +69,18 @@ class QuestMapperTest {
         // Then
         info.isCompleted.shouldBeTrue()
         info.tasks.map { task -> task.isDone }.shouldContainExactly(true, true, true)
-        info.tasks.map { task -> task.progress }.shouldContainExactly(1, 5, 1)
-        info.currentTask.kind shouldBe Kind.REACH
+        info.tasks.map { task -> task.defeatsCounted }.shouldContainExactly(1, 5, 1)
+        info.currentTask.kind shouldBe Kind.VISIT
     }
 
     @Test
-    fun `questInfo should count the defeats of a defeat task and 1 for a talk or a reach`() {
+    fun `questInfo should count the defeats of a defeat task and 1 for a talk or a visit`() {
         // Given
         val quest = mainQuest(tasks = threeTasks)
         // When
         val info = questInfo(quest, status = StatusDto.COMPLETED, currentTaskIndex = 2)
         // Then
-        info.tasks.map { task -> task.count }.shouldContainExactly(1, 5, 1)
+        info.tasks.map { task -> task.requiredDefeats }.shouldContainExactly(1, 5, 1)
     }
 
     @Test
@@ -101,7 +101,10 @@ class QuestMapperTest {
         val info = questInfo(quest)
         // Then
         info.gold shouldBe 40
-        info.items.shouldContainExactly(RewardItem("health-potion", TextsMother.texts().lootableItemName("health-potion")), RewardItem("hammer", TextsMother.texts().lootableItemName("hammer")))
+        info.items.shouldContainExactly(
+            RewardItem("health-potion", MessagesMother.messages().lootableItemName("health-potion")),
+            RewardItem("hammer", MessagesMother.messages().lootableItemName("hammer")),
+        )
     }
 
     @Test
@@ -126,7 +129,7 @@ class QuestMapperTest {
     @Test
     fun `QuestInfo should pin the main quest when no other quest is pinned`() {
         // When
-        val infos = QuestMapper.questInfos(listOf(mainQuest().toDto(), sideQuest().start().toDto()), TextsMother.texts())
+        val infos = QuestMapper.questInfos(listOf(mainQuest().toDto(), sideQuest().start().toDto()), MessagesMother.messages())
         // Then
         infos.map { info -> info.isPinned }.shouldContainExactly(true, false)
     }
@@ -143,7 +146,7 @@ class QuestMapperTest {
                         .pin()
                         .toDto(),
                 ),
-                TextsMother.texts(),
+                MessagesMother.messages(),
             )
         // Then
         infos.map { info -> info.isPinned }.shouldContainExactly(false, true)

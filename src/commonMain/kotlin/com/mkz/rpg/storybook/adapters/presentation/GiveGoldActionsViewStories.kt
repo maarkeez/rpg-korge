@@ -39,7 +39,7 @@ object GiveGoldActionsViewStories : StoryBinding {
         context: StoryContext,
     ): View =
         GiveGoldActionsView(
-            context.texts,
+            context.messages,
             onCancelled = { context.action("onCancelled") },
             onAll = { context.action("onAll", setArg = AMOUNT to ArgDto.int(args.int(MAXIMUM))) },
             onGiven = { context.action("onGiven") },

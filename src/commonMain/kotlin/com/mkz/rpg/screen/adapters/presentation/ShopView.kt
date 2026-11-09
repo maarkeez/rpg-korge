@@ -18,14 +18,14 @@ import korlibs.korge.view.solidRect
 import korlibs.math.geom.Size
 
 /**
- * A merchant's shop, displayed in place of its dialog once the player chooses to buy or sell, until Back. On top, the
- * buyer's name, gold and bag, between the arrows that switch the buyer, as swiping the shop left or right does. Under
+ * A merchant's shop, displayed in place of its talk panel once the player chooses to buy or sell, until Back. On top, the
+ * buyer's name, gold and inventory, between the arrows that switch the buyer, as swiping the shop left or right does. Under
  * it, the items to buy or to sell, one slot per item, as the inventory does. At the bottom, a hint until an item is
  * selected, then its name and price. Back and Buy or Sell are in the row of the call to action.
  */
 open class ShopView(
-    resourcesLoader: BattleSceneResourcesLoader,
-    private val texts: Texts,
+    resourcesLoader: GameSceneResourcesLoader,
+    private val messages: Messages,
 ) : Container() {
     companion object {
         const val SLOTS = 12
@@ -56,7 +56,7 @@ open class ShopView(
         val isTradeable: Boolean,
     )
 
-    /** The party member trading: its position in the party, from the leader, and its gold and bag. */
+    /** The party member trading: its position in the party, from the leader, and its gold and inventory. */
     data class Buyer(
         val name: String,
         val gold: Int,
@@ -120,8 +120,8 @@ open class ShopView(
     }
 
     /**
-     * Displays the items in their order followed by the empty slots, the ones the buyer can not trade dimmed, and the buyer, e.g.: Knight · 20 G · Bag 11/12, or
-     * Bag full. The arrows are disabled at the ends of the party. Clears the selected slot.
+     * Displays the items in their order followed by the empty slots, the ones the buyer can not trade dimmed, and the buyer, e.g.: Knight · 20 G · Inventory 11/12, or
+     * Inventory full. The arrows are disabled at the ends of the party. Clears the selected slot.
      */
     open fun display(
         slots: List<Slot>,
@@ -131,13 +131,13 @@ open class ShopView(
             val slot = slots.getOrNull(index)
             slotView.display(lootableItemId = slot?.lootableItemId, isEquipped = slot?.isEquipped ?: false, isDimmed = slot?.isTradeable == false)
         }
-        val bag =
+        val inventory =
             if (buyer.usedStorageSpace >= buyer.maximumStorageSpace) {
-                texts[UiText.SHOP_BAG_FULL]
+                messages[UiMessage.SHOP_INVENTORY_FULL]
             } else {
-                texts[UiText.SHOP_BAG, "used" to buyer.usedStorageSpace, "maximum" to buyer.maximumStorageSpace]
+                messages[UiMessage.SHOP_INVENTORY, "used" to buyer.usedStorageSpace, "maximum" to buyer.maximumStorageSpace]
             }
-        buyerText.text = texts[UiText.SHOP_BUYER, "name" to buyer.name, "gold" to texts.gold(buyer.gold), "bag" to bag]
+        buyerText.text = messages[UiMessage.SHOP_BUYER, "name" to buyer.name, "gold" to messages.gold(buyer.gold), "inventory" to inventory]
         previousBuyerButton.enabled = buyer.partyIndex > 0
         nextBuyerButton.enabled = buyer.partyIndex < buyer.partySize - 1
         selectSlot(null)
@@ -160,10 +160,10 @@ open class ShopView(
         itemPrice: Int,
     ) {
         itemNameText.text = itemName
-        itemPriceText.text = texts.gold(itemPrice)
+        itemPriceText.text = messages.gold(itemPrice)
     }
 
-    // < Knight · 20 G · Bag 11/12 >
+    // < Knight · 20 G · Inventory 11/12 >
     private fun header(): UIContainer =
         UIContainer(Size(WIDTH, BAR_HEIGHT)).apply {
             previousBuyerButton = button("<", ARROW_WIDTH) { delegate?.shopBuyerStepped(-1) }

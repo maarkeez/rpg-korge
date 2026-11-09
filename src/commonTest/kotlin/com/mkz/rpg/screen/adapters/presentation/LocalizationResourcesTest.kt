@@ -17,7 +17,7 @@ import kotlin.test.Test
 /**
  * The catalogs under resources/localization must match the text the screen displays: every key it translates is in
  * messages.pot, messages.pot has no other key, and every translation matches messages.pot. Translations may be missing.
- * The screen translates the UI texts, and the game data from its ids: the name of each resource (e.g.: `unit.bat.name`
+ * The screen translates the UI messages, and the game data from its ids: the name of each resource (e.g.: `unit.bat.name`
  * for resources/unit/bat.toml), the line of each npc, and the description and each task of each quest.
  */
 class LocalizationResourcesTest {
@@ -51,19 +51,19 @@ class LocalizationResourcesTest {
     }
 
     @Test
-    fun `should have every UI text in the source catalog, plural when the UI text is`() {
+    fun `should have every UI message in the source catalog, plural when the UI message is`() {
         val missing =
-            UiText.entries
+            UiMessage.entries
                 .filter { text -> sourceEntries[text.key]?.let { entry -> (entry.idPlural != null) == text.isPlural } != true }
                 .map { text -> "${text.key}${if (text.isPlural) " (plural)" else ""}" }
-        withClue("UI texts missing from $SOURCE_FILE_NAME, or not plural when the UI text is: $missing") { missing.shouldBeEmpty() }
+        withClue("UI messages missing from $SOURCE_FILE_NAME, or not plural when the UI message is: $missing") { missing.shouldBeEmpty() }
     }
 
     @Test
     fun `should have every game data text in the source catalog`() =
         runTest {
             val missing = gameDataKeys().filter { key -> key !in sourceEntries }
-            withClue("Game data texts missing from $SOURCE_FILE_NAME: $missing") { missing.shouldBeEmpty() }
+            withClue("Game data messages missing from $SOURCE_FILE_NAME: $missing") { missing.shouldBeEmpty() }
         }
 
     @Test
@@ -76,7 +76,7 @@ class LocalizationResourcesTest {
     @Test
     fun `should only have the keys the screen translates in the source catalog`() =
         runTest {
-            val keys = UiText.entries.map(UiText::key).toSet() + Localization.LANGUAGE_NAME_KEY + gameDataKeys() + questTaskKeys()
+            val keys = UiMessage.entries.map(UiMessage::key).toSet() + Localization.LANGUAGE_NAME_KEY + gameDataKeys() + questTaskKeys()
             val orphans = sourceCatalog.entries.map { entry -> entry.context ?: entry.id }.filter { key -> key !in keys }
             withClue("Entries of $SOURCE_FILE_NAME the screen does not translate, or without msgctxt: $orphans") { orphans.shouldBeEmpty() }
         }
@@ -123,9 +123,10 @@ class LocalizationResourcesTest {
 
     @Test
     fun `should only use the characters the font draws`() {
-        val texts = sourceCatalog.entries.flatMap { entry -> listOfNotNull(entry.id, entry.idPlural) } + translationCatalogs.values.flatMap { file -> file.entries.flatMap(PoFile.Entry::translations) }
+        val messages =
+            sourceCatalog.entries.flatMap { entry -> listOfNotNull(entry.id, entry.idPlural) } + translationCatalogs.values.flatMap { file -> file.entries.flatMap(PoFile.Entry::translations) }
         val undrawn =
-            texts
+            messages
                 .flatMap { text -> text.filter { character -> character.code !in drawnCharacters }.map { character -> "'$character' in '$text'" } }
                 .distinct()
         withClue("Characters the font does not draw: $undrawn") { undrawn.shouldBeEmpty() }

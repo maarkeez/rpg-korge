@@ -20,7 +20,7 @@ class QuestDetailViewTest : ViewsForTesting() {
         "Hace mucho tiempo una cabra se comió el libro de hechizos de un mago y se tragó toda su magia. " +
             "Ahora gobierna la guarida del sur, y nadie se atreve a acercarse, ni de día ni de noche, ni siquiera los más valientes del reino."
 
-    private fun detailView() = QuestDetailView(BattleSceneResourcesLoader(), TextsMother.texts())
+    private fun detailView() = QuestDetailView(GameSceneResourcesLoader(), MessagesMother.messages())
 
     @Test
     fun `display should draw the name, the description, the task and the reward when given a quest`() =
@@ -44,7 +44,7 @@ class QuestDetailViewTest : ViewsForTesting() {
             // Given
             val detailView = detailView()
             // When
-            detailView.display(questInfo(tasks = listOf(task(text = "Defeat 5 Rats", progress = 3, count = 5))))
+            detailView.display(questInfo(tasks = listOf(task(text = "Defeat 5 Rats", defeatsCounted = 3, requiredDefeats = 5))))
             val count = detailView.displayedCount()
             val isBarShown = detailView.isProgressBarShown()
             detailView.display(questInfo())
@@ -78,7 +78,7 @@ class QuestDetailViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val detailView = detailView()
-            val tasks = listOf(task(text = "Talk to the Elder", progress = 1, isDone = true), task(text = "Reach the lair", progress = 1, isDone = true), task())
+            val tasks = listOf(task(text = "Talk to the Elder", defeatsCounted = 1, isDone = true), task(text = "Reach the lair", defeatsCounted = 1, isDone = true), task())
             // When
             detailView.display(questInfo(tasks = tasks))
             val tasksDone = detailView.displayedTasksDone()

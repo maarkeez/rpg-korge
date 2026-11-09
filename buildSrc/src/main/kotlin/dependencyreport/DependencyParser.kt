@@ -16,7 +16,7 @@ data class ImportDependency(
 
 // Reads the subdomain dependencies from the `import` lines, so it needs no compilation.
 // The subdomain of a file is the first package segment after the base package, so a subdomain nested in another one
-// (e.g.: `screen.adapters.presentation.battlefieldHud`) is part of it. Files declared in the base package (e.g.: `Main.kt`) are ignored.
+// (e.g.: `screen.adapters.presentation.selection`) is part of it. Files declared in the base package (e.g.: `Main.kt`) are ignored.
 class DependencyParser(
     private val basePackage: String,
 ) {

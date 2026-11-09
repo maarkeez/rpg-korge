@@ -18,7 +18,7 @@ object LocalizationMother {
                     MessageDto(key = Localization.LANGUAGE_NAME_KEY, forms = listOf("English")),
                     MessageDto(key = "ui.shop.buy", forms = listOf("Buy")),
                     MessageDto(key = "ui.shop.sell", forms = listOf("Sell")),
-                    MessageDto(key = "ui.battleInfo.round", forms = listOf("Round {round}")),
+                    MessageDto(key = "ui.banner.round", forms = listOf("Round {round}")),
                     MessageDto(key = "ui.remainingSummonDuration.vanishes", forms = listOf("Vanishes in {turns} turn", "Vanishes in {turns} turns")),
                 ),
         )
@@ -31,7 +31,7 @@ object LocalizationMother {
                 listOf(
                     MessageDto(key = Localization.LANGUAGE_NAME_KEY, forms = listOf("Español")),
                     MessageDto(key = "ui.shop.buy", forms = listOf("Comprar")),
-                    MessageDto(key = "ui.battleInfo.round", forms = listOf("Ronda {round}")),
+                    MessageDto(key = "ui.banner.round", forms = listOf("Ronda {round}")),
                     MessageDto(key = "ui.remainingSummonDuration.vanishes", forms = listOf("Desaparece en {turns} turno", "Desaparece en {turns} turnos")),
                 ),
         )

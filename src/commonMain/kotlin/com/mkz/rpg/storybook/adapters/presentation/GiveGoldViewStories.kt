@@ -88,7 +88,7 @@ object GiveGoldViewStories : StoryBinding {
         val receivers = args.int(RECEIVERS)
         // The receiver is one of the receivers, however few.
         val receiverIndex = args.int(RECEIVER_INDEX).coerceAtMost(receivers - 1)
-        return GiveGoldView(context.resourcesLoader, context.texts).apply {
+        return GiveGoldView(context.resourcesLoader, context.messages).apply {
             setDelegate(
                 object : GiveGoldView.Delegate {
                     override fun amountChanged(amount: Int) = context.action("amountChanged", amount)

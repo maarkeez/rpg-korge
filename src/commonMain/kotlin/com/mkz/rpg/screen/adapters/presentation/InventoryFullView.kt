@@ -15,11 +15,11 @@ import korlibs.math.geom.Size
 
 /** Asks the player to tap a stored item to discard it for the found one, or to leave the found one on its tile. */
 class InventoryFullView(
-    texts: Texts,
+    messages: Messages,
     foundItemName: String,
     foundItemSellPrice: Int,
     foundItemId: String,
-    resourcesLoader: BattleSceneResourcesLoader,
+    resourcesLoader: GameSceneResourcesLoader,
     onLeft: () -> Unit,
 ) : Container() {
     companion object {
@@ -52,7 +52,7 @@ class InventoryFullView(
                 }
             }
             leaveButton =
-                uiButton(texts[UiText.INVENTORY_FULL_LEAVE]) {
+                uiButton(messages[UiMessage.INVENTORY_FULL_LEAVE]) {
                     width = WIDTH
                     bgColorOut = Colors.DIMGRAY
                     bgColorOver = RGBA(85, 85, 85)
@@ -60,7 +60,7 @@ class InventoryFullView(
                     onClick { onLeft() }
                 }
         }
-        titleView.display(texts[UiText.INVENTORY_FULL_TITLE])
-        messageView.display(texts[UiText.INVENTORY_FULL_MESSAGE, "item" to foundItemName, "sellPrice" to texts.gold(foundItemSellPrice)])
+        titleView.display(messages[UiMessage.INVENTORY_FULL_TITLE])
+        messageView.display(messages[UiMessage.INVENTORY_FULL_MESSAGE, "item" to foundItemName, "sellPrice" to messages.gold(foundItemSellPrice)])
     }
 }

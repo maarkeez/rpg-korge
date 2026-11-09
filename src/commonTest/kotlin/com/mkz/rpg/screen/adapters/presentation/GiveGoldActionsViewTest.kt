@@ -14,7 +14,7 @@ class GiveGoldActionsViewTest : ViewsForTesting() {
     fun `DisplayAmount should write the amount on Give, and disable All at the maximum`() =
         sharedViewsTest {
             // Given
-            val actionsView = GiveGoldActionsView(TextsMother.texts(), onCancelled = {}, onAll = {}, onGiven = {})
+            val actionsView = GiveGoldActionsView(MessagesMother.messages(), onCancelled = {}, onAll = {}, onGiven = {})
             // When
             actionsView.displayAmount(amount = 25, maximum = 120)
             // Then
@@ -33,7 +33,7 @@ class GiveGoldActionsViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val calls = mutableListOf<String>()
-            val actionsView = GiveGoldActionsView(TextsMother.texts(), onCancelled = { calls += "cancel" }, onAll = { calls += "all" }, onGiven = { calls += "give" })
+            val actionsView = GiveGoldActionsView(MessagesMother.messages(), onCancelled = { calls += "cancel" }, onAll = { calls += "all" }, onGiven = { calls += "give" })
             actionsView.displayAmount(amount = 25, maximum = 120)
             addChild(actionsView)
             // When
@@ -42,6 +42,6 @@ class GiveGoldActionsViewTest : ViewsForTesting() {
             clickOn(actionsView.giveButton)
             // Then
             calls.shouldContainExactly("cancel", "all", "give")
-            actionsView.isAsTallAsFinishTurn().shouldBeTrue()
+            actionsView.isAsTallAsFinishPlayerTurn().shouldBeTrue()
         }
 }

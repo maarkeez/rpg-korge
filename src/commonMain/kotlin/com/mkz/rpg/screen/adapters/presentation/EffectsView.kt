@@ -8,7 +8,7 @@ import korlibs.korge.view.text
 import korlibs.math.geom.Size
 
 class EffectsView(
-    resourcesLoader: BattleSceneResourcesLoader,
+    resourcesLoader: GameSceneResourcesLoader,
 ) : Container() {
     internal lateinit var effectViews: Array<EffectView>
 

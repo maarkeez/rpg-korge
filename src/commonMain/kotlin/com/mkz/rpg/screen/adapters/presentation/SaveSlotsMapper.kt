@@ -15,13 +15,13 @@ object SaveSlotsMapper {
 
     fun slots(
         slots: List<Save.Dto.SlotDto>,
-        texts: Texts,
+        messages: Messages,
         isLoading: Boolean,
     ): List<SaveSlotsView.Slot> =
         slots.map { slot ->
             SaveSlotsView.Slot(
                 number = slot.slot,
-                label = label(slot, texts),
+                label = label(slot, messages),
                 isEnabled = !isLoading || slot.state == Save.Dto.SlotStateDto.SAVED,
                 isDeletable = isLoading && slot.state != Save.Dto.SlotStateDto.EMPTY,
             )
@@ -29,17 +29,17 @@ object SaveSlotsMapper {
 
     private fun label(
         slot: Save.Dto.SlotDto,
-        texts: Texts,
+        messages: Messages,
     ): String {
         val summary = slot.summary
         return when {
-            slot.state == Save.Dto.SlotStateDto.EMPTY -> texts[UiText.SAVE_SLOTS_EMPTY]
-            slot.state == Save.Dto.SlotStateDto.INCOMPATIBLE || summary == null -> texts[UiText.SAVE_SLOTS_INCOMPATIBLE]
+            slot.state == Save.Dto.SlotStateDto.EMPTY -> messages[UiMessage.SAVE_SLOTS_EMPTY]
+            slot.state == Save.Dto.SlotStateDto.INCOMPATIBLE || summary == null -> messages[UiMessage.SAVE_SLOTS_INCOMPATIBLE]
             else ->
-                texts[
-                    UiText.SAVE_SLOTS_SAVED,
+                messages[
+                    UiMessage.SAVE_SLOTS_SUMMARY,
                     "date" to DateTime.fromUnixMillis(summary.savedAt).local.format(DATE_FORMAT),
-                    "leader" to (summary.leaderUnitId?.let(texts::unitName) ?: "-"),
+                    "leader" to (summary.leaderUnitId?.let(messages::unitName) ?: "-"),
                     "members" to summary.partySize,
                 ]
         }

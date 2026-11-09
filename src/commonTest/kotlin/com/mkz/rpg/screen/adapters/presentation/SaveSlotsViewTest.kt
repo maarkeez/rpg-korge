@@ -11,14 +11,14 @@ class SaveSlotsViewTest : ViewsForTesting() {
     private val selections = mutableListOf<String>()
 
     private fun newSaveSlotsView(slots: List<SaveSlotsView.Slot>) =
-        SaveSlotsView(TextsMother.texts()).apply {
+        SaveSlotsView(MessagesMother.messages()).apply {
             setDelegate(
                 object : SaveSlotsView.Delegate {
                     override fun saveSlotSelected(number: Int) {
                         selections += "slot $number"
                     }
 
-                    override fun saveSlotDeleteSelected(number: Int) {
+                    override fun deleteSaveSelected(number: Int) {
                         selections += "delete $number"
                     }
                 },

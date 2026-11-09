@@ -29,13 +29,13 @@ class WorldBuilderHudViewTest : ViewsForTesting() {
     private val lavaBitmap = Bitmap32(16, 16, Colors.RED)
     private val terrains = listOf(WorldBuilderHudView.TerrainOption("lava", lavaBitmap), WorldBuilderHudView.TerrainOption("sand", sandBitmap))
 
-    private fun hudView() = WorldBuilderHudView(TextsMother.texts()).also { hudView -> hudView.setDelegate(delegate) }
+    private fun newHudView() = WorldBuilderHudView(MessagesMother.messages()).also { hudView -> hudView.setDelegate(delegate) }
 
     @Test
     fun `DisplaySize should display the rows and the columns when the size is displayed`() =
         sharedViewsTest {
             // Given
-            val hudView = hudView()
+            val hudView = newHudView()
             // When
             hudView.displaySize(rows = 12, columns = 40, allowedSizes = 1..128)
             // Then
@@ -47,7 +47,7 @@ class WorldBuilderHudViewTest : ViewsForTesting() {
     fun `DisplaySize should disable the steps out of 1 to 128 when the size is close to the limits`() =
         sharedViewsTest {
             // Given
-            val hudView = hudView()
+            val hudView = newHudView()
             // When
             hudView.displaySize(rows = 5, columns = 124, allowedSizes = 1..128)
             // Then
@@ -61,7 +61,7 @@ class WorldBuilderHudViewTest : ViewsForTesting() {
     fun `DisplaySize should disable the steps out of the allowed sizes when the allowed sizes are 4 to 20`() =
         sharedViewsTest {
             // Given
-            val hudView = hudView()
+            val hudView = newHudView()
             // When
             hudView.displaySize(rows = 11, columns = 18, allowedSizes = 4..20)
             // Then
@@ -73,7 +73,7 @@ class WorldBuilderHudViewTest : ViewsForTesting() {
     fun `RowsStep should ask for the size with the rows stepped when a rows step is clicked`() =
         sharedViewsTest {
             // Given
-            val hudView = hudView()
+            val hudView = newHudView()
             hudView.displaySize(rows = 16, columns = 20, allowedSizes = 1..128)
             addChild(hudView)
             // When
@@ -86,7 +86,7 @@ class WorldBuilderHudViewTest : ViewsForTesting() {
     fun `ColumnsStep should ask for the size with the columns stepped when a columns step is clicked`() =
         sharedViewsTest {
             // Given
-            val hudView = hudView()
+            val hudView = newHudView()
             hudView.displaySize(rows = 16, columns = 20, allowedSizes = 1..128)
             addChild(hudView)
             // When
@@ -99,7 +99,7 @@ class WorldBuilderHudViewTest : ViewsForTesting() {
     fun `DisplayTerrains should display each terrain tile and highlight the selected one when the terrains are displayed`() =
         sharedViewsTest {
             // Given
-            val hudView = hudView()
+            val hudView = newHudView()
             // When
             hudView.displayTerrains(terrains, selectedTerrainId = "sand")
             // Then
@@ -112,7 +112,7 @@ class WorldBuilderHudViewTest : ViewsForTesting() {
     fun `SelectTerrain should highlight only the selected terrain when another terrain is selected`() =
         sharedViewsTest {
             // Given
-            val hudView = hudView()
+            val hudView = newHudView()
             hudView.displayTerrains(terrains, selectedTerrainId = "sand")
             // When
             hudView.selectTerrain("lava")
@@ -124,7 +124,7 @@ class WorldBuilderHudViewTest : ViewsForTesting() {
     fun `PaletteTerrain should ask to select the terrain when it is clicked`() =
         sharedViewsTest {
             // Given
-            val hudView = hudView()
+            val hudView = newHudView()
             hudView.displayTerrains(terrains, selectedTerrainId = "sand")
             addChild(hudView)
             // When

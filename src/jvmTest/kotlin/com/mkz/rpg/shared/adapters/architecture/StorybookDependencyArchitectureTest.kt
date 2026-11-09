@@ -51,7 +51,7 @@ class StorybookDependencyArchitectureTest {
 
     // Out of the subdomains (e.g.: `korlibs`), the root package (e.g.: `GAME_WINDOW_SIZE`), `shared` and `localization`,
     // or a declaration of the presentation package of another subdomain, but none of a package nested in it (e.g.:
-    // `screen.adapters.presentation.battlefieldHud.domain`).
+    // `screen.adapters.presentation.selection.domain`).
     private fun isAllowedForStorybook(import: String): Boolean {
         val relativeName = import.removePrefix("$rootPackage.").takeIf { it != import && it.contains(".") } ?: return true
         val subdomain = relativeName.substringBefore(".")

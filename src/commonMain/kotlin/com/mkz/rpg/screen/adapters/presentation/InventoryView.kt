@@ -25,8 +25,8 @@ import korlibs.math.geom.Size
  * give some, faded when it can not.
  */
 open class InventoryView(
-    resourcesLoader: BattleSceneResourcesLoader,
-    private val texts: Texts,
+    resourcesLoader: GameSceneResourcesLoader,
+    private val messages: Messages,
 ) : Container() {
     companion object {
         const val SLOTS = 12
@@ -95,7 +95,7 @@ open class InventoryView(
         uiVerticalStack(padding = PADDING) {
             uiHorizontalStack {
                 addChild(titleLine())
-                closeButton = button(texts[UiText.INVENTORY_CLOSE], CLOSE_WIDTH) { delegate?.inventoryClosed() }
+                closeButton = button(messages[UiMessage.INVENTORY_CLOSE], CLOSE_WIDTH) { delegate?.inventoryClosed() }
             }
             slotViews.chunked(SLOTS_PER_ROW).forEachIndexed { rowIndex, rowSlots ->
                 if (rowIndex > 0) uiSpacing(Size(0.0, SLOT_SPACING - PADDING))
@@ -154,11 +154,11 @@ open class InventoryView(
         gold: Int,
         owner: Owner?,
     ) {
-        goldView.display(texts.gold(gold))
+        goldView.display(messages.gold(gold))
         goldButton.visible = owner != null
         if (owner == null) return
         goldView.hide()
-        goldButton.display(texts.gold(gold), isFaded = !owner.canGiveGold)
+        goldButton.display(messages.gold(gold), isFaded = !owner.canGiveGold)
         goldButton.position(goldView.x + TEXT_WIDTH - goldButton.buttonWidth, (BAR_HEIGHT - GoldButtonView.HEIGHT) / 2)
     }
 
@@ -171,7 +171,7 @@ open class InventoryView(
         nextOwnerButton.enabled = owner != null && owner.partyIndex < owner.partySize - 1
         titleView.x = if (hasArrows) ARROW_WIDTH + TITLE_SPACING else 0.0
         goldView.x = if (hasArrows) ARROW_WIDTH + TITLE_SPACING else TITLE_LINE_WIDTH - TITLE_SPACING - TEXT_WIDTH
-        titleView.display(owner?.name ?: texts[UiText.INVENTORY_TITLE])
+        titleView.display(owner?.name ?: messages[UiMessage.INVENTORY_TITLE])
     }
 
     private fun titleLine(): UIContainer =

@@ -13,7 +13,7 @@ class PauseViewTest : ViewsForTesting() {
     private val selections = mutableListOf<String>()
 
     private fun newPauseView() =
-        PauseView(TextsMother.texts()).apply {
+        PauseView(MessagesMother.messages()).apply {
             setDelegate(
                 object : PauseView.Delegate {
                     override fun pauseResumeSelected() {

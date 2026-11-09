@@ -34,7 +34,7 @@ fun BattlefieldView.hasTerrainAt(
     column: Int,
 ): Boolean = isDisplayed && tile(row, column).hasLayer(BattlefieldView.TERRAIN)
 
-/** Whether the tile casts a shadow over its neighbours, which would draw a line along its borders. */
+/** Whether the tile casts a shadow over the tiles adjacent to it, which would draw a line along its borders. */
 fun BattlefieldView.hasShadowAt(
     row: Int,
     column: Int,
@@ -169,7 +169,7 @@ fun BattlefieldView.battleUnitPositions(): List<Pair<Int, Int>> =
             .filter { (row, column) -> hasBattleUnitAt(row, column) }
     }
 
-/** Whether the tile is highlighted (e.g.: movement range, cast range or selected tile). */
+/** Whether the tile is highlighted (e.g.: walking range, cast range or selected tile). */
 fun BattlefieldView.hasSelectionAt(
     row: Int,
     column: Int,
@@ -216,7 +216,7 @@ fun BattlefieldView.displayedBattlefieldCount(): Int = if (!isDisplayed) 0 else 
 fun BattlefieldView.lootBitmapAt(
     row: Int,
     column: Int,
-): Bitmap? = (tile(row, column).findViewByName(BattlefieldView.LOOT) as? Image)?.bitmap?.base
+): Bitmap? = (tile(row, column).findViewByName(BattlefieldView.DROPPED_ITEMS) as? Image)?.bitmap?.base
 
 /** Whether the loot is drawn right above the terrain, so the battle unit and the selection are drawn over it. */
 fun BattlefieldView.isLootRightAboveTerrainAt(
@@ -224,10 +224,10 @@ fun BattlefieldView.isLootRightAboveTerrainAt(
     column: Int,
 ): Boolean {
     val layerNames = tile(row, column).children.map { child -> child.name }
-    return layerNames.indexOf(BattlefieldView.LOOT) == layerNames.indexOf(BattlefieldView.TERRAIN) + 1
+    return layerNames.indexOf(BattlefieldView.DROPPED_ITEMS) == layerNames.indexOf(BattlefieldView.TERRAIN) + 1
 }
 
-/** The icon of the picked up item lifted off the tile: how far it has risen from the tile center, its scale and opacity. */
+/** The icon of the looted item lifted off the tile: how far it has risen from the tile center, its scale and opacity. */
 data class LiftedLoot(
     val bitmap: Bitmap?,
     val rise: Double,
@@ -235,12 +235,12 @@ data class LiftedLoot(
     val alpha: Double,
 )
 
-/** The picked up item being lifted off the tile, or `null` when none is. */
+/** the looted item being lifted off the tile, or `null` when none is. */
 fun BattlefieldView.liftedLootAt(
     row: Int,
     column: Int,
 ): LiftedLoot? {
-    val liftedView = tile(row, column).findViewByName(BattlefieldView.PICKED_UP_LOOT) as? Image ?: return null
+    val liftedView = tile(row, column).findViewByName(BattlefieldView.LOOTED_ITEM) as? Image ?: return null
     return LiftedLoot(
         bitmap = liftedView.bitmap.base,
         rise = BattlefieldView.TILE_SIZE / 2.0 - liftedView.y,
@@ -249,13 +249,13 @@ fun BattlefieldView.liftedLootAt(
     )
 }
 
-/** Whether the picked up item is drawn over the battle unit standing on the tile. */
+/** Whether the looted item is drawn over the battle unit standing on the tile. */
 fun BattlefieldView.isLiftedLootOverBattleUnitAt(
     row: Int,
     column: Int,
 ): Boolean {
     val layerNames = tile(row, column).children.map { child -> child.name }
-    return layerNames.indexOf(BattlefieldView.PICKED_UP_LOOT) > layerNames.indexOf(BattlefieldView.BATTLE_UNIT)
+    return layerNames.indexOf(BattlefieldView.LOOTED_ITEM) > layerNames.indexOf(BattlefieldView.BATTLE_UNIT)
 }
 
 /**

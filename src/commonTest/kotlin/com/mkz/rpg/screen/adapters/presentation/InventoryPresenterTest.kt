@@ -22,12 +22,12 @@ import com.mkz.rpg.lootableItem.domain.LootableItemMother.equippableLootableItem
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
-import com.mkz.rpg.screen.adapters.presentation.FakeBattleHudView.Display
+import com.mkz.rpg.screen.adapters.presentation.FakeHudView.Display
+import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.gameSceneTimeline
+import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.playLongStep
 import com.mkz.rpg.screen.adapters.presentation.InventoryView.Slot
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
+import com.mkz.rpg.screen.adapters.presentation.selection.domain.Selection.Dto.TileDto
+import com.mkz.rpg.screen.adapters.presentation.selection.domain.SelectionEvent
 import com.mkz.rpg.shared.adapters.presentation.GameButton
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.shared.domain.DomainEvent
@@ -92,9 +92,9 @@ class InventoryPresenterTest {
     private val eventBus = apis.eventBus
     private val inventoryView = FakeInventoryView()
     private val battleUnitInfoView = FakeBattleUnitInfoView()
-    private val battleHudView = FakeBattleHudView()
-    private val playerCallToActionView = FakePlayerCallToActionView()
-    private val timeline = battleSceneTimeline()
+    private val hudView = FakeHudView()
+    private val callToActionView = FakeCallToActionView()
+    private val timeline = gameSceneTimeline()
 
     // The presenter is created once the battle has started, so it only reacts to what the test publishes.
     private val inventoryPresenter =
@@ -102,8 +102,8 @@ class InventoryPresenterTest {
             inventoryView = inventoryView,
             giveGoldView = FakeGiveGoldView(),
             battleUnitInfoView = battleUnitInfoView,
-            battleHudView = battleHudView,
-            playerCallToActionView = playerCallToActionView,
+            hudView = hudView,
+            callToActionView = callToActionView,
             inventoryApi = apis.inventoryApi,
             lootableItemApi = apis.lootableItemApi,
             battleUnitApi = apis.battleUnitApi,
@@ -112,7 +112,7 @@ class InventoryPresenterTest {
             partyApi = apis.partyApi,
             battlefieldApi = apis.battlefieldApi,
             battlefieldView = FakeBattlefieldView(),
-            texts = TextsMother.texts(),
+            messages = MessagesMother.messages(),
             timeline = timeline,
             eventBus = eventBus,
         )
@@ -136,12 +136,12 @@ class InventoryPresenterTest {
         battleUnitId: String,
         row: Int,
         column: Int,
-    ) = publish(BattlefieldHudEvent.SelectedBattleUnit(tile = TileDto(row, column), battleUnitId = battleUnitId, tilesWhereCanBeMoved = emptySet()))
+    ) = publish(SelectionEvent.BattleUnitSelected(tile = TileDto(row, column), battleUnitId = battleUnitId, walkingRange = emptySet()))
 
-    // The player selects the knight and opens its bag.
+    // The player selects the knight and opens its inventory.
     private fun openKnightInventory() {
         select("knight-1", row = 1, column = 1)
-        battleUnitInfoView.onBagSelected.shouldNotBeNull().invoke()
+        battleUnitInfoView.onInventoryButtonSelected.shouldNotBeNull().invoke()
         eventBus.dispatch()
     }
 
@@ -160,7 +160,7 @@ class InventoryPresenterTest {
     }
 
     private fun clickItemAction(label: String) {
-        playerCallToActionView.displayedItemActions
+        callToActionView.displayedItemButtons
             .shouldNotBeNull()
             .actions
             .single { action -> action.label == label }
@@ -168,14 +168,14 @@ class InventoryPresenterTest {
         eventBus.dispatch()
     }
 
-    private fun colorsOfItemActions() =
-        playerCallToActionView.displayedItemActions
+    private fun colorsOfItemButtons() =
+        callToActionView.displayedItemButtons
             .shouldNotBeNull()
             .actions
             .map { action -> action.color }
 
-    private fun answerDiscardQuestion(answer: FakePlayerCallToActionView.DisplayedDiscardQuestion.() -> Unit) {
-        playerCallToActionView.displayedDiscardQuestion.shouldNotBeNull().answer()
+    private fun answerDiscardQuestion(answer: FakeCallToActionView.DisplayedDiscardQuestion.() -> Unit) {
+        callToActionView.displayedDiscardQuestion.shouldNotBeNull().answer()
         eventBus.dispatch()
     }
 
@@ -189,26 +189,26 @@ class InventoryPresenterTest {
     }
 
     @Test
-    fun `DisplayBag should display the bag when a human battle unit is selected`() {
+    fun `DisplayInventoryButton should display the inventory button when a human battle unit is selected`() {
         // Given
         // When
         select("knight-1", row = 1, column = 1)
         // Then
-        battleUnitInfoView.onBagSelected.shouldNotBeNull()
+        battleUnitInfoView.onInventoryButtonSelected.shouldNotBeNull()
     }
 
     @Test
-    fun `DisplayBag should not display the bag when a cpu battle unit is selected`() {
+    fun `DisplayInventoryButton should not display the inventory button when a cpu battle unit is selected`() {
         // Given
         select("knight-1", row = 1, column = 1)
         // When
         select("rat-1", row = 1, column = 3)
         // Then
-        battleUnitInfoView.onBagSelected.shouldBeNull()
+        battleUnitInfoView.onInventoryButtonSelected.shouldBeNull()
     }
 
     @Test
-    fun `DisplayBag should not display the bag when a summoned battle unit is selected`() {
+    fun `DisplayInventoryButton should not display the inventory button when a summoned battle unit is selected`() {
         // Given
         val beeTile = summonBee()
         val beeBattleUnitId = apis.battlefieldApi.searchOccupant(row = beeTile.row, column = beeTile.column).shouldNotBeNull()
@@ -216,21 +216,21 @@ class InventoryPresenterTest {
         // When
         select(beeBattleUnitId, row = beeTile.row, column = beeTile.column)
         // Then
-        battleUnitInfoView.onBagSelected.shouldBeNull()
+        battleUnitInfoView.onInventoryButtonSelected.shouldBeNull()
     }
 
     @Test
-    fun `DisplayBag should not display the bag when the battlefield hud is idle`() {
+    fun `DisplayInventoryButton should not display the inventory button when nothing is selected`() {
         // Given
         select("knight-1", row = 1, column = 1)
         // When
-        publish(BattlefieldHudEvent.Idle)
+        publish(SelectionEvent.Deselected)
         // Then
-        battleUnitInfoView.onBagSelected.shouldBeNull()
+        battleUnitInfoView.onInventoryButtonSelected.shouldBeNull()
     }
 
     @Test
-    fun `OpenInventory should display the stored items marking the equipped one when the bag is clicked`() {
+    fun `OpenInventory should display the stored items marking the equipped one when the inventory button is clicked`() {
         // Given
         loot("knight-1", "health-potion")
         loot("knight-1", "hammer")
@@ -241,7 +241,7 @@ class InventoryPresenterTest {
         // Then
         inventoryView.displayedSlots.last().shouldContainExactly(Slot("health-potion", isEquipped = false), Slot("hammer", isEquipped = true))
         inventoryView.displayedGold shouldBe 20
-        battleHudView.displays.last() shouldBe Display.INVENTORY
+        hudView.displays.last() shouldBe Display.INVENTORY
     }
 
     @Test
@@ -254,14 +254,14 @@ class InventoryPresenterTest {
     }
 
     @Test
-    fun `OpenInventory should ignore the bag when the timeline is playing`() {
+    fun `OpenInventory should ignore the inventory button when the timeline is playing`() {
         // Given
         select("knight-1", row = 1, column = 1)
         timeline.playLongStep()
         // When
-        battleUnitInfoView.onBagSelected.shouldNotBeNull().invoke()
+        battleUnitInfoView.onInventoryButtonSelected.shouldNotBeNull().invoke()
         // Then
-        battleHudView.displays.shouldBeEmpty()
+        hudView.displays.shouldBeEmpty()
     }
 
     @Test
@@ -283,10 +283,10 @@ class InventoryPresenterTest {
         clickSlot(0)
         // Then
         inventoryView.selectedSlot shouldBe 0
-        val itemActions = playerCallToActionView.displayedItemActions.shouldNotBeNull()
-        itemActions.itemName shouldBe "Health Potion"
-        itemActions.itemSellPrice shouldBe 5
-        itemActions.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to true, "Consume" to true)
+        val itemButtons = callToActionView.displayedItemButtons.shouldNotBeNull()
+        itemButtons.itemName shouldBe "Health Potion"
+        itemButtons.itemSellPrice shouldBe 5
+        itemButtons.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to true, "Consume" to true)
     }
 
     @Test
@@ -297,8 +297,8 @@ class InventoryPresenterTest {
         // When
         clickSlot(0)
         // Then
-        val itemActions = playerCallToActionView.displayedItemActions.shouldNotBeNull()
-        itemActions.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to true, "Consume" to true)
+        val itemButtons = callToActionView.displayedItemButtons.shouldNotBeNull()
+        itemButtons.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to true, "Consume" to true)
     }
 
     @Test
@@ -309,8 +309,8 @@ class InventoryPresenterTest {
         // When
         clickSlot(0)
         // Then
-        val itemActions = playerCallToActionView.displayedItemActions.shouldNotBeNull()
-        itemActions.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to true, "Consume" to false)
+        val itemButtons = callToActionView.displayedItemButtons.shouldNotBeNull()
+        itemButtons.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to true, "Consume" to false)
     }
 
     @Test
@@ -321,8 +321,8 @@ class InventoryPresenterTest {
         // When
         clickSlot(0)
         // Then
-        val itemActions = playerCallToActionView.displayedItemActions.shouldNotBeNull()
-        itemActions.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to true, "Equip" to true)
+        val itemButtons = callToActionView.displayedItemButtons.shouldNotBeNull()
+        itemButtons.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to true, "Equip" to true)
     }
 
     @Test
@@ -334,7 +334,7 @@ class InventoryPresenterTest {
         // When
         clickSlot(0)
         // Then
-        playerCallToActionView.displayedItemActions.shouldNotBeNull().itemSellPrice shouldBe 25
+        callToActionView.displayedItemButtons.shouldNotBeNull().itemSellPrice shouldBe 25
     }
 
     @Test
@@ -347,8 +347,8 @@ class InventoryPresenterTest {
         // When
         clickSlot(0)
         // Then
-        val itemActions = playerCallToActionView.displayedItemActions.shouldNotBeNull()
-        itemActions.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to false, "Unequip" to true)
+        val itemButtons = callToActionView.displayedItemButtons.shouldNotBeNull()
+        itemButtons.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to false, "Unequip" to true)
     }
 
     @Test
@@ -362,8 +362,8 @@ class InventoryPresenterTest {
         // When
         clickSlot(1)
         // Then
-        val itemActions = playerCallToActionView.displayedItemActions.shouldNotBeNull()
-        itemActions.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to true, "Equip" to false)
+        val itemButtons = callToActionView.displayedItemButtons.shouldNotBeNull()
+        itemButtons.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to true, "Equip" to false)
     }
 
     @Test
@@ -374,8 +374,8 @@ class InventoryPresenterTest {
         // When
         clickSlot(0)
         // Then
-        colorsOfItemActions().shouldContainExactly(GameButton.GREY, GameButton.GREY, ConfirmButton.COLOR)
-        playerCallToActionView.displayedItemActions!!
+        colorsOfItemButtons().shouldContainExactly(GameButton.GREY, GameButton.GREY, ConfirmButton.COLOR)
+        callToActionView.displayedItemButtons!!
             .actions
             .last()
             .pressedColor shouldBe ConfirmButton.PRESSED_COLOR
@@ -389,7 +389,7 @@ class InventoryPresenterTest {
         // When
         clickSlot(0)
         // Then
-        colorsOfItemActions().shouldContainExactly(GameButton.GREY, GameButton.GREY, ConfirmButton.COLOR)
+        colorsOfItemButtons().shouldContainExactly(GameButton.GREY, GameButton.GREY, ConfirmButton.COLOR)
     }
 
     @Test
@@ -402,7 +402,7 @@ class InventoryPresenterTest {
         // When
         clickSlot(0)
         // Then
-        colorsOfItemActions().shouldContainExactly(GameButton.GREY, GameButton.GREY, ConfirmButton.COLOR)
+        colorsOfItemButtons().shouldContainExactly(GameButton.GREY, GameButton.GREY, ConfirmButton.COLOR)
     }
 
     @Test
@@ -414,8 +414,8 @@ class InventoryPresenterTest {
         // When
         clickItemAction("Discard")
         // Then
-        playerCallToActionView.displayedDiscardQuestion.shouldNotBeNull().itemName shouldBe "Health Potion"
-        playerCallToActionView.displayedItemActions.shouldBeNull()
+        callToActionView.displayedDiscardQuestion.shouldNotBeNull().itemName shouldBe "Health Potion"
+        callToActionView.displayedItemButtons.shouldBeNull()
         inventoryView.selectedSlot shouldBe 0
         apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")?.storedItems shouldBe listOf("health-potion")
     }
@@ -433,7 +433,7 @@ class InventoryPresenterTest {
         apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")?.storedItems shouldBe emptyList()
         inventoryView.displayedSlots.last().shouldBeEmpty()
         inventoryView.selectedSlot.shouldBeNull()
-        playerCallToActionView.displayedDiscardQuestion.shouldBeNull()
+        callToActionView.displayedDiscardQuestion.shouldBeNull()
     }
 
     @Test
@@ -446,8 +446,8 @@ class InventoryPresenterTest {
         // When
         answerDiscardQuestion { onBack() }
         // Then
-        playerCallToActionView.displayedDiscardQuestion.shouldBeNull()
-        playerCallToActionView.displayedItemActions.shouldNotBeNull().itemName shouldBe "Health Potion"
+        callToActionView.displayedDiscardQuestion.shouldBeNull()
+        callToActionView.displayedItemButtons.shouldNotBeNull().itemName shouldBe "Health Potion"
         inventoryView.selectedSlot shouldBe 0
         apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")?.storedItems shouldBe listOf("health-potion")
     }
@@ -463,8 +463,8 @@ class InventoryPresenterTest {
         // When
         clickSlot(1)
         // Then
-        playerCallToActionView.displayedDiscardQuestion.shouldBeNull()
-        playerCallToActionView.displayedItemActions.shouldNotBeNull().itemName shouldBe "Hammer"
+        callToActionView.displayedDiscardQuestion.shouldBeNull()
+        callToActionView.displayedItemButtons.shouldNotBeNull().itemName shouldBe "Hammer"
         inventoryView.selectedSlot shouldBe 1
         apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")?.storedItems shouldBe listOf("health-potion", "hammer")
     }
@@ -480,7 +480,7 @@ class InventoryPresenterTest {
         inventoryView.delegate.shouldNotBeNull().inventoryClosed()
         eventBus.dispatch()
         // Then
-        playerCallToActionView.displayedDiscardQuestion.shouldBeNull()
+        callToActionView.displayedDiscardQuestion.shouldBeNull()
         apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")?.storedItems shouldBe listOf("health-potion")
     }
 
@@ -495,7 +495,7 @@ class InventoryPresenterTest {
         // Then
         inventoryView.displayedSlots.last().shouldBeEmpty()
         inventoryView.selectedSlot.shouldBeNull()
-        playerCallToActionView.displayedItemActions.shouldBeNull()
+        callToActionView.displayedItemButtons.shouldBeNull()
     }
 
     @Test
@@ -537,10 +537,10 @@ class InventoryPresenterTest {
         // When
         inventoryView.delegate.shouldNotBeNull().inventoryClosed()
         // Then
-        battleHudView.displays.last() shouldBe Display.BATTLE_UNIT_INFO
+        hudView.displays.last() shouldBe Display.BATTLE_UNIT_INFO
         battleUnitInfoView.displayedBattleUnits
             .last()
-            .battleUnit.maximumHealthPoints shouldBe 120
+            .battleUnit.maximumHealth shouldBe 120
     }
 
     @Test
@@ -550,9 +550,9 @@ class InventoryPresenterTest {
         // When
         findWhileFull("hammer")
         // Then
-        battleHudView.displays.last() shouldBe Display.INVENTORY
+        hudView.displays.last() shouldBe Display.INVENTORY
         inventoryView.displayedSlots.last().size shouldBe 12
-        val inventoryFull = playerCallToActionView.displayedInventoryFull.shouldNotBeNull()
+        val inventoryFull = callToActionView.displayedInventoryFull.shouldNotBeNull()
         inventoryFull.foundItemName shouldBe "Hammer"
         inventoryFull.foundItemSellPrice shouldBe 25
         inventoryFull.foundItemId shouldBe "hammer"
@@ -567,8 +567,8 @@ class InventoryPresenterTest {
         // When
         clickSlot(0)
         // Then
-        playerCallToActionView.displayedDiscardQuestion.shouldNotBeNull().itemName shouldBe "Health Potion"
-        playerCallToActionView.displayedInventoryFull.shouldBeNull()
+        callToActionView.displayedDiscardQuestion.shouldNotBeNull().itemName shouldBe "Health Potion"
+        callToActionView.displayedInventoryFull.shouldBeNull()
         inventoryView.selectedSlot shouldBe 0
         apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")?.storedItems shouldBe List(12) { "health-potion" }
         timeline.isPlaying.shouldBeTrue()
@@ -583,8 +583,8 @@ class InventoryPresenterTest {
         // When
         answerDiscardQuestion { onBack() }
         // Then
-        playerCallToActionView.displayedInventoryFull.shouldNotBeNull().foundItemName shouldBe "Hammer"
-        playerCallToActionView.displayedDiscardQuestion.shouldBeNull()
+        callToActionView.displayedInventoryFull.shouldNotBeNull().foundItemName shouldBe "Hammer"
+        callToActionView.displayedDiscardQuestion.shouldBeNull()
         inventoryView.selectedSlot.shouldBeNull()
         apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")?.storedItems shouldBe List(12) { "health-potion" }
         timeline.isPlaying.shouldBeTrue()
@@ -599,7 +599,7 @@ class InventoryPresenterTest {
         // When
         clickSlot(3)
         // Then
-        playerCallToActionView.displayedDiscardQuestion.shouldNotBeNull()
+        callToActionView.displayedDiscardQuestion.shouldNotBeNull()
         inventoryView.selectedSlot shouldBe 3
         timeline.isPlaying.shouldBeTrue()
     }
@@ -616,8 +616,8 @@ class InventoryPresenterTest {
         // When
         clickSlot(0)
         // Then
-        playerCallToActionView.displayedDiscardQuestion.shouldBeNull()
-        playerCallToActionView.displayedInventoryFull.shouldNotBeNull()
+        callToActionView.displayedDiscardQuestion.shouldBeNull()
+        callToActionView.displayedInventoryFull.shouldNotBeNull()
         inventoryView.selectedSlot.shouldBeNull()
     }
 
@@ -630,11 +630,11 @@ class InventoryPresenterTest {
         // When
         answerDiscardQuestion { onDiscarded() }
         // Then
-        playerCallToActionView.displayedDiscardQuestion.shouldBeNull()
+        callToActionView.displayedDiscardQuestion.shouldBeNull()
         inventoryView.selectedSlot.shouldBeNull()
         apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")?.storedItems shouldBe List(11) { "health-potion" } + "hammer"
         apis.lootDropApi.searchDroppedItems()[LootDrop.Dto.PositionDto(1, 2)].shouldBeNull()
-        playerCallToActionView.displayedInventoryFull.shouldBeNull()
+        callToActionView.displayedInventoryFull.shouldBeNull()
         timeline.isPlaying.shouldBeFalse()
     }
 
@@ -644,7 +644,7 @@ class InventoryPresenterTest {
         fillKnightInventoryWithHealthPotions()
         findWhileFull("hammer")
         // When
-        playerCallToActionView.displayedInventoryFull
+        callToActionView.displayedInventoryFull
             .shouldNotBeNull()
             .onLeft()
         eventBus.dispatch()
@@ -662,12 +662,12 @@ class InventoryPresenterTest {
         // When
         inventoryView.delegate.shouldNotBeNull().inventoryClosed()
         // Then
-        battleHudView.displays.last() shouldBe Display.INVENTORY
-        playerCallToActionView.displayedInventoryFull.shouldNotBeNull()
+        hudView.displays.last() shouldBe Display.INVENTORY
+        callToActionView.displayedInventoryFull.shouldNotBeNull()
     }
 
     @Test
-    fun `SelectItem should not display the item actions during the turn of another player in a battle`() {
+    fun `SelectItem should not display the item buttons during the turn of another player in a battle`() {
         // Given
         loot("knight-1", "health-potion")
         apis.battleApi.finishPlayerTurn()
@@ -676,7 +676,7 @@ class InventoryPresenterTest {
         // When
         clickSlot(0)
         // Then
-        playerCallToActionView.displayedItemActions.shouldBeNull()
+        callToActionView.displayedItemButtons.shouldBeNull()
     }
 
     @Test

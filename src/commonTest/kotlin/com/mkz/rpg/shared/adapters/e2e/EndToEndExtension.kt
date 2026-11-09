@@ -46,7 +46,7 @@ suspend fun ViewsForTesting.waitUntil(condition: () -> Boolean) {
 /**
  * Starts the game as the player does, and plays a new game from the menu. By default, the CPU battle units always rest
  * instead of wandering, so they stand where the game setup deploys them. The games are saved in the [storage], in
- * memory, so no test reads the games saved by another one. It waits for the toast announcing the main quest, which fades by itself.
+ * memory, so no test reads the games saved by another one. It waits for the announcement announcing the main quest, which fades by itself.
  */
 suspend fun ViewsForTesting.startNewGame(
     random: Random = FixedDoublesRandom(0.0),

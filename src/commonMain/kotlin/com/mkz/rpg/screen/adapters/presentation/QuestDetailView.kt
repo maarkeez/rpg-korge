@@ -25,8 +25,8 @@ import korlibs.math.geom.Size
  * open once completed, so the story can be read again.
  */
 class QuestDetailView(
-    private val resourcesLoader: BattleSceneResourcesLoader,
-    private val texts: Texts,
+    private val resourcesLoader: GameSceneResourcesLoader,
+    private val messages: Messages,
 ) : Container() {
     companion object {
         const val WIDTH = 378.0
@@ -98,15 +98,15 @@ class QuestDetailView(
         targetSlot(task, resourcesLoader, PADDING, PADDING, TARGET_SIZE, portraitScale = 3.0, ring = if (quest.isCompleted) HudStyle.ALLY else ringOf(task))
         targetTick = if (quest.isCompleted) container { tickDisc(TARGET_BOTTOM - 20, TARGET_BOTTOM - 20, TARGET_TICK_SIZE) } else null
         val caption =
-            texts[
+            messages[
                 when {
-                    quest.isCompleted -> UiText.QUEST_DETAIL_COMPLETED
-                    quest.isMain -> UiText.QUEST_DETAIL_MAIN_QUEST
-                    else -> UiText.QUEST_DETAIL_SIDE_QUEST
+                    quest.isCompleted -> UiMessage.QUEST_DETAIL_COMPLETED
+                    quest.isMain -> UiMessage.QUEST_DETAIL_MAIN_QUEST
+                    else -> UiMessage.QUEST_DETAIL_SIDE_QUEST
                 },
             ]
         captionText = text(caption, textSize = QuestViewParts.CAPTION_SIZE, color = if (quest.isCompleted) HudStyle.ALLY else HudStyle.FAINT) { xy(TEXT_X, PADDING - 2) }
-        repeatablePillView = if (quest.isRepeatable) repeatablePill(TEXT_X + widthOf(caption, QuestViewParts.CAPTION_SIZE) + PILL_SPACING, PILL_Y, texts) else null
+        repeatablePillView = if (quest.isRepeatable) repeatablePill(TEXT_X + widthOf(caption, QuestViewParts.CAPTION_SIZE) + PILL_SPACING, PILL_Y, messages) else null
         var nameHeight = 0.0
         nameView = container { nameHeight = wrappedText(quest.name, TEXT_X, NAME_Y, TEXT_WIDTH, NAME_SIZE, Colors.WHITE, maximumLines = NAME_MAXIMUM_LINES) }
         val descriptionY = NAME_Y + nameHeight + DESCRIPTION_SPACING
@@ -120,15 +120,15 @@ class QuestDetailView(
         val task = quest.currentTask
         val bannerY = if (quest.hasTasksDoneDisplayed()) BANNER_Y else BANNER_Y_WITHOUT_TASKS_DONE
         panel(Size(CONTENT_WIDTH, BANNER_HEIGHT), fill = HudStyle.PANEL_RAISED).xy(PADDING, bannerY)
-        val isCounted = !quest.isCompleted && task.count > 1
+        val isCounted = !quest.isCompleted && task.requiredDefeats > 1
         val taskY = bannerY + if (isCounted) COUNTED_TASK_OFFSET else SINGLE_TASK_OFFSET
         if (quest.isCompleted) tickDisc(TASK_X, taskY, TASK_SIZE) else taskGlyph(task.kind, TASK_X, taskY, TASK_SIZE, HudStyle.SELECTION)
-        val count = if (isCounted) "${task.progress}/${task.count}" else null
+        val count = if (isCounted) "${task.defeatsCounted}/${task.requiredDefeats}" else null
         val countWidth = count?.let { value -> widthOf(value, TASK_SIZE) } ?: 0.0
         val taskWidth = TASK_RIGHT - TASK_TEXT_X - if (isCounted) countWidth + COUNT_SPACING else 0.0
         taskText = text(fitted(task.text, TASK_SIZE, taskWidth), textSize = TASK_SIZE, color = if (quest.isCompleted) HudStyle.MUTED else Colors.WHITE) { xy(TASK_TEXT_X, taskY) }
         countText = count?.let { value -> text(value, textSize = TASK_SIZE, color = HudStyle.SELECTION) { xy(TASK_RIGHT - countWidth, taskY) } }
-        progressBarView = if (isCounted) container { progressBar(TASK_X, bannerY + BAR_OFFSET, BAR_WIDTH, BAR_HEIGHT, task.progress, task.count) } else null
+        progressBarView = if (isCounted) container { progressBar(TASK_X, bannerY + BAR_OFFSET, BAR_WIDTH, BAR_HEIGHT, task.defeatsCounted, task.requiredDefeats) } else null
     }
 
     private fun drawTasksDone(quest: QuestInfo) {
@@ -138,13 +138,13 @@ class QuestDetailView(
         }
         val tasksDone = quest.doneTasks.size
         tickDisc(PADDING + 2, TASKS_DONE_Y + 1, 12.0)
-        tasksDoneText = text(texts.plural(UiText.QUEST_DETAIL_TASKS_DONE, tasksDone, "tasks" to tasksDone), textSize = TASKS_DONE_SIZE, color = HudStyle.MUTED) { xy(PADDING + 20, TASKS_DONE_Y) }
+        tasksDoneText = text(messages.plural(UiMessage.QUEST_DETAIL_TASKS_DONE, tasksDone, "tasks" to tasksDone), textSize = TASKS_DONE_SIZE, color = HudStyle.MUTED) { xy(PADDING + 20, TASKS_DONE_Y) }
     }
 
     private fun drawReward(quest: QuestInfo) {
-        val caption = texts[UiText.QUEST_DETAIL_REWARD]
+        val caption = messages[UiMessage.QUEST_DETAIL_REWARD]
         text(caption, textSize = QuestViewParts.CAPTION_SIZE, color = HudStyle.FAINT) { xy(PADDING, REWARD_CAPTION_Y) }
-        rewardView = container { rewardRow(quest, PADDING + widthOf(caption, QuestViewParts.CAPTION_SIZE) + REWARD_SPACING, REWARD_ROW_Y, resourcesLoader, texts) }
+        rewardView = container { rewardRow(quest, PADDING + widthOf(caption, QuestViewParts.CAPTION_SIZE) + REWARD_SPACING, REWARD_ROW_Y, resourcesLoader, messages) }
     }
 
     private fun QuestInfo.hasTasksDoneDisplayed() = doneTasks.isNotEmpty() && !isCompleted

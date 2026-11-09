@@ -21,7 +21,7 @@ A CPU player turn is played one decision at a time by the [`CpuBattleBrain`](../
 
 The CPU battle brain only resolves the exact decision it awaits (the same battle unit and tile, or the same battle unit and ability), so events of other battle units or decisions are ignored.
 
-The whole CPU player turn is resolved instantly. The battle scene then replays it decision by decision, e.g.: each battle unit walking its path tile by tile, see [Presentation timeline](presentation-timeline.md).
+The whole CPU player turn is resolved instantly. The game screen then replays it decision by decision, e.g.: each battle unit walking its path tile by tile, see [Presentation timeline](presentation-timeline.md).
 
 Every decision spends casts or steps, so a player turn always ends. As a safeguard, a player turn ends after `CpuBattleBrain.MAX_DECISIONS_PER_PLAYER_TURN` (20) decisions.
 
@@ -72,7 +72,7 @@ The **expected amount** of an effect is its full amount when it is applied immed
 - Damage only counts the targets within reach.
 - Summons are worth the damage the summon will deal to the enemy within reach of the caster nearest to its tile:
   - The **summon damage** is the expected amount of the best damaging ability of the summon's unit.
-  - The summon acts in the player turn it is summoned in, after the battle units already playing it, and walks and casts in the same player turn, so the **player turns to damage** are `max(1, ⌈(distance to the enemy - 1) / its movement range⌉)`, counting the tiles apart. Hence, the tile nearest to the enemy is preferred.
+  - The summon acts in the player turn it is summoned in, after the battle units already playing it, and walks and casts in the same player turn, so the **player turns to damage** are `max(1, ⌈(distance to the enemy - 1) / its maximum steps⌉)`, counting the tiles apart. Hence, the tile nearest to the enemy is preferred.
   - A summon without a damaging ability, or without an enemy within reach, is worth 0.
 - The best damage, heal or summon is cast when its utility is higher than `MINIMUM_UTILITY_GAIN`. Otherwise, one of the other abilities is cast at random, if any.
 
@@ -138,7 +138,7 @@ When a round finishes (`RoundFinished`), the CPU battle units out of the battle 
 
 ### In sight
 
-Only the CPU battle units the player may see wander: those around the party leader, on the tiles the camera can show, and 1 tile around them (`SIGHT_MARGIN`), so the ones about to come into view are wandering already ([`IsInSight`](../../src/commonMain/kotlin/com/mkz/rpg/cpuWanderBrain/usecases/queries/IsInSight.kt)). The camera shows 6x6 tiles (`VIEW_TILES`, as `BattlefieldView.VISIBLE_TILES`, since the domain does not depend on the screen), and keeps the leader in its 2x2 centre, so on each axis it can show from 3 tiles before to 3 tiles after the leader: 7 tiles, 9 with the margin. Near a border, the camera stops scrolling, so the area shifts to stay inside the battlefield. For example, on a battlefield of 40 rows and 24 columns, with the leader on row 10 and column 12, the rows 6 to 14 and the columns 8 to 16 are in sight. With the leader on column 1, the columns -1 to 7 are, as the camera does not scroll left of the first column.
+Only the CPU battle units the player may see wander: those around the party leader, on the tiles the camera can show, and 1 tile around them (`SIGHT_MARGIN`), so the ones about to come into view are wandering already ([`IsInSight`](../../src/commonMain/kotlin/com/mkz/rpg/cpuWanderBrain/usecases/queries/IsInSight.kt)). The camera shows 6x6 tiles (`VISIBLE_TILES`, as `BattlefieldView.VISIBLE_TILES`, since the domain does not depend on the screen), and keeps the leader in its 2x2 centre, so on each axis it can show from 3 tiles before to 3 tiles after the leader: 7 tiles, 9 with the margin. Near a border, the camera stops scrolling, so the area shifts to stay inside the battlefield. For example, on a battlefield of 40 rows and 24 columns, with the leader on row 10 and column 12, the rows 6 to 14 and the columns 8 to 16 are in sight. With the leader on column 1, the columns -1 to 7 are, as the camera does not scroll left of the first column.
 
 The others stay put, including the ones returning home after a chase, as nobody sees them, and deciding where each one steps takes time: on the web build, wandering all of them every second (13 in the demo) froze the game for about half a second. They still recover, and still engage the party when it walks within their reach. Without a party leader on the battlefield, none wanders.
 

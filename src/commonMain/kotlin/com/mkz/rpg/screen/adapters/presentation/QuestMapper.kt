@@ -11,38 +11,38 @@ internal object QuestMapper {
     /** The main quest is pinned when no other quest is. */
     fun questInfos(
         quests: List<Quest.Dto>,
-        texts: Texts,
+        messages: Messages,
     ): List<QuestInfo> {
         val isSideQuestPinned = quests.any { quest -> quest.progress.isPinned }
-        return quests.map { quest -> questInfo(quest, texts, isPinned = quest.progress.isPinned || (quest.type == QuestTypeDto.MAIN && !isSideQuestPinned)) }
+        return quests.map { quest -> questInfo(quest, messages, isPinned = quest.progress.isPinned || (quest.type == QuestTypeDto.MAIN && !isSideQuestPinned)) }
     }
 
     private fun questInfo(
         quest: Quest.Dto,
-        texts: Texts,
+        messages: Messages,
         isPinned: Boolean,
     ): QuestInfo {
         val isCompleted = quest.progress.status == StatusDto.COMPLETED
         val currentTaskIndex = quest.progress.currentTaskIndex
         return QuestInfo(
             id = quest.id,
-            name = texts.questName(quest.id),
-            description = texts.questDescription(quest.id),
+            name = messages.questName(quest.id),
+            description = messages.questDescription(quest.id),
             tasks =
                 quest.tasks.take(currentTaskIndex + 1).mapIndexed { taskIndex, task ->
-                    val count = countOf(task)
+                    val requiredDefeats = requiredDefeatsOf(task)
                     val isDone = isCompleted || taskIndex < currentTaskIndex
                     QuestInfo.Task(
                         kind = kindOf(task),
-                        text = texts.questTask(quest.id, taskIndex),
-                        progress = if (isDone) count else quest.progress.currentTaskDefeats,
-                        count = count,
+                        text = messages.questTask(quest.id, taskIndex),
+                        defeatsCounted = if (isDone) requiredDefeats else quest.progress.currentTaskDefeats,
+                        requiredDefeats = requiredDefeats,
                         portraitPath = portraitPathOf(task),
                         isDone = isDone,
                     )
                 },
             gold = quest.reward.gold,
-            items = quest.reward.lootableItemIds.map { lootableItemId -> QuestInfo.RewardItem(id = lootableItemId, name = texts.lootableItemName(lootableItemId)) },
+            items = quest.reward.lootableItemIds.map { lootableItemId -> QuestInfo.RewardItem(id = lootableItemId, name = messages.lootableItemName(lootableItemId)) },
             isCompleted = isCompleted,
             isMain = quest.type == QuestTypeDto.MAIN,
             isRepeatable = quest.repeatable,
@@ -60,11 +60,11 @@ internal object QuestMapper {
         when (task.type) {
             TaskDto.TypeDto.DEFEAT -> QuestInfo.Kind.DEFEAT
             TaskDto.TypeDto.TALK -> QuestInfo.Kind.TALK
-            TaskDto.TypeDto.VISIT -> QuestInfo.Kind.REACH
+            TaskDto.TypeDto.VISIT -> QuestInfo.Kind.VISIT
         }
 
     // A talk or a visit has nothing to count.
-    private fun countOf(task: TaskDto): Int = task.defeat?.requiredDefeats ?: 1
+    private fun requiredDefeatsOf(task: TaskDto): Int = task.defeat?.requiredDefeats ?: 1
 
     private fun portraitPathOf(task: TaskDto): String? =
         when (task.type) {

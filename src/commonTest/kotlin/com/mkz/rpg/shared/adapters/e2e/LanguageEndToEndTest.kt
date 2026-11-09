@@ -1,7 +1,7 @@
 package com.mkz.rpg.shared.adapters.e2e
 
 import com.mkz.rpg.GAME_WINDOW_SIZE
-import com.mkz.rpg.screen.adapters.presentation.battleInfoView
+import com.mkz.rpg.screen.adapters.presentation.bannerView
 import com.mkz.rpg.screen.adapters.presentation.clickLanguage
 import com.mkz.rpg.screen.adapters.presentation.clickPlayNewGame
 import com.mkz.rpg.screen.adapters.presentation.menuView
@@ -30,7 +30,7 @@ class LanguageEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             // When
             clickPlayNewGame(menuView)
             // Then
-            waitUntil { battleInfoView()?.roundText() == "Explorando" }
-            battleInfoView()?.roundText() shouldBe "Explorando"
+            waitUntil { bannerView()?.roundText() == "Explorando" }
+            bannerView()?.roundText() shouldBe "Explorando"
         }
 }

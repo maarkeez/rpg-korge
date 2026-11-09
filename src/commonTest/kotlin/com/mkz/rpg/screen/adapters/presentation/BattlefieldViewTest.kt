@@ -2,9 +2,9 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battlefield.domain.BattlefieldMother
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.screen.adapters.presentation.BattlefieldHealthBarPreviewView.PreviewOption
 import com.mkz.rpg.screen.adapters.presentation.BattlefieldView.Following.TRAIL
+import com.mkz.rpg.screen.adapters.presentation.GameSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.shared.adapters.presentation.addChildScaled
 import com.mkz.rpg.shared.adapters.presentation.awaitCompletion
 import com.mkz.rpg.shared.adapters.presentation.nextFrame
@@ -682,13 +682,13 @@ class BattlefieldViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `PickUpLoot should finish lifting the item when its tile is scrolled out of the viewport meanwhile`() =
+    fun `LootDroppedItem should finish lifting the item when its tile is scrolled out of the viewport meanwhile`() =
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 64, columns = 64).toTerrain())
             addChild(battlefieldView)
-            val pickingUp = startAnimation { battlefieldView.pickUpLoot(row = 0, column = 0, lootableItemId = "health-potion", remainingLootableItemIds = emptyList()) }
+            val pickingUp = startAnimation { battlefieldView.lootDroppedItem(row = 0, column = 0, lootableItemId = "health-potion", remainingLootableItemIds = emptyList()) }
             // When
             dragBattlefield(battlefieldView, -1200.0 to -1200.0)
             awaitCompletion(pickingUp)
@@ -719,7 +719,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `DisplayLoot should display the item icon below the battle unit when one item lies on the tile`() =
+    fun `DisplayDroppedItems should display the item icon below the battle unit when one item lies on the tile`() =
         sharedViewsTest {
             // Given
             val resourcesLoader = loadedResourcesLoader()
@@ -727,7 +727,7 @@ class BattlefieldViewTest : ViewsForTesting() {
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             // When
-            battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = listOf("health-potion"))
+            battlefieldView.displayDroppedItems(row = 0, column = 0, lootableItemIds = listOf("health-potion"))
             // Then
             battlefieldView.lootBitmapAt(row = 0, column = 0) shouldBe resourcesLoader.bitmap("lootableItem/health-potion.png")
             battlefieldView.isLootRightAboveTerrainAt(row = 0, column = 0).shouldBeTrue()
@@ -735,40 +735,40 @@ class BattlefieldViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `DisplayLoot should display the chest when several items lie on the tile`() =
+    fun `DisplayDroppedItems should display the chest when several items lie on the tile`() =
         sharedViewsTest {
             // Given
             val resourcesLoader = loadedResourcesLoader()
             val battlefieldView = BattlefieldView(resourcesLoader)
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
-            battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = listOf("health-potion"))
+            battlefieldView.displayDroppedItems(row = 0, column = 0, lootableItemIds = listOf("health-potion"))
             // When
-            battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = listOf("health-potion", "hammer"))
+            battlefieldView.displayDroppedItems(row = 0, column = 0, lootableItemIds = listOf("health-potion", "hammer"))
             // Then
             battlefieldView.lootBitmapAt(row = 0, column = 0) shouldBe resourcesLoader.bitmap("battlefield/chest.png")
         }
 
     @Test
-    fun `DisplayLoot should remove the loot when no item lies on the tile`() =
+    fun `DisplayDroppedItems should remove the loot when no item lies on the tile`() =
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
-            battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = listOf("health-potion", "hammer"))
+            battlefieldView.displayDroppedItems(row = 0, column = 0, lootableItemIds = listOf("health-potion", "hammer"))
             // When
-            battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = emptyList())
+            battlefieldView.displayDroppedItems(row = 0, column = 0, lootableItemIds = emptyList())
             // Then
             battlefieldView.lootBitmapAt(row = 0, column = 0).shouldBeNull()
         }
 
     @Test
-    fun `PickUpLoot should lift the item icon over the battle unit, growing and fading out, when the item is picked up`() =
+    fun `LootDroppedItem should lift the item icon over the battle unit, growing and fading out, when the item is looted`() =
         sharedViewsTest {
             // Given
             val resourcesLoader = loadedResourcesLoader()
             val battlefieldView = BattlefieldView(resourcesLoader)
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
-            battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = listOf("health-potion"))
+            battlefieldView.displayDroppedItems(row = 0, column = 0, lootableItemIds = listOf("health-potion"))
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             addChild(battlefieldView)
             // When
@@ -779,9 +779,9 @@ class BattlefieldViewTest : ViewsForTesting() {
             isOverBattleUnit.shouldBeTrue()
             liftedLoot.map(LiftedLoot::bitmap).distinct().shouldContainExactly(resourcesLoader.bitmap("lootableItem/health-potion.png"))
             liftedLoot.first().rise shouldBe (0.0 plusOrMinus 0.01)
-            liftedLoot.last().rise shouldBe (BattlefieldView.PICK_UP_RISE plusOrMinus 3.0)
-            liftedLoot.first().scale shouldBe (BattlefieldView.LOOT_SCALE plusOrMinus 0.01)
-            liftedLoot.last().scale shouldBe (BattlefieldView.PICK_UP_SCALE plusOrMinus 0.1)
+            liftedLoot.last().rise shouldBe (BattlefieldView.LOOTED_ITEM_RISE plusOrMinus 3.0)
+            liftedLoot.first().scale shouldBe (BattlefieldView.DROPPED_ITEM_SCALE plusOrMinus 0.01)
+            liftedLoot.last().scale shouldBe (BattlefieldView.LOOTED_ITEM_SCALE plusOrMinus 0.1)
             liftedLoot.first().alpha shouldBe (1.0 plusOrMinus 0.01)
             liftedLoot.last().alpha shouldBe (0.0 plusOrMinus 0.1)
             liftedLoot.zipWithNext().all { (previous, next) -> next.rise >= previous.rise && next.alpha <= previous.alpha }.shouldBeTrue()
@@ -790,12 +790,12 @@ class BattlefieldViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `PickUpLoot should lift the item icon at whole pixels when the item is picked up`() =
+    fun `LootDroppedItem should lift the item icon at whole pixels when the item is looted`() =
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
-            battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = listOf("health-potion"))
+            battlefieldView.displayDroppedItems(row = 0, column = 0, lootableItemIds = listOf("health-potion"))
             addChild(battlefieldView)
             // When
             val pickingUp = startPickingUp(battlefieldView, lootableItemId = "health-potion", remainingLootableItemIds = emptyList())
@@ -806,13 +806,13 @@ class BattlefieldViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `PickUpLoot should display the items left on the tile when the item is picked up`() =
+    fun `LootDroppedItem should display the items left on the tile when the item is looted`() =
         sharedViewsTest {
             // Given
             val resourcesLoader = loadedResourcesLoader()
             val battlefieldView = BattlefieldView(resourcesLoader)
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
-            battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = listOf("health-potion", "hammer"))
+            battlefieldView.displayDroppedItems(row = 0, column = 0, lootableItemIds = listOf("health-potion", "hammer"))
             addChild(battlefieldView)
             // When
             val pickingUp = startPickingUp(battlefieldView, lootableItemId = "health-potion", remainingLootableItemIds = listOf("hammer"))
@@ -823,12 +823,12 @@ class BattlefieldViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `PickUpLoot should scroll the battlefield to the tile when the item is picked up out of the viewport`() =
+    fun `LootDroppedItem should scroll the battlefield to the tile when the item is looted out of the viewport`() =
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
-            battlefieldView.displayLoot(row = 12, column = 13, lootableItemIds = listOf("health-potion"))
+            battlefieldView.displayDroppedItems(row = 12, column = 13, lootableItemIds = listOf("health-potion"))
             addChild(battlefieldView)
             require(!battlefieldView.isTileVisible(row = 12, column = 13))
             // When
@@ -839,12 +839,12 @@ class BattlefieldViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `PickUpLoot should not lift anything when the item has no image`() =
+    fun `LootDroppedItem should not lift anything when the item has no image`() =
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
-            battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = listOf("health-potion", "crown"))
+            battlefieldView.displayDroppedItems(row = 0, column = 0, lootableItemIds = listOf("health-potion", "crown"))
             addChild(battlefieldView)
             // When
             val pickingUp = startPickingUp(battlefieldView, lootableItemId = "crown", remainingLootableItemIds = listOf("health-potion"))
@@ -862,7 +862,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         remainingLootableItemIds: List<String>,
     ): Job =
         startAnimation {
-            battlefieldView.pickUpLoot(row = row, column = column, lootableItemId = lootableItemId, remainingLootableItemIds = remainingLootableItemIds)
+            battlefieldView.lootDroppedItem(row = row, column = column, lootableItemId = lootableItemId, remainingLootableItemIds = remainingLootableItemIds)
         }
 
     private val path = listOf(TilePosition(row = 0, column = 1), TilePosition(row = 0, column = 2))
@@ -1309,7 +1309,7 @@ class BattlefieldViewTest : ViewsForTesting() {
     private fun Double.shouldBeAtWholePixel() = this shouldBe round(this)
 
     // The leader, a knight, stands at (0,0), and the member, a rat, on its east at (0,1).
-    private fun swappingBattlefieldView(resourcesLoader: BattleSceneResourcesLoader): BattlefieldView {
+    private fun swappingBattlefieldView(resourcesLoader: GameSceneResourcesLoader): BattlefieldView {
         val battlefieldView = BattlefieldView(resourcesLoader)
         battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toTerrain())
         battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
@@ -1649,10 +1649,10 @@ class BattlefieldViewTest : ViewsForTesting() {
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             addChild(battlefieldView)
             // When
-            val tinting = startAnimation { battlefieldView.tint(BattleInfoView.CPU_TURN_COLOR) }
+            val tinting = startAnimation { battlefieldView.tint(BannerView.CPU_TURN_COLOR) }
             val tints = sampleUntilCompletion(tinting) { battlefieldView.tintColor() to battlefieldView.tintAlpha() }
             // Then
-            tints.mapNotNull { (color, _) -> color }.distinct().shouldContainExactly(BattleInfoView.CPU_TURN_COLOR)
+            tints.mapNotNull { (color, _) -> color }.distinct().shouldContainExactly(BannerView.CPU_TURN_COLOR)
             tints.maxOf { (_, alpha) -> alpha } shouldBe (BattlefieldView.TINT_ALPHA plusOrMinus 0.05)
             battlefieldView.tintColor().shouldBeNull()
         }
@@ -1665,7 +1665,7 @@ class BattlefieldViewTest : ViewsForTesting() {
             battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
             addChild(battlefieldView)
             // When
-            awaitCompletion(startAnimation { battlefieldView.tint(BattleInfoView.HUMAN_TURN_COLOR) })
+            awaitCompletion(startAnimation { battlefieldView.tint(BannerView.HUMAN_TURN_COLOR) })
             // Then
             battlefieldView.scrollOffset() shouldBe (0.0 to 0.0)
         }

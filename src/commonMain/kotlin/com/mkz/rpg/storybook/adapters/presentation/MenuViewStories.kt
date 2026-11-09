@@ -34,7 +34,7 @@ object MenuViewStories : StoryBinding {
         context: StoryContext,
     ): View =
         MenuView(
-            context.texts,
+            context.messages,
             onNewGameSelected = { context.action("onNewGameSelected") },
             onLoadGameSelected = { context.action("onLoadGameSelected") },
             onWorldBuilderSelected = { context.action("onWorldBuilderSelected") },

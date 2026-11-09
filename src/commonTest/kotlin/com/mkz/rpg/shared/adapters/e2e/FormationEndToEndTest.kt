@@ -2,6 +2,7 @@ package com.mkz.rpg.shared.adapters.e2e
 
 import com.mkz.rpg.GAME_WINDOW_SIZE
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
+import com.mkz.rpg.screen.adapters.presentation.callToActionView
 import com.mkz.rpg.screen.adapters.presentation.clickAction
 import com.mkz.rpg.screen.adapters.presentation.clickB
 import com.mkz.rpg.screen.adapters.presentation.crownedRowIndexes
@@ -9,7 +10,6 @@ import com.mkz.rpg.screen.adapters.presentation.formationView
 import com.mkz.rpg.screen.adapters.presentation.hasBattleUnitAt
 import com.mkz.rpg.screen.adapters.presentation.isPadShown
 import com.mkz.rpg.screen.adapters.presentation.names
-import com.mkz.rpg.screen.adapters.presentation.playerCallToActionView
 import com.mkz.rpg.screen.adapters.presentation.virtualPadView
 import com.mkz.rpg.shared.adapters.presentation.isShown
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
@@ -50,7 +50,7 @@ class FormationEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             clickB(requireNotNull(virtualPadView()))
             waitUntil { formationView()?.isShown() == true }
             // When
-            clickAction(requireNotNull(stage.playerCallToActionView()), "Close")
+            clickAction(requireNotNull(stage.callToActionView()), "Close")
             // Then
             waitUntil { virtualPadView()?.isPadShown() == true }
             withClue("Expected the virtual pad to be displayed again") { virtualPadView()?.isPadShown()?.shouldBeTrue() }

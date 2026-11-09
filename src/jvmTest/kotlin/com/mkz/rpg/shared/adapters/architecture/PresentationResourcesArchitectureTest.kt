@@ -7,7 +7,7 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import kotlin.test.Test
 
 class PresentationResourcesArchitectureTest {
-    private val resourcesLoaderFileName = "BattleSceneResourcesLoader.kt"
+    private val resourcesLoaderFileName = "GameSceneResourcesLoader.kt"
     private val resourceReadingImports =
         setOf(
             "korlibs.io.file.std.resourcesVfs",

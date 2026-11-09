@@ -66,7 +66,7 @@ class AbilityInfoMapperTest {
         // When
         val abilityInfo = abilityInfo(mushroom, venom)
         // Then
-        abilityInfo.effects shouldBe listOf(AbilityInfo.Effect.DamageEachTurn(damage = 3, turns = 5))
+        abilityInfo.effects shouldBe listOf(AbilityInfo.Effect.DamageOnPlayerTurnStarted(damage = 3, turns = 5))
     }
 
     @Test
@@ -77,7 +77,7 @@ class AbilityInfoMapperTest {
         // When
         val abilityInfo = abilityInfo(mending, heal)
         // Then
-        abilityInfo.effects shouldBe listOf(AbilityInfo.Effect.HealSelf(15), AbilityInfo.Effect.HealAdjacentAllies(15))
+        abilityInfo.effects shouldBe listOf(AbilityInfo.Effect.HealCaster(15), AbilityInfo.Effect.HealAdjacentAllies(15))
     }
 
     @Test
@@ -101,7 +101,7 @@ class AbilityInfoMapperTest {
         // When
         val abilityInfo = abilityInfo(skull, venom, venomOnDeath)
         // Then
-        abilityInfo.effects shouldBe listOf(AbilityInfo.Effect.OnDefeatedPoisonAllies(damage = 3, turns = 5))
+        abilityInfo.effects shouldBe listOf(AbilityInfo.Effect.OnDefeatedDamageAdjacentAllies(damage = 3, turns = 5))
     }
 
     @Test
@@ -109,7 +109,7 @@ class AbilityInfoMapperTest {
         // Given
         val mending = ability(manaCost = 10, cooldown = 2).toDto()
         // When
-        val reason = AbilityInfoMapper.reason(mending, cooldownTurnsLeft = 1, remainingMana = 4)
+        val reason = AbilityInfoMapper.reason(mending, remainingCooldown = 1, remainingMana = 4)
         // Then
         reason shouldBe AbilityInfo.Reason.Cooldown(turnsLeft = 1)
     }
@@ -119,7 +119,7 @@ class AbilityInfoMapperTest {
         // Given
         val bat = ability(manaCost = 10, cooldown = 0).toDto()
         // When
-        val reason = AbilityInfoMapper.reason(bat, cooldownTurnsLeft = 0, remainingMana = 4)
+        val reason = AbilityInfoMapper.reason(bat, remainingCooldown = 0, remainingMana = 4)
         // Then
         reason shouldBe AbilityInfo.Reason.NotEnoughMana(manaCost = 10, remainingMana = 4)
     }
@@ -129,7 +129,7 @@ class AbilityInfoMapperTest {
         // Given
         val bat = ability(manaCost = 10, cooldown = 0).toDto()
         // When
-        val reason = AbilityInfoMapper.reason(bat, cooldownTurnsLeft = 0, remainingMana = 10)
+        val reason = AbilityInfoMapper.reason(bat, remainingCooldown = 0, remainingMana = 10)
         // Then
         reason shouldBe null
     }

@@ -22,7 +22,7 @@ import com.mkz.rpg.shared.domain.subscribe
 
 /**
  * Keeps the quests on the screen: the tracker names the current task of the pinned quest, or else of the main quest, popping
- * when it changes, also when a quest it does not name progresses, and stays ticked once the main quest is completed. A toast
+ * when it changes, also when a quest it does not name progresses, and stays ticked once the main quest is completed. A announcement
  * announces any quest starting or completing, one after the other, alongside the timeline, so it holds nothing. The tracker
  * is read only in a battle, and hidden once a player wins, as the winner is drawn across the whole top line.
  *
@@ -41,12 +41,12 @@ class QuestPresenter(
     private val confirmDialogView: ConfirmDialogView,
     private val questAnnouncementView: QuestAnnouncementView,
     private val battlefieldView: BattlefieldView,
-    private val playerCallToActionView: PlayerCallToActionView,
+    private val callToActionView: CallToActionView,
     private val questApi: QuestApi,
     private val partyApi: PartyApi,
     private val npcApi: NpcApi,
-    private val texts: Texts,
-    private val timeline: BattleSceneTimeline,
+    private val messages: Messages,
+    private val timeline: GameSceneTimeline,
     eventBus: EventBus,
 ) : QuestTrackerView.Delegate,
     QuestJournalView.Delegate {
@@ -57,9 +57,9 @@ class QuestPresenter(
     // Whether Back in the detail view returns to the journal.
     private var isDetailFromJournal = false
 
-    // The toasts still to play, and whether one is on its way out, so they never overlap.
-    private val pendingToasts = ArrayDeque<Pair<Moment, QuestInfo>>()
-    private var isPlayingToasts = false
+    // The announcements still to play, and whether one is on its way out, so they never overlap.
+    private val pendingAnnouncements = ArrayDeque<Pair<Moment, QuestInfo>>()
+    private var isPlayingAnnouncements = false
 
     private var onTrackerSelected: (() -> Unit)? = null
 
@@ -207,32 +207,32 @@ class QuestPresenter(
         trackedQuest?.let { tracked -> displayedQuest = tracked }
         timeline.play {
             trackedQuest?.let(questTrackerView::display)
-            pendingToasts.addLast(moment to quest)
-            if (!isPlayingToasts) {
-                isPlayingToasts = true
-                timeline.playAlongside { playToasts() }
+            pendingAnnouncements.addLast(moment to quest)
+            if (!isPlayingAnnouncements) {
+                isPlayingAnnouncements = true
+                timeline.playAlongside { playAnnouncements() }
             }
         }
     }
 
-    private suspend fun playToasts() {
-        while (pendingToasts.isNotEmpty()) {
-            val (moment, quest) = pendingToasts.removeFirst()
+    private suspend fun playAnnouncements() {
+        while (pendingAnnouncements.isNotEmpty()) {
+            val (moment, quest) = pendingAnnouncements.removeFirst()
             questAnnouncementView.announce(moment, quest)
         }
-        isPlayingToasts = false
+        isPlayingAnnouncements = false
     }
 
     private fun canAct() = isQuestOpen && !timeline.isPlaying
 
     private fun displayJournal(quests: List<QuestInfo>) {
         questJournalView.display(quests)
-        playerCallToActionView.displayActions(journalActions())
+        callToActionView.displayButtons(journalActions())
     }
 
     private fun displayDetail(quest: QuestInfo) {
         questDetailView.display(quest)
-        playerCallToActionView.displayActions(detailActions(quest))
+        callToActionView.displayButtons(detailActions(quest))
     }
 
     private fun journalActions() = listOf(backAction { if (canAct()) partyApi.closeQuest() })
@@ -242,13 +242,13 @@ class QuestPresenter(
         listOfNotNull(
             backAction { detailBackSelected() },
             if (!quest.isMain && !quest.isCompleted) {
-                ActionRowView.Action(texts[UiText.QUEST_ABANDON], HudStyle.DANGER, HudStyle.DANGER_PRESSED) { abandonSelected(quest) }
+                ButtonRowView.Action(messages[UiMessage.QUEST_ABANDON], HudStyle.DANGER, HudStyle.DANGER_PRESSED) { abandonSelected(quest) }
             } else {
                 null
             },
         )
 
-    private fun backAction(onSelected: () -> Unit) = ActionRowView.Action(texts[UiText.QUEST_DETAIL_BACK], onSelected = onSelected)
+    private fun backAction(onSelected: () -> Unit) = ButtonRowView.Action(messages[UiMessage.QUEST_DETAIL_BACK], onSelected = onSelected)
 
     private fun detailBackSelected() {
         if (!canAct()) return
@@ -263,11 +263,11 @@ class QuestPresenter(
     private fun abandonSelected(quest: QuestInfo) {
         if (!canAct()) return
         questDetailView.hide()
-        confirmDialogView.display(texts[UiText.QUEST_ABANDON_QUESTION, "quest" to quest.name])
+        confirmDialogView.display(messages[UiMessage.QUEST_ABANDON_QUESTION, "quest" to quest.name])
         confirmDialogView.visible = true
-        playerCallToActionView.displayConfirmation(
-            cancelLabel = texts[UiText.QUEST_DETAIL_BACK],
-            confirmLabel = texts[UiText.QUEST_ABANDON],
+        callToActionView.displayConfirmation(
+            cancelLabel = messages[UiMessage.QUEST_DETAIL_BACK],
+            confirmLabel = messages[UiMessage.QUEST_ABANDON],
             onCancelled = { if (canAct()) keepQuest(quest) },
             onConfirmed = { if (canAct()) abandonQuest(quest) },
         )
@@ -326,7 +326,7 @@ class QuestPresenter(
         }
     }
 
-    private fun questInfos(): List<QuestInfo> = QuestMapper.questInfos(questApi.searchQuests(), texts)
+    private fun questInfos(): List<QuestInfo> = QuestMapper.questInfos(questApi.searchQuests(), messages)
 
     private fun trackedQuest(): QuestInfo? = questInfos().firstOrNull { quest -> quest.isPinned }
 }

@@ -17,7 +17,7 @@ import korlibs.time.milliseconds
 import kotlin.test.Test
 
 class QuestAnnouncementViewTest : ViewsForTesting() {
-    private fun announcementView() = QuestAnnouncementView(BattleSceneResourcesLoader(), TextsMother.texts())
+    private fun announcementView() = QuestAnnouncementView(GameSceneResourcesLoader(), MessagesMother.messages())
 
     @Test
     fun `QuestAnnouncementView should be hidden until it announces`() =
@@ -61,7 +61,7 @@ class QuestAnnouncementViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `display should cut the name when it does not fit the toast`() =
+    fun `display should cut the name when it does not fit the announcement`() =
         sharedViewsTest {
             // Given
             val announcementView = announcementView()
@@ -72,7 +72,7 @@ class QuestAnnouncementViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `Announce should hide the toast when it has been held and faded`() =
+    fun `Announce should hide the announcement when it has been held and faded`() =
         sharedViewsTest {
             // Given
             val announcementView = announcementView()
@@ -93,7 +93,7 @@ class QuestAnnouncementViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `Announce should show the toast fully when it announces again after fading`() =
+    fun `Announce should show the announcement fully when it announces again after fading`() =
         sharedViewsTest {
             // Given
             val announcementView = announcementView()
@@ -109,9 +109,9 @@ class QuestAnnouncementViewTest : ViewsForTesting() {
     @Test
     fun `Announce should take no taps when it is displayed`() =
         sharedViewsTest {
-            // Given: a button under the toast.
+            // Given: a button under the announcement.
             var confirms = 0
-            val button = buttonUnderTheToast { confirms++ }
+            val button = buttonUnderTheAnnouncement { confirms++ }
             val announcementView = announcementView()
             addChild(announcementView)
             announcementView.display(Moment.COMPLETED, completedQuestInfo())

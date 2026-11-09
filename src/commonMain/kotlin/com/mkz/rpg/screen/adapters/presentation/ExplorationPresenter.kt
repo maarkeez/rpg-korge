@@ -20,7 +20,7 @@ import com.mkz.rpg.party.domain.PartyEvent.QuestClosed
 import com.mkz.rpg.party.domain.PartyEvent.QuestOpened
 import com.mkz.rpg.save.domain.SaveEvent.GameLoaded
 import com.mkz.rpg.screen.adapters.presentation.ShopView.Mode
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
+import com.mkz.rpg.screen.adapters.presentation.selection.domain.SelectionEvent
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
@@ -28,7 +28,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 /**
- * Walks the party with the virtual pad while exploring. The pad takes the place of the battle HUD and the player call
+ * Walks the party with the virtual pad while exploring. The pad takes the place of the HUD and the player call
  * to action, which are displayed while battling, and while exploring when a battle unit of the party is selected (e.g.:
  * to use its inventory) or a found item does not fit in the inventory. It also counts the seconds while exploring, for the terrain
  * effects of the battle units standing still. Once the game is over, the pad is hidden and the seconds are no longer
@@ -37,10 +37,10 @@ import kotlin.time.Duration.Companion.seconds
  * A press while the scene is still playing (e.g.: a battle unit flashing with its terrain effect) is not lost: the last
  * arrow or A pressed is acted on once the scene is idle, unless the pad is hidden meanwhile.
  *
- * Pressing A talks to the npc next to the leader: its dialog takes the place of the pad until it is tapped. Time stops
- * meanwhile, as the party neither walks nor starts a second while talking. The dialog of a merchant is not closed by
+ * Pressing A talks to the npc next to the leader: its talk panel takes the place of the pad until it is tapped. Time stops
+ * meanwhile, as the party neither walks nor starts a second while talking. The talk panel of a merchant is not closed by
  * tapping it, but by its Leave choice, in the row of the call to action. Its Buy and Sell choices open its shop in place
- * of the dialog (see [ShopPresenter]), until Back displays the dialog again.
+ * of the talk panel (see [ShopPresenter]), until Back displays the talk panel again.
  *
  * Pressing B opens the party formation in place of the pad (see [FormationPresenter]), where the player sets the party
  * order, and who leads. Time stops meanwhile too, until Close displays the pad again.
@@ -53,17 +53,17 @@ import kotlin.time.Duration.Companion.seconds
  */
 class ExplorationPresenter(
     private val virtualPadView: VirtualPadView,
-    private val npcDialogView: NpcDialogView,
-    private val battleHudView: BattleHudView,
-    private val playerCallToActionView: PlayerCallToActionView,
+    private val talkView: TalkView,
+    private val hudView: HudView,
+    private val callToActionView: CallToActionView,
     private val partyApi: PartyApi,
     private val npcApi: NpcApi,
     private val shopPresenter: ShopPresenter,
     private val formationPresenter: FormationPresenter,
     private val pausePresenter: PausePresenter,
     private val questPresenter: QuestPresenter,
-    private val texts: Texts,
-    private val timeline: BattleSceneTimeline,
+    private val messages: Messages,
+    private val timeline: GameSceneTimeline,
     eventBus: EventBus,
 ) {
     companion object {
@@ -109,11 +109,11 @@ class ExplorationPresenter(
                 timeline.play { displayVirtualPad(isDisplayed = true) }
             },
             // While exploring, selecting a battle unit of the party displays its info and inventory in place of the pad,
-            // until the HUD goes idle (e.g.: an empty tile is selected).
-            eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> {
+            // until the HUD deselects (e.g.: an empty tile is selected).
+            eventBus.subscribe<SelectionEvent.BattleUnitSelected> {
                 if (isExploring()) timeline.play { displayVirtualPad(isDisplayed = false) }
             },
-            eventBus.subscribe<BattlefieldHudEvent.Idle> {
+            eventBus.subscribe<SelectionEvent.Deselected> {
                 if (isExploring()) timeline.play { displayVirtualPad(isDisplayed = true) }
             },
             // Straight away, as the timeline waits until the player chooses what to do with the found item.
@@ -158,19 +158,19 @@ class ExplorationPresenter(
                 isGameOver = true
                 timeline.play {
                     virtualPadView.visible = false
-                    npcDialogView.visible = false
+                    talkView.visible = false
                     shopPresenter.close()
                     formationPresenter.close()
                     pausePresenter.close()
                     questPresenter.closeQuest()
-                    playerCallToActionView.hideActions()
+                    callToActionView.hideButtons()
                 }
             },
         )
 
     init {
         virtualPadView.visible = false
-        npcDialogView.visible = false
+        talkView.visible = false
         virtualPadView.setOnDirectionPressed { direction -> pendingPress = Press.Arrow(direction) }
         virtualPadView.setOnDirectionHeld { direction -> stepParty(direction) }
         virtualPadView.setOnAPressed {
@@ -185,7 +185,7 @@ class ExplorationPresenter(
             pendingPress = Press.Start
             openPause()
         }
-        npcDialogView.setOnTapped { dialogTapped() }
+        talkView.setOnTapped { talkPanelTapped() }
         shopPresenter.setOnBack { shopBackSelected() }
         questPresenter.setOnTrackerSelected { openQuest() }
     }
@@ -266,24 +266,24 @@ class ExplorationPresenter(
     }
 
     // Finishes the talk, but with a merchant, which is left with its Leave choice.
-    private fun dialogTapped() {
-        if (timeline.isPlaying || !npcDialogView.visible || talkingNpc()?.let { npc -> npcApi.searchIsMerchant(npc.id) } == true) return
+    private fun talkPanelTapped() {
+        if (timeline.isPlaying || !talkView.visible || talkingNpc()?.let { npc -> npcApi.searchIsMerchant(npc.id) } == true) return
         partyApi.finishTalk()
     }
 
     // The merchant's Buy or Sell choice.
     private fun openShop(mode: Mode) {
-        if (timeline.isPlaying || !npcDialogView.visible) return
+        if (timeline.isPlaying || !talkView.visible) return
         val merchant = talkingNpc() ?: return
         timeline.play {
-            npcDialogView.visible = false
+            talkView.visible = false
             shopPresenter.open(merchant, mode)
         }
     }
 
     // The merchant's Leave choice.
     private fun leaveMerchant() {
-        if (timeline.isPlaying || !npcDialogView.visible) return
+        if (timeline.isPlaying || !talkView.visible) return
         partyApi.finishTalk()
     }
 
@@ -300,31 +300,31 @@ class ExplorationPresenter(
 
     private fun isExploring() = !isGameOver && partyApi.searchParty()?.isExploring == true
 
-    // The pad takes the place of the battle HUD and the call to action, or the other way around. Either closes the dialog,
+    // The pad takes the place of the HUD and the call to action, or the other way around. Either closes the talk panel,
     // the shop, the formation, the pause screen and the quest being read, and with them the buttons in the row.
     private fun displayVirtualPad(isDisplayed: Boolean) {
-        npcDialogView.visible = false
+        talkView.visible = false
         shopPresenter.close()
         formationPresenter.close()
         pausePresenter.close()
         questPresenter.closeQuest()
-        playerCallToActionView.hideActions()
+        callToActionView.hideButtons()
         virtualPadView.visible = isDisplayed
-        battleHudView.visible = !isDisplayed
-        playerCallToActionView.visible = !isDisplayed
+        hudView.visible = !isDisplayed
+        callToActionView.visible = !isDisplayed
     }
 
-    // The dialog takes the place of the pad, with Leave, Sell and Buy in the row for a merchant.
+    // The talk panel takes the place of the pad, with Leave, Sell and Buy in the row for a merchant.
     private fun displayNpcDialog(npc: Npc.Dto) {
-        npcDialogView.display(NpcDialog(npcId = npc.id, unitId = npc.unitId, name = texts.npcName(npc.id), line = texts.npcLine(npc.id)))
+        talkView.display(TalkInfo(npcId = npc.id, unitId = npc.unitId, name = messages.npcName(npc.id), line = messages.npcLine(npc.id)))
         virtualPadView.visible = false
-        npcDialogView.visible = true
+        talkView.visible = true
         if (npcApi.searchIsMerchant(npc.id)) {
-            playerCallToActionView.displayActions(
+            callToActionView.displayButtons(
                 listOf(
-                    ActionRowView.Action(texts[UiText.NPC_DIALOG_LEAVE]) { leaveMerchant() },
-                    ActionRowView.Action(texts[UiText.NPC_DIALOG_SELL]) { openShop(Mode.SELL) },
-                    ActionRowView.Action(texts[UiText.NPC_DIALOG_BUY], ConfirmButton.COLOR, ConfirmButton.PRESSED_COLOR) { openShop(Mode.BUY) },
+                    ButtonRowView.Action(messages[UiMessage.TALK_LEAVE]) { leaveMerchant() },
+                    ButtonRowView.Action(messages[UiMessage.TALK_SELL]) { openShop(Mode.SELL) },
+                    ButtonRowView.Action(messages[UiMessage.TALK_BUY], ConfirmButton.COLOR, ConfirmButton.PRESSED_COLOR) { openShop(Mode.BUY) },
                 ),
             )
         }

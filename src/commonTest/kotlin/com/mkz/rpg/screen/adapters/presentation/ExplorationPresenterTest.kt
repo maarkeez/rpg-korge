@@ -17,11 +17,11 @@ import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
 import com.mkz.rpg.save.adapters.presentation.SaveApi
 import com.mkz.rpg.save.domain.SaveEvent
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
+import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.gameSceneTimeline
+import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.playLongStep
 import com.mkz.rpg.screen.adapters.presentation.VirtualPadView.Direction
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
+import com.mkz.rpg.screen.adapters.presentation.selection.domain.Selection.Dto.TileDto
+import com.mkz.rpg.screen.adapters.presentation.selection.domain.SelectionEvent
 import com.mkz.rpg.shared.adapters.presentation.GameButton
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.shared.domain.subscribe
@@ -65,60 +65,60 @@ class ExplorationPresenterTest {
         ).also(SubdomainApis::initialise)
     private val eventBus = apis.eventBus
     private val virtualPadView = VirtualPadView()
-    private val npcDialogView = NpcDialogView(Size(390, 300), BattleSceneResourcesLoader())
-    private val shopView = ShopView(BattleSceneResourcesLoader(), TextsMother.texts())
+    private val talkView = TalkView(Size(390, 300), GameSceneResourcesLoader())
+    private val shopView = ShopView(GameSceneResourcesLoader(), MessagesMother.messages())
     private val battlefieldView = FakeBattlefieldView()
-    private val battleHudView = FakeBattleHudView()
-    private val playerCallToActionView = FakePlayerCallToActionView()
-    private val timeline = battleSceneTimeline()
+    private val hudView = FakeHudView()
+    private val callToActionView = FakeCallToActionView()
+    private val timeline = gameSceneTimeline()
     private val shopPresenter =
         ShopPresenter(
             shopView,
             battlefieldView,
-            playerCallToActionView,
+            callToActionView,
             apis.partyApi,
             apis.inventoryApi,
             apis.lootableItemApi,
             apis.battleUnitApi,
             apis.battlefieldApi,
-            TextsMother.texts(),
+            MessagesMother.messages(),
             timeline,
             eventBus,
         )
 
-    private val formationView = FormationView(BattleSceneResourcesLoader())
-    private val formationPresenter = FormationPresenter(formationView, battlefieldView, playerCallToActionView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, TextsMother.texts(), timeline)
-    private val pauseView = PauseView(TextsMother.texts())
-    private val saveSlotsView = SaveSlotsView(TextsMother.texts())
+    private val formationView = FormationView(GameSceneResourcesLoader())
+    private val formationPresenter = FormationPresenter(formationView, battlefieldView, callToActionView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, MessagesMother.messages(), timeline)
+    private val pauseView = PauseView(MessagesMother.messages())
+    private val saveSlotsView = SaveSlotsView(MessagesMother.messages())
     private val confirmDialogView = ConfirmDialogView()
     private val pausePresenter =
         PausePresenter(
             pauseView,
             saveSlotsView,
             confirmDialogView,
-            playerCallToActionView,
+            callToActionView,
             apis.partyApi,
             SaveApi(InmemoryStorage(), eventBus, emptyList(), {
                 false
             }, { null }, { 0 }, { DateTime.nowUnixMillis() }),
-            TextsMother.texts(),
+            MessagesMother.messages(),
             timeline,
         ) {}
 
-    private val questDetailView = QuestDetailView(BattleSceneResourcesLoader(), TextsMother.texts())
+    private val questDetailView = QuestDetailView(GameSceneResourcesLoader(), MessagesMother.messages())
     private val questPresenter =
         QuestPresenter(
             FakeQuestTrackerView(),
             questDetailView,
-            QuestJournalView(BattleSceneResourcesLoader(), TextsMother.texts()),
+            QuestJournalView(GameSceneResourcesLoader(), MessagesMother.messages()),
             ConfirmDialogView(),
             FakeQuestAnnouncementView(),
             FakeBattlefieldView(),
-            playerCallToActionView,
+            callToActionView,
             apis.questApi,
             apis.partyApi,
             apis.npcApi,
-            TextsMother.texts(),
+            MessagesMother.messages(),
             timeline,
             eventBus,
         )
@@ -126,16 +126,16 @@ class ExplorationPresenterTest {
     private fun createPresenter() =
         ExplorationPresenter(
             virtualPadView,
-            npcDialogView,
-            battleHudView,
-            playerCallToActionView,
+            talkView,
+            hudView,
+            callToActionView,
             apis.partyApi,
             apis.npcApi,
             shopPresenter,
             formationPresenter,
             pausePresenter,
             questPresenter,
-            TextsMother.texts(),
+            MessagesMother.messages(),
             timeline,
             eventBus,
         )
@@ -154,19 +154,19 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `DisplayExploring should display the virtual pad in place of the battle HUD and the call to action when the exploration starts`() {
+    fun `DisplayExploring should display the virtual pad in place of the HUD and the call to action when the exploration starts`() {
         // Given
         createPresenter()
         // When
         startExploring()
         // Then
         virtualPadView.visible.shouldBeTrue()
-        battleHudView.visible.shouldBeFalse()
-        playerCallToActionView.visible.shouldBeFalse()
+        hudView.visible.shouldBeFalse()
+        callToActionView.visible.shouldBeFalse()
     }
 
     @Test
-    fun `DisplayExploring should display the battle HUD and the call to action in place of the virtual pad when the exploration is interrupted`() {
+    fun `DisplayExploring should display the HUD and the call to action in place of the virtual pad when the exploration is interrupted`() {
         // Given
         createPresenter()
         startExploring()
@@ -175,8 +175,8 @@ class ExplorationPresenterTest {
         eventBus.dispatch()
         // Then
         virtualPadView.visible.shouldBeFalse()
-        battleHudView.visible.shouldBeTrue()
-        playerCallToActionView.visible.shouldBeTrue()
+        hudView.visible.shouldBeTrue()
+        callToActionView.visible.shouldBeTrue()
     }
 
     @Test
@@ -194,11 +194,11 @@ class ExplorationPresenterTest {
         virtualPadView.visible.shouldBeTrue()
         leaderLanding.complete(Unit)
         isPadVisibleWhenAnnounced shouldBe false
-        battleHudView.visible.shouldBeTrue()
+        hudView.visible.shouldBeTrue()
     }
 
     @Test
-    fun `DisplayExploring should display the virtual pad in place of the battle HUD and the call to action when the exploration resumes`() {
+    fun `DisplayExploring should display the virtual pad in place of the HUD and the call to action when the exploration resumes`() {
         // Given
         createPresenter()
         startExploring()
@@ -209,8 +209,8 @@ class ExplorationPresenterTest {
         eventBus.dispatch()
         // Then
         virtualPadView.visible.shouldBeTrue()
-        battleHudView.visible.shouldBeFalse()
-        playerCallToActionView.visible.shouldBeFalse()
+        hudView.visible.shouldBeFalse()
+        callToActionView.visible.shouldBeFalse()
     }
 
     @Test
@@ -296,7 +296,7 @@ class ExplorationPresenterTest {
         longStep.complete(Unit)
         presenter.tick(1.milliseconds)
         // When
-        eventBus.publish(BattlefieldHudEvent.Idle)
+        eventBus.publish(SelectionEvent.Deselected)
         eventBus.dispatch()
         presenter.tick(1.milliseconds)
         eventBus.dispatch()
@@ -319,7 +319,7 @@ class ExplorationPresenterTest {
     fun `StepParty should step the party when an arrow is tapped while its three members flash every second on water`() {
         // Given
         val apis = partyOnWaterApis()
-        val timeline = battleSceneTimeline()
+        val timeline = gameSceneTimeline()
         val battlefieldView = FakeBattlefieldView().apply { flashing = CompletableDeferred() }
         val presenter = partyOnWaterPresenters(apis, battlefieldView, timeline)
         apis.partyApi.startExploration()
@@ -352,14 +352,14 @@ class ExplorationPresenterTest {
     private fun partyOnWaterPresenters(
         apis: SubdomainApis,
         battlefieldView: FakeBattlefieldView,
-        timeline: BattleSceneTimeline,
+        timeline: GameSceneTimeline,
     ): ExplorationPresenter {
         BattlefieldPresenter(
             battlefieldView = battlefieldView,
             battleUnitInfoView = FakeBattleUnitInfoView(),
-            attackPreviewView = FakeAttackPreviewView(),
-            playerCallToActionView = FakePlayerCallToActionView(),
-            battleHudView = FakeBattleHudView(),
+            castPreviewView = FakeCastPreviewView(),
+            callToActionView = FakeCallToActionView(),
+            hudView = FakeHudView(),
             battlefieldApi = apis.battlefieldApi,
             battleUnitApi = apis.battleUnitApi,
             playerApi = apis.playerApi,
@@ -377,35 +377,35 @@ class ExplorationPresenterTest {
             ShopPresenter(
                 shopView,
                 battlefieldView,
-                playerCallToActionView,
+                callToActionView,
                 apis.partyApi,
                 apis.inventoryApi,
                 apis.lootableItemApi,
                 apis.battleUnitApi,
                 apis.battlefieldApi,
-                TextsMother.texts(),
+                MessagesMother.messages(),
                 timeline,
                 apis.eventBus,
             )
-        val formationPresenter = FormationPresenter(formationView, battlefieldView, playerCallToActionView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, TextsMother.texts(), timeline)
+        val formationPresenter = FormationPresenter(formationView, battlefieldView, callToActionView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, MessagesMother.messages(), timeline)
         val pausePresenter =
             PausePresenter(
                 pauseView,
                 saveSlotsView,
                 confirmDialogView,
-                playerCallToActionView,
+                callToActionView,
                 apis.partyApi,
                 SaveApi(InmemoryStorage(), apis.eventBus, emptyList(), {
                     false
                 }, { null }, { 0 }, { DateTime.nowUnixMillis() }),
-                TextsMother.texts(),
+                MessagesMother.messages(),
                 timeline,
             ) {}
         return ExplorationPresenter(
             virtualPadView,
-            npcDialogView,
-            battleHudView,
-            playerCallToActionView,
+            talkView,
+            hudView,
+            callToActionView,
             apis.partyApi,
             apis.npcApi,
             shopPresenter,
@@ -413,20 +413,20 @@ class ExplorationPresenterTest {
             pausePresenter,
             QuestPresenter(
                 FakeQuestTrackerView(),
-                QuestDetailView(BattleSceneResourcesLoader(), TextsMother.texts()),
-                QuestJournalView(BattleSceneResourcesLoader(), TextsMother.texts()),
+                QuestDetailView(GameSceneResourcesLoader(), MessagesMother.messages()),
+                QuestJournalView(GameSceneResourcesLoader(), MessagesMother.messages()),
                 ConfirmDialogView(),
                 FakeQuestAnnouncementView(),
                 FakeBattlefieldView(),
-                playerCallToActionView,
+                callToActionView,
                 apis.questApi,
                 apis.partyApi,
                 apis.npcApi,
-                TextsMother.texts(),
+                MessagesMother.messages(),
                 timeline,
                 apis.eventBus,
             ),
-            TextsMother.texts(),
+            MessagesMother.messages(),
             timeline,
             apis.eventBus,
         )
@@ -467,10 +467,10 @@ class ExplorationPresenterTest {
         virtualPadView.visible.shouldBeFalse()
     }
 
-    private val knightSelected = BattlefieldHudEvent.SelectedBattleUnit(tile = TileDto(row = 1, column = 1), battleUnitId = "knight-1", tilesWhereCanBeMoved = emptySet())
+    private val knightSelected = SelectionEvent.BattleUnitSelected(tile = TileDto(row = 1, column = 1), battleUnitId = "knight-1", walkingRange = emptySet())
 
     @Test
-    fun `DisplayVirtualPad should display the battle HUD and the call to action in place of the pad when a battle unit is selected while exploring`() {
+    fun `DisplayVirtualPad should display the HUD and the call to action in place of the pad when a battle unit is selected while exploring`() {
         // Given
         createPresenter()
         startExploring()
@@ -479,43 +479,43 @@ class ExplorationPresenterTest {
         eventBus.dispatch()
         // Then
         virtualPadView.visible.shouldBeFalse()
-        battleHudView.visible.shouldBeTrue()
-        playerCallToActionView.visible.shouldBeTrue()
+        hudView.visible.shouldBeTrue()
+        callToActionView.visible.shouldBeTrue()
     }
 
     @Test
-    fun `DisplayVirtualPad should display the pad again when the battlefield HUD goes idle while exploring`() {
+    fun `DisplayVirtualPad should display the pad again when nothing is selected while exploring`() {
         // Given
         createPresenter()
         startExploring()
         eventBus.publish(knightSelected)
         eventBus.dispatch()
         // When
-        eventBus.publish(BattlefieldHudEvent.Idle)
+        eventBus.publish(SelectionEvent.Deselected)
         eventBus.dispatch()
         // Then
         virtualPadView.visible.shouldBeTrue()
-        battleHudView.visible.shouldBeFalse()
-        playerCallToActionView.visible.shouldBeFalse()
+        hudView.visible.shouldBeFalse()
+        callToActionView.visible.shouldBeFalse()
     }
 
     @Test
-    fun `DisplayVirtualPad should keep the battle HUD when the battlefield HUD goes idle while battling`() {
+    fun `DisplayVirtualPad should keep the HUD when nothing is selected while battling`() {
         // Given
         createPresenter()
         startExploring()
         apis.partyApi.interruptExploration()
         eventBus.dispatch()
         // When
-        eventBus.publish(BattlefieldHudEvent.Idle)
+        eventBus.publish(SelectionEvent.Deselected)
         eventBus.dispatch()
         // Then
         virtualPadView.visible.shouldBeFalse()
-        battleHudView.visible.shouldBeTrue()
+        hudView.visible.shouldBeTrue()
     }
 
     @Test
-    fun `DisplayVirtualPad should display the battle HUD straight away when a found item does not fit in the inventory while exploring`() {
+    fun `DisplayVirtualPad should display the HUD straight away when a found item does not fit in the inventory while exploring`() {
         // Given
         createPresenter()
         startExploring()
@@ -525,8 +525,8 @@ class ExplorationPresenterTest {
         eventBus.dispatch()
         // Then
         virtualPadView.visible.shouldBeFalse()
-        battleHudView.visible.shouldBeTrue()
-        playerCallToActionView.visible.shouldBeTrue()
+        hudView.visible.shouldBeTrue()
+        callToActionView.visible.shouldBeTrue()
     }
 
     @Test
@@ -549,20 +549,20 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `TalkToAdjacentNpc should display the dialog of the npc next to the leader in place of the pad when A is pressed`() {
+    fun `TalkToAdjacentNpc should display the talk panel of the npc next to the leader in place of the pad when A is pressed`() {
         // Given
         createPresenter()
         startExploring()
         // When
         talk()
         // Then
-        npcDialogView.visible.shouldBeTrue()
-        npcDialogView.displayedName() shouldBe "Elder"
-        npcDialogView.displayedLine() shouldBe
+        talkView.visible.shouldBeTrue()
+        talkView.displayedName() shouldBe "Elder"
+        talkView.displayedLine() shouldBe
             "Long ago a goat chewed up a wizard's spellbook and swallowed its magic. The Goat Wizard now rules the lair down south. Beat it, and its bees may answer your call."
         virtualPadView.visible.shouldBeFalse()
-        battleHudView.visible.shouldBeFalse()
-        playerCallToActionView.visible.shouldBeFalse()
+        hudView.visible.shouldBeFalse()
+        callToActionView.visible.shouldBeFalse()
     }
 
     @Test
@@ -581,7 +581,7 @@ class ExplorationPresenterTest {
         eventBus.dispatch()
         // Then
         apis.partyApi.searchParty()!!.talkingNpcId shouldBe "elder"
-        npcDialogView.visible.shouldBeTrue()
+        talkView.visible.shouldBeTrue()
     }
 
     @Test
@@ -595,7 +595,7 @@ class ExplorationPresenterTest {
         // When
         talk()
         // Then
-        npcDialogView.visible.shouldBeFalse()
+        talkView.visible.shouldBeFalse()
         virtualPadView.visible.shouldBeTrue()
     }
 
@@ -627,16 +627,16 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `FinishTalk should display the pad again and explore when the dialog is tapped`() {
+    fun `FinishTalk should display the pad again and explore when the talk panel is tapped`() {
         // Given
         createPresenter()
         startExploring()
         talk()
         // When
-        npcDialogView.tapDialog()
+        talkView.tapDialog()
         eventBus.dispatch()
         // Then
-        npcDialogView.visible.shouldBeFalse()
+        talkView.visible.shouldBeFalse()
         virtualPadView.visible.shouldBeTrue()
         apis.partyApi
             .searchParty()!!
@@ -645,7 +645,7 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `DisplayExploring should close the dialog when the exploration is interrupted while talking`() {
+    fun `DisplayExploring should close the talk panel when the exploration is interrupted while talking`() {
         // Given
         createPresenter()
         startExploring()
@@ -654,8 +654,8 @@ class ExplorationPresenterTest {
         eventBus.publish(PartyEvent.ExplorationInterrupted(playerId = "human"))
         eventBus.dispatch()
         // Then
-        npcDialogView.visible.shouldBeFalse()
-        battleHudView.visible.shouldBeTrue()
+        talkView.visible.shouldBeFalse()
+        hudView.visible.shouldBeTrue()
     }
 
     // The leader walks east to (1,2), next to the merchant, south of it, and talks to it.
@@ -669,7 +669,7 @@ class ExplorationPresenterTest {
     // ... and chooses to buy.
     private fun openTheShop() {
         talkToTheMerchant()
-        playerCallToActionView.chooseAction("Buy")
+        callToActionView.chooseAction("Buy")
         eventBus.dispatch()
     }
 
@@ -681,7 +681,7 @@ class ExplorationPresenterTest {
         // When
         talkToTheMerchant()
         // Then
-        playerCallToActionView.actionLabels().shouldContainExactly("Leave", "Sell", "Buy")
+        callToActionView.actionLabels().shouldContainExactly("Leave", "Sell", "Buy")
     }
 
     @Test
@@ -692,8 +692,8 @@ class ExplorationPresenterTest {
         // When
         talkToTheMerchant()
         // Then
-        playerCallToActionView.displayedActions!!.map { action -> action.color }.shouldContainExactly(GameButton.GREY, GameButton.GREY, ConfirmButton.COLOR)
-        playerCallToActionView.displayedActions!!.last().pressedColor shouldBe ConfirmButton.PRESSED_COLOR
+        callToActionView.displayedActions!!.map { action -> action.color }.shouldContainExactly(GameButton.GREY, GameButton.GREY, ConfirmButton.COLOR)
+        callToActionView.displayedActions!!.last().pressedColor shouldBe ConfirmButton.PRESSED_COLOR
     }
 
     @Test
@@ -704,41 +704,41 @@ class ExplorationPresenterTest {
         // When
         talk()
         // Then
-        playerCallToActionView.displayedActions shouldBe null
+        callToActionView.displayedActions shouldBe null
     }
 
     @Test
-    fun `DialogTapped should keep talking to a merchant`() {
+    fun `TalkPanelTapped should keep talking to a merchant`() {
         // Given
         createPresenter()
         startExploring()
         talkToTheMerchant()
         // When
-        npcDialogView.tapDialog()
+        talkView.tapDialog()
         eventBus.dispatch()
         // Then
-        npcDialogView.visible.shouldBeTrue()
+        talkView.visible.shouldBeTrue()
         shopPresenter.isOpen.shouldBeFalse()
         apis.partyApi.searchParty()!!.talkingNpcId shouldBe "merchant"
     }
 
     @Test
-    fun `Buy should open the shop of the merchant to buy in place of its dialog, and keep talking`() {
+    fun `Buy should open the shop of the merchant to buy in place of its talk panel, and keep talking`() {
         // Given
         createPresenter()
         startExploring()
         talkToTheMerchant()
         // When
-        playerCallToActionView.chooseAction("Buy")
+        callToActionView.chooseAction("Buy")
         eventBus.dispatch()
         // Then
         shopPresenter.isOpen.shouldBeTrue()
         shopView.visible.shouldBeTrue()
         shopView.footerText() shouldBe "Tap an item to buy"
-        npcDialogView.visible.shouldBeFalse()
+        talkView.visible.shouldBeFalse()
         virtualPadView.visible.shouldBeFalse()
-        playerCallToActionView.visible.shouldBeTrue()
-        playerCallToActionView.actionLabels().shouldContainExactly("Back")
+        callToActionView.visible.shouldBeTrue()
+        callToActionView.actionLabels().shouldContainExactly("Back")
         apis.partyApi.searchParty()!!.talkingNpcId shouldBe "merchant"
     }
 
@@ -749,7 +749,7 @@ class ExplorationPresenterTest {
         startExploring()
         talkToTheMerchant()
         // When
-        playerCallToActionView.chooseAction("Sell")
+        callToActionView.chooseAction("Sell")
         eventBus.dispatch()
         // Then
         shopView.visible.shouldBeTrue()
@@ -764,7 +764,7 @@ class ExplorationPresenterTest {
         talkToTheMerchant()
         timeline.playLongStep()
         // When
-        playerCallToActionView.chooseAction("Buy")
+        callToActionView.chooseAction("Buy")
         // Then
         shopPresenter.isOpen.shouldBeFalse()
     }
@@ -776,10 +776,10 @@ class ExplorationPresenterTest {
         startExploring()
         talkToTheMerchant()
         // When
-        playerCallToActionView.chooseAction("Leave")
+        callToActionView.chooseAction("Leave")
         eventBus.dispatch()
         // Then
-        npcDialogView.visible.shouldBeFalse()
+        talkView.visible.shouldBeFalse()
         virtualPadView.visible.shouldBeTrue()
         apis.partyApi
             .searchParty()!!
@@ -788,22 +788,22 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `ShopBackSelected should close the shop and display the merchant's dialog again, still talking`() {
+    fun `ShopBackSelected should close the shop and display the merchant's talk panel again, still talking`() {
         // Given
         createPresenter()
         startExploring()
         openTheShop()
         shopPresenter.shopSlotSelected(0)
         // When
-        playerCallToActionView.chooseAction("Back")
+        callToActionView.chooseAction("Back")
         eventBus.dispatch()
         // Then
         shopPresenter.isOpen.shouldBeFalse()
         shopView.visible.shouldBeFalse()
-        npcDialogView.visible.shouldBeTrue()
-        playerCallToActionView.actionLabels().shouldContainExactly("Leave", "Sell", "Buy")
+        talkView.visible.shouldBeTrue()
+        callToActionView.actionLabels().shouldContainExactly("Leave", "Sell", "Buy")
         virtualPadView.visible.shouldBeFalse()
-        playerCallToActionView.visible.shouldBeTrue()
+        callToActionView.visible.shouldBeTrue()
         apis.partyApi.searchParty()!!.talkingNpcId shouldBe "merchant"
     }
 
@@ -813,15 +813,15 @@ class ExplorationPresenterTest {
         createPresenter()
         startExploring()
         openTheShop()
-        playerCallToActionView.chooseAction("Back")
+        callToActionView.chooseAction("Back")
         eventBus.dispatch()
         // When
-        playerCallToActionView.chooseAction("Sell")
+        callToActionView.chooseAction("Sell")
         eventBus.dispatch()
         // Then
         shopPresenter.isOpen.shouldBeTrue()
         shopView.footerText() shouldBe "Nothing to sell"
-        npcDialogView.visible.shouldBeFalse()
+        talkView.visible.shouldBeFalse()
     }
 
     @Test
@@ -836,9 +836,9 @@ class ExplorationPresenterTest {
         eventBus.dispatch()
         // Then
         shopPresenter.isOpen.shouldBeFalse()
-        battleHudView.visible.shouldBeTrue()
-        playerCallToActionView.visible.shouldBeTrue()
-        playerCallToActionView.displayedItemActions shouldBe null
+        hudView.visible.shouldBeTrue()
+        callToActionView.visible.shouldBeTrue()
+        callToActionView.displayedItemButtons shouldBe null
     }
 
     private fun openFormation() {
@@ -858,9 +858,9 @@ class ExplorationPresenterTest {
         formationView.names().shouldContainExactly("Knight")
         formationView.crownedRowIndexes().shouldContainExactly(0)
         virtualPadView.visible.shouldBeFalse()
-        battleHudView.visible.shouldBeFalse()
-        playerCallToActionView.visible.shouldBeTrue()
-        playerCallToActionView.actionLabels().shouldContainExactly("Close")
+        hudView.visible.shouldBeFalse()
+        callToActionView.visible.shouldBeTrue()
+        callToActionView.actionLabels().shouldContainExactly("Close")
         apis.partyApi
             .searchParty()!!
             .isInFormation
@@ -926,7 +926,7 @@ class ExplorationPresenterTest {
         startExploring()
         openFormation()
         // When
-        playerCallToActionView.chooseAction("Close")
+        callToActionView.chooseAction("Close")
         eventBus.dispatch()
         // Then
         formationView.visible.shouldBeFalse()
@@ -952,8 +952,8 @@ class ExplorationPresenterTest {
         // Then
         pauseView.visible.shouldBeTrue()
         virtualPadView.visible.shouldBeFalse()
-        battleHudView.visible.shouldBeFalse()
-        playerCallToActionView.visible.shouldBeFalse()
+        hudView.visible.shouldBeFalse()
+        callToActionView.visible.shouldBeFalse()
         apis.partyApi
             .searchParty()!!
             .isPaused
@@ -1038,14 +1038,14 @@ class ExplorationPresenterTest {
         startExploring()
         tapTracker()
         // When
-        playerCallToActionView.chooseAction("Back")
+        callToActionView.chooseAction("Back")
         eventBus.dispatch()
         // Then
         isReadingQuest().shouldBeFalse()
         questDetailView.visible.shouldBeFalse()
         virtualPadView.visible.shouldBeTrue()
-        playerCallToActionView.displayedActions shouldBe null
-        playerCallToActionView.visible.shouldBeFalse()
+        callToActionView.displayedActions shouldBe null
+        callToActionView.visible.shouldBeFalse()
     }
 
     @Test
@@ -1056,8 +1056,8 @@ class ExplorationPresenterTest {
         // When
         tapTracker()
         // Then
-        playerCallToActionView.actionLabels().shouldContainExactly("Back")
-        playerCallToActionView.visible.shouldBeTrue()
+        callToActionView.actionLabels().shouldContainExactly("Back")
+        callToActionView.visible.shouldBeTrue()
     }
 
     @Test
@@ -1071,7 +1071,7 @@ class ExplorationPresenterTest {
         eventBus.dispatch()
         // Then
         questDetailView.visible.shouldBeFalse()
-        playerCallToActionView.displayedActions shouldBe null
+        callToActionView.displayedActions shouldBe null
     }
 
     @Test
@@ -1085,7 +1085,7 @@ class ExplorationPresenterTest {
         eventBus.dispatch()
         // Then
         questDetailView.visible.shouldBeFalse()
-        playerCallToActionView.displayedActions shouldBe null
+        callToActionView.displayedActions shouldBe null
     }
 
     @Test
@@ -1103,7 +1103,7 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `GameLoaded should display the virtual pad in place of the battle HUD and the call to action when a save is loaded`() {
+    fun `GameLoaded should display the virtual pad in place of the HUD and the call to action when a save is loaded`() {
         // Given
         createPresenter()
         // When
@@ -1111,7 +1111,7 @@ class ExplorationPresenterTest {
         eventBus.dispatch()
         // Then
         virtualPadView.visible.shouldBeTrue()
-        battleHudView.visible.shouldBeFalse()
-        playerCallToActionView.visible.shouldBeFalse()
+        hudView.visible.shouldBeFalse()
+        callToActionView.visible.shouldBeFalse()
     }
 }

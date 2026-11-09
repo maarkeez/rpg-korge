@@ -15,11 +15,11 @@ import com.mkz.rpg.party.domain.PartyEvent.ExplorationInterrupted
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.BattleUnitAt
+import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.gameSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.InventoryView.Slot
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
+import com.mkz.rpg.screen.adapters.presentation.selection.domain.Selection.Dto.TileDto
+import com.mkz.rpg.screen.adapters.presentation.selection.domain.SelectionEvent
 import com.mkz.rpg.shared.adapters.presentation.GameButton
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.shared.domain.DomainEvent
@@ -64,17 +64,17 @@ class InventoryPresenterGiveTest {
     private val eventBus = apis.eventBus
     private val inventoryView = FakeInventoryView()
     private val battleUnitInfoView = FakeBattleUnitInfoView()
-    private val playerCallToActionView = FakePlayerCallToActionView()
+    private val callToActionView = FakeCallToActionView()
     private val battlefieldView = FakeBattlefieldView()
-    private val timeline = battleSceneTimeline()
+    private val timeline = gameSceneTimeline()
 
     private val inventoryPresenter =
         InventoryPresenter(
             inventoryView = inventoryView,
             giveGoldView = FakeGiveGoldView(),
             battleUnitInfoView = battleUnitInfoView,
-            battleHudView = FakeBattleHudView(),
-            playerCallToActionView = playerCallToActionView,
+            hudView = FakeHudView(),
+            callToActionView = callToActionView,
             inventoryApi = apis.inventoryApi,
             lootableItemApi = apis.lootableItemApi,
             battleUnitApi = apis.battleUnitApi,
@@ -83,7 +83,7 @@ class InventoryPresenterGiveTest {
             partyApi = apis.partyApi,
             battlefieldApi = apis.battlefieldApi,
             battlefieldView = battlefieldView,
-            texts = TextsMother.texts(),
+            messages = MessagesMother.messages(),
             timeline = timeline,
             eventBus = eventBus,
         )
@@ -103,24 +103,24 @@ class InventoryPresenterGiveTest {
         eventBus.dispatch()
     }
 
-    private fun fillBag(battleUnitId: String) = repeat(12) { loot(battleUnitId, "health-potion") }
+    private fun fillInventory(battleUnitId: String) = repeat(12) { loot(battleUnitId, "health-potion") }
 
     private fun publish(event: DomainEvent) {
         eventBus.publish(event)
         eventBus.dispatch()
     }
 
-    // The player selects the knight, opens its bag and taps its first item.
+    // The player selects the knight, opens its inventory and taps its first item.
     private fun selectKnightFirstItem() {
-        publish(BattlefieldHudEvent.SelectedBattleUnit(tile = TileDto(1, 1), battleUnitId = "knight-1", tilesWhereCanBeMoved = emptySet()))
-        battleUnitInfoView.onBagSelected.shouldNotBeNull().invoke()
+        publish(SelectionEvent.BattleUnitSelected(tile = TileDto(1, 1), battleUnitId = "knight-1", walkingRange = emptySet()))
+        battleUnitInfoView.onInventoryButtonSelected.shouldNotBeNull().invoke()
         eventBus.dispatch()
         inventoryView.delegate.shouldNotBeNull().slotSelected(0)
         eventBus.dispatch()
     }
 
     private fun giveAction() =
-        playerCallToActionView.displayedItemActions
+        callToActionView.displayedItemButtons
             .shouldNotBeNull()
             .actions
             .single { action -> action.label in setOf("Give", "No one", "No space") }
@@ -149,12 +149,12 @@ class InventoryPresenterGiveTest {
         // When
         selectKnightFirstItem()
         // Then
-        playerCallToActionView.displayedItemActions
+        callToActionView.displayedItemButtons
             .shouldNotBeNull()
             .actions
             .map { action -> action.label to action.isEnabled }
             .shouldContainExactly("Cancel" to true, "Discard" to true, "Give" to true, "Consume" to true)
-        playerCallToActionView.displayedItemActions!!
+        callToActionView.displayedItemButtons!!
             .actions
             .map { action -> action.color }
             .shouldContainExactly(GameButton.GREY, GameButton.GREY, GameButton.GREY, ConfirmButton.COLOR)
@@ -173,11 +173,11 @@ class InventoryPresenterGiveTest {
     }
 
     @Test
-    fun `SelectItem should disable give, reading why, when every other bag is full`() {
+    fun `SelectItem should disable give, reading why, when every other inventory is full`() {
         // Given
         loot("knight-1", "hammer")
-        fillBag("viking-1")
-        fillBag("mage-1")
+        fillInventory("viking-1")
+        fillInventory("mage-1")
         // When
         selectKnightFirstItem()
         // Then
@@ -189,18 +189,18 @@ class InventoryPresenterGiveTest {
     fun `Give should dim every tile but the ones of the members that can receive the item, and ask to tap one`() {
         // Given
         loot("knight-1", "hammer")
-        fillBag("mage-1")
+        fillInventory("mage-1")
         selectKnightFirstItem()
         // When
         clickGive()
         // Then
         battlefieldView.tilesNotDimmed.last() shouldBe setOf(vikingTile)
-        playerCallToActionView.displayedGiveItem.shouldNotBeNull().itemName shouldBe "Hammer"
-        playerCallToActionView.displayedItemActions.shouldBeNull()
+        callToActionView.displayedGiveItem.shouldNotBeNull().itemName shouldBe "Hammer"
+        callToActionView.displayedItemButtons.shouldBeNull()
     }
 
     @Test
-    fun `TileSelected should give the item to the member on the tapped tile, keeping the giver's bag open`() {
+    fun `TileSelected should give the item to the member on the tapped tile, keeping the giver's inventory open`() {
         // Given
         loot("knight-1", "hammer")
         loot("knight-1", "health-potion")
@@ -214,7 +214,7 @@ class InventoryPresenterGiveTest {
         storedItems("viking-1").shouldContainExactly("hammer")
         inventoryView.displayedSlots.last().shouldContainExactly(Slot("health-potion", isEquipped = false))
         inventoryView.selectedSlot.shouldBeNull()
-        playerCallToActionView.displayedGiveItem.shouldBeNull()
+        callToActionView.displayedGiveItem.shouldBeNull()
         battlefieldView.flashedBattleUnits.last() shouldBe BattleUnitAt(row = 1, column = 2, unitId = "viking")
         // The tiles look as when the giver was selected.
         battlefieldView.tileSelections.last() shouldBe knightTile
@@ -225,7 +225,7 @@ class InventoryPresenterGiveTest {
     fun `TileSelected should take the taps on any other tile without giving the item`() {
         // Given
         loot("knight-1", "hammer")
-        fillBag("mage-1")
+        fillInventory("mage-1")
         selectKnightFirstItem()
         clickGive()
         // When
@@ -233,7 +233,7 @@ class InventoryPresenterGiveTest {
         // Then
         takenTaps.shouldContainExactly(true, true, true, true)
         storedItems("knight-1").shouldContainExactly("hammer")
-        playerCallToActionView.displayedGiveItem.shouldNotBeNull()
+        callToActionView.displayedGiveItem.shouldNotBeNull()
     }
 
     @Test
@@ -246,7 +246,7 @@ class InventoryPresenterGiveTest {
     }
 
     @Test
-    fun `Give should ignore the bag's slots and close until the item is given or cancelled`() {
+    fun `Give should ignore the inventory's slots and close until the item is given or cancelled`() {
         // Given
         loot("knight-1", "hammer")
         loot("knight-1", "health-potion")
@@ -258,7 +258,7 @@ class InventoryPresenterGiveTest {
         eventBus.dispatch()
         // Then
         inventoryView.selectedSlot shouldBe 0
-        playerCallToActionView.displayedGiveItem.shouldNotBeNull()
+        callToActionView.displayedGiveItem.shouldNotBeNull()
     }
 
     @Test
@@ -268,10 +268,10 @@ class InventoryPresenterGiveTest {
         selectKnightFirstItem()
         clickGive()
         // When
-        playerCallToActionView.displayedGiveItem.shouldNotBeNull().onCancelled()
+        callToActionView.displayedGiveItem.shouldNotBeNull().onCancelled()
         eventBus.dispatch()
         // Then
-        playerCallToActionView.displayedItemActions.shouldNotBeNull().itemName shouldBe "Hammer"
+        callToActionView.displayedItemButtons.shouldNotBeNull().itemName shouldBe "Hammer"
         battlefieldView.tilesNotDimmed.last() shouldBe setOf(knightTile)
         tapTile(vikingTile).shouldBeFalse()
         storedItems("viking-1").shouldBeEmpty()
@@ -286,7 +286,7 @@ class InventoryPresenterGiveTest {
         // When
         publish(ExplorationInterrupted(playerId = "human"))
         // Then
-        playerCallToActionView.displayedGiveItem.shouldBeNull()
+        callToActionView.displayedGiveItem.shouldBeNull()
         tapTile(vikingTile).shouldBeFalse()
     }
 }

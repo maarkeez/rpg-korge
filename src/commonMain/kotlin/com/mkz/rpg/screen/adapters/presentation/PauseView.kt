@@ -18,7 +18,7 @@ import kotlin.time.Duration.Companion.seconds
  * to menu, one under the other, centred. Once the game is saved, Saved is displayed under them for [SAVED_DURATION].
  */
 open class PauseView(
-    private val texts: Texts,
+    private val messages: Messages,
 ) : Container() {
     companion object {
         val SAVED_DURATION = 1.5.seconds
@@ -41,14 +41,14 @@ open class PauseView(
 
     private var delegate: Delegate? = null
 
-    internal val resumeButton = ConfirmButton(label = texts[UiText.PAUSE_RESUME], buttonWidth = BUTTON_WIDTH, onConfirmed = { delegate?.pauseResumeSelected() })
-    internal val saveButton = CancelButton(label = texts[UiText.PAUSE_SAVE], buttonWidth = BUTTON_WIDTH, onCancelled = { delegate?.pauseSaveSelected() })
-    internal val quitButton = CancelButton(label = texts[UiText.PAUSE_QUIT], buttonWidth = BUTTON_WIDTH, onCancelled = { delegate?.pauseQuitSelected() })
+    internal val resumeButton = ConfirmButton(label = messages[UiMessage.PAUSE_RESUME], buttonWidth = BUTTON_WIDTH, onConfirmed = { delegate?.pauseResumeSelected() })
+    internal val saveButton = CancelButton(label = messages[UiMessage.PAUSE_SAVE], buttonWidth = BUTTON_WIDTH, onCancelled = { delegate?.pauseSaveSelected() })
+    internal val quitButton = CancelButton(label = messages[UiMessage.PAUSE_QUIT], buttonWidth = BUTTON_WIDTH, onCancelled = { delegate?.pauseQuitSelected() })
 
     private val buttonsY = (HEIGHT - 3 * BUTTON_HEIGHT - 2 * BUTTON_GAP) / 2
 
     internal val savedText: UIText =
-        uiText(texts[UiText.PAUSE_SAVED], size = Size(WIDTH, SAVED_HEIGHT)) {
+        uiText(messages[UiMessage.PAUSE_SAVED], size = Size(WIDTH, SAVED_HEIGHT)) {
             styles.textAlignment = TextAlignment.MIDDLE_CENTER
             position(0.0, buttonsY + 3 * BUTTON_HEIGHT + 3 * BUTTON_GAP)
             visible = false

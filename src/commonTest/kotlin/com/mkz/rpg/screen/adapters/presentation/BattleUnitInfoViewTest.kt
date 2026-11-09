@@ -1,8 +1,8 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.screen.adapters.presentation.BattleUnitInfoMother.battleUnitInfo
 import com.mkz.rpg.screen.adapters.presentation.BattleUnitInfoMother.turnActions
+import com.mkz.rpg.screen.adapters.presentation.GameSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -36,7 +36,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `Init should not be visible when is initialized`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
             // When
             // Then
             battleUnitInfoView.isVisibleToUser().shouldBeFalse()
@@ -46,7 +46,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `Display should be visible when is displayed`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
             // When
             battleUnitInfoView.display()
             // Then
@@ -57,9 +57,9 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `BattleUnitInfoView should ring the portrait green when the battle unit is an ally`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
             // When
-            battleUnitInfoView.display(battleUnit = battleUnitInfo(isAlly = true), turnActions = turnActions(), remainingTurns = null, abilities = emptyList())
+            battleUnitInfoView.display(battleUnit = battleUnitInfo(isHumanPlayers = true), turnActions = turnActions(), remainingTurns = null, abilities = emptyList())
             // Then
             battleUnitInfoView.portraitRingColor() shouldBe HudStyle.ALLY
         }
@@ -68,7 +68,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `Display should display the remaining steps and casts out of their maximum when is displayed`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
             // When
             battleUnitInfoView.display(turnActions = turnActions(remainingSteps = 2, maximumSteps = 3, remainingCasts = 1, maximumCasts = 1))
             // Then
@@ -82,7 +82,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `Display should display the steps in white and the casts in gold when is displayed`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
             // When
             battleUnitInfoView.display()
             // Then
@@ -94,7 +94,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `Display should display no remaining casts when the battle unit has cast this turn`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
             // When
             battleUnitInfoView.display(turnActions = turnActions(remainingCasts = 0, maximumCasts = 1))
             // Then
@@ -106,12 +106,12 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `Display should only darken the abilities in cooldown when the battle unit has no casts left`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
             val abilities =
                 listOf(
-                    BattleUnitInfoView.Ability(abilityId = "sword", cooldownTurnsLeft = 0, hasEnoughMana = true, manaCost = 10),
-                    BattleUnitInfoView.Ability(abilityId = "mushroom", cooldownTurnsLeft = 2, hasEnoughMana = true, manaCost = 10),
-                    BattleUnitInfoView.Ability(abilityId = "heal", cooldownTurnsLeft = 0, hasEnoughMana = false, manaCost = 10),
+                    BattleUnitInfoView.Ability(abilityId = "sword", remainingCooldown = 0, hasEnoughMana = true, manaCost = 10),
+                    BattleUnitInfoView.Ability(abilityId = "mushroom", remainingCooldown = 2, hasEnoughMana = true, manaCost = 10),
+                    BattleUnitInfoView.Ability(abilityId = "heal", remainingCooldown = 0, hasEnoughMana = false, manaCost = 10),
                 )
             // When
             battleUnitInfoView.display(turnActions = turnActions(remainingCasts = 0, maximumCasts = 1), abilities = abilities)
@@ -128,7 +128,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `Display should tell how many turns a summon has left, after its name`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
             // When
             battleUnitInfoView.display(remainingTurns = 3)
             // Then
@@ -140,7 +140,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `Display should not tell any turns left when the battle unit never vanishes`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
             battleUnitInfoView.display(remainingTurns = 3)
             // When
             battleUnitInfoView.display(remainingTurns = null)
@@ -152,7 +152,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `DisplayAbilitySelected should select ability button when ability is selected`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
             val selectedAbilityIndex = 0
             // When
             battleUnitInfoView.displayAbilitySelected(selectedAbilityIndex)
@@ -166,7 +166,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `DisplayAbilitySelected should unselect other ability buttons when ability is selected`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
             val abilityButtons = battleUnitInfoView.abilityButtons()
             abilityButtons.forEach { abilityButton -> abilityButton.select() }
             val selectedAbilityIndex = 0
@@ -183,7 +183,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `BattleUnitInfoView should display the ability info under the ability buttons when an ability is selected`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
             battleUnitInfoView.display()
             // When
             battleUnitInfoView.displayAbilitySelected(0)
@@ -198,7 +198,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `BattleUnitInfoView should hide the ability info when it displays a battle unit`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
             battleUnitInfoView.display()
             battleUnitInfoView.displayAbilityInfo(sword)
             // When
@@ -211,7 +211,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `BattleUnitInfoView should hide the ability info when it hides the ability info`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
             battleUnitInfoView.display()
             battleUnitInfoView.displayAbilityInfo(sword)
             // When
@@ -224,7 +224,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `BattleUnitInfoView should collapse the header when it displays the ability info`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
             addChild(battleUnitInfoView)
             battleUnitInfoView.display()
             // When
@@ -237,28 +237,28 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `BattleUnitInfoView should hide the name, the effects and the bag when it displays the ability info`() =
+    fun `BattleUnitInfoView should hide the name, the effects and the inventory button when it displays the ability info`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
             battleUnitInfoView.display(battleUnit = battleUnitInfo(effectIds = listOf("venom-damage")), turnActions = turnActions(), remainingTurns = null, abilities = emptyList())
-            battleUnitInfoView.displayBag(onBagSelected = {})
+            battleUnitInfoView.displayInventoryButton(onInventoryButtonSelected = {})
             // When
             battleUnitInfoView.displayAbilityInfo(sword)
             // Then
             battleUnitInfoView.isNameDisplayed().shouldBeFalse()
             battleUnitInfoView.areEffectsDisplayed().shouldBeFalse()
-            battleUnitInfoView.isBagDisplayed().shouldBeFalse()
+            battleUnitInfoView.isInventoryButtonDisplayed().shouldBeFalse()
         }
 
     @Test
-    fun `BattleUnitInfoView should expand the header and show the bag again when it hides the ability info`() =
+    fun `BattleUnitInfoView should expand the header and show the inventory button again when it hides the ability info`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
             addChild(battleUnitInfoView)
             battleUnitInfoView.display()
-            battleUnitInfoView.displayBag(onBagSelected = {})
+            battleUnitInfoView.displayInventoryButton(onInventoryButtonSelected = {})
             battleUnitInfoView.displayAbilityInfo(sword)
             // When
             battleUnitInfoView.hideAbilityInfo()
@@ -266,7 +266,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
             // Then
             battleUnitInfoView.isHeaderCollapsed().shouldBeFalse()
             battleUnitInfoView.isNameDisplayed().shouldBeTrue()
-            battleUnitInfoView.isBagDisplayed().shouldBeTrue()
+            battleUnitInfoView.isInventoryButtonDisplayed().shouldBeTrue()
             battleUnitInfoView.areAbilityButtonsUnderHeader().shouldBeTrue()
         }
 
@@ -274,7 +274,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `BattleUnitInfoView should expand the header when it displays a battle unit while focused`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
             battleUnitInfoView.display()
             battleUnitInfoView.displayAbilityInfo(sword)
             // When
@@ -288,7 +288,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `Hide should not be visible when is hidden`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
             battleUnitInfoView.display()
             // When
             battleUnitInfoView.hide()
@@ -297,30 +297,30 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `DisplayBag should display the bag and open the inventory when the bag is clicked`() =
+    fun `DisplayInventoryButton should display the inventory button and open the inventory when the inventory button is clicked`() =
         sharedViewsTest {
             // Given
-            var bagSelected = false
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            var inventoryButtonSelected = false
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
             battleUnitInfoView.display()
             addChild(battleUnitInfoView)
-            battleUnitInfoView.displayBag(onBagSelected = { bagSelected = true })
+            battleUnitInfoView.displayInventoryButton(onInventoryButtonSelected = { inventoryButtonSelected = true })
             // When
-            clickBag(battleUnitInfoView)
+            clickInventoryButton(battleUnitInfoView)
             // Then
-            battleUnitInfoView.isBagDisplayed().shouldBeTrue()
-            bagSelected.shouldBeTrue()
+            battleUnitInfoView.isInventoryButtonDisplayed().shouldBeTrue()
+            inventoryButtonSelected.shouldBeTrue()
         }
 
     @Test
-    fun `HideBag should not display the bag when the bag is hidden`() =
+    fun `HideInventoryButton should not display the inventory button when the inventory button is hidden`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
-            battleUnitInfoView.displayBag(onBagSelected = {})
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), MessagesMother.messages())
+            battleUnitInfoView.displayInventoryButton(onInventoryButtonSelected = {})
             // When
-            battleUnitInfoView.hideBag()
+            battleUnitInfoView.hideInventoryButton()
             // Then
-            battleUnitInfoView.isBagDisplayed().shouldBeFalse()
+            battleUnitInfoView.isInventoryButtonDisplayed().shouldBeFalse()
         }
 }

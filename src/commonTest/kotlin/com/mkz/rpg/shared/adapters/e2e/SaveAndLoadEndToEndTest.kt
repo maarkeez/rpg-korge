@@ -3,6 +3,7 @@ package com.mkz.rpg.shared.adapters.e2e
 import com.mkz.rpg.GAME_WINDOW_SIZE
 import com.mkz.rpg.screen.adapters.presentation.VirtualPadView.Direction
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
+import com.mkz.rpg.screen.adapters.presentation.callToActionView
 import com.mkz.rpg.screen.adapters.presentation.clickAction
 import com.mkz.rpg.screen.adapters.presentation.clickArrow
 import com.mkz.rpg.screen.adapters.presentation.clickConfirmation
@@ -18,7 +19,6 @@ import com.mkz.rpg.screen.adapters.presentation.isPadShown
 import com.mkz.rpg.screen.adapters.presentation.isSavedShown
 import com.mkz.rpg.screen.adapters.presentation.menuView
 import com.mkz.rpg.screen.adapters.presentation.pauseView
-import com.mkz.rpg.screen.adapters.presentation.playerCallToActionView
 import com.mkz.rpg.screen.adapters.presentation.saveSlotsView
 import com.mkz.rpg.screen.adapters.presentation.virtualPadView
 import com.mkz.rpg.shared.adapters.presentation.isShown
@@ -58,7 +58,7 @@ class SaveAndLoadEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             // And the human player quits to the menu.
             clickQuit(requireNotNull(pauseView()))
             waitUntil { confirmDialogView()?.isShown() == true }
-            clickConfirmation(requireNotNull(stage.playerCallToActionView()))
+            clickConfirmation(requireNotNull(stage.callToActionView()))
             waitUntil { menuView()?.isShown() == true }
             // When
             clickLoadGame(requireNotNull(menuView()))
@@ -79,7 +79,7 @@ class SaveAndLoadEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             waitUntil { menuView() != null }
             clickLoadGame(requireNotNull(menuView()))
             waitUntil { saveSlotsView()?.isShown() == true }
-            val callToAction = requireNotNull(stage.playerCallToActionView())
+            val callToAction = requireNotNull(stage.callToActionView())
             callToAction.y shouldBe 587.0
             // When
             clickAction(callToAction, "Back")

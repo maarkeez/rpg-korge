@@ -31,11 +31,11 @@ object QuestInfoMother {
     fun task(
         text: String = "Defeat the Goat Wizard",
         kind: Kind = Kind.DEFEAT,
-        progress: Int = 0,
-        count: Int = 1,
+        defeatsCounted: Int = 0,
+        requiredDefeats: Int = 1,
         portraitPath: String? = null,
         isDone: Boolean = false,
-    ) = Task(kind = kind, text = text, progress = progress, count = count, portraitPath = portraitPath, isDone = isDone)
+    ) = Task(kind = kind, text = text, defeatsCounted = defeatsCounted, requiredDefeats = requiredDefeats, portraitPath = portraitPath, isDone = isDone)
 
-    fun completedQuestInfo() = questInfo(tasks = listOf(task(progress = 1, isDone = true)), isCompleted = true)
+    fun completedQuestInfo() = questInfo(tasks = listOf(task(defeatsCounted = 1, isDone = true)), isCompleted = true)
 }

@@ -19,8 +19,8 @@ import com.mkz.rpg.quest.domain.QuestMother.mainQuest
 import com.mkz.rpg.quest.domain.QuestMother.sideQuest
 import com.mkz.rpg.quest.domain.QuestMother.talk
 import com.mkz.rpg.save.domain.SaveEvent.GameLoaded
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
+import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.gameSceneTimeline
+import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.playLongStep
 import com.mkz.rpg.screen.adapters.presentation.QuestAnnouncementView.Moment
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
@@ -37,13 +37,13 @@ import kotlin.test.Test
 class QuestPresenterTest {
     private val questId = "defeat-the-goat-wizard"
     private val trackerView = FakeQuestTrackerView()
-    private val detailView = QuestDetailView(BattleSceneResourcesLoader(), TextsMother.texts())
-    private val journalView = QuestJournalView(BattleSceneResourcesLoader(), TextsMother.texts())
+    private val detailView = QuestDetailView(GameSceneResourcesLoader(), MessagesMother.messages())
+    private val journalView = QuestJournalView(GameSceneResourcesLoader(), MessagesMother.messages())
     private val confirmDialogView = ConfirmDialogView()
     private val announcementView = FakeQuestAnnouncementView()
     private val battlefieldView = FakeBattlefieldView()
-    private val callToActionView = FakePlayerCallToActionView()
-    private val timeline = battleSceneTimeline()
+    private val callToActionView = FakeCallToActionView()
+    private val timeline = gameSceneTimeline()
 
     // The knight explores the sand, alone, with the quests given.
     private fun apis(
@@ -72,7 +72,7 @@ class QuestPresenterTest {
             questApi,
             partyApi,
             npcApi,
-            TextsMother.texts(),
+            MessagesMother.messages(),
             timeline,
             eventBus,
         )
@@ -125,7 +125,7 @@ class QuestPresenterTest {
     }
 
     @Test
-    fun `QuestPresenter should play the toasts one after the other when a talk starts two quests`() {
+    fun `QuestPresenter should play the announcements one after the other when a talk starts two quests`() {
         // Given
         val apis = apis(mainQuest(id = questId), sideQuest(id = "side"), sideQuest(id = "other"))
         apis.presenter()
@@ -137,11 +137,11 @@ class QuestPresenterTest {
         // Then
         announcementView.announcements.size shouldBe 1
         // When
-        announcementView.fadeToast()
+        announcementView.fadeAnnouncement()
         // Then
         announcementView.announcements.size shouldBe 2
         // When
-        announcementView.fadeToast()
+        announcementView.fadeAnnouncement()
         apis.eventBus.publish(QuestCompleted(questId = "side"))
         apis.eventBus.dispatch()
         // Then: with none left, the next one plays straight away.
@@ -171,7 +171,7 @@ class QuestPresenterTest {
         // Then
         trackerView.displayedQuests
             .last()
-            .currentTask.progress shouldBe 1
+            .currentTask.defeatsCounted shouldBe 1
         trackerView.pops shouldBe 1
         timeline.isPlaying.shouldBeFalse()
     }
@@ -590,7 +590,7 @@ class QuestPresenterTest {
         // Then
         trackerView.displayedQuests
             .last()
-            .currentTask.progress shouldBe 1
+            .currentTask.defeatsCounted shouldBe 1
         trackerView.pops shouldBe 1
     }
 

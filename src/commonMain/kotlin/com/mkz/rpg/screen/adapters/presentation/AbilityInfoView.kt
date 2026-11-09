@@ -20,12 +20,12 @@ import korlibs.math.geom.degrees
  * What a selected ability does, as a card: its icon at 2x in a slot, its name and who it is cast on, and its costs as
  * pills (its mana always, its cooldown only when it has one). Why it can not be cast now, if so, is a tinted banner under
  * them. Then a sentence per effect, led by a gold diamond, its numbers in gold, wrapped beside a 3x3 diagram around the
- * caster. In the diagram, the neighbours are filled when the ability reaches all of them, and outlined when it reaches one.
+ * caster. In the diagram, the adjacent tiles are filled when the ability reaches all of them, and outlined when it reaches one.
  */
 open class AbilityInfoView(
     private val panelWidth: Double,
-    private val resourcesLoader: BattleSceneResourcesLoader,
-    private val texts: Texts,
+    private val resourcesLoader: GameSceneResourcesLoader,
+    private val messages: Messages,
 ) : Container() {
     companion object {
         const val WIDTH = 380.0
@@ -84,12 +84,12 @@ open class AbilityInfoView(
                 val damage: Int,
             ) : Effect
 
-            data class DamageEachTurn(
+            data class DamageOnPlayerTurnStarted(
                 val damage: Int,
                 val turns: Int,
             ) : Effect
 
-            data class HealSelf(
+            data class HealCaster(
                 val healing: Int,
             ) : Effect
 
@@ -105,7 +105,7 @@ open class AbilityInfoView(
 
             data object Teleport : Effect
 
-            data class OnDefeatedPoisonAllies(
+            data class OnDefeatedDamageAdjacentAllies(
                 val damage: Int,
                 val turns: Int,
             ) : Effect
@@ -148,8 +148,8 @@ open class AbilityInfoView(
     /** The diagram, row by row, the caster in the middle. */
     internal var marks: List<Mark> = emptyList()
 
-    // When the ability reaches one of the neighbours marked, not all of them, they are outlined.
-    internal var isOneOfTheNeighbours = false
+    // When the ability reaches one of the adjacent tiles marked, not all of them, they are outlined.
+    internal var isOneOfTheAdjacentTiles = false
 
     init {
         visible = false
@@ -167,7 +167,7 @@ open class AbilityInfoView(
                 xy(PADDING + (ICON_SLOT_SIZE - bitmap.width * ICON_SCALE) / 2, PADDING + (ICON_SLOT_SIZE - bitmap.height * ICON_SCALE) / 2)
             }
         }
-        nameText = content.text(texts.abilityName(abilityInfo.abilityId), textSize = NAME_TEXT_SIZE, color = Colors.WHITE) { xy(NAME_X, PADDING + 2) }
+        nameText = content.text(messages.abilityName(abilityInfo.abilityId), textSize = NAME_TEXT_SIZE, color = Colors.WHITE) { xy(NAME_X, PADDING + 2) }
         targetingText = content.text(targeting(abilityInfo.targeting), textSize = TEXT_SIZE, color = HudStyle.MUTED) { xy(NAME_X, PADDING + 24) }
         displayCosts(abilityInfo)
         var cursorY = PADDING + ICON_SLOT_SIZE + SPACING
@@ -234,33 +234,33 @@ open class AbilityInfoView(
 
     private fun reason(reason: AbilityInfo.Reason?): Pair<String, RGBA>? =
         when (reason) {
-            is AbilityInfo.Reason.Cooldown -> texts.plural(UiText.ABILITY_INFO_READY_IN, reason.turnsLeft, "turns" to reason.turnsLeft) to COOLDOWN_COLOR
-            is AbilityInfo.Reason.NotEnoughMana -> texts[UiText.ABILITY_INFO_NOT_ENOUGH_MANA, "manaCost" to reason.manaCost, "mana" to reason.remainingMana] to MANA_COLOR
+            is AbilityInfo.Reason.Cooldown -> messages.plural(UiMessage.ABILITY_INFO_READY_IN, reason.turnsLeft, "turns" to reason.turnsLeft) to COOLDOWN_COLOR
+            is AbilityInfo.Reason.NotEnoughMana -> messages[UiMessage.ABILITY_INFO_NOT_ENOUGH_MANA, "manaCost" to reason.manaCost, "mana" to reason.remainingMana] to MANA_COLOR
             null -> null
         }
 
     private fun targeting(targeting: AbilityInfo.Targeting): String =
-        texts[
+        messages[
             when (targeting) {
-                AbilityInfo.Targeting.CASTER -> UiText.ABILITY_INFO_TARGETING_CASTER
-                AbilityInfo.Targeting.ADJACENT_ENEMY -> UiText.ABILITY_INFO_TARGETING_ADJACENT_ENEMY
-                AbilityInfo.Targeting.ALL_ADJACENT_ENEMIES -> UiText.ABILITY_INFO_TARGETING_ALL_ADJACENT_ENEMIES
-                AbilityInfo.Targeting.VACANT_TILE_ADJACENT_TO_CASTER -> UiText.ABILITY_INFO_TARGETING_TILE_NEXT_TO_CASTER
-                AbilityInfo.Targeting.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT -> UiText.ABILITY_INFO_TARGETING_TILE_NEXT_TO_ANOTHER_UNIT
+                AbilityInfo.Targeting.CASTER -> UiMessage.ABILITY_INFO_TARGETING_CASTER
+                AbilityInfo.Targeting.ADJACENT_ENEMY -> UiMessage.ABILITY_INFO_TARGETING_ADJACENT_ENEMY
+                AbilityInfo.Targeting.ALL_ADJACENT_ENEMIES -> UiMessage.ABILITY_INFO_TARGETING_ALL_ADJACENT_ENEMIES
+                AbilityInfo.Targeting.VACANT_TILE_ADJACENT_TO_CASTER -> UiMessage.ABILITY_INFO_TARGETING_VACANT_TILE_ADJACENT_TO_CASTER
+                AbilityInfo.Targeting.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT -> UiMessage.ABILITY_INFO_TARGETING_VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT
             },
         ]
 
     private fun sentence(effect: AbilityInfo.Effect): String =
         when (effect) {
-            is AbilityInfo.Effect.Damage -> texts[UiText.ABILITY_INFO_DAMAGE, "damage" to effect.damage]
-            is AbilityInfo.Effect.DamageEachTurn -> texts.plural(UiText.ABILITY_INFO_DAMAGE_EACH_TURN, effect.turns, "damage" to effect.damage, "turns" to effect.turns)
-            is AbilityInfo.Effect.HealSelf -> texts[UiText.ABILITY_INFO_HEAL_SELF, "healing" to effect.healing]
-            is AbilityInfo.Effect.HealAdjacentAllies -> texts[UiText.ABILITY_INFO_HEAL_ADJACENT_ALLIES, "healing" to effect.healing]
+            is AbilityInfo.Effect.Damage -> messages[UiMessage.ABILITY_INFO_DAMAGE, "damage" to effect.damage]
+            is AbilityInfo.Effect.DamageOnPlayerTurnStarted -> messages.plural(UiMessage.ABILITY_INFO_DAMAGE_ON_PLAYER_TURN_STARTED, effect.turns, "damage" to effect.damage, "turns" to effect.turns)
+            is AbilityInfo.Effect.HealCaster -> messages[UiMessage.ABILITY_INFO_HEAL_CASTER, "heal" to effect.healing]
+            is AbilityInfo.Effect.HealAdjacentAllies -> messages[UiMessage.ABILITY_INFO_HEAL_ADJACENT_ALLIES, "heal" to effect.healing]
             is AbilityInfo.Effect.Summon ->
-                texts.plural(UiText.ABILITY_INFO_SUMMON, effect.turns, "unit" to texts.unitName(effect.unitId), "turns" to effect.turns, "health" to effect.healthPoints)
-            is AbilityInfo.Effect.Teleport -> texts[UiText.ABILITY_INFO_TELEPORT]
-            is AbilityInfo.Effect.OnDefeatedPoisonAllies ->
-                texts.plural(UiText.ABILITY_INFO_ON_DEFEATED_POISON_ALLIES, effect.turns, "damage" to effect.damage, "turns" to effect.turns)
+                messages.plural(UiMessage.ABILITY_INFO_SUMMON, effect.turns, "unit" to messages.unitName(effect.unitId), "turns" to effect.turns, "health" to effect.healthPoints)
+            is AbilityInfo.Effect.Teleport -> messages[UiMessage.ABILITY_INFO_TELEPORT]
+            is AbilityInfo.Effect.OnDefeatedDamageAdjacentAllies ->
+                messages.plural(UiMessage.ABILITY_INFO_ON_DEFEATED_DAMAGE_ADJACENT_ALLIES, effect.turns, "damage" to effect.damage, "turns" to effect.turns)
         }
 
     /**
@@ -296,7 +296,7 @@ open class AbilityInfoView(
         top: Double,
     ) {
         marks = marks(abilityInfo)
-        isOneOfTheNeighbours = abilityInfo.targeting != AbilityInfo.Targeting.ALL_ADJACENT_ENEMIES && abilityInfo.targeting != AbilityInfo.Targeting.CASTER
+        isOneOfTheAdjacentTiles = abilityInfo.targeting != AbilityInfo.Targeting.ALL_ADJACENT_ENEMIES && abilityInfo.targeting != AbilityInfo.Targeting.CASTER
         val diagramX = panelWidth - PADDING - DIAGRAM_SIZE
         val radius = CELL_SIZE * 0.22
         marks.forEachIndexed { index, mark ->
@@ -306,7 +306,7 @@ open class AbilityInfoView(
                 when (mark) {
                     Mark.NONE -> UNMARKED_COLOR to true
                     Mark.CASTER -> CASTER_COLOR to true
-                    Mark.ENEMY -> ENEMY_COLOR to !isOneOfTheNeighbours
+                    Mark.ENEMY -> ENEMY_COLOR to !isOneOfTheAdjacentTiles
                     Mark.ALLY -> ALLY_COLOR to true
                     Mark.EMPTY_TILE -> EMPTY_TILE_COLOR to false
                 }
@@ -322,7 +322,7 @@ open class AbilityInfoView(
         }
     }
 
-    // The caster in the middle, and its four orthogonal neighbours marked by who the ability reaches there.
+    // The caster in the middle, and its four adjacent tiles marked by who the ability reaches there.
     private fun marks(abilityInfo: AbilityInfo): List<Mark> {
         val healsAllies = abilityInfo.effects.any { effect -> effect is AbilityInfo.Effect.HealAdjacentAllies }
         val (caster, neighbour) =

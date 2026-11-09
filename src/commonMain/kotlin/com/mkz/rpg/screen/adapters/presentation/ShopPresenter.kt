@@ -21,19 +21,19 @@ import com.mkz.rpg.shared.domain.subscribe
  * name and price, and tapping it again clears the selection, as switching the buyer does. The items the buyer can not
  * trade are dimmed. The row of the call to action holds Back, and beside it, while an item is selected, Buy, or Sell, or
  * why the buyer can not trade it, disabled. Back is handed to the listener set with [setOnBack], which returns to the
- * merchant's dialog.
+ * merchant's talk panel.
  */
 class ShopPresenter(
     private val shopView: ShopView,
     private val battlefieldView: BattlefieldView,
-    private val playerCallToActionView: PlayerCallToActionView,
+    private val callToActionView: CallToActionView,
     private val partyApi: PartyApi,
     private val inventoryApi: InventoryApi,
     private val lootableItemApi: LootableItemApi,
     private val battleUnitApi: BattleUnitApi,
     private val battlefieldApi: BattlefieldApi,
-    private val texts: Texts,
-    private val timeline: BattleSceneTimeline,
+    private val messages: Messages,
+    private val timeline: GameSceneTimeline,
     eventBus: EventBus,
 ) : ShopView.Delegate {
     // What the scene displays. Changed in timeline order, like the views.
@@ -117,7 +117,7 @@ class ShopPresenter(
             }
         val buyer =
             ShopView.Buyer(
-                name = battleUnitApi.searchBattleUnitById(buyerId)?.let { battleUnit -> texts.unitName(battleUnit.unitId) }.orEmpty(),
+                name = battleUnitApi.searchBattleUnitById(buyerId)?.let { battleUnit -> messages.unitName(battleUnit.unitId) }.orEmpty(),
                 gold = inventory?.gold ?: 0,
                 usedStorageSpace = inventory?.storedItems?.size ?: 0,
                 maximumStorageSpace = inventory?.maximumStorageSpace ?: 0,
@@ -143,15 +143,15 @@ class ShopPresenter(
         shopView.selectSlot(null)
         shopView.displayHint(
             when {
-                mode == Mode.BUY -> texts[UiText.SHOP_TAP_TO_BUY]
-                displayedSlots.isEmpty() -> texts[UiText.SHOP_NOTHING_TO_SELL]
-                else -> texts[UiText.SHOP_TAP_TO_SELL]
+                mode == Mode.BUY -> messages[UiMessage.SHOP_TAP_TO_BUY]
+                displayedSlots.isEmpty() -> messages[UiMessage.SHOP_NOTHING_TO_SELL]
+                else -> messages[UiMessage.SHOP_TAP_TO_SELL]
             },
         )
-        playerCallToActionView.displayActions(listOf(backAction()))
+        callToActionView.displayButtons(listOf(backAction()))
     }
 
-    private fun backAction() = ActionRowView.Action(texts[UiText.SHOP_BACK]) { whenIdle { onBack?.invoke() } }
+    private fun backAction() = ButtonRowView.Action(messages[UiMessage.SHOP_BACK]) { whenIdle { onBack?.invoke() } }
 
     // Displays the name and price of the item with Buy, or Sell, or why the buyer can not trade it, disabled. Tapping the
     // selected item, or an empty slot, clears the selection.
@@ -162,8 +162,8 @@ class ShopPresenter(
         val lootableItem = lootableItemApi.searchLootableItemById(lootableItemId) ?: return
         val (price, actionLabel) =
             when (mode) {
-                Mode.BUY -> lootableItem.price to texts[UiText.SHOP_BUY]
-                Mode.SELL -> (lootableItemApi.searchSellPrice(lootableItemId) ?: return) to texts[UiText.SHOP_SELL]
+                Mode.BUY -> lootableItem.price to messages[UiMessage.SHOP_BUY]
+                Mode.SELL -> (lootableItemApi.searchSellPrice(lootableItemId) ?: return) to messages[UiMessage.SHOP_SELL]
             }
         selectedSlotIndex = slotIndex
         shopView.selectSlot(slotIndex)
@@ -173,11 +173,11 @@ class ShopPresenter(
                 Mode.BUY -> ConfirmButton.COLOR to ConfirmButton.PRESSED_COLOR
                 Mode.SELL -> GameButton.GREY to GameButton.GREY_OVER
             }
-        shopView.displayItem(texts.lootableItemName(lootableItem.id), price)
-        playerCallToActionView.displayActions(
+        shopView.displayItem(messages.lootableItemName(lootableItem.id), price)
+        callToActionView.displayButtons(
             listOf(
                 backAction(),
-                ActionRowView.Action(refusal?.let(::refusalText) ?: actionLabel, color, pressedColor, isEnabled = refusal == null) { whenIdle { trade() } },
+                ButtonRowView.Action(refusal?.let(::refusalText) ?: actionLabel, color, pressedColor, isEnabled = refusal == null) { whenIdle { trade() } },
             ),
         )
     }
@@ -194,10 +194,10 @@ class ShopPresenter(
     // The refusals the shop can meet. The others (e.g.: no longer trading) leave Buy or Sell disabled.
     private fun refusalText(refusal: TradeRefusalDto): String? =
         when (refusal) {
-            TradeRefusalDto.NOT_ENOUGH_GOLD -> texts[UiText.SHOP_NOT_ENOUGH_GOLD]
-            TradeRefusalDto.INVENTORY_FULL -> texts[UiText.SHOP_NO_ROOM]
-            TradeRefusalDto.EQUIPPED -> texts[UiText.SHOP_EQUIPPED]
-            TradeRefusalDto.GOLD_FULL -> texts[UiText.SHOP_GOLD_FULL]
+            TradeRefusalDto.NOT_ENOUGH_GOLD -> messages[UiMessage.SHOP_NOT_ENOUGH_GOLD]
+            TradeRefusalDto.INVENTORY_FULL -> messages[UiMessage.SHOP_NO_STORAGE_SPACE]
+            TradeRefusalDto.EQUIPPED -> messages[UiMessage.SHOP_EQUIPPED]
+            TradeRefusalDto.GOLD_FULL -> messages[UiMessage.SHOP_GOLD_FULL]
             TradeRefusalDto.NOT_TRADING, TradeRefusalDto.NOT_SOLD_BY_THE_MERCHANT, TradeRefusalDto.NOT_STORED -> null
         }
 
@@ -212,7 +212,7 @@ class ShopPresenter(
         }
     }
 
-    // Displays the buyer's new gold and bag once it traded.
+    // Displays the buyer's new gold and inventory once it traded.
     private fun refresh(
         battleUnitId: String,
         keepsSelection: Boolean,

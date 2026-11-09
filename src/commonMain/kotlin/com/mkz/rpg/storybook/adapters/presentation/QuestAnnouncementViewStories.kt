@@ -48,7 +48,7 @@ object QuestAnnouncementViewStories : StoryBinding {
         args: Args,
         context: StoryContext,
     ): View =
-        QuestAnnouncementView(context.resourcesLoader, context.texts).apply {
-            display(Moment.valueOf(args.text(MOMENT)), QuestSample.valueOf(args.text(QUEST)).quest(context.texts))
+        QuestAnnouncementView(context.resourcesLoader, context.messages).apply {
+            display(Moment.valueOf(args.text(MOMENT)), QuestSample.valueOf(args.text(QUEST)).quest(context.messages))
         }
 }

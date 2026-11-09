@@ -9,7 +9,7 @@ import korlibs.korge.view.image
  * or a tile its ability can be cast on.
  */
 class TileHighlightView(
-    resourcesLoader: BattleSceneResourcesLoader,
+    resourcesLoader: GameSceneResourcesLoader,
     val kind: Kind,
 ) : Container() {
     enum class Kind(

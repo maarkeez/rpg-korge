@@ -31,33 +31,33 @@ msgctxt "ui.menu.language"
 msgid "Language"
 msgstr ""
 
-#. The header while the party explores, out of the battles.
-msgctxt "ui.battleInfo.exploring"
+#. The banner while the party explores, out of the battles.
+msgctxt "ui.banner.exploring"
 msgid "Exploring"
 msgstr ""
 
-#. The header when a battle starts.
-msgctxt "ui.battleInfo.battle"
+#. The banner when a battle starts.
+msgctxt "ui.banner.battle"
 msgid "Battle!"
 msgstr ""
 
-#. The header when a battle finishes.
-msgctxt "ui.battleInfo.battleOver"
+#. The banner when a battle finishes.
+msgctxt "ui.banner.battleFinished"
 msgid "Battle over!"
 msgstr ""
 
 #. {round}: the number of the round, e.g.: 3.
-msgctxt "ui.battleInfo.round"
+msgctxt "ui.banner.round"
 msgid "Round {round}"
 msgstr ""
 
 #. {player}: the name of the player whose turn it is.
-msgctxt "ui.battleInfo.playerTurn"
+msgctxt "ui.banner.playerTurn"
 msgid "{player} turn"
 msgstr ""
 
 #. {player}: the name of the winning player.
-msgctxt "ui.battleInfo.playerWins"
+msgctxt "ui.banner.victory"
 msgid "{player} wins!"
 msgstr ""
 
@@ -68,7 +68,7 @@ msgid_plural "Vanishes in {turns} turns"
 msgstr[0] ""
 msgstr[1] ""
 
-msgctxt "ui.finishTurn.finishTurn"
+msgctxt "ui.finishPlayerTurn.finishPlayerTurn"
 msgid "Finish turn"
 msgstr ""
 
@@ -95,48 +95,48 @@ msgctxt "ui.inventory.close"
 msgid "Close"
 msgstr ""
 
-msgctxt "ui.itemActions.cancel"
+msgctxt "ui.itemButtons.cancel"
 msgid "Cancel"
 msgstr ""
 
-msgctxt "ui.itemActions.discard"
+msgctxt "ui.itemButtons.discard"
 msgid "Discard"
 msgstr ""
 
 #. Asked before discarding an item, once Discard or a stored item to swap is tapped. {item} is its name.
-msgctxt "ui.itemActions.discardQuestion"
+msgctxt "ui.itemButtons.discardQuestion"
 msgid "Discard {item}? It can't be undone."
 msgstr ""
 
 #. Steps back from the question to discard an item.
-msgctxt "ui.itemActions.back"
+msgctxt "ui.itemButtons.back"
 msgid "Back"
 msgstr ""
 
 #. Gives the item to another party member.
-msgctxt "ui.itemActions.give"
+msgctxt "ui.itemButtons.give"
 msgid "Give"
 msgstr ""
 
 #. Why the item can not be given: no party member can receive it.
-msgctxt "ui.itemActions.noOne"
+msgctxt "ui.itemButtons.noOne"
 msgid "No one"
 msgstr ""
 
 #. Why the item can not be given: the inventories of the other party members have no storage space left.
-msgctxt "ui.itemActions.bagsFull"
+msgctxt "ui.itemButtons.noSpace"
 msgid "No space"
 msgstr ""
 
-msgctxt "ui.itemActions.consume"
+msgctxt "ui.itemButtons.consume"
 msgid "Consume"
 msgstr ""
 
-msgctxt "ui.itemActions.equip"
+msgctxt "ui.itemButtons.equip"
 msgid "Equip"
 msgstr ""
 
-msgctxt "ui.itemActions.unequip"
+msgctxt "ui.itemButtons.unequip"
 msgid "Unequip"
 msgstr ""
 
@@ -195,7 +195,7 @@ msgstr ""
 
 #. {item}: the name of the item found. {sellPrice}: its sell price, e.g.: 5 G.
 msgctxt "ui.inventoryFull.message"
-msgid "Tap an item to swap it for: {item} ({sellPrice})"
+msgid "Tap an item to discard for: {item} ({sellPrice})"
 msgstr ""
 
 #. Leaves the item found on the ground.
@@ -204,32 +204,32 @@ msgid "Leave it"
 msgstr ""
 
 #. Opens the shop of the merchant to buy.
-msgctxt "ui.npcDialog.buy"
+msgctxt "ui.talk.buy"
 msgid "Buy"
 msgstr ""
 
 #. Opens the shop of the merchant to sell.
-msgctxt "ui.npcDialog.sell"
+msgctxt "ui.talk.sell"
 msgid "Sell"
 msgstr ""
 
-#. Closes the dialog of the merchant.
-msgctxt "ui.npcDialog.leave"
+#. Closes the talk panel of the merchant.
+msgctxt "ui.talk.leave"
 msgid "Leave"
 msgstr ""
 
-#. The party member trading. {name}: its name. {gold}: its gold, e.g.: 20 G. {bag}: its inventory, e.g.: Inventory 3/12.
+#. The party member trading. {name}: its name. {gold}: its gold, e.g.: 20 G. {inventory}: its inventory, e.g.: Inventory 3/12.
 msgctxt "ui.shop.buyer"
-msgid "{name} · {gold} · {bag}"
+msgid "{name} · {gold} · {inventory}"
 msgstr ""
 
 #. {used}: the stored items. {maximum}: the storage spaces of the inventory.
-msgctxt "ui.shop.bag"
+msgctxt "ui.shop.inventory"
 msgid "Inventory {used}/{maximum}"
 msgstr ""
 
 #. The inventory of the party member trading is full.
-msgctxt "ui.shop.bagFull"
+msgctxt "ui.shop.inventoryFull"
 msgid "Inventory full"
 msgstr ""
 
@@ -263,7 +263,7 @@ msgid "Not enough gold"
 msgstr ""
 
 #. Why the item can not be bought: the inventory is full.
-msgctxt "ui.shop.noRoom"
+msgctxt "ui.shop.noStorageSpace"
 msgid "Inventory full"
 msgstr ""
 
@@ -337,7 +337,7 @@ msgid "Incompatible save"
 msgstr ""
 
 #. A save slot with a game saved in it. {date}: when it was saved, {leader}: the party leader's name, {members}: the party size.
-msgctxt "ui.saveSlots.saved"
+msgctxt "ui.saveSlots.summary"
 msgid "{date} · {leader} · party of {members}"
 msgstr ""
 
@@ -441,9 +441,9 @@ msgctxt "ui.worldBuilder.unknownTerrain"
 msgid "Unknown terrain: {terrain}"
 msgstr ""
 
-#. {terrain} and {neighbour}: the names of two terrains, e.g.: Lava and Water.
+#. {terrain} and {adjacentTerrain}: the names of two terrains, e.g.: Lava and Water.
 msgctxt "ui.worldBuilder.forbiddenAdjacentTerrains"
-msgid "{terrain} can not be next to {neighbour}"
+msgid "{terrain} can not be next to {adjacentTerrain}"
 msgstr ""
 
 #. The kind of files the file dialog shows.
@@ -479,12 +479,12 @@ msgid "All adjacent enemies"
 msgstr ""
 
 #. Where an ability is cast: an empty tile next to the caster.
-msgctxt "ui.abilityInfo.targeting.tileNextToCaster"
+msgctxt "ui.abilityInfo.targeting.vacantTileAdjacentToCaster"
 msgid "An empty tile next to you"
 msgstr ""
 
 #. Where an ability is cast: an empty tile next to another battle unit.
-msgctxt "ui.abilityInfo.targeting.tileNextToAnotherUnit"
+msgctxt "ui.abilityInfo.targeting.vacantTileAdjacentToAnotherBattleUnit"
 msgid "An empty tile next to another unit"
 msgstr ""
 
@@ -494,20 +494,20 @@ msgid "Deals {damage} damage."
 msgstr ""
 
 #. {damage}: the health points the target loses at the start of each of its turns. {turns}: how many turns.
-msgctxt "ui.abilityInfo.effect.damageEachTurn"
+msgctxt "ui.abilityInfo.effect.damageOnPlayerTurnStarted"
 msgid "Poisons: {damage} damage each turn for {turns} turn."
 msgid_plural "Poisons: {damage} damage each turn for {turns} turns."
 msgstr[0] ""
 msgstr[1] ""
 
-#. {healing}: the health points the caster recovers.
-msgctxt "ui.abilityInfo.effect.healSelf"
-msgid "Heals you {healing} HP."
+#. {heal}: the health points the caster recovers.
+msgctxt "ui.abilityInfo.effect.healCaster"
+msgid "Heals you {heal} HP."
 msgstr ""
 
-#. {healing}: the health points each ally next to the caster recovers.
+#. {heal}: the health points each ally next to the caster recovers.
 msgctxt "ui.abilityInfo.effect.healAdjacentAllies"
-msgid "Heals adjacent allies {healing} HP."
+msgid "Heals adjacent allies {heal} HP."
 msgstr ""
 
 #. {unit}: the name of the summoned unit, e.g.: Bat. {turns}: the turns it stays. {health}: its health points.
@@ -523,7 +523,7 @@ msgid "Teleports you there."
 msgstr ""
 
 #. When the target is defeated, its allies next to it are poisoned. {damage}: the health points each loses at the start of each of its turns. {turns}: how many turns.
-msgctxt "ui.abilityInfo.effect.onDefeatedPoisonAllies"
+msgctxt "ui.abilityInfo.effect.onDefeatedDamageAdjacentAllies"
 msgid "When defeated: poisons its adjacent allies ({damage} damage each turn for {turns} turn)."
 msgid_plural "When defeated: poisons its adjacent allies ({damage} damage each turn for {turns} turns)."
 msgstr[0] ""
@@ -550,17 +550,17 @@ msgid "MP"
 msgstr ""
 
 #. A battle unit the previewed cast would defeat: knocked out.
-msgctxt "ui.attackPreview.ko"
+msgctxt "ui.castPreview.defeated"
 msgid "KO"
 msgstr ""
 
 #. Who casts the previewed ability. {unit}: the name of the caster.
-msgctxt "ui.attackPreview.by"
+msgctxt "ui.castPreview.by"
 msgid "by {unit}"
 msgstr ""
 
 #. The mana the previewed cast spends. {mana}: the mana it costs.
-msgctxt "ui.attackPreview.mana"
+msgctxt "ui.castPreview.mana"
 msgid "-{mana} mana"
 msgstr ""
 
@@ -633,12 +633,12 @@ msgctxt "ui.questJournal.completed"
 msgid "COMPLETED"
 msgstr ""
 
-#. Over the name of the quest, on the toast announcing that it starts.
+#. Over the name of the quest, on the announcement announcing that it starts.
 msgctxt "ui.questAnnouncement.started"
 msgid "NEW QUEST"
 msgstr ""
 
-#. Over the name of the quest, on the toast announcing that it is completed.
+#. Over the name of the quest, on the announcement announcing that it is completed.
 msgctxt "ui.questAnnouncement.completed"
 msgid "QUEST COMPLETED"
 msgstr ""
@@ -877,27 +877,27 @@ msgctxt "quest.the-elders-errand.task.1"
 msgid "Talk to the Elder"
 msgstr ""
 
-#. Displayed in the world builder, e.g.: "{terrain} can not be next to {neighbour}".
+#. Displayed in the world builder, e.g.: "{terrain} can not be next to {adjacentTerrain}".
 msgctxt "terrain.grass.name"
 msgid "Grass"
 msgstr ""
 
-#. Displayed in the world builder, e.g.: "{terrain} can not be next to {neighbour}".
+#. Displayed in the world builder, e.g.: "{terrain} can not be next to {adjacentTerrain}".
 msgctxt "terrain.lava.name"
 msgid "Lava"
 msgstr ""
 
-#. Displayed in the world builder, e.g.: "{terrain} can not be next to {neighbour}".
+#. Displayed in the world builder, e.g.: "{terrain} can not be next to {adjacentTerrain}".
 msgctxt "terrain.sand.name"
 msgid "Sand"
 msgstr ""
 
-#. Displayed in the world builder, e.g.: "{terrain} can not be next to {neighbour}".
+#. Displayed in the world builder, e.g.: "{terrain} can not be next to {adjacentTerrain}".
 msgctxt "terrain.void.name"
 msgid "Void"
 msgstr ""
 
-#. Displayed in the world builder, e.g.: "{terrain} can not be next to {neighbour}".
+#. Displayed in the world builder, e.g.: "{terrain} can not be next to {adjacentTerrain}".
 msgctxt "terrain.water.name"
 msgid "Water"
 msgstr ""

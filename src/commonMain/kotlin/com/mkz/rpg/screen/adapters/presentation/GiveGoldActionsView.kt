@@ -10,7 +10,7 @@ import korlibs.math.geom.Size
 
 /** Cancel, All and Give, at the level of the finish turn and as tall as it, while the panel to give gold is displayed. */
 class GiveGoldActionsView(
-    private val texts: Texts,
+    private val messages: Messages,
     onCancelled: () -> Unit,
     onAll: () -> Unit,
     onGiven: () -> Unit,
@@ -23,11 +23,11 @@ class GiveGoldActionsView(
 
     private val buttonSize = Size(BUTTON_WIDTH, UIButton.DEFAULT_SIZE.height)
     internal val cancelButton: GameButton =
-        gameButton(texts[UiText.GIVE_GOLD_CANCEL], buttonSize) {
+        gameButton(messages[UiMessage.GIVE_GOLD_CANCEL], buttonSize) {
             onClick { onCancelled() }
         }
     internal val allButton: GameButton =
-        gameButton(texts[UiText.GIVE_GOLD_ALL], buttonSize) {
+        gameButton(messages[UiMessage.GIVE_GOLD_ALL], buttonSize) {
             xy(BUTTON_WIDTH + SPACING, 0.0)
             onClick { onAll() }
         }
@@ -42,7 +42,7 @@ class GiveGoldActionsView(
         amount: Int,
         maximum: Int,
     ) {
-        giveButton.text = texts[UiText.GIVE_GOLD_GIVE, "amount" to texts.gold(amount)]
+        giveButton.text = messages[UiMessage.GIVE_GOLD_GIVE, "amount" to messages.gold(amount)]
         allButton.enabled = amount < maximum
     }
 }

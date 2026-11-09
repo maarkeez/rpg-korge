@@ -11,7 +11,7 @@ A new game starts exploring the battlefield, out of the battles: there are no tu
 
 ## The virtual pad
 
-[`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) is laid out as a Game Boy Color: the north, east, south and west arrows on the left, the round B and A buttons on the right, A higher and further right than B, and the Start pill centred at the bottom, between both. The arrows are grey squares as big as A and B, of the same grey as Start. The pad is laid out from its bottom, lower than the battle HUD it takes the place of: Start lines up with the bottom of Finish turn, so the lowest button is on the same line while exploring and battling.
+[`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) is laid out as a Game Boy Color: the north, east, south and west arrows on the left, the round B and A buttons on the right, A higher and further right than B, and the Start pill centred at the bottom, between both. The arrows are grey squares as big as A and B, of the same grey as Start. The pad is laid out from its bottom, lower than the HUD it takes the place of: Start lines up with the bottom of Finish turn, so the lowest button is on the same line while exploring and battling.
 
 - The arrows walk the party (see [Walking](#walking)).
 - A talks to an npc adjacent to the leader (see [Talking to an npc](#talking-to-an-npc)), recruits it when it is recruitable (see [Recruiting an npc](#recruiting-an-npc)), and trades with it when it is a merchant (see [Shopping at a merchant](#shopping-at-a-merchant)).
@@ -42,7 +42,7 @@ The followers walk in **walking order**, which is kept apart from the party orde
 
 In a battle, an ally still blocks its tile: only the exploring party swaps.
 
-Holding an arrow keeps walking: [`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) asks to walk on every frame the arrow is held, and [`ExplorationPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt) only walks once the [presentation timeline](presentation-timeline.md) is idle, so the party can not walk ahead of its animation. The battle units glide from tile to tile. The steps of one walk glide at the same time, the followers together with the leader (`BattleSceneTimeline.playTogether`), so the party walks a tile in `EXPLORING_STEP_DURATION` (250ms) whatever its size, and a held arrow walks it smoothly.
+Holding an arrow keeps walking: [`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) asks to walk on every frame the arrow is held, and [`ExplorationPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt) only walks once the [presentation timeline](presentation-timeline.md) is idle, so the party can not walk ahead of its animation. The battle units glide from tile to tile. The steps of one walk glide at the same time, the followers together with the leader (`GameSceneTimeline.playTogether`), so the party walks a tile in `EXPLORING_STEP_DURATION` (250ms) whatever its size, and a held arrow walks it smoothly.
 
 A tap is never lost while the timeline plays (e.g.: the party still gliding, or a recruit flashing):
 
@@ -68,10 +68,10 @@ An npc ([`npc`](../../src/commonMain/kotlin/com/mkz/rpg/npc) subdomain, see [Gam
 
 1. [`TalkToAdjacentNpc`](../../src/commonMain/kotlin/com/mkz/rpg/npc/usecases/commands/TalkToAdjacentNpc.kt) looks for an npc on the tiles north, east, south and west of the leader, in that order, with no diagonals and whichever way the leader faces ([`SearchAdjacentNpc`](../../src/commonMain/kotlin/com/mkz/rpg/npc/usecases/queries/SearchAdjacentNpc.kt)), and requests the party to talk to the first one (`RequestStartTalk`). The party talks to it ([`StartTalk`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/StartTalk.kt), `NpcTalkStarted`). Nothing happens when there is none, or when the party can not walk (e.g.: it is still walking, or battling).
 2. While talking, the party is in its `TALKING` mode: `isExploring` is `false`, so time stops. The party does not walk, and no second starts, so nothing wanders, no terrain effect applies, and nobody engages.
-3. [`NpcDialogView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/NpcDialogView.kt) takes the place of the virtual pad: the portrait of the npc on the left (`npc/<npc id>_portrait.png`, at 3x), its name on top and its line below it, wrapping when long. Tapping the battlefield does nothing.
-4. Tapping anywhere on the dialog finishes the talk ([`FinishTalk`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/FinishTalk.kt), `NpcTalkFinished`): the virtual pad is displayed again, and time goes on. A merchant's dialog is only left with its Leave choice instead (see [Shopping at a merchant](#shopping-at-a-merchant)).
+3. [`TalkView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/TalkView.kt) takes the place of the virtual pad: the portrait of the npc on the left (`npc/<npc id>_portrait.png`, at 3x), its name on top and its line below it, wrapping when long. Tapping the battlefield does nothing.
+4. Tapping anywhere on the talk panel finishes the talk ([`FinishTalk`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/FinishTalk.kt), `NpcTalkFinished`): the virtual pad is displayed again, and time goes on. A merchant's talk panel is only left with its Leave choice instead (see [Shopping at a merchant](#shopping-at-a-merchant)).
 
-A battle starting while talking (`InterruptExploration`) abandons the talk, and the battle HUD takes the place of the dialog.
+A battle starting while talking (`InterruptExploration`) abandons the talk, and the HUD takes the place of the talk panel.
 
 ## Recruiting an npc
 
@@ -86,18 +86,18 @@ The events are dispatched in the order they are published, so the npc is removed
 
 ## Shopping at a merchant
 
-An npc with a stock in its game data is a merchant (e.g.: the blacksmith, see [Game data](game-data.md)). Its dialog is displayed as any other, with Leave, Sell and Buy in the [action row](buttons.md#the-action-row), and the party keeps talking to it, so time stays stopped, until Leave. Tapping the dialog elsewhere does nothing. The shop is screen state only: the party has no mode nor event for it.
+An npc with a stock in its game data is a merchant (e.g.: the blacksmith, see [Game data](game-data.md)). Its talk panel is displayed as any other, with Leave, Sell and Buy in the [button row](buttons.md#the-button-row), and the party keeps talking to it, so time stays stopped, until Leave. Tapping the dialog elsewhere does nothing. The shop is screen state only: the party has no mode nor event for it.
 
-1. Buy or Sell opens the merchant's shop in place of the dialog, to buy or to sell ([`ShopPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt)). [`ShopView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopView.kt) is one panel, its 300 spread evenly: the buyer on top, 12 storage spaces as the inventory does, and a line with the hint or the item. Its buttons are in the action row.
+1. Buy or Sell opens the merchant's shop in place of the talk panel, to buy or to sell ([`ShopPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt)). [`ShopView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopView.kt) is one panel, its 300 spread evenly: the buyer on top, 12 storage spaces as the inventory does, and a line with the hint or the item. Its buttons are in the button row.
 2. The buyer is one party member at a time, the leader when the shop opens. The header displays its name, gold and inventory (e.g.: `< Knight · 20 G · Inventory 11/12 >`, or `Inventory full`).
 3. The arrows, or swiping the shop left or right (at least 40 px), move the buyer to the previous or next party member, in party order, and are disabled at the ends. Every tile is dimmed but the buyer's and the merchant's, and the battlefield scrolls to the buyer.
 4. Buying displays the items the merchant sells, the line `Tap an item to buy`, and Back alone in the row. Tapping one frames it, the line displays its name and price (e.g.: `Hammer ........ 50 G`), and Buy shares the row with Back. When the buyer can not afford it or its inventory is full, Buy is disabled and reads why: `Not enough gold` or `Inventory full`. After buying, the item stays selected, to buy another one.
 5. Selling displays the buyer's items, the equipped ones framed in gold, and the line `Tap an item to sell`, or `Nothing to sell`. Tapping one displays its sell price (e.g.: `Hammer ........ 25 G`), with Sell beside Back. Sell is disabled and reads why for the only copy of an equipped item (`Equipped`), and when the buyer's gold would go above 99,999 G (`Gold full`). After selling, the selection is cleared.
 6. The items the buyer can not buy (or sell) are dimmed, so switching the buyer shows at once what it can trade.
 7. Switching the buyer, and tapping the selected item again or an empty storage space, clear the selection: the line displays the hint again, and Back fills the row.
-8. Back closes the shop, the tiles are no longer dimmed, and the merchant's dialog is displayed again, still talking, to buy, sell, or Leave. Leave finishes the talk (`NpcTalkFinished`): the virtual pad is displayed again, and time goes on.
+8. Back closes the shop, the tiles are no longer dimmed, and the merchant's talk panel is displayed again, still talking, to buy, sell, or Leave. Leave finishes the talk (`NpcTalkFinished`): the virtual pad is displayed again, and time goes on.
 
-A battle starting while shopping abandons the shop, as it abandons the dialog. See [Buying and selling](inventory.md#buying-and-selling) for the rules of each trade.
+A battle starting while shopping abandons the shop, as it abandons the talk. See [Buying and selling](inventory.md#buying-and-selling) for the rules of each trade.
 
 ## Choosing the leader
 
@@ -114,9 +114,9 @@ order, and so who leads:
    [`FormationView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/FormationView.kt) in place of the pad:
    a row per party member, in party order, with the crown on the leader, its portrait, its name, and its health and mana
    bars. Every tile but the party's is dimmed.
-3. Tapping a member selects it, framing its row and its tile. Tapping another one swaps both, and tapping the selected
+3. Tapping a member selects it, framing its row and its tile. Tapping another one reorders both, and tapping the selected
    one again clears the selection.
-4. Close, filling the action row, applies the order displayed ([`CloseFormation`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/CloseFormation.kt),
+4. Close, filling the button row, applies the order displayed ([`CloseFormation`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/CloseFormation.kt),
    `FormationClosed`), and the pad is displayed again. Its first member leads.
 
 Nobody moves when the order changes: the walking order is rebuilt from the new leader, as after a swap, unless the order is the
@@ -138,35 +138,35 @@ While exploring, Start opens the pause screen in place of the pad:
    Resume, Save and Quit to menu.
 3. Resume explores again ([`ClosePause`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/ClosePause.kt),
    `PauseClosed`), and the pad is displayed again.
-4. Save lists the save slots, with Back in the [action row](buttons.md#the-action-row), and saves the game into one (see [Save and load](save-and-load.md#saving)).
+4. Save lists the save slots, with Back in the [button row](buttons.md#the-button-row), and saves the game into one (see [Save and load](save-and-load.md#saving)).
 5. Quit to menu asks to confirm, in [`ConfirmDialogView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ConfirmDialogView.kt),
-   as the progress since the last save is lost, with its choices in the action row, and goes back to the menu.
+   as the progress since the last save is lost, with its choices in the button row, and goes back to the menu.
 
 ## Reading the quest
 
 While exploring, tapping the [tracker](quests.md#the-tracker) opens the [journal](quests.md#the-journal) in place of the pad once a side quest is listed, and otherwise the main quest in full:
 
-1. The tap only counts once the timeline is idle, and while the pad is displayed: a tap at any other moment is ignored, not kept as a press of the pad is. So it does nothing while a dialog, the shop, the formation, the pause screen or the battle HUD has the place of the pad.
+1. The tap only counts once the timeline is idle, and while the pad is displayed: a tap at any other moment is ignored, not kept as a press of the pad is. So it does nothing while a talk panel, the shop, the formation, the pause screen or the HUD has the place of the pad.
 2. [`OpenQuest`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/OpenQuest.kt) only reads when the party can walk (`QuestOpened`). Time stops meanwhile, as in the formation and the pause: the party is `READING_QUEST`, so it does not walk, no second starts, the CPU battle units do not wander, no terrain effect is applied, and tapping the battlefield does nothing. It can not be saved mid-reading, as saving asks for `PAUSED`, and the mode is not saved.
-3. [`QuestPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt) displays the journal or [`QuestDetailView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestDetailView.kt) in place of the pad, with the battlefield still in sight above it, and their buttons in the [action row](buttons.md#the-action-row) below it.
-4. Back steps out one level at a time: from a detail view opened from the journal to the journal, keeping its scroll, with nothing published, and from the journal, or a detail view opened directly, it explores again ([`CloseQuest`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/CloseQuest.kt), `QuestClosed`), and the pad is displayed again. Displaying or hiding the pad also removes the row (`hideActions`), so a battle starting never leaves an old Back on the screen: Finish turn is displayed again when the battle has one.
+3. [`QuestPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt) displays the journal or [`QuestDetailView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestDetailView.kt) in place of the pad, with the battlefield still in sight above it, and their buttons in the [button row](buttons.md#the-button-row) below it.
+4. Back steps out one level at a time: from a detail view opened from the journal to the journal, keeping its scroll, with nothing published, and from the journal, or a detail view opened directly, it explores again ([`CloseQuest`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/CloseQuest.kt), `QuestClosed`), and the pad is displayed again. Displaying or hiding the pad also removes the row (`hideButtons`), so a battle starting never leaves an old Back on the screen: Finish turn is displayed again when the battle has one.
 
 ## Inventory
 
 There are no turns while exploring, so the inventory of the party can always be used:
 
-- Tapping a battle unit of the party selects it: the battle HUD displays its info and its inventory in place of the virtual pad, and the call to action below it the item actions once an item is tapped. There is no finish turn, as there are no turns: the call to action is empty otherwise. It has no movement range, so tapping a tile does not move it, and its abilities can not be cast: tapping one displays its ability info, read-only, as a blocked ability in a battle, with why it could not be cast (e.g.: `Needs 10 mana, has 4`). Tapping the ability again or any tile goes back to the party member, so the player can read the party's abilities before engaging. While an ability is on show, the info collapses its header and hides the bag button.
-- The selection stays as it is while the CPU battle units wander, so the inventory stays open until the player closes it: a tile occupied or an occupant removed only displays the selected battle unit again when its own tile changes ([`RefreshMovementRange`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/RefreshMovementRange.kt)).
+- Tapping a battle unit of the party selects it: the HUD displays its info and its inventory in place of the virtual pad, and the call to action below it the item buttons once an item is tapped. There is no finish turn, as there are no turns: the call to action is empty otherwise. It has no walking range, so tapping a tile does not move it, and its abilities can not be cast: tapping one displays its ability info, read-only, as a blocked ability in a battle, with why it could not be cast (e.g.: `Needs 10 mana, has 4`). Tapping the ability again or any tile goes back to the party member, so the player can read the party's abilities before engaging. While an ability is on show, the info collapses its header and hides the bag button.
+- The selection stays as it is while the CPU battle units wander, so the inventory stays open until the player closes it: a tile occupied or an occupant removed only displays the selected battle unit again when its own tile changes ([`RefreshWalkingRange`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/selection/usecases/commands/RefreshWalkingRange.kt)).
 - Tapping an empty tile, a CPU battle unit or the selected battle unit again clears the selection, and the virtual pad is displayed again. Tapping another battle unit of the party selects it instead.
 - The inventory's title line names the party member between two arrows, its gold before the next one, as a button: `< Knight ........ [ 20 G ] >`. The arrows, or swiping the inventory left or right (at least 40 px), switch it to the previous or next party member, in party order, and are disabled at the ends. The member switched to is selected on the battlefield, as if its tile was tapped, so Close displays its info. The selected item is cleared, and switching waits while giving an item or choosing what to do with a found one.
-- The item actions also offer Give (see [Giving](inventory.md#giving)). Give dims every tile but the ones of the party members that can receive the item, and the call to action reads `Tap a party member to give the Hammer` with Cancel ([`InventoryPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/InventoryPresenter.kt), which takes the tapped tiles before the battlefield HUD meanwhile). Tapping a receiver's tile gives the item: the giver's inventory stays open with nothing selected, and the receiver flashes. Any other tap is ignored (dimmed tiles, the giver's tile, the inventory's storage spaces and Close), and Cancel displays the item's actions again. Give is disabled for the only copy of an equipped item, and reads why when no one can receive it: `No one` or `No space`. Time goes on meanwhile, and a battle starting abandons the giving.
+- The item buttons also offer Give (see [Giving](inventory.md#giving)). Give dims every tile but the ones of the party members that can receive the item, and the call to action reads `Tap a party member to give the Hammer` with Cancel ([`InventoryPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/InventoryPresenter.kt), which takes the tapped tiles before the selection meanwhile). Tapping a receiver's tile gives the item: the giver's inventory stays open with nothing selected, and the receiver flashes. Any other tap is ignored (dimmed tiles, the giver's tile, the inventory's storage spaces and Close), and Cancel displays the item's actions again. Give is disabled for the only copy of an equipped item, and reads why when no one can receive it: `No one` or `No space`. Time goes on meanwhile, and a battle starting abandons the giving.
 - The gold button gives gold (see [Giving gold](inventory.md#giving-gold)). It opens the panel ([`GiveGoldView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/GiveGoldView.kt)) in place of the inventory, with the giver, the first member with room as the receiver, what each would carry and a slider starting at 1 G, and Cancel, All and Give in the call to action, at the level of the finish turn.
   - The slider, or - and +, set the amount, up to the lower of the giver's gold and the receiver's room. All sets that maximum.
   - The arrows of the panel, hidden with a single receiver, or tapping a receiver's tile, choose another receiver, lowering the amount to fit. Every tile is dimmed but the receivers' ones, the chosen one is selected, and any other tap is ignored.
   - Give moves the gold, displays the inventory again with the new gold and the giver selected, and flashes the receiver. Cancel displays the inventory again with nothing moved.
   - A faded button reads why no gold can be given in the call to action, with OK: `No gold to give`, `No one to give gold to` or `Everyone's gold is full`.
   - Time goes on, as when giving an item. A battle starting, or the giver being defeated, abandons the give with no gold moved. The receiver being defeated moves on to the next one, or back to the inventory when none is left. A grant reads the gold and the room again, lowering the amount to fit.
-- When an item found on the way does not fit in the inventory (`InventoryFull`), the battle HUD and the call to action are displayed straight away, so the player can choose what to do with it. Tapping a tile once chosen displays the virtual pad again.
+- When an item found on the way does not fit in the inventory (`InventoryFull`), the HUD and the call to action are displayed straight away, so the player can choose what to do with it. Tapping a tile once chosen displays the virtual pad again.
 - The party does not walk while the virtual pad is hidden, even when an arrow is still held.
 
 ## Terrain effects
@@ -191,9 +191,9 @@ After the party starts exploring, every time it has taken a party step and every
 - When a round finishes and the CPU battle units out of the battle have wandered, the CPU battle brain [`JoinAndLeaveBattle`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBattleBrain/usecases/commands/JoinAndLeaveBattle.kt) has the CPU battle units join and leave the battle (`CpuBattleUnitsJoinedAndLeft`), and requests the next round (`RequestStartNextRound`): the CPU battle units out of the battle that now have a battle unit of the party within reach join it, and the CPU battle units in the battle without any leave it (e.g.: left behind). The next round only starts then, so the joining ones play from it.
 - Only the battle units in the battle can be selected: tapping one out of it is as tapping an empty tile.
 - The exploration is interrupted (`ExplorationInterrupted`), so the party no longer steps.
-- The battle HUD and the player call to action, with the finish turn, take the place of the virtual pad as soon as the leader lands on its last tile (`BattleStarted`, played with `BattleSceneTimeline.playNext`), and the battle info announces the battle. Hiding the pad after the announcements (about 950ms later) made the party look frozen.
+- The HUD and the call to action, with the finish turn, take the place of the virtual pad as soon as the leader lands on its last tile (`BattleStarted`, played with `GameSceneTimeline.playNext`), and the banner announces the battle. Hiding the pad after the announcements (about 950ms later) made the party look frozen.
 
-While exploring, the battle info displays "Exploring".
+While exploring, the banner displays "Exploring".
 
 ## Back to exploring
 
@@ -206,7 +206,7 @@ Once the battle is finished, a turn finish requested afterwards (e.g.: by the re
 
 - The exploration resumes (`ExplorationResumed`, see [`ResumeExploration`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/ResumeExploration.kt)), with the battle units of the party that were not defeated.
 - The summons left (e.g.: the bees a knight summoned) vanish, whatever summon duration they had left, as they never explore ([`VanishSummons`](../../src/commonMain/kotlin/com/mkz/rpg/battleUnit/usecases/commands/VanishSummons.kt)). They flash and leave the battlefield, without being defeated: they drop no loot. A player whose last battle units were summons is defeated then, so the human player loses the game when only bees were left.
-- The battle info announces that the battle is over and displays "Exploring" again. The selection is cleared, the finish turn is removed from the player call to action, and the virtual pad takes the place of the battle HUD and the call to action.
+- The banner announces that the battle is over and displays "Exploring" again. The selection is cleared, the finish turn is removed from the call to action, and the virtual pad takes the place of the HUD and the call to action.
 - The next time CPU battle units engage, a new battle starts, which replaces the finished one.
 
 So defeating the last CPU battle unit in the battle during the human turn explores again straight away, without finishing the turn. A player with no battle units left on the battlefield still loses the game (`PlayerVictory`), and the game does not go back to exploring then: the player is defeated before the disengaged battle is checked, so only the victory is displayed.

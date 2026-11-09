@@ -15,11 +15,11 @@ import kotlin.test.Test
 
 class QuestJournalViewTest : ViewsForTesting() {
     private val mainQuest = questInfo(id = "main")
-    private val sideQuest = questInfo(id = "side", isMain = false, name = "Bats in the Meadow", tasks = listOf(task(text = "Defeat 3 Bats", progress = 1, count = 3)))
+    private val sideQuest = questInfo(id = "side", isMain = false, name = "Bats in the Meadow", tasks = listOf(task(text = "Defeat 3 Bats", defeatsCounted = 1, requiredDefeats = 3)))
     private val completedQuest = completedQuestInfo().copy(id = "done", isMain = false, name = "The Elder's Errand")
     private val tenQuests = List(10) { index -> questInfo(id = "quest-$index", isMain = false) }
 
-    private fun journalView() = QuestJournalView(BattleSceneResourcesLoader(), TextsMother.texts())
+    private fun journalView() = QuestJournalView(GameSceneResourcesLoader(), MessagesMother.messages())
 
     @Test
     fun `QuestJournalView should be hidden until it displays the quests`() =

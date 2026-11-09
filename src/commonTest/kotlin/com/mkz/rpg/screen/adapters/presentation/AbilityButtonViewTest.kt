@@ -1,6 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import com.mkz.rpg.screen.adapters.presentation.GameSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -17,7 +17,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 54, height = 54), loadedResourcesLoader())
             // When
-            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 0, hasEnoughMana = true, manaCost = 10)
+            abilityButtonView.display(abilityId = "mushroom", remainingCooldown = 0, hasEnoughMana = true, manaCost = 10)
             // Then
             abilityButtonView.isVisibleToUser().shouldBeTrue()
         }
@@ -28,7 +28,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 54, height = 54), loadedResourcesLoader())
             // When
-            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 0, hasEnoughMana = true, manaCost = 10)
+            abilityButtonView.display(abilityId = "mushroom", remainingCooldown = 0, hasEnoughMana = true, manaCost = 10)
             // Then
             abilityButtonView.isAbilityIconDisplayed().shouldBeTrue()
         }
@@ -39,7 +39,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 54, height = 54), loadedResourcesLoader())
             // When
-            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 0, hasEnoughMana = true, manaCost = 10)
+            abilityButtonView.display(abilityId = "mushroom", remainingCooldown = 0, hasEnoughMana = true, manaCost = 10)
             // Then
             abilityButtonView.isAbilityIconDarkened().shouldBeFalse()
             abilityButtonView.isAbilityIconTintedBlue().shouldBeFalse()
@@ -52,7 +52,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 54, height = 54), loadedResourcesLoader())
             // When
-            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 2, hasEnoughMana = true, manaCost = 10)
+            abilityButtonView.display(abilityId = "mushroom", remainingCooldown = 2, hasEnoughMana = true, manaCost = 10)
             // Then
             abilityButtonView.isAbilityIconDarkened().shouldBeTrue()
             abilityButtonView.cooldownBadgeText() shouldBe "2"
@@ -64,7 +64,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 54, height = 54), loadedResourcesLoader())
             // When
-            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 0, hasEnoughMana = false, manaCost = 10)
+            abilityButtonView.display(abilityId = "mushroom", remainingCooldown = 0, hasEnoughMana = false, manaCost = 10)
             // Then
             abilityButtonView.isAbilityIconTintedBlue().shouldBeTrue()
             abilityButtonView.cooldownBadgeText() shouldBe null
@@ -76,7 +76,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 54, height = 54), loadedResourcesLoader())
             // When
-            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 1, hasEnoughMana = false, manaCost = 10)
+            abilityButtonView.display(abilityId = "mushroom", remainingCooldown = 1, hasEnoughMana = false, manaCost = 10)
             // Then
             abilityButtonView.isAbilityIconDarkened().shouldBeTrue()
             abilityButtonView.cooldownBadgeText() shouldBe "1"
@@ -87,9 +87,9 @@ class AbilityButtonViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 54, height = 54), loadedResourcesLoader())
-            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 1, hasEnoughMana = true, manaCost = 10)
+            abilityButtonView.display(abilityId = "mushroom", remainingCooldown = 1, hasEnoughMana = true, manaCost = 10)
             // When
-            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 0, hasEnoughMana = true, manaCost = 10)
+            abilityButtonView.display(abilityId = "mushroom", remainingCooldown = 0, hasEnoughMana = true, manaCost = 10)
             // Then
             abilityButtonView.cooldownBadgeCount() shouldBe 0
             abilityButtonView.isAbilityIconDarkened().shouldBeFalse()
@@ -101,7 +101,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 54, height = 54), loadedResourcesLoader())
             // When
-            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 0, hasEnoughMana = false, manaCost = 10)
+            abilityButtonView.display(abilityId = "mushroom", remainingCooldown = 0, hasEnoughMana = false, manaCost = 10)
             // Then
             abilityButtonView.costBadgeText() shouldBe "10"
         }
@@ -112,7 +112,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 54, height = 54), loadedResourcesLoader())
             // When
-            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 0, hasEnoughMana = true, manaCost = 10)
+            abilityButtonView.display(abilityId = "mushroom", remainingCooldown = 0, hasEnoughMana = true, manaCost = 10)
             // Then
             abilityButtonView.costBadgeText() shouldBe null
         }
@@ -123,7 +123,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 54, height = 54), loadedResourcesLoader())
             // When
-            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 2, hasEnoughMana = false, manaCost = 10)
+            abilityButtonView.display(abilityId = "mushroom", remainingCooldown = 2, hasEnoughMana = false, manaCost = 10)
             // Then
             abilityButtonView.isCooldownCentered().shouldBeTrue()
             abilityButtonView.costBadgeText() shouldBe null
@@ -169,7 +169,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 54, height = 54), loadedResourcesLoader())
-            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 0, hasEnoughMana = true, manaCost = 10)
+            abilityButtonView.display(abilityId = "mushroom", remainingCooldown = 0, hasEnoughMana = true, manaCost = 10)
             // When
             abilityButtonView.hide()
             // Then
@@ -189,7 +189,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                     }
                 },
             )
-            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 0, hasEnoughMana = true, manaCost = 10)
+            abilityButtonView.display(abilityId = "mushroom", remainingCooldown = 0, hasEnoughMana = true, manaCost = 10)
             addChild(abilityButtonView)
             // When
             clickAbilityButton(abilityButtonView)

@@ -11,7 +11,7 @@ import korlibs.math.geom.Size
 
 /** Asks the player to tap the party member who receives the item, or to cancel giving it. */
 class GiveItemView(
-    texts: Texts,
+    messages: Messages,
     itemName: String,
     onCancelled: () -> Unit,
 ) : Container() {
@@ -26,7 +26,7 @@ class GiveItemView(
         uiVerticalStack(padding = 4.0) {
             addChild(messageView)
             cancelButton =
-                uiButton(texts[UiText.GIVE_ITEM_CANCEL]) {
+                uiButton(messages[UiMessage.GIVE_ITEM_CANCEL]) {
                     width = WIDTH
                     bgColorOut = Colors.DIMGRAY
                     bgColorOver = RGBA(85, 85, 85)
@@ -34,6 +34,6 @@ class GiveItemView(
                     onClick { onCancelled() }
                 }
         }
-        messageView.display(texts[UiText.GIVE_ITEM_MESSAGE, "item" to itemName])
+        messageView.display(messages[UiMessage.GIVE_ITEM_MESSAGE, "item" to itemName])
     }
 }

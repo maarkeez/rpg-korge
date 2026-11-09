@@ -7,16 +7,16 @@ import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailabilities.Abili
 internal object BattleUnitInfoMapper {
     fun battleUnitInfo(
         battleUnit: BattleUnit.Dto,
-        isAlly: Boolean,
+        isHumanPlayers: Boolean,
     ): BattleUnitInfo =
         BattleUnitInfo(
             unitId = battleUnit.unitId,
-            remainingHealthPoints = battleUnit.remainingHealth,
-            maximumHealthPoints = battleUnit.maximumHealth,
-            remainingManaPoints = battleUnit.remainingMana,
-            maximumManaPoints = battleUnit.maximumMana,
+            remainingHealth = battleUnit.remainingHealth,
+            maximumHealth = battleUnit.maximumHealth,
+            remainingMana = battleUnit.remainingMana,
+            maximumMana = battleUnit.maximumMana,
             effectIds = battleUnit.ongoingEffects.onPlayerTurnStarted + battleUnit.ongoingEffects.onDefeatedEffects,
-            isAlly = isAlly,
+            isHumanPlayers = isHumanPlayers,
         )
 
     fun turnActions(battleUnit: BattleUnit.Dto): BattleUnitInfoView.TurnActions =
@@ -31,7 +31,7 @@ internal object BattleUnitInfoMapper {
         abilityAvailabilities.map { abilityAvailability ->
             BattleUnitInfoView.Ability(
                 abilityId = abilityAvailability.abilityId,
-                cooldownTurnsLeft = abilityAvailability.remainingCooldown,
+                remainingCooldown = abilityAvailability.remainingCooldown,
                 hasEnoughMana = abilityAvailability.hasEnoughMana,
                 manaCost = abilityAvailability.manaCost,
             )

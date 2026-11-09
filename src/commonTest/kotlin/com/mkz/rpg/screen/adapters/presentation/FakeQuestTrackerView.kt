@@ -1,7 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 // Records what the presenters ask the tracker to display, instead of drawing it.
-class FakeQuestTrackerView : QuestTrackerView(TextsMother.texts()) {
+class FakeQuestTrackerView : QuestTrackerView(MessagesMother.messages()) {
     val displayedQuests = mutableListOf<QuestInfo>()
     val tappableChanges = mutableListOf<Boolean>()
     var pops = 0

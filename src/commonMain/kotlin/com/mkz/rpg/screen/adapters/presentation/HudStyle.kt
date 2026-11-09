@@ -9,7 +9,7 @@ import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
 
 /**
- * The palette and the panel every view of the battle HUD draws with. The HUD keeps pixel art for what the artist draws
+ * The palette and the panel every view of the HUD draws with. The HUD keeps pixel art for what the artist draws
  * (the portraits, the ability and effect icons, the chest), always at a whole scale, and draws the chrome around it as
  * vectors: rounded panels and slots, bars, pips, pills and rings.
  */
@@ -17,7 +17,7 @@ object HudStyle {
     // The panels: the header of the battle unit info, the ability info, the forecast rows.
     val PANEL = RGBA(0x17, 0x17, 0x25)
 
-    // The slots: the portraits, the ability buttons, the bag, the effects.
+    // The slots: the portraits, the ability buttons, the inventory button, the effects.
     val PANEL_RAISED = RGBA(0x22, 0x22, 0x36)
 
     // The 1-pixel border of the panels and the slots.
@@ -35,7 +35,7 @@ object HudStyle {
     // The selected ring, the numbers in the effects of an ability.
     val SELECTION = RGBA(0xFF, 0xD8, 0x4A)
 
-    // The team rings of the portraits: the human player's battle units, the CPU's, and a receiver a cast would defeat.
+    // The player rings of the portraits: the human player's battle units, the CPU's, and a recipient a cast would defeat.
     val ALLY = RGBA(0x5A, 0xD2, 0x5A)
     val ENEMY = RGBA(0xFF, 0x37, 0x5F)
     val DEFEATED = RGBA(0x8A, 0x8A, 0xA0)

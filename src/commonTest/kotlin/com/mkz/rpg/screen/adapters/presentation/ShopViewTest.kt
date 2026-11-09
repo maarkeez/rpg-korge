@@ -1,6 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import com.mkz.rpg.screen.adapters.presentation.GameSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.screen.adapters.presentation.ShopView.Slot
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -40,7 +40,7 @@ class ShopViewTest : ViewsForTesting() {
     fun `Init should display 12 empty slots, under the header and above the line of the item, spread over the panel`() =
         sharedViewsTest {
             // When
-            val shopView = ShopView(loadedResourcesLoader(), TextsMother.texts())
+            val shopView = ShopView(loadedResourcesLoader(), MessagesMother.messages())
             // Then
             shopView.slotCount() shouldBe 12
             shopView.slotBitmaps().all { bitmap -> bitmap == null }.shouldBeTrue()
@@ -53,7 +53,7 @@ class ShopViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val resourcesLoader = loadedResourcesLoader()
-            val shopView = ShopView(resourcesLoader, TextsMother.texts())
+            val shopView = ShopView(resourcesLoader, MessagesMother.messages())
             // When
             shopView.displayMerchant()
             // Then
@@ -68,7 +68,7 @@ class ShopViewTest : ViewsForTesting() {
     fun `Display should frame the equipped items in gold`() =
         sharedViewsTest {
             // Given
-            val shopView = ShopView(loadedResourcesLoader(), TextsMother.texts())
+            val shopView = ShopView(loadedResourcesLoader(), MessagesMother.messages())
             // When
             shopView.displayMerchant(slots = listOf(Slot("health-potion", isEquipped = false, isTradeable = true), Slot("hammer", isEquipped = true, isTradeable = false)))
             // Then
@@ -79,7 +79,7 @@ class ShopViewTest : ViewsForTesting() {
     fun `Display should dim the items the buyer can not trade`() =
         sharedViewsTest {
             // Given
-            val shopView = ShopView(loadedResourcesLoader(), TextsMother.texts())
+            val shopView = ShopView(loadedResourcesLoader(), MessagesMother.messages())
             // When
             shopView.displayMerchant(slots = listOf(Slot("health-potion", isEquipped = false, isTradeable = true), Slot("hammer", isEquipped = false, isTradeable = false)))
             // Then
@@ -93,10 +93,10 @@ class ShopViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `Display should display the buyer's name, gold and bag, between both arrows enabled`() =
+    fun `Display should display the buyer's name, gold and inventory, between both arrows enabled`() =
         sharedViewsTest {
             // Given
-            val shopView = ShopView(loadedResourcesLoader(), TextsMother.texts())
+            val shopView = ShopView(loadedResourcesLoader(), MessagesMother.messages())
             // When
             shopView.displayMerchant()
             // Then
@@ -105,10 +105,10 @@ class ShopViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `Display should display the bag is full, and disable the arrows at the ends of the party`() =
+    fun `Display should display the inventory is full, and disable the arrows at the ends of the party`() =
         sharedViewsTest {
             // Given
-            val shopView = ShopView(loadedResourcesLoader(), TextsMother.texts())
+            val shopView = ShopView(loadedResourcesLoader(), MessagesMother.messages())
             // When
             shopView.displayMerchant(buyer = knight.copy(usedStorageSpace = 12, partyIndex = 0, partySize = 2))
             // Then
@@ -126,7 +126,7 @@ class ShopViewTest : ViewsForTesting() {
     fun `SelectSlot should frame only the selected slot, or none when no slot is selected`() =
         sharedViewsTest {
             // Given
-            val shopView = ShopView(loadedResourcesLoader(), TextsMother.texts())
+            val shopView = ShopView(loadedResourcesLoader(), MessagesMother.messages())
             shopView.displayMerchant()
             shopView.selectSlot(0)
             // When
@@ -143,7 +143,7 @@ class ShopViewTest : ViewsForTesting() {
     fun `DisplayItem should display the item's name and price, and DisplayHint the hint`() =
         sharedViewsTest {
             // Given
-            val shopView = ShopView(loadedResourcesLoader(), TextsMother.texts())
+            val shopView = ShopView(loadedResourcesLoader(), MessagesMother.messages())
             // When
             shopView.displayItem(itemName = "Hammer", itemPrice = 50)
             // Then
@@ -157,7 +157,7 @@ class ShopViewTest : ViewsForTesting() {
         }
 
     private suspend fun ViewsForTesting.newShopView(delegate: RecordingDelegate): ShopView {
-        val shopView = ShopView(loadedResourcesLoader(), TextsMother.texts())
+        val shopView = ShopView(loadedResourcesLoader(), MessagesMother.messages())
         shopView.setDelegate(delegate)
         shopView.displayMerchant()
         views.stage.addChild(shopView)

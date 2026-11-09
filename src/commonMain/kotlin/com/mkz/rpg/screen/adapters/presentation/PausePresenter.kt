@@ -17,11 +17,11 @@ class PausePresenter(
     private val pauseView: PauseView,
     private val saveSlotsView: SaveSlotsView,
     private val confirmDialogView: ConfirmDialogView,
-    private val playerCallToActionView: PlayerCallToActionView,
+    private val callToActionView: CallToActionView,
     private val partyApi: PartyApi,
     private val saveApi: SaveApi,
-    private val texts: Texts,
-    private val timeline: BattleSceneTimeline,
+    private val messages: Messages,
+    private val timeline: GameSceneTimeline,
     private val onQuit: () -> Unit,
 ) : PauseView.Delegate,
     SaveSlotsView.Delegate {
@@ -60,8 +60,8 @@ class PausePresenter(
     override fun pauseQuitSelected() =
         whenIdle {
             confirm(
-                message = texts[UiText.PAUSE_QUIT_CONFIRMATION],
-                confirmLabel = texts[UiText.PAUSE_QUIT],
+                message = messages[UiMessage.PAUSE_QUIT_CONFIRMATION],
+                confirmLabel = messages[UiMessage.PAUSE_QUIT],
                 onCancelled = ::displayPause,
                 onConfirmed = onQuit,
             )
@@ -75,8 +75,8 @@ class PausePresenter(
                 save(number)
             } else {
                 confirm(
-                    message = texts[UiText.SAVE_SLOTS_OVERWRITE_CONFIRMATION, "slot" to number],
-                    confirmLabel = texts[UiText.SAVE_SLOTS_OVERWRITE],
+                    message = messages[UiMessage.SAVE_SLOTS_OVERWRITE_CONFIRMATION, "slot" to number],
+                    confirmLabel = messages[UiMessage.SAVE_SLOTS_OVERWRITE],
                     onCancelled = ::displaySaveSlots,
                     onConfirmed = { save(number) },
                 )
@@ -84,7 +84,7 @@ class PausePresenter(
         }
 
     // Slots are only deleted from Load game, in the menu.
-    override fun saveSlotDeleteSelected(number: Int) = Unit
+    override fun deleteSaveSelected(number: Int) = Unit
 
     private fun save(number: Int) {
         saveApi.saveGame(slot = number)
@@ -97,16 +97,16 @@ class PausePresenter(
         saveSlotsView.visible = false
         confirmDialogView.visible = false
         pauseView.visible = true
-        playerCallToActionView.hideActions()
+        callToActionView.hideButtons()
     }
 
     private fun displaySaveSlots() {
-        saveSlotsView.display(title = texts[UiText.SAVE_SLOTS_SAVE_TITLE], slots = SaveSlotsMapper.slots(saveApi.searchSaveSlots(), texts, isLoading = false))
+        saveSlotsView.display(title = messages[UiMessage.SAVE_SLOTS_SAVE_TITLE], slots = SaveSlotsMapper.slots(saveApi.searchSaveSlots(), messages, isLoading = false))
         pauseView.visible = false
         confirmDialogView.visible = false
         saveSlotsView.visible = true
-        playerCallToActionView.displayActions(
-            listOf(ActionRowView.Action(texts[UiText.SAVE_SLOTS_BACK]) { whenIdle { displayPause() } }),
+        callToActionView.displayButtons(
+            listOf(ButtonRowView.Action(messages[UiMessage.SAVE_SLOTS_BACK]) { whenIdle { displayPause() } }),
         )
     }
 
@@ -120,8 +120,8 @@ class PausePresenter(
         pauseView.visible = false
         saveSlotsView.visible = false
         confirmDialogView.visible = true
-        playerCallToActionView.displayConfirmation(
-            cancelLabel = texts[UiText.CALL_TO_ACTION_CANCEL],
+        callToActionView.displayConfirmation(
+            cancelLabel = messages[UiMessage.CALL_TO_ACTION_CANCEL],
             confirmLabel = confirmLabel,
             onCancelled = { whenIdle(onCancelled) },
             onConfirmed = { whenIdle(onConfirmed) },

@@ -19,7 +19,7 @@ import korlibs.math.geom.Size
  * slot that can be deleted has Delete on its right.
  */
 open class SaveSlotsView(
-    texts: Texts,
+    messages: Messages,
 ) : Container() {
     companion object {
         /** The slots displayed: one row each. */
@@ -46,7 +46,7 @@ open class SaveSlotsView(
     interface Delegate {
         fun saveSlotSelected(number: Int)
 
-        fun saveSlotDeleteSelected(number: Int)
+        fun deleteSaveSelected(number: Int)
     }
 
     private var delegate: Delegate? = null
@@ -74,10 +74,10 @@ open class SaveSlotsView(
         }
     internal val deleteButtons: List<GameButton> =
         List(ROWS) { index ->
-            gameButton(texts[UiText.SAVE_SLOTS_DELETE], Size(DELETE_WIDTH, ROW_HEIGHT)) {
+            gameButton(messages[UiMessage.SAVE_SLOTS_DELETE], Size(DELETE_WIDTH, ROW_HEIGHT)) {
                 position(WIDTH - PADDING - DELETE_WIDTH, rowY(index))
                 visible = false
-                onClick { delegate?.saveSlotDeleteSelected(index + 1) }
+                onClick { delegate?.deleteSaveSelected(index + 1) }
             }
         }
 

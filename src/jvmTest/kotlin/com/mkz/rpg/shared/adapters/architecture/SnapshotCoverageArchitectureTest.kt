@@ -30,7 +30,7 @@ class SnapshotCoverageArchitectureTest {
             "localization" to "the language is picked for the session",
             "worldBuilder" to "the world builder exports its worlds instead",
             "storybook" to "a tool, not the game",
-            "screen.adapters.presentation.battlefieldHud" to "what the HUD displays, drawn again from the other subdomains",
+            "screen.adapters.presentation.selection" to "what the HUD displays, drawn again from the other subdomains",
         )
 
     private val scope = Konsist.scopeFromProduction()

@@ -59,7 +59,7 @@ object QuestJournalViewStories : StoryBinding {
         args: Args,
         context: StoryContext,
     ): View =
-        QuestJournalView(context.resourcesLoader, context.texts).apply {
+        QuestJournalView(context.resourcesLoader, context.messages).apply {
             setDelegate(
                 object : QuestJournalView.Delegate {
                     override fun questJournalSelected(questId: String) = context.action("questJournalSelected", questId)
@@ -67,7 +67,7 @@ object QuestJournalViewStories : StoryBinding {
                     override fun questJournalPinSelected(questId: String) = context.action("questJournalPinSelected", questId)
                 },
             )
-            display(QuestSample.journal(args.int(COUNT), args.boolean(LONG_TEXT), context.texts))
+            display(QuestSample.journal(args.int(COUNT), args.boolean(LONG_TEXT), context.messages))
             scrollTo(args.int(SCROLL).toDouble())
         }
 }

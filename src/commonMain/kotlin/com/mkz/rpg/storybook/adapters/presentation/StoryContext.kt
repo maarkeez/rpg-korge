@@ -1,16 +1,16 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoader
-import com.mkz.rpg.screen.adapters.presentation.Texts
+import com.mkz.rpg.screen.adapters.presentation.GameSceneResourcesLoader
+import com.mkz.rpg.screen.adapters.presentation.Messages
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 
 /**
- * What the stories build their views with, as the game does: its images, loaded once, and its texts. The callbacks of
+ * What the stories build their views with, as the game does: its images, loaded once, and its messages. The callbacks of
  * the views are handed to [action], which logs them in the Actions.
  */
 class StoryContext(
-    val resourcesLoader: BattleSceneResourcesLoader,
-    val texts: Texts,
+    val resourcesLoader: GameSceneResourcesLoader,
+    val messages: Messages,
 ) {
     interface Delegate {
         /** The view on show made a callback, which may change an arg, e.g.: `shopSlotSelected(3)` sets `selectedSlot`. */

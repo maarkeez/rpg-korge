@@ -22,35 +22,35 @@ import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationInterrupted
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
+import com.mkz.rpg.screen.adapters.presentation.selection.domain.SelectionEvent
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
 import kotlinx.coroutines.CompletableDeferred
 
 /**
- * Displays the inventory of the selected battle unit behind the bag, lets the player act on its items, and asks the
- * player what to do with an item found while the inventory is full. Discarding an item, also to swap it for the found
+ * Displays the inventory of the selected battle unit behind the inventory button, lets the player act on its items, and asks the
+ * player what to do with an item found while the inventory is full. Discarding an item, also for the found
  * one, asks first.
  *
  * While exploring, an item can be given to another party member: Give dims every tile but the ones of the members that
  * can receive it, and tapping one of them gives the item. Until then, every other tap is ignored, but Cancel's.
  *
- * While exploring, the gold button opens the panel to give gold in place of the bag, with Cancel, All and Give in the call
+ * While exploring, the gold button opens the panel to give gold in place of the inventory, with Cancel, All and Give in the call
  * to action, or reads why no gold can be given. Every tile is dimmed but the receivers' ones, and tapping one chooses it.
  *
  * While exploring, the arrows (or a swipe) switch the inventory to the previous or next party member, selecting it on the
  * battlefield through the selector set with [setBattleUnitSelector], so its inventory stays open meanwhile.
  *
- * The bag opens the inventory straight away: it is hidden while an ability of the battle unit is on show, as the battle
+ * The inventory button opens the inventory straight away: it is hidden while an ability of the battle unit is on show, as the battle
  * unit info collapses its header, so it is never tapped over a dimmed battlefield.
  */
 class InventoryPresenter(
     private val inventoryView: InventoryView,
     private val giveGoldView: GiveGoldView,
     private val battleUnitInfoView: BattleUnitInfoView,
-    private val battleHudView: BattleHudView,
-    private val playerCallToActionView: PlayerCallToActionView,
+    private val hudView: HudView,
+    private val callToActionView: CallToActionView,
     private val inventoryApi: InventoryApi,
     private val lootableItemApi: LootableItemApi,
     private val battleUnitApi: BattleUnitApi,
@@ -59,8 +59,8 @@ class InventoryPresenter(
     private val partyApi: PartyApi,
     private val battlefieldApi: BattlefieldApi,
     private val battlefieldView: BattlefieldView,
-    private val texts: Texts,
-    private val timeline: BattleSceneTimeline,
+    private val messages: Messages,
+    private val timeline: GameSceneTimeline,
     eventBus: EventBus,
 ) : InventoryView.Delegate,
     GiveGoldView.Delegate {
@@ -79,10 +79,10 @@ class InventoryPresenter(
     // The gold being given, while the panel is on show.
     private var givingGold: GivingGold? = null
 
-    // Why no gold can be given is on show, until OK or until the bag it was read from goes away.
+    // Why no gold can be given is on show, until OK or until the inventory it was read from goes away.
     private var isReadingGoldRefusal = false
 
-    // The party member the inventory switches to, until the battlefield HUD has selected it.
+    // The party member the inventory switches to, until the selection has selected it.
     private var switchingTo: String? = null
     private var battleUnitSelector: ((battleUnitId: String) -> Unit)? = null
 
@@ -132,7 +132,7 @@ class InventoryPresenter(
     private val subscriptions =
         listOf(
             // Selecting a battle unit displays its info instead of the inventory, but the party member the inventory switches to.
-            eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event ->
+            eventBus.subscribe<SelectionEvent.BattleUnitSelected> { event ->
                 val battleUnitId = event.battleUnitId
                 val hasInventory = hasInventory(battleUnitId)
                 val isSwitchedTo = switchingTo == battleUnitId
@@ -140,17 +140,17 @@ class InventoryPresenter(
                 timeline.play {
                     clearDisplayedInventory()
                     if (hasInventory) {
-                        battleUnitInfoView.displayBag(onBagSelected = { whenIdle { openInventory(battleUnitId) } })
+                        battleUnitInfoView.displayInventoryButton(onInventoryButtonSelected = { whenIdle { openInventory(battleUnitId) } })
                     } else {
-                        battleUnitInfoView.hideBag()
+                        battleUnitInfoView.hideInventoryButton()
                     }
                 }
                 if (isSwitchedTo && hasInventory) openInventory(battleUnitId)
             },
-            eventBus.subscribe<BattlefieldHudEvent.Idle> {
+            eventBus.subscribe<SelectionEvent.Deselected> {
                 timeline.play {
                     clearDisplayedInventory()
-                    battleUnitInfoView.hideBag()
+                    battleUnitInfoView.hideInventoryButton()
                 }
             },
             eventBus.subscribe<InventoryEvent.ItemStored> { event -> refreshInventory(event.battleUnitId) },
@@ -160,7 +160,7 @@ class InventoryPresenter(
             eventBus.subscribe<InventoryEvent.ItemUnequipped> { event -> refreshInventory(event.battleUnitId) },
             eventBus.subscribe<InventoryEvent.ItemBought> { event -> refreshInventory(event.battleUnitId) },
             eventBus.subscribe<InventoryEvent.ItemSold> { event -> refreshInventory(event.battleUnitId) },
-            // The giver's bag stays open, with nothing selected, and the receiver flashes on its tile.
+            // The giver's inventory stays open, with nothing selected, and the receiver flashes on its tile.
             eventBus.subscribe<ItemGiven> { event ->
                 refreshInventory(event.battleUnitId)
                 val giverPosition = battlefieldApi.searchPosition(event.battleUnitId)
@@ -170,11 +170,11 @@ class InventoryPresenter(
                 refreshInventory(event.battleUnitId)
                 flashReceiver(event.battleUnitId)
             },
-            // A battle starting abandons the giving, as the battle HUD takes over.
+            // A battle starting abandons the giving, as the HUD takes over.
             eventBus.subscribe<ExplorationInterrupted> { timeline.play { abandonGiving() } },
             // The giver leaves the party, or a receiver can no longer receive: back to the item's actions, when the giver remains.
             eventBus.subscribe<BattleUnitDefeated> { event -> timeline.play { abandonGivingOf(event.battleUnitId) } },
-            // The bag is displayed again with the new gold, so the next give can start straight away, and the receiver flashes on its tile.
+            // The inventory is displayed again with the new gold, so the next give can start straight away, and the receiver flashes on its tile.
             eventBus.subscribe<GoldGiven> { event -> timeline.play { finishGivingGold(event.battleUnitId) } },
             eventBus.subscribe<GoldReceived> { event ->
                 refreshInventory(event.battleUnitId)
@@ -186,7 +186,7 @@ class InventoryPresenter(
             eventBus.subscribe<BattleUnitDefeated> { event -> timeline.play { abandonGivingGoldOf(event.battleUnitId) } },
             eventBus.subscribe<InventoryFull> { event ->
                 val sellPrice = lootableItemApi.searchSellPrice(event.lootableItemId) ?: return@subscribe
-                timeline.play { askWhatToDoWith(FoundItem(event, name = texts.lootableItemName(event.lootableItemId), sellPrice = sellPrice)) }
+                timeline.play { askWhatToDoWith(FoundItem(event, name = messages.lootableItemName(event.lootableItemId), sellPrice = sellPrice)) }
             },
         )
 
@@ -219,7 +219,7 @@ class InventoryPresenter(
         val partyIndex = party.battleUnitIds.indexOf(battleUnitId).takeIf { index -> index >= 0 } ?: return null
         val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return null
         return InventoryView.Owner(
-            name = texts.unitName(battleUnit.unitId),
+            name = messages.unitName(battleUnit.unitId),
             partyIndex = partyIndex,
             partySize = party.battleUnitIds.size,
             canGiveGold = inventoryApi.searchGiveGoldRefusal(battleUnitId) == null,
@@ -243,7 +243,7 @@ class InventoryPresenter(
         displayedSlots = slots
         selectedSlotIndex = null
         inventoryView.display(slots, gold, owner)
-        battleHudView.displayInventoryView()
+        hudView.displayInventoryView()
     }
 
     private fun refreshInventory(battleUnitId: String) {
@@ -274,14 +274,14 @@ class InventoryPresenter(
         giving = null
         displayedBattleUnitId = null
         displayedSlots = emptyList()
-        if (selectedSlotIndex != null || isReadingGoldRefusal || givingGold != null) playerCallToActionView.dismiss()
+        if (selectedSlotIndex != null || isReadingGoldRefusal || givingGold != null) callToActionView.dismiss()
         selectedSlotIndex = null
         isReadingGoldRefusal = false
         givingGold = null
     }
 
     /**
-     * Opens the inventory and waits for the player to choose: to swap a stored item for the found one, or to leave it on
+     * Opens the inventory and waits for the player to choose: to discard a stored item for the found one, or to leave it on
      * its tile. The inventory is read now, as a previous choice of the same walk may have changed it.
      */
     private suspend fun askWhatToDoWith(found: FoundItem) {
@@ -295,7 +295,7 @@ class InventoryPresenter(
     }
 
     private fun displayFoundItem(found: FoundItem) {
-        playerCallToActionView.displayInventoryFull(
+        callToActionView.displayInventoryFull(
             foundItemName = found.name,
             foundItemSellPrice = found.sellPrice,
             foundItemId = found.event.lootableItemId,
@@ -307,13 +307,13 @@ class InventoryPresenter(
         val pendingChoice = choice ?: return
         foundItem = null
         choice = null
-        playerCallToActionView.dismiss()
+        callToActionView.dismiss()
         pendingChoice.complete(Unit)
     }
 
-    // An equipped item can not be discarded, so it can not be swapped either. Tapping another item moves the question to it.
+    // An equipped item can not be discarded, so the found one can not take its place either. Tapping another item moves the question to it.
     // The timeline is waiting for the choice, so the views change straight away.
-    private fun askToSwap(
+    private fun askToDiscardFor(
         found: FoundItem,
         slotIndex: Int,
     ) {
@@ -321,26 +321,26 @@ class InventoryPresenter(
         if (slot.isEquipped) return
         selectedSlotIndex = slotIndex
         inventoryView.selectSlot(slotIndex)
-        playerCallToActionView.displayDiscardQuestion(
-            itemName = texts.lootableItemName(slot.lootableItemId),
+        callToActionView.displayDiscardQuestion(
+            itemName = messages.lootableItemName(slot.lootableItemId),
             onBack = {
-                clearSwapSelection()
+                clearDiscardSelection()
                 displayFoundItem(found)
             },
-            onDiscarded = { swap(found.event, slot.lootableItemId) },
+            onDiscarded = { discardFor(found.event, slot.lootableItemId) },
         )
     }
 
-    private fun clearSwapSelection() {
+    private fun clearDiscardSelection() {
         selectedSlotIndex = null
         inventoryView.selectSlot(null)
     }
 
-    private fun swap(
+    private fun discardFor(
         found: InventoryFull,
         lootableItemId: String,
     ) {
-        clearSwapSelection()
+        clearDiscardSelection()
         inventoryApi.discardItem(battleUnitId = found.battleUnitId, lootableItemId = lootableItemId)
         inventoryApi.storeLootedItem(battleUnitId = found.battleUnitId, lootableItemId = found.lootableItemId, row = found.row, column = found.column)
         completeChoice()
@@ -355,18 +355,18 @@ class InventoryPresenter(
         val isItemEquipped = displayedSlots.any { displayedSlot -> displayedSlot.lootableItemId == slot.lootableItemId && displayedSlot.isEquipped }
         val actions =
             buildList {
-                add(action(texts[UiText.ITEM_ACTIONS_CANCEL]) {})
+                add(action(messages[UiMessage.ITEM_BUTTONS_CANCEL]) {})
                 add(
-                    ItemActionsView.Action(label = texts[UiText.ITEM_ACTIONS_DISCARD], isEnabled = !slot.isEquipped) {
-                        if (!timeline.isPlaying) askToDiscard(battleUnitId, slotIndex, slot.lootableItemId, texts.lootableItemName(lootableItem.id))
+                    ItemButtonsView.Button(label = messages[UiMessage.ITEM_BUTTONS_DISCARD], isEnabled = !slot.isEquipped) {
+                        if (!timeline.isPlaying) askToDiscard(battleUnitId, slotIndex, slot.lootableItemId, messages.lootableItemName(lootableItem.id))
                     },
                 )
                 // Only while exploring: the battle actions stay as they are.
                 if (isExploring()) {
                     val refusal = inventoryApi.searchGiveItemRefusal(battleUnitId, slot.lootableItemId)
                     add(
-                        ItemActionsView.Action(label = giveLabel(refusal), isEnabled = refusal == null) {
-                            if (!timeline.isPlaying) startGiving(battleUnitId, slotIndex, slot.lootableItemId, texts.lootableItemName(lootableItem.id))
+                        ItemButtonsView.Button(label = giveLabel(refusal), isEnabled = refusal == null) {
+                            if (!timeline.isPlaying) startGiving(battleUnitId, slotIndex, slot.lootableItemId, messages.lootableItemName(lootableItem.id))
                         },
                     )
                 }
@@ -374,23 +374,23 @@ class InventoryPresenter(
                     // An item teaching an ability its battle unit can not learn (e.g.: already known) can not be consumed.
                     CONSUMABLE ->
                         add(
-                            primaryAction(texts[UiText.ITEM_ACTIONS_CONSUME], isEnabled = inventoryApi.canConsumeItem(battleUnitId, slot.lootableItemId)) {
+                            primaryAction(messages[UiMessage.ITEM_BUTTONS_CONSUME], isEnabled = inventoryApi.canConsumeItem(battleUnitId, slot.lootableItemId)) {
                                 inventoryApi.consumeItem(battleUnitId, slot.lootableItemId)
                             },
                         )
                     EQUIPPABLE ->
                         if (slot.isEquipped) {
-                            add(primaryAction(texts[UiText.ITEM_ACTIONS_UNEQUIP]) { inventoryApi.unequipItem(battleUnitId, slot.lootableItemId) })
+                            add(primaryAction(messages[UiMessage.ITEM_BUTTONS_UNEQUIP]) { inventoryApi.unequipItem(battleUnitId, slot.lootableItemId) })
                         } else {
                             // Another copy of the item is already equipped.
-                            add(primaryAction(texts[UiText.ITEM_ACTIONS_EQUIP], isEnabled = !isItemEquipped) { inventoryApi.equipItem(battleUnitId, slot.lootableItemId) })
+                            add(primaryAction(messages[UiMessage.ITEM_BUTTONS_EQUIP], isEnabled = !isItemEquipped) { inventoryApi.equipItem(battleUnitId, slot.lootableItemId) })
                         }
                 }
             }
         timeline.play {
             selectedSlotIndex = slotIndex
             inventoryView.selectSlot(slotIndex)
-            playerCallToActionView.displayItemActions(itemName = texts.lootableItemName(lootableItem.id), itemSellPrice = sellPrice, actions = actions)
+            callToActionView.displayItemButtons(itemName = messages.lootableItemName(lootableItem.id), itemSellPrice = sellPrice, actions = actions)
         }
     }
 
@@ -399,7 +399,7 @@ class InventoryPresenter(
         label: String,
         isEnabled: Boolean = true,
         act: () -> Unit,
-    ) = ItemActionsView.Action(label = label, isEnabled = isEnabled) {
+    ) = ItemButtonsView.Button(label = label, isEnabled = isEnabled) {
         if (!timeline.isPlaying) act()
         timeline.play {
             selectedSlotIndex = null
@@ -421,13 +421,13 @@ class InventoryPresenter(
         itemName: String,
     ) {
         timeline.play {
-            playerCallToActionView.displayDiscardQuestion(
+            callToActionView.displayDiscardQuestion(
                 itemName = itemName,
                 onBack = { whenIdle { selectItem(slotIndex) } },
                 onDiscarded = {
                     whenIdle {
                         inventoryApi.discardItem(battleUnitId, lootableItemId)
-                        playerCallToActionView.dismiss()
+                        callToActionView.dismiss()
                         timeline.play {
                             selectedSlotIndex = null
                             inventoryView.selectSlot(null)
@@ -441,9 +441,9 @@ class InventoryPresenter(
     // A disabled Give reads why when no party member can receive the item.
     private fun giveLabel(refusal: GiveItemRefusalDto?): String =
         when (refusal) {
-            GiveItemRefusalDto.NO_ONE -> texts[UiText.ITEM_ACTIONS_NO_ONE]
-            GiveItemRefusalDto.INVENTORIES_FULL -> texts[UiText.ITEM_ACTIONS_BAGS_FULL]
-            else -> texts[UiText.ITEM_ACTIONS_GIVE]
+            GiveItemRefusalDto.NO_ONE -> messages[UiMessage.ITEM_BUTTONS_NO_ONE]
+            GiveItemRefusalDto.INVENTORIES_FULL -> messages[UiMessage.ITEM_BUTTONS_NO_SPACE]
+            else -> messages[UiMessage.ITEM_BUTTONS_GIVE]
         }
 
     // Every tile is dimmed but the ones of the party members that can receive the item, and the call to action asks to tap one.
@@ -463,7 +463,7 @@ class InventoryPresenter(
             giving = Giving(giverBattleUnitId = giverBattleUnitId, slotIndex = slotIndex, lootableItemId = lootableItemId, receivers = receivers)
             battlefieldView.resetTiles()
             battlefieldView.dimTilesExcept(BattlefieldMapper.positions(receivers.keys))
-            playerCallToActionView.displayGiveItem(itemName = itemName, onCancelled = { if (!timeline.isPlaying) cancelGiving() })
+            callToActionView.displayGiveItem(itemName = itemName, onCancelled = { if (!timeline.isPlaying) cancelGiving() })
         }
     }
 
@@ -483,7 +483,7 @@ class InventoryPresenter(
         giving = null
         selectedSlotIndex = null
         inventoryView.selectSlot(null)
-        playerCallToActionView.dismiss()
+        callToActionView.dismiss()
         restoreGiverSelection(giverPosition)
     }
 
@@ -500,7 +500,7 @@ class InventoryPresenter(
         giving = null
         selectedSlotIndex = null
         inventoryView.selectSlot(null)
-        playerCallToActionView.dismiss()
+        callToActionView.dismiss()
         battlefieldView.resetTiles()
     }
 
@@ -530,7 +530,7 @@ class InventoryPresenter(
             timeline.play {
                 clearSelectedSlot()
                 isReadingGoldRefusal = true
-                playerCallToActionView.displayGiveGoldRefusal(message, onDismissed = { isReadingGoldRefusal = false })
+                callToActionView.displayGiveGoldRefusal(message, onDismissed = { isReadingGoldRefusal = false })
             }
         }
     }
@@ -539,9 +539,9 @@ class InventoryPresenter(
     private fun refusalMessage(refusal: GiveGoldRefusalDto): String? =
         when (refusal) {
             GiveGoldRefusalDto.NOT_EXPLORING -> null
-            GiveGoldRefusalDto.NO_GOLD -> texts[UiText.GIVE_GOLD_NO_GOLD]
-            GiveGoldRefusalDto.NO_ONE -> texts[UiText.GIVE_GOLD_NO_ONE]
-            GiveGoldRefusalDto.GOLD_FULL -> texts[UiText.GIVE_GOLD_GOLD_FULL]
+            GiveGoldRefusalDto.NO_GOLD -> messages[UiMessage.GIVE_GOLD_NO_GOLD]
+            GiveGoldRefusalDto.NO_ONE -> messages[UiMessage.GIVE_GOLD_NO_ONE]
+            GiveGoldRefusalDto.GOLD_FULL -> messages[UiMessage.GIVE_GOLD_GOLD_FULL]
         }
 
     private fun clearSelectedSlot() {
@@ -565,14 +565,14 @@ class InventoryPresenter(
             isReadingGoldRefusal = false
             givingGold = current
             displayGivingGold(current)
-            playerCallToActionView.displayGiveGold(
+            callToActionView.displayGiveGold(
                 amount = current.amount,
                 maximum = current.maximum,
                 onCancelled = { if (!timeline.isPlaying) cancelGivingGold() },
                 onAll = { giveAllGold() },
                 onGiven = { giveGold() },
             )
-            battleHudView.displayGiveGoldView()
+            hudView.displayGiveGoldView()
         }
     }
 
@@ -580,14 +580,14 @@ class InventoryPresenter(
     private fun displayGivingGold(current: GivingGold) {
         val giverUnitId = battleUnitApi.searchBattleUnitById(current.giverBattleUnitId)?.unitId ?: return
         giveGoldView.display(
-            giver = GiveGoldView.Member(name = texts.unitName(giverUnitId), unitId = giverUnitId, gold = current.giverGold),
-            receiver = GiveGoldView.Member(name = texts.unitName(current.receiver.unitId), unitId = current.receiver.unitId, gold = current.receiver.gold),
+            giver = GiveGoldView.Member(name = messages.unitName(giverUnitId), unitId = giverUnitId, gold = current.giverGold),
+            receiver = GiveGoldView.Member(name = messages.unitName(current.receiver.unitId), unitId = current.receiver.unitId, gold = current.receiver.gold),
             amount = current.amount,
             maximum = current.maximum,
             canStepToPrevious = current.receiverIndex > 0,
             canStepToNext = current.receiverIndex < current.receivers.lastIndex,
         )
-        playerCallToActionView.updateGiveGold(amount = current.amount, maximum = current.maximum)
+        callToActionView.updateGiveGold(amount = current.amount, maximum = current.maximum)
         battlefieldView.resetTiles()
         battlefieldView.dimTilesExcept(BattlefieldMapper.positions(current.receivers.map { receiver -> receiver.position }.toSet()))
         battlefieldView.displayTileSelection(row = current.receiver.position.row, column = current.receiver.position.column)
@@ -613,25 +613,25 @@ class InventoryPresenter(
 
     private fun finishGivingGold(giverBattleUnitId: String) {
         if (givingGold == null) return
-        displayBagAgain(giverBattleUnitId)
+        displayInventoryButtonAgain(giverBattleUnitId)
         restoreGiverSelection(battlefieldApi.searchPosition(giverBattleUnitId))
     }
 
-    // Back to the bag with nothing moved, with the giver selected again.
+    // Back to the inventory with nothing moved, with the giver selected again.
     private fun cancelGivingGold() {
         val current = givingGold ?: return
         timeline.play { finishGivingGold(current.giverBattleUnitId) }
     }
 
-    private fun displayBagAgain(giverBattleUnitId: String) {
+    private fun displayInventoryButtonAgain(giverBattleUnitId: String) {
         givingGold = null
-        playerCallToActionView.dismiss()
+        callToActionView.dismiss()
         displayInventory(giverBattleUnitId, slotsOf(giverBattleUnitId), goldOf(giverBattleUnitId), ownerOf(giverBattleUnitId))
     }
 
     private fun abandonGivingGold() {
         val current = givingGold ?: return
-        displayBagAgain(current.giverBattleUnitId)
+        displayInventoryButtonAgain(current.giverBattleUnitId)
         battlefieldView.resetTiles()
     }
 
@@ -652,7 +652,7 @@ class InventoryPresenter(
         if (isInvolved) continueGivingGold(current, goldReceiversOf(current.giverBattleUnitId), goldOf(current.giverBattleUnitId))
     }
 
-    // The chosen receiver stays while it can receive gold, or the next one takes its place. Back to the bag when none is left.
+    // The chosen receiver stays while it can receive gold, or the next one takes its place. Back to the inventory when none is left.
     private fun continueGivingGold(
         current: GivingGold,
         receivers: List<GoldReceiver>,
@@ -718,7 +718,7 @@ class InventoryPresenter(
     override fun slotSelected(index: Int) {
         val found = foundItem
         if (found != null) {
-            askToSwap(found, index)
+            askToDiscardFor(found, index)
         } else {
             whenIdle { selectItem(index) }
         }
@@ -732,7 +732,7 @@ class InventoryPresenter(
         timeline.play {
             val current = givingGold ?: return@play
             givingGold = current.copy(amount = amount)
-            playerCallToActionView.updateGiveGold(amount = amount, maximum = current.maximum)
+            callToActionView.updateGiveGold(amount = amount, maximum = current.maximum)
         }
     }
 
@@ -750,12 +750,12 @@ class InventoryPresenter(
                 clearDisplayedInventory()
                 // The info is read again, as the items may have changed the battle unit, e.g.: healed it.
                 battleUnitInfoView.display(
-                    battleUnit = BattleUnitInfoMapper.battleUnitInfo(battleUnit, isAlly = true),
+                    battleUnit = BattleUnitInfoMapper.battleUnitInfo(battleUnit, isHumanPlayers = true),
                     turnActions = BattleUnitInfoMapper.turnActions(battleUnit),
                     remainingTurns = battleUnit.remainingSummonDuration,
                     abilities = BattleUnitInfoMapper.abilities(abilityAvailabilities),
                 )
-                battleHudView.displayBattleUnitInfoView()
+                hudView.displayBattleUnitInfoView()
             }
         }
 }

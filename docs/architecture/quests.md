@@ -20,7 +20,7 @@ A quest is a line of tasks, completed one after the other, and completing the la
 | Quest to start  | The gold sign: the npc can start a side quest                               | `Sign.QUEST_TO_START`                                                       |
 | Talk task       | The green sign: a current task is to talk to the npc                        | `Sign.TALK_TASK`                                                            |
 | Repeatable pill | The pill saying that a side quest can run again                             | `QuestViewParts.repeatablePill`                                             |
-| Announcement    | A quest starting or completing, drawn as a toast                            | `QuestAnnouncementView`                                                     |
+| Announcement    | A quest starting or completing, shown for a moment                            | `QuestAnnouncementView`                                                     |
 | Status          | Where a quest is in its life                                                | `NOT_STARTED`, `ACTIVE`, `COMPLETED`                                        |
 
 ## Starting
@@ -89,7 +89,7 @@ A reward is some gold and a list of lootable items, as the game has no experienc
 
 ## What the player sees
 
-The screen follows the quests in [`QuestPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt), reading `QuestApi.searchQuests`: the tracker follows the main quest, and a toast announces any quest. [`QuestMapper`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestMapper.kt) turns the quest into `QuestInfo`, the plain data the views draw, already translated, so they import no domain. The tasks after the current one are never mapped, so they can not be revealed.
+The screen follows the quests in [`QuestPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt), reading `QuestApi.searchQuests`: the tracker follows the main quest, and an announcement announces any quest. [`QuestMapper`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestMapper.kt) turns the quest into `QuestInfo`, the plain data the views draw, already translated, so they import no domain. The tasks after the current one are never mapped, so they can not be revealed.
 
 ### The tracker
 
@@ -106,7 +106,7 @@ The screen follows the quests in [`QuestPresenter`](../../src/commonMain/kotlin/
 
 ### The detail view
 
-[`QuestDetailView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestDetailView.kt) displays a quest in place of the pad, with time stopped (see [Reading the quest](exploration.md#reading-the-quest)). It is led by the portrait of who the current task is about, or the task's glyph for a place, with its caption (MAIN QUEST, SIDE QUEST or QUEST COMPLETED), the Repeatable pill when it runs again, the name and the description beside it. Under them, the current task in a banner, with its count and bar only when it counts above 1, the tasks done as a count, and the reward, which is always shown, evenly apart down the 300 of the panel, the banner lower when no tasks done are under it. Its buttons are in the [action row](buttons.md#the-action-row), at the level of the finish turn, with Back first. Once completed, it still opens, with a ticked target, so the story can be read again.
+[`QuestDetailView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestDetailView.kt) displays a quest in place of the pad, with time stopped (see [Reading the quest](exploration.md#reading-the-quest)). It is led by the portrait of who the current task is about, or the task's glyph for a place, with its caption (MAIN QUEST, SIDE QUEST or QUEST COMPLETED), the Repeatable pill when it runs again, the name and the description beside it. Under them, the current task in a banner, with its count and bar only when it counts above 1, the tasks done as a count, and the reward, which is always shown, evenly apart down the 300 of the panel, the banner lower when no tasks done are under it. Its buttons are in the [button row](buttons.md#the-button-row), at the level of the finish turn, with Back first. Once completed, it still opens, with a ticked target, so the story can be read again.
 
 ### The journal
 
@@ -116,12 +116,12 @@ Tapping the tracker while exploring opens [`QuestJournalView`](../../src/commonM
 - Each row names its section (MAIN QUEST, SIDE QUEST, COMPLETED), and holds the target's portrait, the name, the current task, its count and bar only when it counts above 1, the Repeatable pill, and on an active quest its pin, gold when pinned.
 - Tapping a pin makes the tracker name that quest, and tapping the gold pin returns it to the main quest. See [Pinning](#pinning). The pin takes its own taps in the 32 around it, so the row does not open.
 - It holds any number of quests, dragged to scroll. A drag above 4 points does not select the row under it, and the list keeps its place when coming back from a detail view.
-- Tapping a row opens its detail view, and Back, filling the action row, steps out one level at a time.
+- Tapping a row opens its detail view, and Back, filling the button row, steps out one level at a time.
 - 4 rows of 63 fit its list of 261. While dragging, the list clips the rows crossing its edges: they draw their rounded shapes as bitmaps (`GraphicsRenderer.SYSTEM`), as KorGE draws them straight to the GPU otherwise, past the clip.
 
 ### Abandoning
 
-The detail view of an active side quest has Abandon beside Back in the action row, in `HudStyle.DANGER`, the red of every action that can not be undone. It asks first, in [`ConfirmDialogView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ConfirmDialogView.kt): Abandon Bats in the Meadow? Its progress is lost, and its giver can start it again. Back and Abandon stay in the row, under the thumb, so tapping Abandon twice abandons the quest without the question being read. Back returns to the detail view. Once abandoned, the quest leaves the journal, and the player returns to it when a side quest is still listed, and otherwise to the pad. No toast announces it.
+The detail view of an active side quest has Abandon beside Back in the button row, in `HudStyle.DANGER`, the red of every action that can not be undone. It asks first, in [`ConfirmDialogView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ConfirmDialogView.kt): Abandon Bats in the Meadow? Its progress is lost, and its giver can start it again. Back and Abandon stay in the row, under the thumb, so tapping Abandon twice abandons the quest without the question being read. Back returns to the detail view. Once abandoned, the quest leaves the journal, and the player returns to it when a side quest is still listed, and otherwise to the pad. No announcement announces it.
 
 ### The quest markers
 
@@ -133,21 +133,21 @@ The detail view of an active side quest has Abandon beside Back in the action ro
 
 ### The announcements
 
-[`QuestAnnouncementView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestAnnouncementView.kt) is a toast over the top of the battlefield, announcing every quest starting, with its goal, and completing, with the reward the quest defines, also when a repeatable quest runs again. It is held for 4 seconds and fades in 0.5 seconds. A count or a task done only pops the tracker.
+[`QuestAnnouncementView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestAnnouncementView.kt) is an announcement over the top of the battlefield, announcing every quest starting, with its goal, and completing, with the reward the quest defines, also when a repeatable quest runs again. It is held for 4 seconds and fades in 0.5 seconds. A count or a task done only pops the tracker.
 
 - It takes no taps, so whatever is under it can be pressed.
-- It holds nothing: time runs, and the player can act. Toasts play one after the other, so a talk starting two quests takes 9 seconds. See [Presentation timeline](presentation-timeline.md#announcing-a-quest).
+- It holds nothing: time runs, and the player can act. Announcements play one after the other, so a talk starting two quests takes 9 seconds. See [Presentation timeline](presentation-timeline.md#announcing-a-quest).
 - A loaded game announces nothing, as `SetUpGame` only starts the main quest in a new game and `RestoreQuests` publishes nothing.
 
 For example, a new game, then defeating the goat wizard in a battle:
 
 | When                        | Published                                          | Displayed                                                                                 | Time     |
 |-----------------------------|----------------------------------------------------|-------------------------------------------------------------------------------------------|----------|
-| The new game is set up      | `QuestStarted`                                     | The tracker reads Defeat the Goat Wizard, and a toast announces the quest for 4.5 seconds | Runs     |
+| The new game is set up      | `QuestStarted`                                     | The tracker reads Defeat the Goat Wizard, and an announcement announces the quest for 4.5 seconds | Runs     |
 | The tracker is tapped       | `QuestOpened`                                      | The detail view takes the place of the pad, as no side quest is listed                    | Stopped  |
 | Back is tapped              | `QuestClosed`                                      | The pad is displayed again                                                                | Runs     |
 | A battle starts             | `ExplorationInterrupted`                           | The tracker stays, without its chevron                                                    | In turns |
-| The goat wizard is defeated | `DefeatCounted`, `TaskCompleted`, `QuestCompleted` | Once it has fallen, the tracker reads Quest completed, and a toast announces 150 G        | In turns |
+| The goat wizard is defeated | `DefeatCounted`, `TaskCompleted`, `QuestCompleted` | Once it has fallen, the tracker reads Quest completed, and an announcement announces 150 G        | In turns |
 | The battle ends             | `ExplorationResumed`                               | The ticked tracker has its chevron back, and opens the completed detail                   | Runs     |
 
 ## Saving
@@ -160,12 +160,12 @@ For example, a new game, then defeating the goat wizard in a battle:
 
 ## Known limitations
 
-- The toast shows the reward the quest defines, so a leader near the cap of 99,999 gold reads 150 G and receives less, and an item that did not fit the bag drops on its tile without a word. Only a leader close to the cap, or with a full bag on The Elder's Errand, would notice.
+- The announcement shows the reward the quest defines, so a leader near the maximum gold of 99,999 reads 150 G and receives less, and an item that did not fit the inventory drops on its tile without a word. Only a leader close to its maximum gold, or with a full inventory on The Elder's Errand, would notice.
 - A long description is cut with an ellipsis beside the target, at 4 lines with a name of one line and 3 with two, as the detail view has no scrolling. The shipped descriptions take 2 or 3.
 - A long task beside a long turn name may touch while the turn pops to 1.3 on the left of the top line. The tracker draws on top, and the pop lasts 400ms.
 - The pop of the tracker, 1.15 for 400ms, was not seen in the prototypes, whose stories draw the settled state: it is a first guess, to check by playing.
-- A quest giver's dialog says nothing about its quest: the toast is what tells the player. E.g.: the Farmer still only thanks the party for dealing with that bat.
-- The toast can be missed, as nothing brings it back: the journal holds the same story.
+- A quest giver's line says nothing about its quest: the announcement is what tells the player. E.g.: the Farmer still only thanks the party for dealing with that bat.
+- The announcement can be missed, as nothing brings it back: the journal holds the same story.
 - A marker only shows on an npc in view, with nothing pointing at one further away.
 - The drag of the journal was only tried with a mouse, so its feel on a phone is still to be checked.
 - A battle unit already standing on a tile of a `VISIT` task when it becomes current does not complete it: it has to move onto one.

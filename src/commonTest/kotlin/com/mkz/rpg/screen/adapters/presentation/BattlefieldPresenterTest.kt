@@ -45,8 +45,6 @@ import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.save.domain.SaveEvent
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
 import com.mkz.rpg.screen.adapters.presentation.BattlefieldHealthBarPreviewView.PreviewOption
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.BattleUnitAt
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.BuildingAt
@@ -54,9 +52,11 @@ import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.MovedBattleU
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.NpcAt
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.PickedUpLoot
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.SwappedBattleUnits
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.CastGroupDto
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
+import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.gameSceneTimeline
+import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.playLongStep
+import com.mkz.rpg.screen.adapters.presentation.selection.domain.Selection.Dto.CastGroupDto
+import com.mkz.rpg.screen.adapters.presentation.selection.domain.Selection.Dto.TileDto
+import com.mkz.rpg.screen.adapters.presentation.selection.domain.SelectionEvent
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.shared.domain.subscribe
@@ -133,17 +133,17 @@ class BattlefieldPresenterTest {
     private val eventBus = apis.eventBus
     private val battlefieldView = FakeBattlefieldView()
     private val battleUnitInfoView = FakeBattleUnitInfoView()
-    private val attackPreviewView = FakeAttackPreviewView()
-    private val timeline = battleSceneTimeline()
+    private val castPreviewView = FakeCastPreviewView()
+    private val timeline = gameSceneTimeline()
 
     // The presenter is created once the battle has started, so it only reacts to what the test publishes.
     private val battlefieldPresenter =
         BattlefieldPresenter(
             battlefieldView = battlefieldView,
             battleUnitInfoView = battleUnitInfoView,
-            attackPreviewView = attackPreviewView,
-            playerCallToActionView = FakePlayerCallToActionView(),
-            battleHudView = FakeBattleHudView(),
+            castPreviewView = castPreviewView,
+            callToActionView = FakeCallToActionView(),
+            hudView = FakeHudView(),
             battlefieldApi = apis.battlefieldApi,
             battleUnitApi = apis.battleUnitApi,
             playerApi = apis.playerApi,
@@ -342,14 +342,14 @@ class BattlefieldPresenterTest {
     private fun exploringPresenter(
         apis: SubdomainApis,
         battlefieldView: FakeBattlefieldView,
-        timeline: BattleSceneTimeline = battleSceneTimeline(),
+        timeline: GameSceneTimeline = gameSceneTimeline(),
         battleUnitInfoView: FakeBattleUnitInfoView = FakeBattleUnitInfoView(),
     ) = BattlefieldPresenter(
         battlefieldView = battlefieldView,
         battleUnitInfoView = battleUnitInfoView,
-        attackPreviewView = FakeAttackPreviewView(),
-        playerCallToActionView = FakePlayerCallToActionView(),
-        battleHudView = FakeBattleHudView(),
+        castPreviewView = FakeCastPreviewView(),
+        callToActionView = FakeCallToActionView(),
+        hudView = FakeHudView(),
         battlefieldApi = apis.battlefieldApi,
         battleUnitApi = apis.battleUnitApi,
         playerApi = apis.playerApi,
@@ -416,7 +416,7 @@ class BattlefieldPresenterTest {
         // Given
         val exploringApis = exploringApis(deployments = partyOfTwoKnights)
         val exploringBattlefieldView = FakeBattlefieldView()
-        val timeline = battleSceneTimeline()
+        val timeline = gameSceneTimeline()
         exploringPresenter(exploringApis, exploringBattlefieldView, timeline)
         exploringApis.partyApi.startExploration()
         exploringApis.eventBus.dispatch()
@@ -555,7 +555,7 @@ class BattlefieldPresenterTest {
                     ),
             )
         val exploringBattlefieldView = FakeBattlefieldView()
-        val timeline = battleSceneTimeline()
+        val timeline = gameSceneTimeline()
         exploringPresenter(exploringApis, exploringBattlefieldView, timeline)
         timeline.playLongStep()
         val path = listOf(position(3, 2))
@@ -586,7 +586,7 @@ class BattlefieldPresenterTest {
         battlingApis.battleApi.startBattle(engagingPlayerId = "cpu", engagedPlayerId = "human", engagingBattleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1"))
         battlingApis.eventBus.dispatch()
         val battlingBattlefieldView = FakeBattlefieldView()
-        val timeline = battleSceneTimeline()
+        val timeline = gameSceneTimeline()
         exploringPresenter(battlingApis, battlingBattlefieldView, timeline)
         val previousStep = timeline.playLongStep()
         val path = listOf(position(3, 2))
@@ -602,7 +602,7 @@ class BattlefieldPresenterTest {
     }
 
     @Test
-    fun `TileSelected should not display any movement range when a battle unit is selected while exploring`() {
+    fun `TileSelected should not display any walking range when a battle unit is selected while exploring`() {
         // Given
         val exploringApis = exploringApis()
         val exploringBattlefieldView = FakeBattlefieldView()
@@ -652,7 +652,7 @@ class BattlefieldPresenterTest {
         // Given
         val exploringApis = exploringApis()
         val exploringBattlefieldView = FakeBattlefieldView().apply { flashing = CompletableDeferred() }
-        val exploringTimeline = battleSceneTimeline()
+        val exploringTimeline = gameSceneTimeline()
         exploringPresenter(exploringApis, exploringBattlefieldView, exploringTimeline)
         exploringApis.eventBus.publish(EffectReceived(battleUnitId = "knight-1", effectId = "water-heal"))
         // When
@@ -667,7 +667,7 @@ class BattlefieldPresenterTest {
         // Given
         val exploringApis = exploringApis(effects = listOf(damageEffect(id = "lava-damage", damage = 15, timingType = "IMMEDIATELY").toDto()))
         val exploringBattlefieldView = FakeBattlefieldView().apply { flashing = CompletableDeferred() }
-        val exploringTimeline = battleSceneTimeline()
+        val exploringTimeline = gameSceneTimeline()
         exploringPresenter(exploringApis, exploringBattlefieldView, exploringTimeline)
         val lavaDamage = EffectApplicationDto(source = SourceDto.terrain("lava"), recipient = RecipientDto.battleUnit("knight-1"), effectId = "lava-damage", destination = null)
         exploringApis.battleUnitApi.applyEffect(lavaDamage)
@@ -773,28 +773,28 @@ class BattlefieldPresenterTest {
     }
 
     @Test
-    fun `DisplayLoot should display the dropped item on its tile when an item is dropped on the battlefield`() {
+    fun `DisplayDroppedItems should display the dropped item on its tile when an item is dropped on the battlefield`() {
         // Given
         apis.lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2)
         // When
         eventBus.dispatch()
         // Then
-        battlefieldView.displayedLoot shouldBe mapOf(position(2, 2) to listOf("health-potion"))
+        battlefieldView.displayedDroppedItems shouldBe mapOf(position(2, 2) to listOf("health-potion"))
     }
 
     @Test
-    fun `DisplayLoot should display every item lying on the tile when several items are dropped on it`() {
+    fun `DisplayDroppedItems should display every item lying on the tile when several items are dropped on it`() {
         // Given
         apis.lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2)
         apis.lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "hammer", row = 2, column = 2)
         // When
         eventBus.dispatch()
         // Then
-        battlefieldView.displayedLoot shouldBe mapOf(position(2, 2) to listOf("health-potion", "hammer"))
+        battlefieldView.displayedDroppedItems shouldBe mapOf(position(2, 2) to listOf("health-potion", "hammer"))
     }
 
     @Test
-    fun `DisplayLoot should display the items left on the tile when a dropped item is picked up`() {
+    fun `DisplayDroppedItems should display the items left on the tile when a dropped item is looted`() {
         // Given
         apis.lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2)
         apis.lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "hammer", row = 2, column = 2)
@@ -803,24 +803,24 @@ class BattlefieldPresenterTest {
         // When
         eventBus.dispatch()
         // Then
-        battlefieldView.displayedLoot shouldBe mapOf(position(2, 2) to listOf("hammer"))
+        battlefieldView.displayedDroppedItems shouldBe mapOf(position(2, 2) to listOf("hammer"))
     }
 
     @Test
-    fun `DisplayLoot should display the dropped item once the previous steps have been played`() {
+    fun `DisplayDroppedItems should display the dropped item once the previous steps have been played`() {
         // Given
         val previousStep = timeline.playLongStep()
         apis.lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2)
         eventBus.dispatch()
-        require(battlefieldView.displayedLoot.isEmpty())
+        require(battlefieldView.displayedDroppedItems.isEmpty())
         // When
         previousStep.complete(Unit)
         // Then
-        battlefieldView.displayedLoot shouldBe mapOf(position(2, 2) to listOf("health-potion"))
+        battlefieldView.displayedDroppedItems shouldBe mapOf(position(2, 2) to listOf("health-potion"))
     }
 
     @Test
-    fun `PickUpLoot should lift the item off its tile when a dropped item is picked up`() {
+    fun `LootDroppedItem should lift the item off its tile when a dropped item is looted`() {
         // Given
         apis.lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2)
         eventBus.dispatch()
@@ -829,11 +829,11 @@ class BattlefieldPresenterTest {
         eventBus.dispatch()
         // Then
         battlefieldView.pickedUpLoot.shouldContainExactly(PickedUpLoot(row = 2, column = 2, lootableItemId = "health-potion"))
-        battlefieldView.displayedLoot shouldBe mapOf(position(2, 2) to emptyList())
+        battlefieldView.displayedDroppedItems shouldBe mapOf(position(2, 2) to emptyList())
     }
 
     @Test
-    fun `PickUpLoot should lift the item off its tile once the previous steps have been played`() {
+    fun `LootDroppedItem should lift the item off its tile once the previous steps have been played`() {
         // Given
         apis.lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2)
         eventBus.dispatch()
@@ -848,7 +848,7 @@ class BattlefieldPresenterTest {
     }
 
     @Test
-    fun `PickUpLoot should lift the item off its tile once the battle unit has walked over it when a human battle unit walks over loot`() {
+    fun `LootDroppedItem should lift the item off its tile once the battle unit has walked over it when a human battle unit walks over loot`() {
         // Given
         apis.lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 1)
         eventBus.dispatch()
@@ -860,7 +860,7 @@ class BattlefieldPresenterTest {
     }
 
     @Test
-    fun `PickUpLoot should not lift anything when a cpu battle unit walks over loot`() {
+    fun `LootDroppedItem should not lift anything when a cpu battle unit walks over loot`() {
         // Given
         apis.lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 3)
         eventBus.dispatch()
@@ -870,29 +870,29 @@ class BattlefieldPresenterTest {
         // Then
         battlefieldView.movedBattleUnits.shouldHaveSize(1)
         battlefieldView.pickedUpLoot.shouldBeEmpty()
-        battlefieldView.displayedLoot shouldBe mapOf(position(2, 3) to listOf("health-potion"))
+        battlefieldView.displayedDroppedItems shouldBe mapOf(position(2, 3) to listOf("health-potion"))
     }
 
     @Test
-    fun `DisplayMovementRange should ring the portrait red when a CPU battle unit is selected`() {
+    fun `BattleUnitSelected should ring the portrait red when a CPU battle unit is selected`() {
         // Given
-        eventBus.publish(BattlefieldHudEvent.SelectedBattleUnit(tile = TileDto(row = 1, column = 3), battleUnitId = "rat-1", tilesWhereCanBeMoved = emptySet()))
+        eventBus.publish(SelectionEvent.BattleUnitSelected(tile = TileDto(row = 1, column = 3), battleUnitId = "rat-1", walkingRange = emptySet()))
         // When
         eventBus.dispatch()
         // Then
         battleUnitInfoView.displayedBattleUnits
             .last()
-            .battleUnit.isAlly shouldBe false
+            .battleUnit.isHumanPlayers shouldBe false
     }
 
     @Test
-    fun `DimTiles should dim every tile but the movement range and the selected battle unit when a battle unit is selected`() {
+    fun `DimTiles should dim every tile but the walking range and the selected battle unit when a battle unit is selected`() {
         // Given
         eventBus.publish(
-            BattlefieldHudEvent.SelectedBattleUnit(
+            SelectionEvent.BattleUnitSelected(
                 tile = TileDto(row = 1, column = 1),
                 battleUnitId = "knight-1",
-                tilesWhereCanBeMoved = setOf(TileDto(row = 1, column = 2), TileDto(row = 2, column = 1)),
+                walkingRange = setOf(TileDto(row = 1, column = 2), TileDto(row = 2, column = 1)),
             ),
         )
         // When
@@ -905,7 +905,7 @@ class BattlefieldPresenterTest {
     fun `DimTiles should dim every tile but the cast tiles and the caster when an ability is selected`() {
         // Given
         eventBus.publish(
-            BattlefieldHudEvent.SelectedBattleUnitAbility(
+            SelectionEvent.AbilitySelected(
                 casterTile = TileDto(row = 1, column = 1),
                 battleUnitId = "knight-1",
                 abilityId = "mushroom",
@@ -926,7 +926,7 @@ class BattlefieldPresenterTest {
     fun `BattlefieldPresenter should display the ability info when an ability is selected`() {
         // Given
         eventBus.publish(
-            BattlefieldHudEvent.SelectedBattleUnitAbility(
+            SelectionEvent.AbilitySelected(
                 casterTile = TileDto(row = 1, column = 1),
                 battleUnitId = "knight-1",
                 abilityId = "mushroom",
@@ -940,19 +940,19 @@ class BattlefieldPresenterTest {
         abilityInfo.abilityId shouldBe "mushroom"
         abilityInfo.manaCost shouldBe 10
         abilityInfo.targeting shouldBe AbilityInfoView.AbilityInfo.Targeting.ALL_ADJACENT_ENEMIES
-        abilityInfo.effects.shouldContainExactly(AbilityInfoView.AbilityInfo.Effect.Damage(7), AbilityInfoView.AbilityInfo.Effect.DamageEachTurn(damage = 3, turns = 5))
+        abilityInfo.effects.shouldContainExactly(AbilityInfoView.AbilityInfo.Effect.Damage(7), AbilityInfoView.AbilityInfo.Effect.DamageOnPlayerTurnStarted(damage = 3, turns = 5))
         abilityInfo.reason shouldBe null
     }
 
     @Test
-    fun `BattlefieldPresenter should hide the ability info when the attack preview is displayed`() {
+    fun `BattlefieldPresenter should hide the ability info when the cast preview is displayed`() {
         // Given
         eventBus.publish(
-            BattlefieldHudEvent.EnemyAbilityCastPreviewed(
+            SelectionEvent.CastOnBattleUnitsPreviewed(
                 casterBattleUnitId = "knight-1",
                 abilityId = "mushroom",
                 castGroup = CastGroupDto(tiles = listOf(TileDto(row = 1, column = 3))),
-                enemyBattleUnitIds = listOf("rat-1"),
+                recipientBattleUnitIds = listOf("rat-1"),
             ),
         )
         // When
@@ -964,7 +964,7 @@ class BattlefieldPresenterTest {
     @Test
     fun `BattlefieldPresenter should display the reason and dim the battlefield when the ability info is displayed`() {
         // Given
-        eventBus.publish(BattlefieldHudEvent.AbilityInfoDisplayed(casterTile = TileDto(row = 1, column = 1), battleUnitId = "knight-1", abilityId = "mushroom"))
+        eventBus.publish(SelectionEvent.AbilityInfoDisplayed(casterTile = TileDto(row = 1, column = 1), battleUnitId = "knight-1", abilityId = "mushroom"))
         // When
         eventBus.dispatch()
         // Then
@@ -976,7 +976,7 @@ class BattlefieldPresenterTest {
     @Test
     fun `BattlefieldPresenter should display no reason when the ability info of a CPU battle unit is displayed`() {
         // Given
-        eventBus.publish(BattlefieldHudEvent.AbilityInfoDisplayed(casterTile = TileDto(row = 1, column = 3), battleUnitId = "rat-1", abilityId = "mushroom"))
+        eventBus.publish(SelectionEvent.AbilityInfoDisplayed(casterTile = TileDto(row = 1, column = 3), battleUnitId = "rat-1", abilityId = "mushroom"))
         // When
         eventBus.dispatch()
         // Then
@@ -1020,9 +1020,9 @@ class BattlefieldPresenterTest {
     }
 
     @Test
-    fun `DimTiles should reset the tiles when the battlefield hud is idle`() {
+    fun `DimTiles should reset the tiles when nothing is selected`() {
         // Given
-        eventBus.publish(BattlefieldHudEvent.Idle)
+        eventBus.publish(SelectionEvent.Deselected)
         // When
         eventBus.dispatch()
         // Then
@@ -1042,7 +1042,7 @@ class BattlefieldPresenterTest {
         battleUnitInfoView.hideCount shouldBeGreaterThan hideCount
     }
 
-    // The player selects the knight-1, so its movement range is displayed.
+    // The player selects the knight-1, so its walking range is displayed.
     private fun selectKnight() {
         battlefieldPresenter.tileSelected(row = 1, column = 1)
         eventBus.dispatch()
@@ -1094,7 +1094,7 @@ class BattlefieldPresenterTest {
             apis.battleUnitApi.searchAbilityAvailabilities("knight-1").map { availability ->
                 BattleUnitInfoView.Ability(
                     abilityId = availability.abilityId,
-                    cooldownTurnsLeft = availability.remainingCooldown,
+                    remainingCooldown = availability.remainingCooldown,
                     hasEnoughMana = availability.hasEnoughMana,
                     manaCost = availability.manaCost,
                 )
@@ -1116,12 +1116,12 @@ class BattlefieldPresenterTest {
         battleUnitInfoView.displayedBattleUnits.last().battleUnit shouldBe
             BattleUnitInfo(
                 unitId = "knight",
-                remainingHealthPoints = 30,
-                maximumHealthPoints = 30,
-                remainingManaPoints = knight.remainingMana,
-                maximumManaPoints = knight.maximumMana,
+                remainingHealth = 30,
+                maximumHealth = 30,
+                remainingMana = knight.remainingMana,
+                maximumMana = knight.maximumMana,
                 effectIds = emptyList(),
-                isAlly = true,
+                isHumanPlayers = true,
             )
     }
 
@@ -1162,8 +1162,8 @@ class BattlefieldPresenterTest {
         selectKnight()
         // Then
         val battleUnit = battleUnitInfoView.displayedBattleUnits.last().battleUnit
-        battleUnit.remainingHealthPoints shouldBe 23
-        battleUnit.maximumHealthPoints shouldBe 30
+        battleUnit.remainingHealth shouldBe 23
+        battleUnit.maximumHealth shouldBe 30
     }
 
     @Test
@@ -1183,7 +1183,7 @@ class BattlefieldPresenterTest {
     private val battleUnitIdsInBattle = setOf("knight-1", "rat-1", "rat-2")
 
     @Test
-    fun `SelectPartyLeader should select the party leader with its movement range when a human turn starts`() {
+    fun `SelectPartyLeader should select the party leader with its walking range when a human turn starts`() {
         // Given
         // When
         publish(PlayerTurnStarted(playerId = "human", battleUnitIds = battleUnitIdsInBattle))
@@ -1254,8 +1254,8 @@ class BattlefieldPresenterTest {
         exploringApis.partyApi.startExploration()
         exploringApis.npcApi.talkToAdjacentNpc()
         exploringApis.eventBus.dispatch()
-        val selections = mutableListOf<BattlefieldHudEvent.SelectedBattleUnit>()
-        exploringApis.eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event -> selections += event }
+        val selections = mutableListOf<SelectionEvent.BattleUnitSelected>()
+        exploringApis.eventBus.subscribe<SelectionEvent.BattleUnitSelected> { event -> selections += event }
         // When
         presenter.tileSelected(row = 1, column = 1)
         exploringApis.eventBus.dispatch()
@@ -1271,8 +1271,8 @@ class BattlefieldPresenterTest {
         exploringApis.partyApi.startExploration()
         exploringApis.partyApi.openFormation()
         exploringApis.eventBus.dispatch()
-        val selections = mutableListOf<BattlefieldHudEvent.SelectedBattleUnit>()
-        exploringApis.eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event -> selections += event }
+        val selections = mutableListOf<SelectionEvent.BattleUnitSelected>()
+        exploringApis.eventBus.subscribe<SelectionEvent.BattleUnitSelected> { event -> selections += event }
         // When
         presenter.tileSelected(row = 1, column = 1)
         exploringApis.eventBus.dispatch()
@@ -1288,8 +1288,8 @@ class BattlefieldPresenterTest {
         exploringApis.partyApi.startExploration()
         exploringApis.partyApi.openQuest()
         exploringApis.eventBus.dispatch()
-        val selections = mutableListOf<BattlefieldHudEvent.SelectedBattleUnit>()
-        exploringApis.eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event -> selections += event }
+        val selections = mutableListOf<SelectionEvent.BattleUnitSelected>()
+        exploringApis.eventBus.subscribe<SelectionEvent.BattleUnitSelected> { event -> selections += event }
         // When
         presenter.tileSelected(row = 1, column = 1)
         exploringApis.eventBus.dispatch()
@@ -1300,8 +1300,8 @@ class BattlefieldPresenterTest {
     @Test
     fun `TileSelected should process the selected tile when the timeline is idle`() {
         // Given
-        val selections = mutableListOf<BattlefieldHudEvent.SelectedBattleUnit>()
-        eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event -> selections += event }
+        val selections = mutableListOf<SelectionEvent.BattleUnitSelected>()
+        eventBus.subscribe<SelectionEvent.BattleUnitSelected> { event -> selections += event }
         // When
         battlefieldPresenter.tileSelected(row = 1, column = 1)
         eventBus.dispatch()
@@ -1312,8 +1312,8 @@ class BattlefieldPresenterTest {
     @Test
     fun `TileSelected should hand the selected tile to the interceptor first, and ignore it when taken, e g while giving an item`() {
         // Given
-        val selections = mutableListOf<BattlefieldHudEvent.SelectedBattleUnit>()
-        eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event -> selections += event }
+        val selections = mutableListOf<SelectionEvent.BattleUnitSelected>()
+        eventBus.subscribe<SelectionEvent.BattleUnitSelected> { event -> selections += event }
         val interceptedTiles = mutableListOf<Pair<Int, Int>>()
         var isTaken = true
         battlefieldPresenter.setTileInterceptor { row, column ->
@@ -1337,8 +1337,8 @@ class BattlefieldPresenterTest {
     @Test
     fun `TileSelected should ignore the selected tile when the timeline is playing`() {
         // Given
-        val selections = mutableListOf<BattlefieldHudEvent.SelectedBattleUnit>()
-        eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event -> selections += event }
+        val selections = mutableListOf<SelectionEvent.BattleUnitSelected>()
+        eventBus.subscribe<SelectionEvent.BattleUnitSelected> { event -> selections += event }
         timeline.playLongStep()
         // When
         battlefieldPresenter.tileSelected(row = 1, column = 1)
@@ -1351,39 +1351,39 @@ class BattlefieldPresenterTest {
     fun `DisplayEnemyAbilityCastPreview should preview every enemy receiving the cast in order when an enemy ability cast is previewed`() {
         // Given
         eventBus.publish(
-            BattlefieldHudEvent.EnemyAbilityCastPreviewed(
+            SelectionEvent.CastOnBattleUnitsPreviewed(
                 casterBattleUnitId = "knight-1",
                 abilityId = "mushroom",
                 castGroup = CastGroupDto(tiles = listOf(TileDto(row = 1, column = 3), TileDto(row = 0, column = 3))),
-                enemyBattleUnitIds = listOf("rat-1", "rat-2"),
+                recipientBattleUnitIds = listOf("rat-1", "rat-2"),
             ),
         )
         // When
         eventBus.dispatch()
         // Then
-        val preview = attackPreviewView.displayedAttackPreviews.single()
+        val preview = castPreviewView.displayedCastPreviews.single()
         preview.casterBattleUnit.unitId shouldBe "knight"
         preview.manaCost shouldBe 10
-        preview.receivers.map { receiver -> receiver.battleUnit.unitId }.shouldContainExactly("rat", "rat")
-        preview.receivers.map { receiver -> receiver.remainingHealthPoints }.shouldContainExactly(14, 14)
+        preview.recipients.map { recipient -> recipient.battleUnit.unitId }.shouldContainExactly("rat", "rat")
+        preview.recipients.map { recipient -> recipient.remainingHealth }.shouldContainExactly(14, 14)
     }
 
     @Test
     fun `DisplayEnemyAbilityCastPreview should preview the effects that would stay on each enemy when an enemy ability cast is previewed`() {
         // Given
         eventBus.publish(
-            BattlefieldHudEvent.EnemyAbilityCastPreviewed(
+            SelectionEvent.CastOnBattleUnitsPreviewed(
                 casterBattleUnitId = "knight-1",
                 abilityId = "mushroom",
                 castGroup = CastGroupDto(tiles = listOf(TileDto(row = 1, column = 3), TileDto(row = 0, column = 3))),
-                enemyBattleUnitIds = listOf("rat-1", "rat-2"),
+                recipientBattleUnitIds = listOf("rat-1", "rat-2"),
             ),
         )
         // When
         eventBus.dispatch()
         // Then
-        val preview = attackPreviewView.displayedAttackPreviews.single()
-        preview.receivers.map { receiver -> receiver.newEffectIds }.shouldContainExactly(listOf("venom"), listOf("venom"))
+        val preview = castPreviewView.displayedCastPreviews.single()
+        preview.recipients.map { recipient -> recipient.newEffectIds }.shouldContainExactly(listOf("venom"), listOf("venom"))
         preview.casterNewEffectIds.shouldBeEmpty()
     }
 
@@ -1391,17 +1391,17 @@ class BattlefieldPresenterTest {
     fun `DisplayEnemyAbilityCastPreview should display the ability previewed when an enemy ability cast is previewed`() {
         // Given
         eventBus.publish(
-            BattlefieldHudEvent.EnemyAbilityCastPreviewed(
+            SelectionEvent.CastOnBattleUnitsPreviewed(
                 casterBattleUnitId = "knight-1",
                 abilityId = "mushroom",
                 castGroup = CastGroupDto(tiles = listOf(TileDto(row = 1, column = 3))),
-                enemyBattleUnitIds = listOf("rat-1"),
+                recipientBattleUnitIds = listOf("rat-1"),
             ),
         )
         // When
         eventBus.dispatch()
         // Then
-        attackPreviewView.displayedAttackPreviews.single().abilityId shouldBe "mushroom"
+        castPreviewView.displayedCastPreviews.single().abilityId shouldBe "mushroom"
     }
 
     @Test
@@ -1410,37 +1410,37 @@ class BattlefieldPresenterTest {
         val knight = apis.battleUnitApi.searchBattleUnitById("knight-1")!!
         val rat = apis.battleUnitApi.searchBattleUnitById("rat-1")!!
         eventBus.publish(
-            BattlefieldHudEvent.EnemyAbilityCastPreviewed(
+            SelectionEvent.CastOnBattleUnitsPreviewed(
                 casterBattleUnitId = "knight-1",
                 abilityId = "mushroom",
                 castGroup = CastGroupDto(tiles = listOf(TileDto(row = 1, column = 3), TileDto(row = 0, column = 3))),
-                enemyBattleUnitIds = listOf("rat-1", "rat-2"),
+                recipientBattleUnitIds = listOf("rat-1", "rat-2"),
             ),
         )
         // When
         eventBus.dispatch()
         // Then
-        val preview = attackPreviewView.displayedAttackPreviews.single()
+        val preview = castPreviewView.displayedCastPreviews.single()
         preview.casterBattleUnit shouldBe
             BattleUnitInfo(
                 unitId = "knight",
-                remainingHealthPoints = 30,
-                maximumHealthPoints = 30,
-                remainingManaPoints = knight.remainingMana,
-                maximumManaPoints = knight.maximumMana,
+                remainingHealth = 30,
+                maximumHealth = 30,
+                remainingMana = knight.remainingMana,
+                maximumMana = knight.maximumMana,
                 effectIds = emptyList(),
-                isAlly = true,
+                isHumanPlayers = true,
             )
-        preview.receivers.map { receiver -> receiver.battleUnit }.shouldContainExactly(
+        preview.recipients.map { recipient -> recipient.battleUnit }.shouldContainExactly(
             List(2) {
                 BattleUnitInfo(
                     unitId = "rat",
-                    remainingHealthPoints = 21,
-                    maximumHealthPoints = 21,
-                    remainingManaPoints = rat.remainingMana,
-                    maximumManaPoints = rat.maximumMana,
+                    remainingHealth = 21,
+                    maximumHealth = 21,
+                    remainingMana = rat.remainingMana,
+                    maximumMana = rat.maximumMana,
                     effectIds = emptyList(),
-                    isAlly = false,
+                    isHumanPlayers = false,
                 )
             },
         )
@@ -1450,11 +1450,11 @@ class BattlefieldPresenterTest {
     fun `DisplayCastGroup should display the health each enemy would have left instead of the selection when an enemy ability cast is previewed`() {
         // Given
         eventBus.publish(
-            BattlefieldHudEvent.EnemyAbilityCastPreviewed(
+            SelectionEvent.CastOnBattleUnitsPreviewed(
                 casterBattleUnitId = "knight-1",
                 abilityId = "mushroom",
                 castGroup = CastGroupDto(tiles = listOf(TileDto(row = 1, column = 3), TileDto(row = 0, column = 3))),
-                enemyBattleUnitIds = listOf("rat-1", "rat-2"),
+                recipientBattleUnitIds = listOf("rat-1", "rat-2"),
             ),
         )
         // When
@@ -1468,7 +1468,7 @@ class BattlefieldPresenterTest {
     fun `DisplayCastGroup should display the health the caster would have left when a self ability cast is previewed on it`() {
         // Given
         eventBus.publish(
-            BattlefieldHudEvent.SelfAbilityCastPreviewed(
+            SelectionEvent.CastOnCasterOrVacantTilePreviewed(
                 casterBattleUnitId = "knight-1",
                 abilityId = "heal",
                 castGroup = CastGroupDto(tiles = listOf(TileDto(row = 1, column = 1))),
@@ -1488,7 +1488,7 @@ class BattlefieldPresenterTest {
         apis.battleUnitApi.applyEffect(poisoning)
         val knight = apis.battleUnitApi.searchBattleUnitById("knight-1")!!
         eventBus.publish(
-            BattlefieldHudEvent.SelfAbilityCastPreviewed(
+            SelectionEvent.CastOnCasterOrVacantTilePreviewed(
                 casterBattleUnitId = "knight-1",
                 abilityId = "heal",
                 castGroup = CastGroupDto(tiles = listOf(TileDto(row = 1, column = 1))),
@@ -1497,14 +1497,14 @@ class BattlefieldPresenterTest {
         // When
         eventBus.dispatch()
         // Then
-        attackPreviewView.displayedAttackPreviews.single().casterRemainingHealthPoints shouldBe knight.maximumHealth - 7 + 5
+        castPreviewView.displayedCastPreviews.single().casterRemainingHealth shouldBe knight.maximumHealth - 7 + 5
     }
 
     @Test
     fun `DisplayCastGroup should select the vacant tiles when a self ability cast is previewed on them`() {
         // Given
         eventBus.publish(
-            BattlefieldHudEvent.SelfAbilityCastPreviewed(
+            SelectionEvent.CastOnCasterOrVacantTilePreviewed(
                 casterBattleUnitId = "knight-1",
                 abilityId = "bee",
                 castGroup = CastGroupDto(tiles = listOf(TileDto(row = 1, column = 2))),
@@ -1530,7 +1530,7 @@ class BattlefieldPresenterTest {
             FakeBattlefieldView.BattleUnitAt(1, 3, "rat"),
             FakeBattlefieldView.BattleUnitAt(0, 3, "rat"),
         )
-        battlefieldView.displayedLoot shouldBe mapOf(TilePosition(2, 2) to listOf("health-potion"))
+        battlefieldView.displayedDroppedItems shouldBe mapOf(TilePosition(2, 2) to listOf("health-potion"))
     }
 
     @Test

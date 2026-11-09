@@ -26,15 +26,15 @@ object AbilityInfoViewStories : StoryBinding {
     private val abilities: Map<String, AbilityInfo> =
         listOf(
             AbilityInfo("sword", manaCost = 0, cooldown = 0, Targeting.ADJACENT_ENEMY, listOf(Effect.Damage(10))),
-            AbilityInfo("skull", manaCost = 10, cooldown = 0, Targeting.ADJACENT_ENEMY, listOf(Effect.Damage(10), Effect.OnDefeatedPoisonAllies(damage = 3, turns = 5))),
+            AbilityInfo("skull", manaCost = 10, cooldown = 0, Targeting.ADJACENT_ENEMY, listOf(Effect.Damage(10), Effect.OnDefeatedDamageAdjacentAllies(damage = 3, turns = 5))),
             AbilityInfo("bat", manaCost = 10, cooldown = 0, Targeting.VACANT_TILE_ADJACENT_TO_CASTER, listOf(Effect.Summon(unitId = "bat", turns = 5, healthPoints = 10))),
-            AbilityInfo("mending", manaCost = 10, cooldown = 2, Targeting.CASTER, listOf(Effect.HealSelf(15), Effect.HealAdjacentAllies(15))),
+            AbilityInfo("mending", manaCost = 10, cooldown = 2, Targeting.CASTER, listOf(Effect.HealCaster(15), Effect.HealAdjacentAllies(15))),
             AbilityInfo("teleport", manaCost = 5, cooldown = 1, Targeting.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT, listOf(Effect.Teleport)),
             AbilityInfo("cleave", manaCost = 5, cooldown = 1, Targeting.ALL_ADJACENT_ENEMIES, listOf(Effect.Damage(15))),
-            AbilityInfo("venom-strike", manaCost = 5, cooldown = 1, Targeting.ADJACENT_ENEMY, listOf(Effect.Damage(5), Effect.DamageEachTurn(damage = 3, turns = 5))),
-            AbilityInfo("poisoned-sword", manaCost = 5, cooldown = 1, Targeting.ADJACENT_ENEMY, listOf(Effect.DamageEachTurn(damage = 3, turns = 5))),
-            AbilityInfo("mushroom", manaCost = 10, cooldown = 0, Targeting.ALL_ADJACENT_ENEMIES, listOf(Effect.DamageEachTurn(damage = 3, turns = 5))),
-            AbilityInfo("heal", manaCost = 10, cooldown = 2, Targeting.CASTER, listOf(Effect.HealSelf(20))),
+            AbilityInfo("venom-strike", manaCost = 5, cooldown = 1, Targeting.ADJACENT_ENEMY, listOf(Effect.Damage(5), Effect.DamageOnPlayerTurnStarted(damage = 3, turns = 5))),
+            AbilityInfo("poisoned-sword", manaCost = 5, cooldown = 1, Targeting.ADJACENT_ENEMY, listOf(Effect.DamageOnPlayerTurnStarted(damage = 3, turns = 5))),
+            AbilityInfo("mushroom", manaCost = 10, cooldown = 0, Targeting.ALL_ADJACENT_ENEMIES, listOf(Effect.DamageOnPlayerTurnStarted(damage = 3, turns = 5))),
+            AbilityInfo("heal", manaCost = 10, cooldown = 2, Targeting.CASTER, listOf(Effect.HealCaster(20))),
             AbilityInfo("bee", manaCost = 10, cooldown = 0, Targeting.VACANT_TILE_ADJACENT_TO_CASTER, listOf(Effect.Summon(unitId = "bee", turns = 5, healthPoints = 10))),
         ).associateBy(AbilityInfo::abilityId)
 
@@ -89,23 +89,23 @@ object AbilityInfoViewStories : StoryBinding {
         args: Args,
         context: StoryContext,
     ): View =
-        AbilityInfoView(AbilityInfoView.WIDTH, context.resourcesLoader, context.texts).apply {
+        AbilityInfoView(AbilityInfoView.WIDTH, context.resourcesLoader, context.messages).apply {
             display(abilityInfo(args))
         }
 
     /** The ability of the args, with the reason it can not be cast now, if any. */
-    private fun abilityInfo(args: Args): AbilityInfo = abilityInfo(args.text(ABILITY), cooldownTurnsLeft = args.int(COOLDOWN_TURNS_LEFT), remainingMana = args.int(REMAINING_MANA))
+    private fun abilityInfo(args: Args): AbilityInfo = abilityInfo(args.text(ABILITY), remainingCooldown = args.int(COOLDOWN_TURNS_LEFT), remainingMana = args.int(REMAINING_MANA))
 
     /** An ability of the game, with the reason it can not be cast now, if any, e.g.: for the battle unit info's stories. */
     internal fun abilityInfo(
         abilityId: String,
-        cooldownTurnsLeft: Int,
+        remainingCooldown: Int,
         remainingMana: Int,
     ): AbilityInfo {
         val ability = abilities.getValue(abilityId)
         val reason =
             when {
-                cooldownTurnsLeft > 0 -> Reason.Cooldown(cooldownTurnsLeft)
+                remainingCooldown > 0 -> Reason.Cooldown(remainingCooldown)
                 remainingMana < ability.manaCost -> Reason.NotEnoughMana(manaCost = ability.manaCost, remainingMana = remainingMana)
                 else -> null
             }

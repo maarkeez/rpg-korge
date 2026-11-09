@@ -2,22 +2,22 @@ package com.mkz.rpg.shared.adapters.e2e
 
 import com.mkz.rpg.GAME_WINDOW_SIZE
 import com.mkz.rpg.screen.adapters.presentation.VirtualPadView.Direction
-import com.mkz.rpg.screen.adapters.presentation.battleHudView
-import com.mkz.rpg.screen.adapters.presentation.battleInfoView
+import com.mkz.rpg.screen.adapters.presentation.bannerView
 import com.mkz.rpg.screen.adapters.presentation.battleUnitInfoView
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
+import com.mkz.rpg.screen.adapters.presentation.callToActionView
 import com.mkz.rpg.screen.adapters.presentation.clickArrow
-import com.mkz.rpg.screen.adapters.presentation.clickBag
+import com.mkz.rpg.screen.adapters.presentation.clickInventoryButton
 import com.mkz.rpg.screen.adapters.presentation.clickTile
 import com.mkz.rpg.screen.adapters.presentation.hasBattleUnitAt
+import com.mkz.rpg.screen.adapters.presentation.hudView
 import com.mkz.rpg.screen.adapters.presentation.inventoryView
-import com.mkz.rpg.screen.adapters.presentation.isBagDisplayed
-import com.mkz.rpg.screen.adapters.presentation.isBattleHudShown
 import com.mkz.rpg.screen.adapters.presentation.isDisplayingBattleUnitInfo
-import com.mkz.rpg.screen.adapters.presentation.isDisplayingFinishTurn
+import com.mkz.rpg.screen.adapters.presentation.isDisplayingFinishPlayerTurn
 import com.mkz.rpg.screen.adapters.presentation.isDisplayingNothing
+import com.mkz.rpg.screen.adapters.presentation.isHudShown
+import com.mkz.rpg.screen.adapters.presentation.isInventoryButtonDisplayed
 import com.mkz.rpg.screen.adapters.presentation.isPadShown
-import com.mkz.rpg.screen.adapters.presentation.playerCallToActionView
 import com.mkz.rpg.screen.adapters.presentation.playerTurnText
 import com.mkz.rpg.screen.adapters.presentation.roundText
 import com.mkz.rpg.screen.adapters.presentation.virtualPadView
@@ -40,15 +40,15 @@ class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     private val nextTileColumn = KNIGHT_START_COLUMN + 1
 
     @Test
-    fun `should explore with the virtual pad in place of the battle HUD when the human player plays a new game`() =
+    fun `should explore with the virtual pad in place of the HUD when the human player plays a new game`() =
         sharedViewsTest {
             // When
             startNewGame()
             // Then
             waitUntil { virtualPadView()?.isPadShown() == true }
             withClue("Expected the virtual pad to be displayed while exploring") { virtualPadView()?.isPadShown()?.shouldBeTrue() }
-            withClue("Expected the battle HUD to be hidden while exploring") { isBattleHudShown().shouldBeFalse() }
-            battleInfoView()?.roundText() shouldBe "Exploring"
+            withClue("Expected the HUD to be hidden while exploring") { isHudShown().shouldBeFalse() }
+            bannerView()?.roundText() shouldBe "Exploring"
         }
 
     @Test
@@ -67,7 +67,7 @@ class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         }
 
     @Test
-    fun `should display the knight info and its bag in place of the virtual pad when the human player taps it while exploring`() =
+    fun `should display the knight info and its inventory button in place of the virtual pad when the human player taps it while exploring`() =
         sharedViewsTest {
             // Given
             startNewGame()
@@ -76,15 +76,15 @@ class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             // When
             clickTile(battlefieldView, knightRow, knightColumn)
             // Then
-            waitUntil { isBattleHudShown() && battleUnitInfoView()?.isBagDisplayed() == true }
-            withClue("Expected the battle HUD to display the knight info") { battleHudView()?.isDisplayingBattleUnitInfo()?.shouldBeTrue() }
-            withClue("Expected the bag of the knight to be displayed") { battleUnitInfoView()?.isBagDisplayed()?.shouldBeTrue() }
+            waitUntil { isHudShown() && battleUnitInfoView()?.isInventoryButtonDisplayed() == true }
+            withClue("Expected the HUD to display the knight info") { hudView()?.isDisplayingBattleUnitInfo()?.shouldBeTrue() }
+            withClue("Expected the inventory button of the knight to be displayed") { battleUnitInfoView()?.isInventoryButtonDisplayed()?.shouldBeTrue() }
             withClue("Expected the virtual pad to be hidden while the knight is selected") { virtualPadView()?.isPadShown()?.shouldBeFalse() }
-            withClue("Expected no finish turn while exploring, as there are no turns") { playerCallToActionView()?.isDisplayingNothing()?.shouldBeTrue() }
+            withClue("Expected no finish turn while exploring, as there are no turns") { callToActionView()?.isDisplayingNothing()?.shouldBeTrue() }
         }
 
     @Test
-    fun `should keep the inventory of the knight open while the cpu battle units wander when the human player opens its bag while exploring`() =
+    fun `should keep the inventory of the knight open while the cpu battle units wander when the human player opens its inventory while exploring`() =
         sharedViewsTest {
             // Given
             // The CPU battle units always step instead of resting, so a tile is occupied every second.
@@ -92,13 +92,13 @@ class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             waitUntil { virtualPadView()?.isPadShown() == true && battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true }
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             clickTile(battlefieldView, knightRow, knightColumn)
-            waitUntil { battleUnitInfoView()?.isBagDisplayed() == true }
+            waitUntil { battleUnitInfoView()?.isInventoryButtonDisplayed() == true }
             // When
-            clickBag(requireNotNull(battleUnitInfoView()))
+            clickInventoryButton(requireNotNull(battleUnitInfoView()))
             waitUntil { inventoryView() != null }
             // Then
             inventoryView().shouldNotBeNull()
-            withClue("Expected no finish turn while exploring, as there are no turns") { playerCallToActionView()?.isDisplayingNothing()?.shouldBeTrue() }
+            withClue("Expected no finish turn while exploring, as there are no turns") { callToActionView()?.isDisplayingNothing()?.shouldBeTrue() }
             waitFor(3.seconds)
             withClue("Expected the inventory of the knight to stay open until the human player closes it") { inventoryView().shouldNotBeNull() }
         }
@@ -111,13 +111,13 @@ class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             waitUntil { virtualPadView()?.isPadShown() == true && battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true }
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             clickTile(battlefieldView, knightRow, knightColumn)
-            waitUntil { isBattleHudShown() }
+            waitUntil { isHudShown() }
             // When
             clickTile(battlefieldView, knightRow, nextTileColumn)
             // Then
             waitUntil { virtualPadView()?.isPadShown() == true }
             withClue("Expected the virtual pad to be displayed again") { virtualPadView()?.isPadShown()?.shouldBeTrue() }
-            withClue("Expected the battle HUD to be hidden again") { isBattleHudShown().shouldBeFalse() }
+            withClue("Expected the HUD to be hidden again") { isHudShown().shouldBeFalse() }
             withClue("Expected the knight to stay at ($knightRow,$knightColumn)") { battlefieldView.hasBattleUnitAt(knightRow, knightColumn).shouldBeTrue() }
             withClue("Expected the knight not to walk to the tapped tile") { battlefieldView.hasBattleUnitAt(knightRow, nextTileColumn).shouldBeFalse() }
         }
@@ -129,10 +129,10 @@ class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             startNewBattle()
             // Then
             withClue("Expected the virtual pad to be hidden while battling") { virtualPadView()?.isPadShown()?.shouldBeFalse() }
-            withClue("Expected the battle HUD to be displayed while battling") { isBattleHudShown().shouldBeTrue() }
-            withClue("Expected the finish turn to be displayed while battling") { playerCallToActionView()?.isDisplayingFinishTurn()?.shouldBeTrue() }
+            withClue("Expected the HUD to be displayed while battling") { isHudShown().shouldBeTrue() }
+            withClue("Expected the finish turn to be displayed while battling") { callToActionView()?.isDisplayingFinishPlayerTurn()?.shouldBeTrue() }
             // The CPU played first, as it engaged.
-            battleInfoView()?.roundText() shouldBe "Round 1"
-            battleInfoView()?.playerTurnText() shouldBe "Human turn"
+            bannerView()?.roundText() shouldBe "Round 1"
+            bannerView()?.playerTurnText() shouldBe "Human turn"
         }
 }

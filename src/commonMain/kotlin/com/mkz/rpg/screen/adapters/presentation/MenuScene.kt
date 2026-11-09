@@ -13,7 +13,7 @@ import korlibs.time.DateTime
 import kotlin.random.Random
 
 /**
- * The first scene of the game, opening the battle, a saved game or the world builder. Localization: the texts of the
+ * The first scene of the game, opening the battle, a saved game or the world builder. Localization: the messages of the
  * selected language, kept by every scene. Storage: where the games are saved, `views.storage` by default, also kept by
  * every scene. Random: the rolls of the CPU battle brain in the battle. Incompatible slot: the slot whose game could not
  * be loaded, if any, so Load game lists the slots straight away, that one as incompatible.
@@ -32,11 +32,11 @@ class MenuScene(
         val ROW_Y = (GAME_WINDOW_SIZE.height - PANEL_HEIGHT) / 2 + PANEL_HEIGHT + 15
     }
 
-    // Like the battle scene, the scene coroutines run on the game window event loop, also in the headless tests.
+    // Like the game scene, the scene coroutines run on the game window event loop, also in the headless tests.
     override val coroutineContext by lazy { super.coroutineContext + views.gameWindow.coroutineDispatcher }
 
     override suspend fun SContainer.sceneMain() {
-        val texts = Texts(localizationApi)
+        val messages = Messages(localizationApi)
         val saveApi =
             SaveApi(
                 storage = storage ?: views.storage,
@@ -50,23 +50,23 @@ class MenuScene(
         lateinit var loadGamePresenter: LoadGamePresenter
         val menuView =
             MenuView(
-                texts = texts,
-                onNewGameSelected = { launchImmediately { sceneContainer.changeTo { BattleScene(localizationApi, storage, random) } } },
+                messages = messages,
+                onNewGameSelected = { launchImmediately { sceneContainer.changeTo { GameScene(localizationApi, storage, random) } } },
                 onLoadGameSelected = { loadGamePresenter.open() },
                 onWorldBuilderSelected = { launchImmediately { sceneContainer.changeTo { WorldBuilderScene(localizationApi, storage) } } },
             )
         // The save slots, and the question before deleting one, take the place of the options: as wide as the window.
-        val saveSlotsView = SaveSlotsView(texts)
+        val saveSlotsView = SaveSlotsView(messages)
         val confirmDialogView = ConfirmDialogView()
         menuView.x = (GAME_WINDOW_SIZE.width - menuView.width) / 2
         menuView.y = (GAME_WINDOW_SIZE.height - menuView.height) / 2
-        val playerCallToActionView = PlayerCallToActionView(texts)
-        playerCallToActionView.y = ROW_Y
-        listOf(menuView, saveSlotsView, confirmDialogView, playerCallToActionView).forEach(::addChild)
+        val callToActionView = CallToActionView(messages)
+        callToActionView.y = ROW_Y
+        listOf(menuView, saveSlotsView, confirmDialogView, callToActionView).forEach(::addChild)
         listOf(saveSlotsView, confirmDialogView).forEach { view -> view.y = (GAME_WINDOW_SIZE.height - PANEL_HEIGHT) / 2 }
         loadGamePresenter =
-            LoadGamePresenter(menuView, saveSlotsView, confirmDialogView, playerCallToActionView, saveApi, texts, incompatibleSlot) { slot ->
-                launchImmediately { sceneContainer.changeTo { BattleScene(localizationApi, storage, random, slot) } }
+            LoadGamePresenter(menuView, saveSlotsView, confirmDialogView, callToActionView, saveApi, messages, incompatibleSlot) { slot ->
+                launchImmediately { sceneContainer.changeTo { GameScene(localizationApi, storage, random, slot) } }
             }
     }
 }

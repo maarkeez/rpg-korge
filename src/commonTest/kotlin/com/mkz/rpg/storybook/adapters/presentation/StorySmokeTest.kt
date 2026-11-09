@@ -1,7 +1,7 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother
-import com.mkz.rpg.screen.adapters.presentation.TextsMother
+import com.mkz.rpg.screen.adapters.presentation.GameSceneResourcesLoaderMother
+import com.mkz.rpg.screen.adapters.presentation.MessagesMother
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import com.mkz.rpg.storybook.usecases.services.FakeStoryLocation
@@ -18,7 +18,7 @@ class StorySmokeTest : ViewsForTesting() {
     fun `Render should render every story of every story binding when they are shown with their default args, the game resources and texts`() =
         sharedViewsTest {
             // Given
-            val storyContext = StoryContext(BattleSceneResourcesLoaderMother.loadedResourcesLoader(), TextsMother.texts())
+            val storyContext = StoryContext(GameSceneResourcesLoaderMother.loadedResourcesLoader(), MessagesMother.messages())
             // When
             val failures =
                 StorybookApi.STORY_BINDINGS.flatMap { binding ->
@@ -35,7 +35,7 @@ class StorySmokeTest : ViewsForTesting() {
     fun `StoryBindings should keep the ids of every component and story, as the links shared hold them`() =
         sharedViewsTest {
             // Given
-            val storyContext = StoryContext(BattleSceneResourcesLoaderMother.loadedResourcesLoader(), TextsMother.texts())
+            val storyContext = StoryContext(GameSceneResourcesLoaderMother.loadedResourcesLoader(), MessagesMother.messages())
             // When
             val components = StorybookApi.STORY_BINDINGS.map { binding -> binding.component(storyContext) }
             val ids = components.flatMap { component -> listOf(component.id) + component.stories.map { story -> story.id } }
@@ -375,7 +375,7 @@ class StorySmokeTest : ViewsForTesting() {
     fun `ControlsView should fit the controls of every story binding above the actions when they are displayed`() =
         sharedViewsTest {
             // Given
-            val storyContext = StoryContext(BattleSceneResourcesLoaderMother.loadedResourcesLoader(), TextsMother.texts())
+            val storyContext = StoryContext(GameSceneResourcesLoaderMother.loadedResourcesLoader(), MessagesMother.messages())
             val controlsView = ControlsView()
             addChild(controlsView)
             // When
@@ -392,7 +392,7 @@ class StorySmokeTest : ViewsForTesting() {
     fun `Init should open the catalogue of every story binding when their controls, args and stories are valid`() =
         sharedViewsTest {
             // Given
-            val storyContext = StoryContext(BattleSceneResourcesLoaderMother.loadedResourcesLoader(), TextsMother.texts())
+            val storyContext = StoryContext(GameSceneResourcesLoaderMother.loadedResourcesLoader(), MessagesMother.messages())
             val storybookApi = StorybookApi(InMemoryEventBus(), FakeStoryLocation(), StorybookApi.STORY_BINDINGS)
             // When
             storybookApi.init(storyContext)

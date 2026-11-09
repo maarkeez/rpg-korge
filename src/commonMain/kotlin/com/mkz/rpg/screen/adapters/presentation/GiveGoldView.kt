@@ -19,18 +19,18 @@ import korlibs.math.geom.Size
 import kotlin.math.roundToInt
 
 /**
- * Takes the place of the bag to give gold: the giver and the receiver side by side, with what each would carry, and the
- * amount on a slider. Its buttons are in the call to action, so it keeps the height of the battle HUD.
+ * Takes the place of the inventory to give gold: the giver and the receiver side by side, with what each would carry, and the
+ * amount on a slider. Its buttons are in the call to action, so it keeps the height of the HUD.
  */
 open class GiveGoldView(
-    resourcesLoader: BattleSceneResourcesLoader,
-    private val texts: Texts,
+    resourcesLoader: GameSceneResourcesLoader,
+    private val messages: Messages,
 ) : Container() {
     companion object {
         const val WIDTH = 378.0
         private const val HEIGHT = 292.0
 
-        // Centered in the battle HUD.
+        // Centered in the HUD.
         const val X = 6.0
         private const val MARGIN = 12.0
         private const val COLUMN_WIDTH = (WIDTH - 2 * MARGIN) / 2
@@ -106,7 +106,7 @@ open class GiveGoldView(
 
     init {
         panel(Size(WIDTH, HEIGHT))
-        addChild(Text(texts[UiText.GIVE_GOLD_TITLE], textSize = TITLE_SIZE).xy(MARGIN, MARGIN - 2))
+        addChild(Text(messages[UiMessage.GIVE_GOLD_TITLE], textSize = TITLE_SIZE).xy(MARGIN, MARGIN - 2))
         addChild(giverPortrait.xy(GIVER_CENTER - PORTRAIT / 2, PORTRAIT_Y))
         addChild(receiverPortrait.xy(RECEIVER_CENTER - PORTRAIT / 2, PORTRAIT_Y))
         addChild(pointer.xy(0.0, PORTRAIT_Y + (PORTRAIT - POINTER_SIZE) / 2))
@@ -178,9 +178,9 @@ open class GiveGoldView(
     }
 
     private fun refresh() {
-        giverGoldText.displayCentered("${texts.gold(giver.gold)} > ${texts.gold(giver.gold - amount)}", GIVER_CENTER, GOLD_SIZE)
-        receiverGoldText.displayCentered("${texts.gold(receiver.gold)} > ${texts.gold(receiver.gold + amount)}", RECEIVER_CENTER, GOLD_SIZE)
-        amountText.displayCentered(texts.gold(amount), WIDTH / 2, AMOUNT_SIZE)
+        giverGoldText.displayCentered("${messages.gold(giver.gold)} > ${messages.gold(giver.gold - amount)}", GIVER_CENTER, GOLD_SIZE)
+        receiverGoldText.displayCentered("${messages.gold(receiver.gold)} > ${messages.gold(receiver.gold + amount)}", RECEIVER_CENTER, GOLD_SIZE)
+        amountText.displayCentered(messages.gold(amount), WIDTH / 2, AMOUNT_SIZE)
         knob.x = TRACK_X + xOf(amount) - KNOB / 2
         fill.scaleX = xOf(amount).coerceAtLeast(1.0)
         minusButton.enabled = amount > 1

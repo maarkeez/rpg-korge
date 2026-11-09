@@ -25,7 +25,7 @@ fun ShopView.itemAlphas(): List<Double?> = slotViews.map { slotView -> (slotView
 /** The slots framed in white, as their item is selected. */
 fun ShopView.selectedSlotIndexes(): List<Int> = slotViews.indices.filter { index -> slotViews[index].findViewByName(InventorySlotView.SELECTION_FRAME) != null }
 
-/** The buyer's name, gold and bag, e.g.: Knight · 20 G · Inventory 11/12. */
+/** The buyer's name, gold and inventory, e.g.: Knight · 20 G · Inventory 11/12. */
 fun ShopView.buyerText(): String = buyerText.text
 
 /** Whether the arrows to the previous and the next party member are enabled. */

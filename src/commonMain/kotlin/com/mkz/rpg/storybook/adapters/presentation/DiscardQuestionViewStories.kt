@@ -36,7 +36,7 @@ object DiscardQuestionViewStories : StoryBinding {
         context: StoryContext,
     ): View =
         DiscardQuestionView(
-            context.texts,
+            context.messages,
             itemName = args.text(ITEM_NAME),
             onBack = { context.action("onBack") },
             onDiscarded = { context.action("onDiscarded") },

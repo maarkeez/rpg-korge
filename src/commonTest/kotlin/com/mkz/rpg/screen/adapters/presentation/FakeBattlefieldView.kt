@@ -7,7 +7,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlin.time.Duration
 
 // Records what the presenters ask the battlefield view to display, instead of drawing it.
-class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
+class FakeBattlefieldView : BattlefieldView(GameSceneResourcesLoader()) {
     data class BattleUnitAt(
         val row: Int,
         val column: Int,
@@ -92,7 +92,7 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
     var flashing: CompletableDeferred<Unit>? = null
 
     // The loot last displayed on each tile.
-    val displayedLoot = mutableMapOf<TilePosition, List<String>>()
+    val displayedDroppedItems = mutableMapOf<TilePosition, List<String>>()
     val pickedUpLoot = mutableListOf<PickedUpLoot>()
     val updatedTerrains = mutableListOf<UpdatedTerrain>()
 
@@ -244,12 +244,12 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         swappedBattleUnits += SwappedBattleUnits(BattleUnitAt(leaderRow, leaderColumn, leaderUnitId), BattleUnitAt(memberRow, memberColumn, memberUnitId))
     }
 
-    override fun displayLoot(
+    override fun displayDroppedItems(
         row: Int,
         column: Int,
         lootableItemIds: List<String>,
     ) {
-        displayedLoot[TilePosition(row, column)] = lootableItemIds
+        displayedDroppedItems[TilePosition(row, column)] = lootableItemIds
     }
 
     override fun updateTerrain(
@@ -264,14 +264,14 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         terrainTransition: TerrainTransition?,
     ): Bitmap = terrainBitmaps.getOrPut(terrainId) { Bitmap32(1, 1) }
 
-    override suspend fun pickUpLoot(
+    override suspend fun lootDroppedItem(
         row: Int,
         column: Int,
         lootableItemId: String,
         remainingLootableItemIds: List<String>,
     ) {
         pickedUpLoot += PickedUpLoot(row, column, lootableItemId)
-        displayedLoot[TilePosition(row, column)] = remainingLootableItemIds
+        displayedDroppedItems[TilePosition(row, column)] = remainingLootableItemIds
     }
 
     override suspend fun tint(color: RGBA) {

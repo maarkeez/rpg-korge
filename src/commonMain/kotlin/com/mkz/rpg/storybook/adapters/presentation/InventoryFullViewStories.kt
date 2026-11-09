@@ -16,7 +16,7 @@ object InventoryFullViewStories : StoryBinding {
     private const val FOUND_ITEM_NAME = "foundItemName"
     private const val FOUND_ITEM_SELL_PRICE = "foundItemSellPrice"
 
-    private val default = StoryDto(id = "screen-inventory-full--default", name = "Default", description = "Asks to tap an item to swap it for the found one, or to leave it.", args = emptyMap())
+    private val default = StoryDto(id = "screen-inventory-full--default", name = "Default", description = "Asks to tap an item to discard for the found one, or to leave it.", args = emptyMap())
     private val longName =
         StoryDto(
             id = "screen-inventory-full--long-name",
@@ -56,7 +56,7 @@ object InventoryFullViewStories : StoryBinding {
         context: StoryContext,
     ): View =
         InventoryFullView(
-            context.texts,
+            context.messages,
             foundItemName = args.text(FOUND_ITEM_NAME),
             foundItemSellPrice = args.int(FOUND_ITEM_SELL_PRICE),
             foundItemId = args.text(FOUND_ITEM),

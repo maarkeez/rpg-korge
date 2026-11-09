@@ -1,6 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import com.mkz.rpg.screen.adapters.presentation.GameSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.screen.adapters.presentation.GiveGoldView.Member
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -41,7 +41,7 @@ class GiveGoldViewTest : ViewsForTesting() {
         maximum: Int = 120,
         canStepToPrevious: Boolean = false,
         canStepToNext: Boolean = false,
-    ) = GiveGoldView(loadedResourcesLoader(), TextsMother.texts()).apply {
+    ) = GiveGoldView(loadedResourcesLoader(), MessagesMother.messages()).apply {
         display(giver = knight, receiver = viking, amount = amount, maximum = maximum, canStepToPrevious = canStepToPrevious, canStepToNext = canStepToNext)
     }
 

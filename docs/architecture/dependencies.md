@@ -22,7 +22,7 @@
 ## How the dependencies are read
 
 - From the `import` lines of the production code, `src/commonMain`. The tests are not included.
-- A file belongs to the subdomain named by the first package segment after `com.mkz.rpg`. So `screen.adapters.presentation.battlefieldHud` is counted as part of `screen`.
+- A file belongs to the subdomain named by the first package segment after `com.mkz.rpg`. So `screen.adapters.presentation.selection` is counted as part of `screen`.
 - Imports within the same subdomain, and imports from outside `com.mkz.rpg` (e.g.: `korlibs`, `kotlin`), are ignored.
 - `Main.kt`, declared directly in `com.mkz.rpg`, is ignored.
 - This is exact as long as a subdomain is only used through `import` lines: there are no wildcard imports (`ktlint_standard_no-wildcard-imports`) and no fully qualified names in the code.

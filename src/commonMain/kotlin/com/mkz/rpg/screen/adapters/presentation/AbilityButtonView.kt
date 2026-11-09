@@ -20,7 +20,7 @@ import korlibs.math.geom.Size
 
 class AbilityButtonView(
     size: Size,
-    private val resourcesLoader: BattleSceneResourcesLoader,
+    private val resourcesLoader: GameSceneResourcesLoader,
 ) : UIButton(size) {
     companion object {
         const val ABILITY = "ABILITY"
@@ -114,7 +114,7 @@ class AbilityButtonView(
      */
     fun display(
         abilityId: String,
-        cooldownTurnsLeft: Int,
+        remainingCooldown: Int,
         hasEnoughMana: Boolean,
         manaCost: Int,
     ) {
@@ -124,7 +124,7 @@ class AbilityButtonView(
         findViewByName(ABILITY_SELECTION)?.removeFromParent()
         findViewByName(COOLDOWN)?.removeFromParent()
         findViewByName(COST)?.removeFromParent()
-        val isInCooldown = cooldownTurnsLeft > 0
+        val isInCooldown = remainingCooldown > 0
         resourcesLoader.bitmapOrNull("ability/$abilityId.png")?.let { avatarBitmap ->
             abilityButton.image(avatarBitmap) {
                 name = ABILITY
@@ -140,14 +140,14 @@ class AbilityButtonView(
             }
         }
         if (isInCooldown) {
-            displayCooldownOverlay(cooldownTurnsLeft)
+            displayCooldownOverlay(remainingCooldown)
         } else if (!hasEnoughMana) {
             displayCostBadge(manaCost)
         }
         visible = true
     }
 
-    private fun displayCooldownOverlay(cooldownTurnsLeft: Int) {
+    private fun displayCooldownOverlay(remainingCooldown: Int) {
         val abilityButton = this
         abilityButton.container {
             name = COOLDOWN
@@ -157,7 +157,7 @@ class AbilityButtonView(
                 RectCorners(HudStyle.SLOT_RADIUS - SELECTION_THICKNESS),
                 fill = COOLDOWN_OVERLAY_COLOR,
             ) { xy(SELECTION_THICKNESS, SELECTION_THICKNESS) }
-            text(text = "$cooldownTurnsLeft", textSize = COOLDOWN_TEXT_SIZE, color = Colors.WHITE) {
+            text(text = "$remainingCooldown", textSize = COOLDOWN_TEXT_SIZE, color = Colors.WHITE) {
                 centerOn(abilityButton)
             }
         }

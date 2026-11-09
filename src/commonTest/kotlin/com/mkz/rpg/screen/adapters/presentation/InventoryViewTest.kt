@@ -1,6 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import com.mkz.rpg.screen.adapters.presentation.GameSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.screen.adapters.presentation.InventoryView.Owner
 import com.mkz.rpg.screen.adapters.presentation.InventoryView.Slot
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
@@ -42,7 +42,7 @@ class InventoryViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             // When
-            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            val inventoryView = InventoryView(loadedResourcesLoader(), MessagesMother.messages())
             // Then
             inventoryView.titleText() shouldBe "Inventory"
             inventoryView.arrowsVisible().shouldBeFalse()
@@ -55,7 +55,7 @@ class InventoryViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val resourcesLoader = loadedResourcesLoader()
-            val inventoryView = InventoryView(resourcesLoader, TextsMother.texts())
+            val inventoryView = InventoryView(resourcesLoader, MessagesMother.messages())
             // When
             inventoryView.display(listOf(Slot("hammer", isEquipped = false), Slot("health-potion", isEquipped = false)), gold = 0)
             // Then
@@ -70,7 +70,7 @@ class InventoryViewTest : ViewsForTesting() {
     fun `Display should display the gold on the title line when is displayed`() =
         sharedViewsTest {
             // Given
-            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            val inventoryView = InventoryView(loadedResourcesLoader(), MessagesMother.messages())
             // When
             inventoryView.display(listOf(Slot("hammer", isEquipped = false)), gold = 120)
             // Then
@@ -82,7 +82,7 @@ class InventoryViewTest : ViewsForTesting() {
     fun `Display should frame the equipped items in gold when is displayed`() =
         sharedViewsTest {
             // Given
-            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            val inventoryView = InventoryView(loadedResourcesLoader(), MessagesMother.messages())
             // When
             inventoryView.display(listOf(Slot("health-potion", isEquipped = false), Slot("hammer", isEquipped = true)), gold = 0)
             // Then
@@ -93,7 +93,7 @@ class InventoryViewTest : ViewsForTesting() {
     fun `Display should clear the selected slot when is displayed again`() =
         sharedViewsTest {
             // Given
-            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            val inventoryView = InventoryView(loadedResourcesLoader(), MessagesMother.messages())
             inventoryView.display(listOf(Slot("hammer", isEquipped = false)), gold = 0)
             inventoryView.selectSlot(0)
             // When
@@ -106,7 +106,7 @@ class InventoryViewTest : ViewsForTesting() {
     fun `SelectSlot should frame only the selected slot when another slot was selected`() =
         sharedViewsTest {
             // Given
-            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            val inventoryView = InventoryView(loadedResourcesLoader(), MessagesMother.messages())
             inventoryView.display(listOf(Slot("hammer", isEquipped = false), Slot("health-potion", isEquipped = false)), gold = 0)
             inventoryView.selectSlot(0)
             // When
@@ -120,7 +120,7 @@ class InventoryViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val delegate = RecordingDelegate()
-            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            val inventoryView = InventoryView(loadedResourcesLoader(), MessagesMother.messages())
             inventoryView.setDelegate(delegate)
             inventoryView.display(listOf(Slot("hammer", isEquipped = false), Slot("health-potion", isEquipped = false)), gold = 0)
             addChild(inventoryView)
@@ -135,7 +135,7 @@ class InventoryViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val delegate = RecordingDelegate()
-            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            val inventoryView = InventoryView(loadedResourcesLoader(), MessagesMother.messages())
             inventoryView.setDelegate(delegate)
             addChild(inventoryView)
             // When
@@ -148,7 +148,7 @@ class InventoryViewTest : ViewsForTesting() {
     fun `Display should name the owner between both arrows enabled, the gold before the next one`() =
         sharedViewsTest {
             // Given
-            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            val inventoryView = InventoryView(loadedResourcesLoader(), MessagesMother.messages())
             addChild(inventoryView)
             // When
             inventoryView.display(emptyList(), gold = 20, owner = Owner(name = "Viking", partyIndex = 1, partySize = 3, canGiveGold = true))
@@ -165,7 +165,7 @@ class InventoryViewTest : ViewsForTesting() {
     fun `Display should disable the arrows at the ends of the party`() =
         sharedViewsTest {
             // Given
-            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            val inventoryView = InventoryView(loadedResourcesLoader(), MessagesMother.messages())
             // When
             inventoryView.display(emptyList(), gold = 0, owner = Owner(name = "Knight", partyIndex = 0, partySize = 1, canGiveGold = true))
             // Then
@@ -177,7 +177,7 @@ class InventoryViewTest : ViewsForTesting() {
     fun `Display should hide the arrows and display the inventory title again when there is no owner`() =
         sharedViewsTest {
             // Given
-            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            val inventoryView = InventoryView(loadedResourcesLoader(), MessagesMother.messages())
             inventoryView.display(emptyList(), gold = 0, owner = Owner(name = "Knight", partyIndex = 0, partySize = 2, canGiveGold = true))
             // When
             inventoryView.display(emptyList(), gold = 0)
@@ -190,7 +190,7 @@ class InventoryViewTest : ViewsForTesting() {
     fun `Display should draw the gold as a button when it names an owner`() =
         sharedViewsTest {
             // Given
-            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            val inventoryView = InventoryView(loadedResourcesLoader(), MessagesMother.messages())
             // When
             inventoryView.display(emptyList(), gold = 120, owner = Owner(name = "Knight", partyIndex = 0, partySize = 3, canGiveGold = true))
             // Then
@@ -203,7 +203,7 @@ class InventoryViewTest : ViewsForTesting() {
     fun `Display should draw the gold as plain text when it names no owner`() =
         sharedViewsTest {
             // Given
-            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            val inventoryView = InventoryView(loadedResourcesLoader(), MessagesMother.messages())
             inventoryView.display(emptyList(), gold = 120, owner = Owner(name = "Knight", partyIndex = 0, partySize = 3, canGiveGold = true))
             // When
             inventoryView.display(emptyList(), gold = 120)
@@ -217,7 +217,7 @@ class InventoryViewTest : ViewsForTesting() {
     fun `Display should fade the gold button when the owner can not give gold`() =
         sharedViewsTest {
             // Given
-            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            val inventoryView = InventoryView(loadedResourcesLoader(), MessagesMother.messages())
             // When
             inventoryView.display(emptyList(), gold = 0, owner = Owner(name = "Knight", partyIndex = 0, partySize = 3, canGiveGold = false))
             // Then
@@ -230,7 +230,7 @@ class InventoryViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val delegate = RecordingDelegate()
-            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            val inventoryView = InventoryView(loadedResourcesLoader(), MessagesMother.messages())
             inventoryView.setDelegate(delegate)
             addChild(inventoryView)
             // When
@@ -247,7 +247,7 @@ class InventoryViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val delegate = RecordingDelegate()
-            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            val inventoryView = InventoryView(loadedResourcesLoader(), MessagesMother.messages())
             inventoryView.setDelegate(delegate)
             inventoryView.display(emptyList(), gold = 0, owner = Owner(name = "Viking", partyIndex = 1, partySize = 3, canGiveGold = true))
             addChild(inventoryView)
@@ -263,7 +263,7 @@ class InventoryViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val delegate = RecordingDelegate()
-            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            val inventoryView = InventoryView(loadedResourcesLoader(), MessagesMother.messages())
             inventoryView.setDelegate(delegate)
             inventoryView.display(listOf(Slot("hammer", isEquipped = false)), gold = 0, owner = Owner(name = "Viking", partyIndex = 1, partySize = 3, canGiveGold = true))
             addChild(inventoryView)
@@ -278,7 +278,7 @@ class InventoryViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val delegate = RecordingDelegate()
-            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            val inventoryView = InventoryView(loadedResourcesLoader(), MessagesMother.messages())
             inventoryView.setDelegate(delegate)
             inventoryView.display(listOf(Slot("hammer", isEquipped = false)), gold = 0, owner = Owner(name = "Viking", partyIndex = 1, partySize = 3, canGiveGold = true))
             addChild(inventoryView)
@@ -295,7 +295,7 @@ class InventoryViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val delegate = RecordingDelegate()
-            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            val inventoryView = InventoryView(loadedResourcesLoader(), MessagesMother.messages())
             inventoryView.setDelegate(delegate)
             addChild(inventoryView)
             // When
