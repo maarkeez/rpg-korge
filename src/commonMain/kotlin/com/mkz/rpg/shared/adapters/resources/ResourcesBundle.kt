@@ -11,7 +11,7 @@ import kotlinx.coroutines.Deferred
 
 /**
  * The game resources, read from the single bundle the build makes of the `resources` folder, so they are loaded with
- * one request instead of one per file. See docs/architecture/assets.md.
+ * one request instead of one per file. See docs/adr/0003-single-resources-bundle.md.
  *
  * [root] reads the files as `resourcesVfs` would, e.g.: `root["unit/knight.toml"]`. The bundle is downloaded once,
  * when a file is first read or when [prefetch] starts it earlier.

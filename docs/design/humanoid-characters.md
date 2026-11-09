@@ -1,7 +1,7 @@
 # Design brief: humanoid characters
 
 > **Status:** in use, rewritten for the top-down view. The game displays 16x16 and 32x32 units and npcs side by side,
-> each filling its 64px tile (see [Assets](../architecture/assets.md)). The sprites of this brief are drafted in
+> each filling its 64px tile. The sprites of this brief are drafted in
 > `art/drafts/`, then moved to `art/unit/` or `art/npc/` once reviewed. The elf is the first character drawn with this version; the rest
 > of the cast is to be redrawn with it, see [Redrawing the cast](#redrawing-the-cast).
 >

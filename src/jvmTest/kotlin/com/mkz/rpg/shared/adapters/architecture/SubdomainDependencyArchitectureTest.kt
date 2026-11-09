@@ -7,12 +7,11 @@ import kotlin.test.Test
 
 /**
  * Subdomains must not depend on each other, even indirectly (e.g.: `a` → `b` → `c` → `a`): the upstream one declares
- * `Request…` events, which the downstream one publishes, instead of the upstream one depending on it (see
- * docs/architecture/package-structure.md). The subdomains and their cycles are read as in the dependency report
- * (docs/architecture/dependencies.md).
+ * `Request…` events, which the downstream one publishes, instead of the upstream one depending on it. The subdomains
+ * and their cycles are read as in the dependency report (docs/architecture/dependencies.html).
  *
  * The restricted subdomains must only depend on the subdomains allowed for them, so their dependencies do not grow
- * (see docs/architecture/package-structure.md).
+ * (see docs/adr/0002-acyclic-shrink-only-subdomain-dependencies.md).
  */
 class SubdomainDependencyArchitectureTest {
     private val rootPackage = "com.mkz.rpg"

@@ -45,7 +45,7 @@ For example, the knight, with 30 health points, walks over two tiles of lava, wh
 
 ## Docs
 
-- [<Architecture doc>](../architecture/<doc>.md): <what it gains>.
+- [<ADR>](../adr/<NNNN-slug>.md): <what it gains>.
 
 ## Tests
 

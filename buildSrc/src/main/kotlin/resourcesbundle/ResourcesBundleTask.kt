@@ -10,7 +10,8 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 
-// Bundles the game resources into the single file the game reads them from. See docs/architecture/assets.md.
+// Bundles the game resources into the single file the game reads them from.
+// See docs/adr/0003-single-resources-bundle.md.
 abstract class ResourcesBundleTask : DefaultTask() {
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)

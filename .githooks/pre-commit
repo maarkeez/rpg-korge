@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-# (1) auto-fix format in place, and regenerate the subdomain dependency report (see docs/architecture/dependencies.md)
+# (1) auto-fix format in place, and regenerate the subdomain dependency report (docs/architecture/dependencies.html)
 ./gradlew formatKotlin dependencyReport --quiet
 
 # re-stage anything the formatter changed, and the report, which `git add -u` misses on its first generation

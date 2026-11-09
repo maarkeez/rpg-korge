@@ -14,7 +14,7 @@ Run `tools/pixel-art/pixel --help`, and `--help` on any command, for the exact o
 
 ## The rules every asset follows
 
-These are enforced by the architecture tests (see [assets](../../../docs/architecture/assets.md)):
+These are enforced by the architecture tests (see [ADR 0005](../../../docs/adr/0005-famicube-palette-and-outline.md)):
 
 - Only the 64 FamiCube colours, fully opaque, or fully transparent. The tool can not write anything else.
 - Battle units, npcs, their portraits, lootable items, buildings and the chest are outlined with `W` (`#151515`): the

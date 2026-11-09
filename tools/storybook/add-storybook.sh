@@ -2,7 +2,7 @@
 # Adds the Storybook to the web build, at /storybook/: the same bundle, which starts the Storybook from that folder.
 # KorGE reads the resources relative to the page URL, ignoring a <base>, so the files of the game are copied instead of
 # shared. Run by the Deploy JS workflow and the storybook skill, from the repository root, after
-# ./gradlew browserReleaseWebpack. See docs/architecture/storybook.md.
+# ./gradlew browserReleaseWebpack. See docs/adr/0008-in-game-storybook.md.
 set -euo pipefail
 
 www="${1:-build/www}"

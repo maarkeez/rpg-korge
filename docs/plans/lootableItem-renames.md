@@ -8,7 +8,7 @@
 > hammer whose `maximum-health-20` were `IMMEDIATELY` fails with `EquippableEffectNotAppliedWhileEquipped`, both thrown
 > right after `isTimedWhileEquipped`. Reading the code and talking about the game take a translation. Instead, the errors,
 > their messages, the comment of `InitialiseLootableItems` and its tests say "timed while equipped". The game plays the
-> same, and players read the same text. Builds on [Game data](../architecture/game-data.md) and the
+> same, and players read the same text. Builds on [Game data](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/game-data.md) and the
 > [effect renames](effect-renames.md).
 
 ## Decisions

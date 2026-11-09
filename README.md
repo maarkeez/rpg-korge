@@ -14,10 +14,10 @@ You can play this game at https://maarkeez.github.io/rpg-korge/
 ## Storybook
 
 Every view of the game, in each of its states, can be browsed at https://maarkeez.github.io/rpg-korge/storybook/, and
-shared with a link. See [Storybook](docs/architecture/storybook.md), and [How to add a story](docs/testing/how-to-add-a-story.md).
+shared with a link. See [ADR 0008](docs/adr/0008-in-game-storybook.md), and [How to add a story](docs/testing/how-to-add-a-story.md).
 
 ## Translations
 
 The game is translated with gettext PO files, so you can translate it with Poedit, Weblate or any other PO tool. See
-[How to add a language](docs/localization/how-to-add-a-language.md), and [Localization](docs/architecture/localization.md)
+[How to add a language](docs/localization/how-to-add-a-language.md), and [ADR 0009](docs/adr/0009-gettext-po-catalogs-with-own-parser.md)
 for how the game reads the translations.

@@ -11,8 +11,8 @@
 > while Bag is avoided. Players also read "Tap an item to swap it for: Hammer (5 G)" when an item found does not fit, while
 > Swap is two occupants exchanging their tiles. So reading the code and talking about the game take a translation.
 > Instead, the classes, functions, translation keys, comments and docs say the glossary's words, and players read "Tap an
-> item to discard for". The game plays the same. Builds on [Presentation timeline](../architecture/presentation-timeline.md),
-> [Exploration](../architecture/exploration.md) and [Buttons](../architecture/buttons.md), and takes what the
+> item to discard for". The game plays the same. Builds on [Presentation timeline](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/presentation-timeline.md),
+> [Exploration](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/exploration.md) and [Buttons](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/buttons.md), and takes what the
 > [ability](ability-renames.md), [battle](battle-renames.md), [battlefield](battlefield-renames.md),
 > [battle setup](battlesetup-renames.md), [battle unit](battleUnit-renames.md), [building](building-renames.md),
 > [CPU wander brain](cpuWanderBrain-renames.md), [effect](effect-renames.md), [inventory](inventory-renames.md),
@@ -161,18 +161,18 @@
 
 ## Docs
 
-- [Presentation timeline](../architecture/presentation-timeline.md): the game screen, the banner, the selection, the
+- [Presentation timeline](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/presentation-timeline.md): the game screen, the banner, the selection, the
   walking range, the cast preview and its recipients, the dropped items and the `DROPPED_ITEMS` layer for the Loot
   heading, the quest announcement for "toast", and the renamed names.
-- [Exploration](../architecture/exploration.md), [Buttons](../architecture/buttons.md),
-  [Quests](../architecture/quests.md), [Inventory](../architecture/inventory.md) and
-  [Save and load](../architecture/save-and-load.md): the button row, the item buttons, the call to action, the talk panel,
+- [Exploration](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/exploration.md), [Buttons](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/buttons.md),
+  [Quests](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/quests.md), [Inventory](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/inventory.md) and
+  [Save and load](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/save-and-load.md): the button row, the item buttons, the call to action, the talk panel,
   the inventory button for "the bag button", the quest announcement and the renamed names.
-- [Localization](../architecture/localization.md): `UiMessage` and `Messages`, and a UI message for "UI text", e.g.:
+- [Localization](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/localization.md): `UiMessage` and `Messages`, and a UI message for "UI text", e.g.:
   How to add a UI message.
-- [Package structure](../architecture/package-structure.md), [Assets](../architecture/assets.md),
-  [Game data](../architecture/game-data.md), [CPU battle brain](../architecture/cpu-battle-brain.md) and
-  [Dependencies](../architecture/dependencies.md): `GameScene`, the `selection` package and `VISIBLE_TILES`.
+- [Package structure](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/package-structure.md), [Assets](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/assets.md),
+  [Game data](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/game-data.md), [CPU battle brain](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/cpu-battle-brain.md) and
+  [Dependencies](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/dependencies.md): `GameScene`, the `selection` package and `VISIBLE_TILES`.
 - `docs/architecture/dependencies.html` is generated again with `./gradlew dependencyReport`.
 
 ## Tests
@@ -213,7 +213,7 @@
 - `BAG_SIZE` of `BattleUnitInfoView` is `INVENTORY_BUTTON_SIZE`, as it is the size of the button, not a storage space.
   `InventoryButtonView.BAG`, the name of its chest, is `CHEST`.
 - `LOOT_SCALE` is `DROPPED_ITEM_SCALE`, so the `PICK_UP_*` constants are `LOOTED_ITEM_RISE`, `LOOTED_ITEM_SCALE` and
-  `LOOTED_ITEM_DURATION`, and the Loot heading of [Presentation timeline](../architecture/presentation-timeline.md) is
+  `LOOTED_ITEM_DURATION`, and the Loot heading of [Presentation timeline](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/presentation-timeline.md) is
   Dropped items.
 - More names follow the selection: the states' `idle()` is `deselect()`, `walkingRange(tile, walkingRange)` is
   `refreshWalkingRange`, the events built in `Selection` are written `SelectionEvent.<Event>`, as a state and an event
@@ -224,6 +224,6 @@
   `playToasts` and `fadeToast` say announcement, and `InventoryPresenter` discards a stored item for a found one
   (`askToDiscardFor`, `discardFor`), for swap.
 - `QuestMapper.countOf` is `requiredDefeatsOf`, and `QuestInfoMother.task` takes `defeatsCounted` and `requiredDefeats`.
-- [CPU battle brain](../architecture/cpu-battle-brain.md) divides by the maximum steps, which it called "movement range"
+- [CPU battle brain](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/cpu-battle-brain.md) divides by the maximum steps, which it called "movement range"
   as the battle unit section had avoided it, not by the walking range.
 - The comments say the game screen for "the battle scene" and the player's colour for "the team's".

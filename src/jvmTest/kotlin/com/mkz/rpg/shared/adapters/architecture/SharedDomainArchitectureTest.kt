@@ -8,7 +8,7 @@ import kotlin.test.Test
 /**
  * Every subdomain may depend on `shared`, so its domain holds only the plumbing of the event bus and the save, never a
  * game rule: a rule belongs to the subdomain owning its concept (e.g.: the gold cap to the inventory), which hands it to
- * the others through a query. See docs/architecture/package-structure.md.
+ * the others through a query. See docs/adr/0001-layered-subdomain-packages.md.
  */
 class SharedDomainArchitectureTest {
     private val sharedDomainPackage = "com.mkz.rpg.shared.domain"

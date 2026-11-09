@@ -20,7 +20,7 @@ is chaining effects on your enemies until the player defeats them.
 - Every entry in `docs/devlog/`: what they cover (never repeat a topic), their numbers, and how the user writes (see
   [Voice](#voice)).
 - What was built: `git log`, and the commits around the topic with `git show --stat <hash>`. Then the plans in
-  `docs/plans/` and the architecture in `docs/architecture/` the commits touch. A link to a GitHub file of this
+  `docs/plans/` and the ADRs in `docs/adr/` the commits touch. A link to a GitHub file of this
   repository (`github.com/maarkeez/rpg-korge/blob/<hash>/<path>`) is read locally with `git show <hash>:<path>`.
 
 Finding facts is your job, never the user's: don't ask anything the repository answers. Use what you find to word the

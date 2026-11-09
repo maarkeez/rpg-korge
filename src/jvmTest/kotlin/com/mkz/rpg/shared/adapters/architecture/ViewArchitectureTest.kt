@@ -8,7 +8,7 @@ import kotlin.test.Test
 /**
  * The views of the game draw view data and never import the domain nor the use cases of a subdomain: their presenters
  * map the domain to the view data. So every view can have its stories in the Storybook, which feeds them plain data,
- * with no exception. See docs/architecture/package-structure.md.
+ * with no exception. See docs/adr/0008-in-game-storybook.md.
  */
 class ViewArchitectureTest {
     private val domainOrUseCasesImport = Regex("""^com\.mkz\.rpg\.[^.]+\.(domain|usecases)\..+""")

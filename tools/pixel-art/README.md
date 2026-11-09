@@ -14,7 +14,7 @@ tools/pixel-art/pixel grid art/unit/knight.aseprite
 
 The `pixel` launcher builds the tool when its sources changed, then runs it. Every command has a `--help`. Coding
 agents follow the [`pixel-art` skill](../../.claude/skills/pixel-art/SKILL.md), which describes the workflow. The
-sources of the game's images live under [`art`](../../art), see [assets](../../docs/architecture/assets.md).
+sources of the game's images live under [`art`](../../art), see [ADR 0006](../../docs/adr/0006-aseprite-sources-drawn-with-the-pixel-tool.md).
 
 ## Developing it
 

@@ -11,7 +11,7 @@
 > names, ids, args and descriptions say the glossary's words (**Screen / Cast preview › One enemy**,
 > `screen-cast-preview--one-enemy`, `recipient`), the catalogue is opened (`OpenCatalogue`), the docs say the selected
 > story, and a control holds a `ValueDto`. The white silhouette of a battle unit, `TileFlashView`, blinks, as Blink now
-> covers it. The game plays the same, and players read the same text. Builds on [Storybook](../architecture/storybook.md)
+> covers it. The game plays the same, and players read the same text. Builds on [Storybook](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/storybook.md)
 > and the [screen](screen-renames.md), [inventory](inventory-renames.md), [quest](quest-renames.md) and
 > [lootable item](lootableItem-renames.md) renames, which left these words to this section.
 
@@ -19,7 +19,7 @@
 
 | Topic          | Decision                                                                                                                                                                                                                                                                                                                |
 |----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Scope          | The renames below, in `storybook`, its tests and [Storybook](../architecture/storybook.md), and the blink of `screen`, with its tests and docs.                                                                                                                                                                         |
+| Scope          | The renames below, in `storybook`, its tests and [Storybook](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/storybook.md), and the blink of `screen`, with its tests and docs.                                                                                                                                                                         |
 | Ids            | The component and story ids follow the new titles and names, this once: `screen-attack-preview` is `screen-cast-preview`. Chosen over keeping them, as the glossary's words matter more than the few links shared. A later rename keeps its id, as today.                                                               |
 | Open           | The catalogue is opened, as the docs say: `OpenCatalogue`, `CatalogueOpened`. Chosen over Initialise, which the glossary avoids for placing buildings and npcs.                                                                                                                                                         |
 | Value          | What a control holds is a value: an arg, of a component's control, or a global. `ArgDto` is `ValueDto`. `Args` and `SearchArgs` keep their names, as they only hold args.                                                                                                                                               |
@@ -128,11 +128,11 @@ Each story id follows its component id and name, e.g.: `screen-shop--buy-invento
 
 ## Docs
 
-- [Storybook](../architecture/storybook.md): says the selected story, record, open and `ValueDto`. Its **Links**
+- [Storybook](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/storybook.md): says the selected story, record, open and `ValueDto`. Its **Links**
   section is **Location**, and its Ubiquitous language table points to the glossary's Storybook section. Its
   examples use the new ids, e.g.: `screen-shop--sell-inventory-full`.
 - [How to add a story](../testing/how-to-add-a-story.md): `ValueDto`.
-- [Exploration](../architecture/exploration.md) and [Presentation timeline](../architecture/presentation-timeline.md):
+- [Exploration](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/exploration.md) and [Presentation timeline](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/presentation-timeline.md):
   blink, `blinkBattleUnit`, `blinkHealth`, `BLINK_COUNT`, `BLINK_DURATION`, `HEALTH_BLINK` and
   `HEALTH_BLINK_DURATION`.
 - [Dependencies](../architecture/dependencies.html): `TileBlinkView`, `TileBlinkViewStories` and `OpenCatalogue`.
@@ -175,5 +175,5 @@ Each story id follows its component id and name, e.g.: `screen-shop--buy-invento
   button**, **Gold button** and **Give gold**. **Cast preview › Defeat** says the recipient reads KO.
 - The `remainingTurns` parameter that `BattleUnitInfoViewStories` hands to the screen's `BattleUnitInfo` keeps its
   name: it is the screen's, outside this plan.
-- [Storybook](../architecture/storybook.md) says that only these renames changed the ids, once, and the test names say
+- [Storybook](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/storybook.md) says that only these renames changed the ids, once, and the test names say
   open, selected story and record.

@@ -11,7 +11,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 
-// Generates the interactive HTML report of the dependencies between the subdomains. See docs/architecture/dependencies.md.
+// Generates the interactive HTML report of the dependencies between the subdomains.
 abstract class DependencyReportTask : DefaultTask() {
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)

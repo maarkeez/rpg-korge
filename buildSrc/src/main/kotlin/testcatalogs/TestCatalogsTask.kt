@@ -10,7 +10,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 
-// Generates the test source holding the localization catalogs. See docs/architecture/localization.md.
+// Generates the test source holding the localization catalogs.
 abstract class TestCatalogsTask : DefaultTask() {
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)

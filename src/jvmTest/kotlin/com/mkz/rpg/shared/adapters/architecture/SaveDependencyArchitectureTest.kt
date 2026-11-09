@@ -8,7 +8,8 @@ import kotlin.test.Test
 
 /**
  * The save only stores what each subdomain hands it through `Snapshottable`, so it depends on no other subdomain, and
- * only the screen, which lists the snapshottables of its scene, uses it. See docs/architecture/save-and-load.md.
+ * only the screen, which lists the snapshottables of its scene, uses it. See
+ * docs/adr/0010-per-subdomain-save-snapshots.md.
  */
 class SaveDependencyArchitectureTest {
     private val rootPackage = "com.mkz.rpg"

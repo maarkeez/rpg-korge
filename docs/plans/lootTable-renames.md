@@ -10,7 +10,7 @@
 > "LOOTABLE_ITEM"`, `weight = 3` and no `lootableItemId` fails with "Invalid loot table entry type". Instead, the code
 > and docs say a loot table is what loot drops roll on, an entry is rolled with its weight, and the error names the
 > missing lootable item. The game plays the same, and players read the same text. Builds on
-> [Game data](../architecture/game-data.md) and the [loot drop renames](lootDrop-renames.md).
+> [Game data](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/game-data.md) and the [loot drop renames](lootDrop-renames.md).
 
 ## Decisions
 
@@ -46,7 +46,7 @@
 
 ## Docs
 
-- [Game data](../architecture/game-data.md): the `lootTable/<loot table id>.toml` section starts with "The weighted
+- [Game data](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/game-data.md): the `lootTable/<loot table id>.toml` section starts with "The weighted
   entries loot drops roll on, shared by every loot drop that lists it.", for "The weighted entries a defeated unit may
   drop.".
 

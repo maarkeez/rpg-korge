@@ -8,8 +8,7 @@ import kotlin.test.Test
 
 /**
  * The use cases of a subdomain (its commands, queries and services) must only be instantiated in its presentation Api,
- * `<subdomain>.adapters.presentation.<Subdomain>Api`, which injects them where they are needed (see
- * docs/architecture/package-structure.md).
+ * `<subdomain>.adapters.presentation.<Subdomain>Api`, which injects them where they are needed.
  */
 class UseCaseInstantiationArchitectureTest {
     private val useCasePackages = listOf("..usecases.commands..", "..usecases.queries..", "..usecases.services..")

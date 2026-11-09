@@ -10,7 +10,7 @@
 > a language has (`PluralRule.count`). `messages.pot` is "the template", and the language is "picked" in the docs while
 > the code selects it. Reading the code and talking about the game take a translation. Instead, the classes, fields,
 > constants, comments and docs use the glossary's words. The game plays the same. Builds on
-> [Localization](../architecture/localization.md) and [How to add a language](../localization/how-to-add-a-language.md).
+> [Localization](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/localization.md) and [How to add a language](../localization/how-to-add-a-language.md).
 
 ## Decisions
 
@@ -68,7 +68,7 @@
 
 ## Docs
 
-- [Localization](../architecture/localization.md): the language is selected from the main menu, for "picked", also in
+- [Localization](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/localization.md): the language is selected from the main menu, for "picked", also in
   Layering. `messages.pot` is "the source catalog, in English", for "the template", and `<language code>.po` is "the
   catalog of a language", for "a translation". Plurals say the plural rule of each catalog, its `Plural-Forms` header,
   and the aggregate "evaluates the plural rules". The heading Fallback is Untranslated messages, and says an
@@ -101,7 +101,7 @@
 
 ### Waiting for other sections
 
-- `screen`: `UiText`, `Texts`, and "UI text" and "game data text" in [Localization](../architecture/localization.md)
+- `screen`: `UiText`, `Texts`, and "UI text" and "game data text" in [Localization](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/localization.md)
   (e.g.: How to add a UI text), while Message is the glossary's word. `MenuView`'s comment "Picking one translates",
   while Select is the glossary's word.
 - `storybook`: the story descriptions "as translations may be" already fit, as they mean a message's translation.

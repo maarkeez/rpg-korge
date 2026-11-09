@@ -9,7 +9,7 @@
 > "occupiable" (`TerrainMother.occupiableTerrain`), while the glossary gives Occupiable to a tile, which also depends on
 > the terrains around it, and says a terrain can be occupied. Instead, a terrain has a transition to another
 > (`transitionsTo`, `hasTransitionTo`, `HasTerrainTransition`), and the test helpers say a terrain can be occupied. The
-> game plays the same, and players read the same text. Builds on [Game data](../architecture/game-data.md) and the
+> game plays the same, and players read the same text. Builds on [Game data](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/game-data.md) and the
 > [battlefield](battlefield-renames.md), [cpuBattleBrain](cpuBattleBrain-renames.md) and
 > [mapBuilder](mapBuilder-renames.md) renames, which left these words to this section.
 
@@ -105,7 +105,7 @@
   to itself, and every caller already skips two equal terrains (`BattlefieldCreation` filters them out, `WorldBuilder`
   compares them first). Whether `ResourcesTerrainLoader` should stop adding it, with its test `LoadTerrains should give a
   terrain a transition to itself when it is loaded` and the default resources test asserting it.
-- [Game data](../architecture/game-data.md) documents no `terrain/<terrain id>.toml` (`canBeOccupied`, `effectId`), nor
+- [Game data](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/game-data.md) documents no `terrain/<terrain id>.toml` (`canBeOccupied`, `effectId`), nor
   how the strips in `terrain/transitions/` give the transitions, beyond the battlefield's note on sand.
 
 ### Waiting for other sections

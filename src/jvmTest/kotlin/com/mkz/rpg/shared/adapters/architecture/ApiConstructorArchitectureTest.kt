@@ -9,7 +9,7 @@ import kotlin.test.Test
 
 /**
  * A presentation Api takes every collaborator from its caller, so each scene shows all of its wiring: its primary
- * constructor is its only one and none of its parameters has a default value (see docs/architecture/package-structure.md).
+ * constructor is its only one and none of its parameters has a default value.
  */
 class ApiConstructorArchitectureTest {
     // The presentation Apis, e.g.: `BattlefieldApi`, and the nested `SelectionApi`.

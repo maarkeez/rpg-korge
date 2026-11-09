@@ -9,7 +9,7 @@
 > an item (`GiveRefusalDto`, `SearchGiveReceivers`) while giving gold says gold (`GiveGoldRefusalDto`,
 > `SearchGoldReceivers`). Reading the code and talking about the game take a translation. Instead, the classes, functions,
 > enum values, comments and player text use the glossary's words. The game plays the same. Builds on
-> [Inventory](../architecture/inventory.md) and [Exploration](../architecture/exploration.md).
+> [Inventory](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/inventory.md) and [Exploration](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/exploration.md).
 
 ## Decisions
 
@@ -93,10 +93,10 @@
 
 ## Docs
 
-- [Inventory](../architecture/inventory.md): the inventory for "the bag", storage spaces, maximum gold for "cap" and
+- [Inventory](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/inventory.md): the inventory for "the bag", storage spaces, maximum gold for "cap" and
   "limit", grant for "pay", player turn, summons, the renamed names, and equipping over an item unequips it, with no
   swap. The examples say `Inventory full` and `Inventories full`.
-- [Exploration](../architecture/exploration.md): 12 storage spaces for "12 slots", the inventory for "its bag" where it
+- [Exploration](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/exploration.md): 12 storage spaces for "12 slots", the inventory for "its bag" where it
   means the inventory, and the examples say `Inventory 11/12`, `Inventory full` and `Inventories full`.
 - `docs/architecture/dependencies.html` is generated again with `./gradlew dependencyReport`, as it names `GiveRefusalDto`.
 
@@ -121,7 +121,7 @@
 
 ## Not in this plan
 
-- The comment of `Inventory.create` and [Inventory](../architecture/inventory.md) say an inventory is created when its
+- The comment of `Inventory.create` and [Inventory](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/inventory.md) say an inventory is created when its
   battle unit is deployed (`BattleUnitDeployed`), while `OnExplorationStarted` and `OnPartyJoined` create it, for the
   party members only. The docs look out of date, still to be fixed.
 
@@ -149,15 +149,15 @@
 
 - The Give button reads "No space" ("Sin espacio"), not "Inventories full", in `ui.itemActions.bagsFull`: **Screen / Item
   actions › Bags full** showed "Inventories …" and "Inventarios …" cut on the button, a quarter of the row. It says storage
-  space, the glossary's word, and fits like "No one" beside it. [Buttons](../architecture/buttons.md),
-  [Presentation timeline](../architecture/presentation-timeline.md) and [Exploration](../architecture/exploration.md) say
+  space, the glossary's word, and fits like "No one" beside it. [Buttons](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/buttons.md),
+  [Presentation timeline](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/presentation-timeline.md) and [Exploration](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/exploration.md) say
   `No space`, and its translator comment says the other members have no storage space left.
 - The screen tests that read the player text follow it: `ShopPresenterTest`, `ShopViewTest` and `ShopViewExtension` say
   `Inventory 0/12` and `Inventory full`, and `InventoryPresenterGiveTest` says `No space`.
 - More test names and comments than the plan named say the same words: `UnequipItemTest` and `PlayerTurnRuleTest` say
   player turn, `StoreLootedItemTest` says the bee is a summon, the comment of `GiveItemTest` says stores and inventory,
   and the domain tests of giving an item are `GiveItem`, `ReceiveItem` and `GiveItemRefusal`.
-- [Inventory](../architecture/inventory.md) says the bag button where it means the button that opens the inventory, as
+- [Inventory](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/inventory.md) says the bag button where it means the button that opens the inventory, as
   it waits for the `screen` section with `BagButtonView`.
 - `InventoryPresenterGiveGoldTest` keeps "at the limit" and "the bag" in its test names, as it is the screen's and waits
   for its section.

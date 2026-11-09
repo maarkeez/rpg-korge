@@ -9,7 +9,7 @@ import kotlin.test.Test
 /**
  * The stories feed the views plain data, never domain objects nor use cases, so the Storybook only depends on the
  * presentation of the other subdomains, besides `shared` and `localization`. Nothing depends on the Storybook, but the
- * entry point (Main.kt), which starts it. See docs/architecture/package-structure.md.
+ * entry point (Main.kt), which starts it. See docs/adr/0008-in-game-storybook.md.
  */
 class StorybookDependencyArchitectureTest {
     private val rootPackage = "com.mkz.rpg"

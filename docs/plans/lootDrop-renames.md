@@ -9,8 +9,8 @@
 > `LootFound`, the inventory stores the potion and requests `RequestPickUpDroppedItem`, and `PickUpDroppedItem` publishes
 > `DroppedItemPickedUp`. Reading the code and talking about the game take a translation. Instead, the code says roll, drop,
 > dropped item, find and loot, as the glossary does. The game plays the same, and players read the same text. Builds on
-> [Inventory](../architecture/inventory.md#looting-from-the-battlefield), [Package
-> structure](../architecture/package-structure.md) and the [inventory renames](inventory-renames.md).
+> [Inventory](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/inventory.md#looting-from-the-battlefield), [Package
+> structure](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/package-structure.md) and the [inventory renames](inventory-renames.md).
 
 ## Decisions
 
@@ -86,15 +86,15 @@
 
 ## Docs
 
-- [Inventory](../architecture/inventory.md): Looting from the battlefield says `ItemDropped`, `findDroppedItems`,
+- [Inventory](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/inventory.md): Looting from the battlefield says `ItemDropped`, `findDroppedItems`,
   `DroppedItemsFound`, `RequestLootDroppedItem`, `lootDroppedItem` and `DroppedItemLooted`, and "loots" for "picks up".
-- [Package structure](../architecture/package-structure.md): the tables say `ItemDropped`, `DroppedItemsFound` and
+- [Package structure](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/package-structure.md): the tables say `ItemDropped`, `DroppedItemsFound` and
   `RequestLootDroppedItem`, "Rolls the loot drop of its unit and drops the item rolled" for "Drops the loot of its unit",
   "Announces the dropped items" for "the items", and "Takes it off its tile" for "Picks it up".
-- [Presentation timeline](../architecture/presentation-timeline.md): the events of the Loot table are `ItemDropped` and
+- [Presentation timeline](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/presentation-timeline.md): the events of the Loot table are `ItemDropped` and
   `DroppedItemLooted`.
-- [Exploration](../architecture/exploration.md): "looting a dropped item" for "a loot pick-up".
-- [Game data](../architecture/game-data.md): "How to make a unit drop loot" is "How to give a unit a loot drop", as no link
+- [Exploration](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/exploration.md): "looting a dropped item" for "a loot pick-up".
+- [Game data](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/game-data.md): "How to make a unit drop loot" is "How to give a unit a loot drop", as no link
   points to it, and the loot table's weights are turned into chances "when a loot drop is rolled", for "when the loot is
   dropped".
 - [Dependencies](../architecture/dependencies.html) is generated again with `./gradlew dependencyReport`.
@@ -146,7 +146,7 @@
 - `party`: Party member is still to be defined, as Loot uses it.
 - `screen`: `BattlefieldPresenter.dropLoot`, `pickUpLoot` and `displayedLoot`, `BattlefieldView.displayLoot` and
   `pickUpLoot`, `FakeBattlefieldView`, the `LOOT` layer and the Loot heading of
-  [Presentation timeline](../architecture/presentation-timeline.md), while Loot is only a verb and Pick up is to be avoided.
+  [Presentation timeline](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/presentation-timeline.md), while Loot is only a verb and Pick up is to be avoided.
   The translator comment of `ui.inventoryFull.leave`, "Leaves the item found on the ground", while a dropped item lies on a
   tile.
 
@@ -161,7 +161,7 @@
 - More comments than the plan named say "loots" for "an inventory stores": every comment of `LootDropEvent`, `LootDrop`,
   `DropItems` and `FindDroppedItems`, and the comment of `RequestLootDroppedItem` says it is requested for an item a party
   member looted. `StoreLootedItem` says it "requests to take it off its tile, as it is looted", for "requests the
-  battlefield to pick it up". [Inventory](../architecture/inventory.md) also says the reward items left are "found, looted
+  battlefield to pick it up". [Inventory](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/inventory.md) also says the reward items left are "found, looted
   and drawn", and that the loot drop of the unit is rolled.
 - The comments and test names of `BattlefieldView`, `BattlefieldViewTest`, `BattlefieldViewExtension` and
   `BattlefieldPresenterTest` keep "picked up", as they go with `pickUpLoot`, which waits for the `screen` section.

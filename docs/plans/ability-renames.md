@@ -6,7 +6,7 @@
 > Mushroom spends is `cost` in `Ability` and its TOML, but `manaCost` in `AbilityInfo`, and Mending heals its
 > `NEARBY_ALLIES`, which players read as "adjacent allies". Reading the code and talking about the game take a
 > translation. Instead, the classes, functions, TOML keys and values, and translation keys use the glossary's words. The
-> game plays the same, apart from one sentence of the ability info. Builds on [Game data](../architecture/game-data.md).
+> game plays the same, apart from one sentence of the ability info. Builds on [Game data](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/game-data.md).
 
 ## Decisions
 
@@ -96,7 +96,7 @@
 
 ## Docs
 
-- [Game data](../architecture/game-data.md): the `ability/<ability id>.toml` and `effect/<effect id>.toml` sections use the new
+- [Game data](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/game-data.md): the `ability/<ability id>.toml` and `effect/<effect id>.toml` sections use the new
   keys and values.
 
 ## Tests
@@ -124,7 +124,7 @@
 
 - The `{cost}` placeholder of `ui.abilityInfo.notEnoughMana` is also `{manaCost}`, in both catalogs, as it is the same word.
   Players read the same sentence.
-- [Assets](../architecture/assets.md) and [How to add a new test](../testing/how-to-add-a-new-test.md) also used these
+- [Assets](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/assets.md) and [How to add a new test](../testing/how-to-add-a-new-test.md) also used these
   words, so they changed too.
 - `WhatShouldCastTest` and `BattlefieldPresenterTest` write `TargetingDto.CASTER`, as importing it would collide with
   `TargetExpressionDto.Type.CASTER`, which they also use.

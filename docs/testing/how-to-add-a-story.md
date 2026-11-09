@@ -1,6 +1,6 @@
 # How to add a story
 
-> **Summary:** Show a view of the game in the [Storybook](../architecture/storybook.md), in each of its states, e.g.:
+> **Summary:** Show a view of the game in the [Storybook](../adr/0008-in-game-storybook.md), in each of its states, e.g.:
 > after adding a view: every view has its stories, with no exception. A view gets one `<View>Stories` binding, with its
 > controls and stories, registered in `StorybookApi`.
 

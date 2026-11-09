@@ -9,7 +9,7 @@ import kotlin.test.Test
 /**
  * Only the presentation layer translates: the other layers hold ids (e.g.: a unit id), never text, so they do not depend
  * on the localization subdomain. The root package boots the game (Main.kt), so it creates the localization for every
- * scene. See docs/architecture/localization.md.
+ * scene.
  */
 class LocalizationArchitectureTest {
     private val rootPackage = "com.mkz.rpg"

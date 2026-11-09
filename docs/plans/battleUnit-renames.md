@@ -8,7 +8,7 @@
 > `movementRange` and its `maximumSteps`, in the same class. Reading the code and talking about the game take a translation.
 > Instead, the code says move for any change of tile and walk for going along a path, health and mana with no "points", and
 > no bare "turn" but where the [effect section](#waiting-for-other-sections) decides it. The game plays the same, and players
-> read the same texts. Builds on [Save and load](../architecture/save-and-load.md).
+> read the same texts. Builds on [Save and load](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/save-and-load.md).
 
 ## Decisions
 
@@ -101,7 +101,7 @@ These only follow the names they read from `battleUnit`. Their own names wait fo
 
 `BattleUnitSnapshot` in `BattleUnitSnapshottable` reaches the save, so `Save.SAVE_VERSION` goes from 4 to 5, and
 `src/jvmTest/fixtures/save/v5.json` is written with the command in
-[Save and load](../architecture/save-and-load.md#save_version), keeping the older fixtures.
+[Save and load](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/save-and-load.md#save_version), keeping the older fixtures.
 
 | Saved field today         | New                       |
 |---------------------------|---------------------------|
@@ -127,9 +127,9 @@ No TOML key changes: `resources/battleUnit/*.toml` only holds `unitId`, `playerI
 
 ## Docs
 
-- [Game data](../architecture/game-data.md), [Exploration](../architecture/exploration.md),
-  [CPU battle brain](../architecture/cpu-battle-brain.md), [Package structure](../architecture/package-structure.md),
-  [Presentation timeline](../architecture/presentation-timeline.md), [Save and load](../architecture/save-and-load.md) and
+- [Game data](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/game-data.md), [Exploration](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/exploration.md),
+  [CPU battle brain](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/cpu-battle-brain.md), [Package structure](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/package-structure.md),
+  [Presentation timeline](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/presentation-timeline.md), [Save and load](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/save-and-load.md) and
   [How to add a new test](../testing/how-to-add-a-new-test.md) use the new names. E.g.: Exploration says "A walk out of a
   battle spends no step, unlike one in a battle" for "A walk spends no turn action, unlike a move in a battle".
 - `docs/architecture/dependencies.html` names the classes as they are.
@@ -186,8 +186,8 @@ No TOML key changes: `resources/battleUnit/*.toml` only holds `unitId`, `playerI
   `screen` section. Only `BattleUnitApi.moveBattleUnit` became `walkBattleUnitInBattle`.
 - The `storybook` and `StorybookApi` needed no change: the stories build a `BattleUnitInfo`, which waits for the `screen`
   section, and none builds a `BattleUnit.Dto`.
-- [Game data](../architecture/game-data.md) needed no change, as it only names the `movementRange` TOML key of a unit, which
-  waits for the `unit` section. [Inventory](../architecture/inventory.md) also changed, as it named `maximumHealthPoints`,
+- [Game data](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/game-data.md) needed no change, as it only names the `movementRange` TOML key of a unit, which
+  waits for the `unit` section. [Inventory](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/inventory.md) also changed, as it named `maximumHealthPoints`,
   `maximumManaPoints` and "turn action".
 - `Bonus.MaximumHealth.healthPoints`, `Bonus.MaximumMana.manaPoints` and the saved `points` of an equipped effect stay, and are
   added to what waits for the `effect` section.

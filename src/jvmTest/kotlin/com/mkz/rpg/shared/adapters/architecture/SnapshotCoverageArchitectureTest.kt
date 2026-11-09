@@ -7,9 +7,10 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import kotlin.test.Test
 
 /**
- * Saving the game snapshots every subdomain holding runtime state (see docs/architecture/save-and-load.md): each
- * subdomain with a repository has its `<subdomain>.adapters.save.<Subdomain>Snapshottable`, implementing `Snapshottable`,
- * unless it is listed below with why it is not saved. A new subdomain has to choose, so a save never misses its state.
+ * Saving the game snapshots every subdomain holding runtime state (see docs/adr/0010-per-subdomain-save-snapshots.md):
+ * each subdomain with a repository has its `<subdomain>.adapters.save.<Subdomain>Snapshottable`, implementing
+ * `Snapshottable`, unless it is listed below with why it is not saved. A new subdomain has to choose, so a save never
+ * misses its state.
  */
 class SnapshotCoverageArchitectureTest {
     private val rootPackage = "com.mkz.rpg"

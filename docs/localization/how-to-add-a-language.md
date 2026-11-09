@@ -60,4 +60,4 @@ The tests fail when a translation breaks one of these rules:
 - **Only use characters the game draws**: the ones listed above, and the common punctuation (e.g.: `¿ ¡ « » ·`), but
   not `…` nor typographic quotes (`“ ” ’`).
 
-See [Localization](../architecture/localization.md) for how the game reads the catalogs.
+See [ADR 0009](../adr/0009-gettext-po-catalogs-with-own-parser.md) for why the game reads PO catalogs.

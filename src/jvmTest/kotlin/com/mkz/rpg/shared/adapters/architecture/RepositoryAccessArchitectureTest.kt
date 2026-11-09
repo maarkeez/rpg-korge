@@ -10,7 +10,7 @@ import kotlin.test.Test
  * The domain declares a repository, its storage adapter implements it, and only its use cases call it: the Api of its
  * subdomain only builds it and hands it to them. So no adapter reads or writes an aggregate around the use cases (e.g.:
  * a snapshottable loading a save). The tests are not checked: they arrange their state through the repositories. See
- * docs/architecture/package-structure.md.
+ * docs/adr/0001-layered-subdomain-packages.md.
  */
 class RepositoryAccessArchitectureTest {
     private val rootPackage = "com.mkz.rpg"

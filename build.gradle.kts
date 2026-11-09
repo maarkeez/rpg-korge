@@ -88,7 +88,7 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
-    // Rewrites the golden save of the current version, e.g.: ./gradlew jvmTest -Drpg.updateSaveFixtures=true. See docs/architecture/save-and-load.md.
+    // Rewrites the golden save of the current version, e.g.: ./gradlew jvmTest -Drpg.updateSaveFixtures=true. See docs/adr/0011-no-save-migrations.md.
     systemProperty("rpg.updateSaveFixtures", providers.systemProperty("rpg.updateSaveFixtures").getOrElse("false"))
 }
 
@@ -110,7 +110,7 @@ tasks.withType<ConfigurableKtLintTask>().configureEach {
 }
 
 // The game reads its resources from a single bundle, so it loads them with one request instead of one per file.
-// Contributors keep editing the files under `resources`, and only the bundle is packaged. See docs/architecture/assets.md.
+// Contributors keep editing the files under `resources`, and only the bundle is packaged. See docs/adr/0003-single-resources-bundle.md.
 val resourcesBundle =
     tasks.register<ResourcesBundleTask>("resourcesBundle") {
         group = "build"
@@ -127,7 +127,7 @@ extensions.getByType<KotlinMultiplatformExtension>().sourceSets.matching { it.na
 }
 
 // The tests translate with the real catalogs, embedded in a generated source, as the JS tests can only read the
-// resources asynchronously. See docs/architecture/localization.md.
+// resources asynchronously.
 val testCatalogs =
     tasks.register<TestCatalogsTask>("testCatalogs") {
         group = "build"
@@ -154,7 +154,7 @@ tasks.withType<ProcessResources>().configureEach {
 
 tasks.register<DependencyReportTask>("dependencyReport") {
     group = "documentation"
-    description = "Generates the interactive report of the dependencies between the subdomains. See docs/architecture/dependencies.md."
+    description = "Generates the interactive report of the dependencies between the subdomains."
 
     sourceDirectory.set(file("src/commonMain/kotlin"))
     basePackage.set("com.mkz.rpg")

@@ -162,7 +162,7 @@ View tests are a bit different from the rest of the tests because they need to r
 * The test class **MUST** extend `korlibs.korge.tests.ViewsForTesting`.
 * Each test function **MUST** start by using [`sharedViewsTest`](../../src/commonTest/kotlin/com/mkz/rpg/shared/adapters/presentation/SharedViewsTestExtension.kt), and never KorGE's `viewsTest` directly. KorGE's `viewsTest` skips the test on JS, so the test would pass on JS without asserting anything. `sharedViewsTest` runs it on every target, letting the browser load the resources between frames. This is enforced by [`TestFrameworkArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/TestFrameworkArchitectureTest.kt).
 * The test **MUST** interact with the view through its page object, and never through the view internals (child views, `findViewByName`, `children`, KorGE view classes...). This is enforced by [`ViewTestPageObjectArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/ViewTestPageObjectArchitectureTest.kt).
-* A new view of the game **MUST** also have its stories in the [Storybook](../architecture/storybook.md), which renders each one in the smoke test. See [How to add a story](how-to-add-a-story.md).
+* A new view of the game **MUST** also have its stories in the [Storybook](../adr/0008-in-game-storybook.md), which renders each one in the smoke test. See [How to add a story](how-to-add-a-story.md).
 
 ### View page objects
 
@@ -258,7 +258,7 @@ class FinishPlayerTurnPresenterTest {
 }
 ```
 
-Presenters draw through the [presentation timeline](../architecture/presentation-timeline.md). Their tests use `GameSceneTimelineMother.gameSceneTimeline()`, which plays the steps straight away. To check that something waits for the previous steps, start a step that keeps the timeline playing with `timeline.playLongStep()`, and complete it later.
+Presenters draw through the presentation timeline (`GameSceneTimeline`). Their tests use `GameSceneTimelineMother.gameSceneTimeline()`, which plays the steps straight away. To check that something waits for the previous steps, start a step that keeps the timeline playing with `timeline.playLongStep()`, and complete it later.
 
 ## Test example - Use case acceptance test
 
@@ -325,7 +325,7 @@ End-to-end tests play the game as a player would: they boot the game headless, c
 - The test class MUST extend `korlibs.korge.tests.ViewsForTesting(windowSize = GAME_WINDOW_SIZE)` and each test MUST start with [`sharedViewsTest`](../../src/commonTest/kotlin/com/mkz/rpg/shared/adapters/presentation/SharedViewsTestExtension.kt), as the view tests do. It runs the game without a window or a GPU on both the JVM and JS, so it runs in the CI.
 - They MUST boot the app using `com.mkz.rpg.startApp()`, the same function used by `main`.
 - They MUST find the scene views through the [`GameScene` page object](../../src/commonTest/kotlin/com/mkz/rpg/screen/adapters/presentation/GameSceneExtension.kt) (e.g.: `battlefieldView()`), and interact with them and assert what is displayed through their view page objects (e.g.: `clickTile(...)`, `hasBattleUnitAt(...)`). See [View page objects](#view-page-objects).
-- They MUST wait until the human player can act (`canHumanPlayerAct()`: the turn has been announced and the finish turn is enabled) before clicking, as the player can not act on the game screen while it replays the battle. Waiting for what is displayed only is not enough: the last animation may have finished while its timeline step has not. See [Presentation timeline](../architecture/presentation-timeline.md).
+- They MUST wait until the human player can act (`canHumanPlayerAct()`: the turn has been announced and the finish turn is enabled) before clicking, as the player can not act on the game screen while it replays the battle. Waiting for what is displayed only is not enough: the last animation may have finished while its timeline step has not.
 - They MUST wait for the game to react using the shared [`waitUntil`](../../src/commonTest/kotlin/com/mkz/rpg/shared/adapters/e2e/EndToEndExtension.kt) helper, which is bounded by real time. The game loads its resources asynchronously in real time, while the frames are simulated much faster than that, so a fixed number of frames is not enough.
 
 To see what the player sees at any step of an end-to-end test, see [How to take a snapshot of the game during an end-to-end test](how-to-take-a-game-snapshot.md).

@@ -9,8 +9,8 @@
 > and the goblin is the effect's `target` while the glossary's Effect target is the ability's rule. Reading the code and
 > talking about the game take a translation. Instead, the classes, functions, TOML keys and values, and saved fields use
 > the glossary's words: Timing, Apply, Trigger, Recipient, Source, Amount, Duration and the outcomes' own words. The game
-> plays the same, and players read the same text. Builds on [Game data](../architecture/game-data.md) and
-> [Save and load](../architecture/save-and-load.md).
+> plays the same, and players read the same text. Builds on [Game data](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/game-data.md) and
+> [Save and load](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/save-and-load.md).
 
 ## Decisions
 
@@ -128,17 +128,17 @@
 
 ## Docs
 
-- [Game data](../architecture/game-data.md): the `effect/<effect id>.toml` section uses the new table, keys and values,
+- [Game data](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/game-data.md): the `effect/<effect id>.toml` section uses the new table, keys and values,
   says "amounts" as "the amount", and the ability info example says `ON_DEFEATED` `APPLY_EFFECT_TO_ADJACENT_ALLIES` of an
   `ON_PLAYER_TURN_STARTED` `DAMAGE`.
 - [How to add an effect outcome](../testing/how-to-add-an-effect-outcome.md): the outcome's names, and "where effects
   trigger" for "where effects are applied" when it means the outcome taking place.
-- [Presentation timeline](../architecture/presentation-timeline.md): `OnPlayerTurnStartedEffectTriggered`, "triggers" for
+- [Presentation timeline](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/presentation-timeline.md): `OnPlayerTurnStartedEffectTriggered`, "triggers" for
   "ticks".
-- [Package structure](../architecture/package-structure.md) and [Exploration](../architecture/exploration.md):
+- [Package structure](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/package-structure.md) and [Exploration](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/exploration.md):
   `TerrainEffectApplied` and `ApplyTerrainEffects`.
-- [CPU battle brain](../architecture/cpu-battle-brain.md): the outcome's names.
-- [Inventory](../architecture/inventory.md) and [Save and load](../architecture/save-and-load.md), where they name the
+- [CPU battle brain](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/cpu-battle-brain.md): the outcome's names.
+- [Inventory](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/inventory.md) and [Save and load](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/save-and-load.md), where they name the
   renamed fields.
 - `docs/architecture/dependencies.html` is generated again with `./gradlew dependencyReport`.
 
@@ -182,8 +182,8 @@
   applied.
 - `applyEquippedEffect` and `DeployBattleUnitEffectAcceptanceTest` keep their names: the plan did not name the first, and
   Deploy is still the glossary's word for putting a battle unit on the battlefield.
-- [Save and load](../architecture/save-and-load.md) needed no change, as it names none of the renamed fields. `v7.json`
+- [Save and load](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/save-and-load.md) needed no change, as it names none of the renamed fields. `v7.json`
   only differs from `v6.json` in its version, as the fixture's knight has no ongoing nor equipped effect.
-- [Presentation timeline](../architecture/presentation-timeline.md) also says the effects "triggered at the start of a
-  player turn" are seen wherever the battle unit is. The ability info line of [Game data](../architecture/game-data.md)
+- [Presentation timeline](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/presentation-timeline.md) also says the effects "triggered at the start of a
+  player turn" are seen wherever the battle unit is. The ability info line of [Game data](https://github.com/maarkeez/rpg-korge/blob/8692ff6f0fe556e6e9142583d589630779a6e17e/docs/architecture/game-data.md)
   says "outcome, timing and effect target".

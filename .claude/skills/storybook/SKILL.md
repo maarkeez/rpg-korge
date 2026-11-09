@@ -8,7 +8,7 @@ description: Opens a story of the game's Storybook (the views of the game shown 
 The Storybook is the game itself, started on another page: `/storybook/` instead of `/`. It shows one view of the game
 at a time, a story, in a phone frame, with its controls and actions on the right. A link opens exactly one state, e.g.:
 `/storybook/?story=screen-shop--sell&args=gold:0;selectedSlot:1&globals=language:es`. See
-[Storybook](../../../docs/architecture/storybook.md) for what it is, and
+[ADR 0008](../../../docs/adr/0008-in-game-storybook.md) for why it is part of the game, and
 [How to add a story](../../../docs/testing/how-to-add-a-story.md) to add one.
 
 To look at a story: build the web bundle, add the Storybook page to it, serve it, and run

@@ -25,7 +25,7 @@ class Messages(
     /** An amount of gold, e.g.: `50 G`. */
     fun gold(amount: Int): String = get(UiMessage.GOLD, "gold" to amount)
 
-    // The game data, translated from its id, e.g.: `unit.bat.name`. See docs/architecture/localization.md.
+    // The game data, translated from its id, e.g.: `unit.bat.name`.
     fun unitName(unitId: String): String = localizationApi.translate("unit.$unitId.name")
 
     fun abilityName(abilityId: String): String = localizationApi.translate("ability.$abilityId.name")

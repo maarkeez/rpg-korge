@@ -16,7 +16,7 @@ units. The code is split into subdomains, each with `domain`, `usecases` and `ad
 
 - The [template](template.md).
 - Any plan in `docs/plans/` the topic builds on or replaces.
-- The docs in `docs/architecture/` the topic touches.
+- The ADRs in `docs/adr/` the topic touches.
 - The code the plan touches: the subdomains, classes, functions, events, views, stories and tests involved. The plan
   names real ones (e.g. `BattlefieldView.moveBattleUnit`, `BattlefieldPresenterTest`), never made-up ones.
 
@@ -88,5 +88,5 @@ How the plans are written, to keep each one sounding like the others:
 - Code names (classes, functions, events, story ids) go in backticks. Stories are in bold as
   **Group / Component › Story**.
 - Test names follow the house style: `<Subject> should <outcome> when <condition>`, grouped under their test class.
-- Link the plans and the architecture docs it builds on with relative links (`../architecture/<doc>.md`).
+- Link the plans and the ADRs it builds on with relative links (`../adr/<NNNN-slug>.md`).
 - Tables are aligned.

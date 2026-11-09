@@ -9,7 +9,7 @@ import kotlin.test.Test
 /**
  * Every view of the game has its stories in the Storybook: a `<View>Stories` binding in the presentation package of the
  * storybook subdomain, listed in `StorybookApi`, with no exception. The views of the Storybook itself are left out.
- * See docs/architecture/package-structure.md.
+ * See docs/adr/0008-in-game-storybook.md.
  */
 class StoryCoverageArchitectureTest {
     private val storybookPresentationPackage = GameViews.STORYBOOK_PRESENTATION_PACKAGE
