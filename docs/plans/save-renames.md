@@ -1,6 +1,6 @@
 # Plan: Rename the code of the save subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** done, built on `main` in `87c925f7`.
 >
 > **Summary:** The code of the save subdomain loads a game but announces it restored (`LoadGame` publishes
 > `GameRestored`), while the [glossary](../../GLOSSARY.md) gives Restore to a battle unit getting mana back from an
@@ -96,3 +96,11 @@ The tests are renamed with the code, and their names and comments say the new wo
   `RestoreBattleUnits`, `BattleUnit.restore`…), say Restore for taking a snapshot back, which the effect section gives to
   a battle unit getting mana back.
 - `screen`: `SaveSlotsView.Delegate`'s `saveSlotSelected` and `saveSlotDeleteSelected`, and the `ui.saveSlots.*` keys.
+
+## Changes while building
+
+- `SaveGame` said "replacing the game saved there" as `Save.save` did, so its comment also says "overwriting the save
+  there", and `SaveGameTest` says `SaveGame should overwrite the save in the slot`.
+- The comments of `SaveEvent.GameLoaded`, `SaveEvent.SaveDeleted` and `DeleteSave` say "the save in the slot", and the
+  one of `SetUpGame` says "To load a save, … the save restores the rest".
+- `BattlefieldPresenterTest` also says "as the save holds it" for "as the saved game holds it".
