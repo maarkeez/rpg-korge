@@ -1,6 +1,6 @@
 # Plan: Rename the code of the terrain subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** done, built on `main` in `d52a6d56`.
 >
 > **Summary:** The code of the terrain subdomain says a terrain "allows" a transition to another, while the
 > [glossary](../../GLOSSARY.md) says a terrain transition is the border drawn where two terrains meet, which a terrain
