@@ -1,6 +1,6 @@
 # Plan: an npc says the line that fits its quest
 
-> **Status:** to do.
+> **Status:** done, built on `main` in 087ec991.
 >
 > **Summary:** Today every npc has a single line, `npc.<id>.line`, whatever its quests say. The Farmer thanks the party
 > for the gate bat before, during and after Bats in the Meadow, and never asks for the 3 bats. The Elder tells the Goat
@@ -227,3 +227,13 @@ And the talks with the Elf through Rats in the Fields, "Defeat 2 Rats", which is
 - A talk with the Elder before the main quest starts, after a teleport into the village, reads its own line and counts
   for nothing, as before.
 - The test helpers of the talk panel still say "dialog": `TalkView.tapDialog`, `clickDialog` and `isDialogShown`.
+
+## Changes while building
+
+- The comment of every own line in the catalogs reads "What the npc says when no quest has a line for it.", in place of
+  "What the npc says when the party talks to it.", as a quest line is said in its place now.
+- `QuestPresenterTest`'s `OpenQuest should list the active quests before the completed ones when one is completed` and
+  `QuestAbandon should return to the journal when a side quest is still listed` talk to the Farmer twice, as a talk
+  starts one of its two side quests. `presenterWithASideQuestOpen` takes how many talks to make.
+- `ExplorationPresenterTest` gives its Elder the main quest's talk task and its merchant `the-blacksmiths-errand`, so
+  the talk panel reads their quest lines from the real catalog.
