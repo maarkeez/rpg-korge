@@ -62,8 +62,6 @@ data class BattleUnit private constructor(
     private val maximumAbilities: MaximumAbilities,
     private val ongoingEffects: OngoingEffects,
     private val remainingSummonDuration: RemainingSummonDuration?,
-    // Its own events, each followed by the battlefield request it needs (e.g.: occupying the tile it was deployed on),
-    // published together so the battlefield is up to date before anything reacting to the next events.
     private val events: Set<DomainEvent>,
 ) {
     companion object {
@@ -98,7 +96,6 @@ data class BattleUnit private constructor(
                     ),
             )
 
-        /** Rebuilds the battle unit as it was when the game was saved, from its [toSnapshot], publishing no events. */
         fun load(snapshot: Dto.SnapshotDto): BattleUnit =
             BattleUnit(
                 Id(snapshot.id),
@@ -140,7 +137,6 @@ data class BattleUnit private constructor(
             remainingSummonDuration = remainingSummonDuration?.value,
         )
 
-    /** Its whole state, to save the game: [load] rebuilds it as it is. */
     fun toSnapshot() =
         Dto.SnapshotDto(
             id = id.value,
@@ -159,9 +155,6 @@ data class BattleUnit private constructor(
             remainingSummonDuration = remainingSummonDuration?.value,
         )
 
-    /**
-     * Path: the tiles walked from the origin (excluded) to the destination (included). Each tile costs one step.
-     */
     fun walkInBattle(
         fromRow: Int,
         fromColumn: Int,
@@ -184,10 +177,6 @@ data class BattleUnit private constructor(
         )
     }
 
-    /**
-     * Walks outside a battle (e.g.: while exploring), so it spends no step.
-     * Path: the tiles walked from the origin (excluded) to the destination (included).
-     */
     fun walkOutOfBattle(
         fromRow: Int,
         fromColumn: Int,
@@ -206,11 +195,6 @@ data class BattleUnit private constructor(
         return copy(events = events + movedEvent + movedEvent.occupantMoveRequest())
     }
 
-    /**
-     * Walks outside a battle onto the tile of the battle unit it swaps with, which walks onto its tile at the same time
-     * (e.g.: the leader of the party and the party member on its next tile). The battlefield swaps both occupants at
-     * once, so it is not requested to move this one.
-     */
     fun swap(
         fromRow: Int,
         fromColumn: Int,
@@ -244,7 +228,6 @@ data class BattleUnit private constructor(
                 fromColumn = fromColumn,
                 toRow = toRow,
                 toColumn = toColumn,
-                // A teleport jumps straight to the destination.
                 path = listOf(Battlefield.Dto.PositionDto(row = toRow, column = toColumn)),
             )
         return copy(
@@ -255,10 +238,6 @@ data class BattleUnit private constructor(
 
     private fun BattleUnitMoved.occupantMoveRequest() = RequestMoveOccupant(occupantId = battleUnitId, toRow = toRow, toColumn = toColumn)
 
-    /**
-     * A summon counts the player turns of its player: once the one it is on finishes, it has one fewer, and it vanishes
-     * when none is left. Nothing changes for the other battle units, nor once defeated.
-     */
     fun reduceRemainingSummonDuration(
         row: Int,
         column: Int,
@@ -268,10 +247,6 @@ data class BattleUnit private constructor(
         return if (reduced.isOver()) vanish(row = row, column = column) else copy(remainingSummonDuration = reduced)
     }
 
-    /**
-     * A summon vanishes from its tile, whatever summon duration it has left (e.g.: when the battle ends). Nothing changes for the
-     * other battle units, nor once defeated.
-     */
     fun vanish(
         row: Int,
         column: Int,
@@ -292,11 +267,6 @@ data class BattleUnit private constructor(
         )
     }
 
-    /**
-     * A defeated battle unit comes back on the tile as it was deployed with its unit: full health and mana, no equipped
-     * effects, no cooldowns, no ongoing effects. It keeps its id, its player, its maximum abilities and the abilities it
-     * learned, after the abilities of its unit. Nothing changes when it is not defeated.
-     */
     fun respawn(
         unit: Unit.Dto,
         row: Int,
@@ -335,30 +305,22 @@ data class BattleUnit private constructor(
         return copy(remainingMana = remainingMana)
     }
 
-    /**
-     * Recovers the percentage of its maximum health and mana (e.g.: while wandering out of the battles), rounded up and
-     * up to the maximums. A defeated battle unit does not recover, so it stays defeated.
-     */
     fun recover(percentage: Int): BattleUnit {
         if (isDefeated()) return this
-        val remainingHealth = RemainingHealth(min(remainingHealth.value + shareOf(maximumHealth(), percentage), maximumHealth()))
-        val remainingMana = RemainingMana(min(remainingMana.value + shareOf(maximumMana(), percentage), maximumMana()))
+        val remainingHealth = RemainingHealth(min(remainingHealth.value + shareRoundedUp(maximumHealth(), percentage), maximumHealth()))
+        val remainingMana = RemainingMana(min(remainingMana.value + shareRoundedUp(maximumMana(), percentage), maximumMana()))
         return copy(remainingHealth = remainingHealth, remainingMana = remainingMana)
     }
 
-    // The percentage of the maximum, rounded up, so any maximum gives at least 1.
-    private fun shareOf(
+    private fun shareRoundedUp(
         maximum: Int,
         percentage: Int,
     ): Int = (maximum * percentage + 99) / 100
 
-    /** The unit's maximum health, raised by the effects of the equipped items. */
     private fun maximumHealth(): Int = baseMaximumHealth.value + equippedEffects.maximumHealthBonus()
 
-    /** The unit's maximum mana, raised by the effects of the equipped items. */
     private fun maximumMana(): Int = baseMaximumMana.value + equippedEffects.maximumManaBonus()
 
-    /** Raises a maximum stat while the item is equipped. The remaining health and mana do not change. */
     fun applyEquippedEffect(
         lootableItemId: String,
         effect: Effect.Dto,
@@ -371,7 +333,6 @@ data class BattleUnit private constructor(
         )
     }
 
-    /** Removes the effects of an unequipped item, lowering the remaining health and mana to the new maximums when they are above them. */
     fun removeEquippedEffects(lootableItemId: String): BattleUnit {
         val unequipped = copy(equippedEffects = equippedEffects.remove(lootableItemId))
         return unequipped.copy(
@@ -385,7 +346,6 @@ data class BattleUnit private constructor(
 
     fun isSamePlayer(battleUnit: BattleUnit): Boolean = battleUnit.playerId == playerId
 
-    /** Whether it can learn the ability for good: it does not know it yet, and knows fewer abilities than the most it can. */
     fun canLearnAbility(abilityId: String): Boolean = !knownAbilities.knows(abilityId) && knownAbilities.value.size < maximumAbilities.value
 
     fun canCastAbility(ability: Ability.Dto): Boolean =
@@ -510,7 +470,6 @@ data class BattleUnit private constructor(
         }
     }
 
-    /** Learns the ability for good, after the abilities it knows, ready to be cast. */
     private fun learnAbility(abilityId: String): BattleUnit {
         if (knownAbilities.knows(abilityId)) throw AbilityAlreadyKnown()
         if (!canLearnAbility(abilityId)) throw AbilitiesAboveLimit()
@@ -523,11 +482,6 @@ data class BattleUnit private constructor(
 
     fun hasOnPlayerTurnStartedEffects(): Boolean = ongoingEffects.hasOnPlayerTurnStartedEffects()
 
-    /**
-     * Triggers each of its ongoing effects timed on player turn started, stacks included, in the order they were received, each on the
-     * battle unit as the previous one left it. Once one defeats it, the rest are not triggered. [effects] holds the definition of each of
-     * their effect ids.
-     */
     fun triggerOnPlayerTurnStartedEffects(
         effects: List<Effect.Dto>,
         currentRow: Int,
@@ -538,7 +492,6 @@ data class BattleUnit private constructor(
         while (!battleUnit.isDefeated()) {
             val index = battleUnit.ongoingEffects.nextOnPlayerTurnStartedIndex(from) ?: break
             val triggeredBattleUnit = battleUnit.triggerOnPlayerTurnStartedEffectAt(index, effects, currentRow, currentColumn)
-            // A stack triggered for its last player turn leaves the list, so the next one takes its place.
             val stackFinished = triggeredBattleUnit.ongoingEffects.value.size < battleUnit.ongoingEffects.value.size
             from = if (stackFinished) index else index + 1
             battleUnit = triggeredBattleUnit
@@ -569,7 +522,6 @@ data class BattleUnit private constructor(
         currentRow: Int,
         currentColumn: Int,
     ): BattleUnit {
-        // A defeat happens once until the battle unit respawns: a defeated battle unit takes no more damage.
         if (isDefeated()) return copy(ongoingEffects = ongoingEffects)
         val remainingHealth = RemainingHealth(max(0, remainingHealth.value - effect.outcome.damage!!.damage))
         val newEvents =
@@ -607,7 +559,6 @@ data class BattleUnit private constructor(
         val value: String,
     )
 
-    /** The player turns a summon has left, counting the one it is on. */
     @JvmInline private value class RemainingSummonDuration(
         val value: Int,
     ) {
@@ -636,12 +587,10 @@ data class BattleUnit private constructor(
         val value: Int,
     )
 
-    // The most abilities it knows, those of its unit and those it learned, given by the unit when deployed.
     @JvmInline private value class MaximumAbilities(
         val value: Int,
     )
 
-    /** The effects of the equipped items, which last until their item is unequipped. */
     @JvmInline private value class EquippedEffects(
         val value: List<EquippedEffect>,
     ) {
@@ -821,7 +770,6 @@ data class BattleUnit private constructor(
 
         fun knows(abilityId: String): Boolean = AbilityId(abilityId) in value
 
-        // The ability is added after the known ones, with no cooldown.
         fun learn(abilityId: String) = KnownAbilities(value + (AbilityId(abilityId) to RemainingCooldown(0)))
 
         fun canCastAbility(abilityId: String): Boolean {
@@ -857,7 +805,6 @@ data class BattleUnit private constructor(
         }
     }
 
-    /** The abilities learned for good (e.g.: by consuming an item), which are kept when it respawns. */
     @JvmInline private value class LearnedAbilities(
         val value: List<String>,
     ) {
@@ -889,15 +836,10 @@ data class BattleUnit private constructor(
 
         fun triggerImmediateEffect(effectId: String): OngoingEffects = OngoingEffects(value.filterNot { it.isImmediate() && it.hasEffectId(effectId) })
 
-        /** The place of the first ongoing effect timed on player turn started at or after [from], or `null` when there is none left. */
         fun nextOnPlayerTurnStartedIndex(from: Int): Int? = (from until value.size).firstOrNull { index -> value[index].isOnPlayerTurnStarted() }
 
         fun effectIdAt(index: Int): String = value.getOrNull(index)?.effectId() ?: throw EffectNotFound()
 
-        /**
-         * Triggers the stack at [index] on its own: it has one less remaining duration, and leaves once triggered for its last player turn.
-         * The other stacks of the same effect keep theirs.
-         */
         fun triggerOnPlayerTurnStarted(index: Int): OngoingEffects {
             val effect = value.getOrNull(index) ?: throw EffectNotFound()
             if (!effect.isOnPlayerTurnStarted()) throw NotOnPlayerTurnStarted()
@@ -1015,16 +957,13 @@ data class BattleUnit private constructor(
         val playerId: String,
         val remainingHealth: Int,
         val remainingMana: Int,
-        // Including the effects of the equipped items.
         val maximumHealth: Int,
         val maximumMana: Int,
-        // The effect ids applied by each equipped lootable item id.
         val equippedEffects: Map<String, List<String>>,
         val remainingActions: RemainingActionsDto,
         val knownAbilities: Map<String, Int>,
         val unitId: String,
         val ongoingEffects: OngoingEffectsDto,
-        // The player turns a summon has left, counting the one it is on. None for the battle units that never vanish.
         val remainingSummonDuration: Int?,
     ) {
         data class RemainingActionsDto(
@@ -1039,11 +978,6 @@ data class BattleUnit private constructor(
             val onDefeatedEffects: List<String>,
         )
 
-        /**
-         * The whole state of a battle unit, to save the game. Base maximums: without the bonuses of the equipped items.
-         * Learned abilities: the ones learned for good (e.g.: by consuming an item), also listed in the known abilities, up to its
-         * maximum abilities.
-         */
         data class SnapshotDto(
             val id: String,
             val unitId: String,
@@ -1061,7 +995,6 @@ data class BattleUnit private constructor(
             val remainingSummonDuration: Int?,
         )
 
-        /** An effect of an equipped item, with the amount its bonus adds to the maximum health or mana. */
         data class EquippedEffectSnapshotDto(
             val lootableItemId: String,
             val effectId: String,
@@ -1074,7 +1007,6 @@ data class BattleUnit private constructor(
             }
         }
 
-        /** An effect received and not triggered yet, with its remaining duration when it triggers on each player turn started. */
         data class OngoingEffectSnapshotDto(
             val effectId: String,
             val timing: TimingDto,

@@ -87,7 +87,6 @@ class CastAbilityTest {
         // Given
         queries.abilityRepository.create(ability(id = "ability-1", manaCost = 0, cooldown = 0, targeting = CASTER))
         queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(startingAbilities = listOf("ability-1"), baseMaximumMana = 10).toDto()))
-        // The ability can only be cast on the knight own tile.
         queries.battlefieldRepository.create(battlefield(". K", occupants = mapOf('K' to "knight-1")))
         // When
         val error =

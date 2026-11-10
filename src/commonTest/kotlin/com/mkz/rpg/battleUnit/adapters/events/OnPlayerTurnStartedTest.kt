@@ -40,7 +40,6 @@ class OnPlayerTurnStartedTest {
         queries.unitRepository.create(knight)
         queries.effectRepository.create(damageEffect(id = "venom", damage = 3))
         queries.battlefieldRepository.create(battlefield("K .", occupants = mapOf('K' to "knight-1")))
-        // The knight has cast the sword in its previous turn, and is poisoned.
         queries.battleUnitRepository.create(
             battleUnit(id = "knight-1", unit = knight.toDto(), player = player(id = "human").toDto())
                 .castAbility(abilityId = "sword", abilityCooldown = 2, abilityManaCost = 15, castGroup = listOf(PositionDto(row = 0, column = 1)))

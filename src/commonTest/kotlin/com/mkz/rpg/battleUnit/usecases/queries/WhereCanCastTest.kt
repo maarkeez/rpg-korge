@@ -20,7 +20,6 @@ class WhereCanCastTest {
 
     private fun storeAbility(targeting: Ability.Dto.TargetingDto) = queries.abilityRepository.create(ability(id = "ability-1", targeting = targeting))
 
-    // Stores the battle units of the given players and the battlefield where they stand.
     private fun battlefieldWith(
         map: String,
         players: Map<Char, String>,
@@ -89,7 +88,6 @@ class WhereCanCastTest {
     fun `should return a single cast group with all adjacent enemy positions when the ability targets all adjacent enemies`() {
         // Given
         storeAbility(targeting = Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES)
-        // E and F are adjacent enemies, G is a diagonal enemy and A is an ally.
         battlefieldWith(
             """
             . . .
@@ -177,7 +175,6 @@ class WhereCanCastTest {
     fun `should return adjacent vacant tiles when the ability targets vacant adjacent tiles to self`() {
         // Given
         storeAbility(targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER)
-        // The diagonal tile is vacant too, but it is not adjacent.
         battlefieldWith(
             """
             C .

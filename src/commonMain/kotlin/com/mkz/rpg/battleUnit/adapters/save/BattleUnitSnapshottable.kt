@@ -12,7 +12,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
-/** Every battle unit as it is, see [SearchBattleUnitsSnapshot] and [LoadBattleUnitsSnapshot]. */
 class BattleUnitSnapshottable(
     private val searchBattleUnitsSnapshot: SearchBattleUnitsSnapshot,
     private val loadBattleUnitsSnapshot: LoadBattleUnitsSnapshot,
@@ -23,6 +22,8 @@ class BattleUnitSnapshottable(
 
     override fun load(snapshot: String) = loadBattleUnitsSnapshot(SnapshotJson.decodeFromString<List<BattleUnitSnapshot>>(snapshot).map(BattleUnitSnapshot::toDto))
 }
+
+private const val CASTS_OF_EVERY_PLAYER_TURN = 1
 
 @Serializable
 private data class BattleUnitSnapshot(
@@ -78,8 +79,7 @@ private data class BattleUnitSnapshot(
                 equippedEffects.map { effect ->
                     EquippedEffectSnapshotDto(effect.lootableItemId, effect.effectId, EquippedEffectSnapshotDto.BonusDto.valueOf(effect.bonus), effect.amount)
                 },
-            // The casts of a player turn are not saved, as they are the same for every battle unit.
-            remainingActions = RemainingActionsDto(remainingCasts = remainingCasts, remainingSteps = remainingSteps, maximumSteps = maximumSteps, maximumCasts = 1),
+            remainingActions = RemainingActionsDto(remainingCasts = remainingCasts, remainingSteps = remainingSteps, maximumSteps = maximumSteps, maximumCasts = CASTS_OF_EVERY_PLAYER_TURN),
             knownAbilities = knownAbilities,
             learnedAbilityIds = learnedAbilityIds,
             maximumAbilities = maximumAbilities,
@@ -87,7 +87,6 @@ private data class BattleUnitSnapshot(
             remainingSummonDuration = remainingSummonDuration,
         )
 
-    // Bonus: MAXIMUM_HEALTH or MAXIMUM_MANA.
     @Serializable
     data class EquippedEffect(
         val lootableItemId: String,
@@ -96,7 +95,6 @@ private data class BattleUnitSnapshot(
         val amount: Int,
     )
 
-    // Timing: IMMEDIATE, ON_PLAYER_TURN_STARTED or ON_DEFEATED. Remaining duration: only when it triggers on each player turn started.
     @Serializable
     data class OngoingEffect(
         val effectId: String,

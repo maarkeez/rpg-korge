@@ -564,7 +564,7 @@ class BattleUnitTest {
 
     @Test
     fun `TriggerImmediateEffect should learn the ability after the known ones, ready to be cast, when the effect teaches an ability`() {
-        // Given: sword is cooling down.
+        // Given
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = UnitMother.unit(startingAbilities = listOf("sword")).toDto())
@@ -793,7 +793,6 @@ class BattleUnitTest {
             .ongoingEffects
             .map { effect -> effect.remainingDuration }
             .shouldContainExactly(4, 4)
-        // The events of a battle unit are a set, so the same events of both stacks are published once.
         val (events, _) = updatedBattleUnit.pullEvents()
         events.map { event -> event::class }.shouldContainExactly(
             BattleUnitEvent.OnPlayerTurnStartedEffectTriggered::class,
@@ -1062,7 +1061,6 @@ class BattleUnitTest {
         result.exceptionOrNull().shouldBeTypeOf<BattleUnitError.EquippedEffectsNotFound>()
     }
 
-    // A battle unit of a unit with 20 health and 10 mana, hurt and with some mana spent.
     private fun hurtBattleUnit(
         remainingHealth: Int,
         spentMana: Int,
@@ -1088,7 +1086,7 @@ class BattleUnitTest {
 
     @Test
     fun `Recover should round the recovered health and mana up`() {
-        // Given: 10% of 15 health and of 5 mana are 1.5 and 0.5.
+        // Given
         val battleUnit = hurtBattleUnit(remainingHealth = 5, spentMana = 5, baseMaximumHealth = 15, baseMaximumMana = 5)
         // When
         val recoveredBattleUnit = battleUnit.recover(percentage = 10)
@@ -1110,7 +1108,7 @@ class BattleUnitTest {
 
     @Test
     fun `Recover should recover the percentage of the maximums raised by the equipped effects`() {
-        // Given: the hammer raises the maximum health from 20 to 40.
+        // Given
         val battleUnit =
             hurtBattleUnit(remainingHealth = 10, spentMana = 0)
                 .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumHealthEffect(maximumHealth = 20).toDto())
@@ -1253,7 +1251,7 @@ class BattleUnitTest {
 
     @Test
     fun `Respawn should bring a defeated battle unit back as it was deployed`() {
-        // Given: it spent mana and a cast, its ability is cooling down, and it equipped the hammer before being defeated.
+        // Given
         val unit = UnitMother.unit(baseMaximumHealth = 20, baseMaximumMana = 10).toDto()
         val player = PlayerMother.player().toDto()
         val defeatedBattleUnit =
@@ -1277,7 +1275,7 @@ class BattleUnitTest {
 
     @Test
     fun `Respawn should keep the learned abilities after the abilities of its unit, with no cooldown`() {
-        // Given: it learned teleport and cast it before being defeated.
+        // Given
         val unit = UnitMother.unit(baseMaximumHealth = 20, startingAbilities = listOf("sword")).toDto()
         val defeatedBattleUnit =
             BattleUnitMother
@@ -1300,7 +1298,7 @@ class BattleUnitTest {
 
     @Test
     fun `Respawn should keep the maximum abilities of the battle unit`() {
-        // Given: it knows sword, learned teleport, and can know 3 abilities.
+        // Given
         val unit = UnitMother.unit(baseMaximumHealth = 20, startingAbilities = listOf("sword")).toDto()
         val defeatedBattleUnit =
             BattleUnitMother

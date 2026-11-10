@@ -27,11 +27,6 @@ class PreviewCastOngoingEffectsTest {
             castResolution = queries.castResolution,
         )
 
-    /**
-     * Stores the battle units standing on the battlefield map, and the effects:
-     * - `C` is the caster, of player-1. `E` and `F` are enemy-1 and enemy-2, of player-2.
-     * - "venom" is applied on every turn started, "curse" when defeated, and "slash" immediately.
-     */
     private fun givenBattle(map: String) {
         val player = player(id = "player-1").toDto()
         val opponent = player(id = "player-2").toDto()

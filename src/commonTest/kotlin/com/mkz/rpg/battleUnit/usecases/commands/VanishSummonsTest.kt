@@ -21,7 +21,6 @@ class VanishSummonsTest {
     private val human = player(id = "human").toDto()
     private val bee = unit(id = "bee").toDto()
 
-    // The knight-1 and the bees of the human stand on the battlefield. The bee-3 was defeated, and stands no more.
     init {
         queries.battlefieldRepository.create(
             battlefield(

@@ -39,15 +39,12 @@ class ApplyEffect(
         application: EffectApplicationDto,
         effect: Effect.Dto,
     ) {
-        // TODO: Revisit this policy, should we include/exclude other effect outcome types?
         val tile = application.recipient.position ?: throw FailedToReceiveAbilityEffects()
         if (effect.outcome.type != SUMMON) throw FailedToReceiveAbilityEffects()
         val casterId = application.source.battleUnitId ?: throw FailedToReceiveAbilityEffects()
         val caster = battleUnitRepository.searchById(casterId) ?: throw FailedToReceiveAbilityEffects()
-        // The summon lasts the turns of the ability it is cast with.
         val abilityId = application.source.abilityId ?: throw FailedToReceiveAbilityEffects()
         val ability = searchAbilityById(abilityId) ?: throw FailedToReceiveAbilityEffects()
-        // Deployed right away, as the other effects are applied, so the battlefield is occupied before the cast is resolved.
         val events =
             battleUnitDeployment.deploy(
                 battleUnitId = "summon-${Random.nextLong()}",
@@ -87,11 +84,9 @@ class ApplyEffect(
                     battleUnit.receiveOnDefeatedEffect(effectId = effect.id).pullEvents()
                 }
                 TimingTypeDto.BEFORE_APPLYING_EFFECT -> {
-                    // TODO: We are missing business logic, this timing is not yet implemented
                     throw FailedToReceiveAbilityEffects()
                 }
                 TimingTypeDto.WHILE_EQUIPPED -> {
-                    // Only an equipped item applies effects that last while it is equipped.
                     val lootableItemId = application.source.lootableItemId
                     if (application.source.type != SourceTypeDto.ITEM || lootableItemId == null) throw FailedToReceiveAbilityEffects()
                     battleUnit.applyEquippedEffect(lootableItemId = lootableItemId, effect = effect).pullEvents()

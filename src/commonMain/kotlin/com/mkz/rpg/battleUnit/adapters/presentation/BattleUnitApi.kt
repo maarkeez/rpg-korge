@@ -74,15 +74,12 @@ class BattleUnitApi(
     eventBus: EventBus,
     private val battleUnitLoader: BattleUnitLoader,
 ) {
-    // Storage
     private val battleUnitRepository: BattleUnitRepository = InMemoryBattleUnitRepository()
 
-    // Save
     private val searchBattleUnitsSnapshot = SearchBattleUnitsSnapshot(battleUnitRepository)
     private val loadBattleUnitsSnapshot = LoadBattleUnitsSnapshot(battleUnitRepository, unitApi.searchUnitById, playerApi.searchPlayerById, abilityApi.searchAbilityById, effectApi.searchEffectById)
     val snapshottable: Snapshottable = BattleUnitSnapshottable(searchBattleUnitsSnapshot, loadBattleUnitsSnapshot)
 
-    // Services
     private val adjacencyService = AdjacencyService()
     private val battleUnitDeployment =
         BattleUnitDeployment(
@@ -93,7 +90,6 @@ class BattleUnitApi(
             battlefieldApi.isTileVacant,
         )
 
-    // Queries
     val searchBattleUnitById = SearchBattleUnitById(battleUnitRepository)
     val canWalkTo =
         CanWalkTo(
@@ -129,7 +125,6 @@ class BattleUnitApi(
         )
     val canLearnAbility = CanLearnAbility(battleUnitRepository)
 
-    // Services
     val castResolution =
         CastResolution(
             battleUnitRepository,
@@ -153,7 +148,6 @@ class BattleUnitApi(
             castResolution,
         )
 
-    // Commands
     val deployBattleUnit =
         DeployBattleUnit(
             battleUnitDeployment,
@@ -232,7 +226,6 @@ class BattleUnitApi(
     val requestJoinBattle = RequestJoinBattle(eventBus)
     val requestLeaveBattle = RequestLeaveBattle(areAllBattleUnitsDefeated, eventBus)
 
-    // Events
     private val onPlayerTurnStarted = OnPlayerTurnStarted(resetBattleUnitActionsAndReduceCooldowns, triggerOnPlayerTurnStartedEffects, replenishMana, eventBus)
     private val onPlayerTurnFinished = OnPlayerTurnFinished(reduceRemainingSummonDurations, eventBus)
     private val onBattleFinishedWithoutWinner = OnBattleFinishedWithoutWinner(vanishSummons, eventBus)

@@ -10,10 +10,6 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.TimingDto.TimingTypeDto
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 
-/**
- * The health each battle unit would have left right after the ability is cast on the cast group, keyed by battle unit
- * id. Only the battle units whose health the cast changes immediately (e.g.: damaged or healed) are listed.
- */
 class PreviewCastRemainingHealth(
     private val searchAbilityById: SearchAbilityById,
     private val searchEffectById: SearchEffectById,
@@ -31,7 +27,6 @@ class PreviewCastRemainingHealth(
         castGroup: List<Battlefield.Dto.PositionDto>,
     ): Map<String, Int> {
         val ability = searchAbilityById(abilityId) ?: return emptyMap()
-        // The effects are applied to copies of the battle units, in the order the cast applies them, without storing them.
         val previewedBattleUnits = mutableMapOf<String, BattleUnit>()
         castGroup
             .flatMap { position -> castResolution(casterId = battleUnitId, ability = ability, targetedRow = position.row, targetedColumn = position.column) }

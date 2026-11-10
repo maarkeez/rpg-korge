@@ -3,7 +3,6 @@ package com.mkz.rpg.battleUnit.usecases.commands
 import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Requests the battle unit to join the battle, when there is one, e.g.: when it is deployed during the battle. */
 class RequestJoinBattle(
     private val eventBus: EventBus,
 ) {

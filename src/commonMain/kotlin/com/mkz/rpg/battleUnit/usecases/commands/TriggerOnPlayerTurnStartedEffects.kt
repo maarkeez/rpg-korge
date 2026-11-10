@@ -6,7 +6,6 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Battle units: those in the battle. The battle units of the player outside it stay as they are. */
 class TriggerOnPlayerTurnStartedEffects(
     private val searchEffectById: SearchEffectById,
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId,
@@ -25,7 +24,6 @@ class TriggerOnPlayerTurnStartedEffects(
         battleUnits
             .filter { battleUnit -> battleUnit.hasOnPlayerTurnStartedEffects() }
             .forEach { battleUnit ->
-                // Every stack of an effect shares its definition.
                 val effects =
                     battleUnit
                         .toDto()

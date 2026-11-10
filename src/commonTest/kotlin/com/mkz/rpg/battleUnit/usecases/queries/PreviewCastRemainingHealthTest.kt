@@ -31,12 +31,6 @@ class PreviewCastRemainingHealthTest {
             castResolution = queries.castResolution,
         )
 
-    /**
-     * Stores the battle units standing on the battlefield map, with 20 health, and the effects:
-     * - `C` is the caster, of player-1, with 10 health left. `E` and `F` are enemy-1 and enemy-2, of player-2.
-     * - "slash" deals 6 damage and "smash" 30 immediately, "cure" heals 4 and "elixir" 50 immediately, "venom" deals
-     *   3 damage on every turn started, and "ether" restores 5 mana immediately.
-     */
     private fun givenBattle(map: String) {
         val player = player(id = "player-1").toDto()
         val opponent = player(id = "player-2").toDto()

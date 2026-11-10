@@ -4,10 +4,6 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Once a player finishes its player turn, its summons in the battle have one fewer. Those with none left vanish: they
- * are deleted, so nothing counts them anymore. Battle units: those in the battle.
- */
 class ReduceRemainingSummonDurations(
     private val battleUnitRepository: BattleUnitRepository,
     private val searchPosition: SearchPosition,

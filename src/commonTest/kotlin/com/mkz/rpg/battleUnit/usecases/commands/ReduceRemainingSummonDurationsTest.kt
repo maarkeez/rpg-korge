@@ -23,7 +23,6 @@ class ReduceRemainingSummonDurationsTest {
     private val cpu = player(id = "cpu").toDto()
     private val bee = unit(id = "bee").toDto()
 
-    // The knight-1 and the bees of the human, and the bat of the cpu, stand on the battlefield.
     private fun givenBattlefield() {
         queries.battlefieldRepository.create(
             battlefield(

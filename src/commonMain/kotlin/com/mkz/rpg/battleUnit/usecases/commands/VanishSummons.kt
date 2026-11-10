@@ -4,10 +4,6 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Once the battle ends, every summon left vanishes, whatever summon duration it has left, as the summons never explore. They are
- * deleted, so nothing counts them anymore.
- */
 class VanishSummons(
     private val battleUnitRepository: BattleUnitRepository,
     private val searchPosition: SearchPosition,

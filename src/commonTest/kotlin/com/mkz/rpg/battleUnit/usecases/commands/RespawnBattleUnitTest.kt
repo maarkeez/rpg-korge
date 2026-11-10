@@ -27,7 +27,6 @@ class RespawnBattleUnitTest {
     private val rat = unit(id = "rat", baseMaximumHealth = 20)
     private val cpu = player(id = "cpu").toDto()
 
-    // The rat-1 is defeated, on a 1x3 sand battlefield.
     @BeforeTest
     fun setUp() {
         unitRepository.create(rat)

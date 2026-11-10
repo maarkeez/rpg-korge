@@ -26,26 +26,22 @@ sealed interface BattleUnitEvent : DomainEvent {
         val walkToColumn: Int,
     ) : BattleUnitEvent
 
-    // Requested outside a battle (e.g.: while exploring), so the walk spends no step.
     data class RequestWalkBattleUnitOutOfBattle(
         val battleUnitId: String,
         val walkToRow: Int,
         val walkToColumn: Int,
     ) : BattleUnitEvent
 
-    // Requested outside a battle (e.g.: while exploring), for two battle units that swap their tiles at once.
     data class RequestSwapBattleUnits(
         val battleUnitId: String,
         val otherBattleUnitId: String,
     ) : BattleUnitEvent
 
-    // Requested for the CPU battle units wandering out of the battles, which recover a percentage of their maximum health and mana.
     data class RequestRecoverBattleUnits(
         val battleUnitIds: List<String>,
         val percentage: Int,
     ) : BattleUnitEvent
 
-    // Requested for a recruited npc, which joins the party as a battle unit of its unit, on its tile.
     data class RequestDeployBattleUnit(
         val battleUnitId: String,
         val unitId: String,
@@ -54,7 +50,6 @@ sealed interface BattleUnitEvent : DomainEvent {
         val column: Int,
     ) : BattleUnitEvent
 
-    // Requested for the defeated CPU battle units the CPU wander brain brings back home.
     data class RequestRespawnBattleUnit(
         val battleUnitId: String,
         val row: Int,
@@ -65,14 +60,11 @@ sealed interface BattleUnitEvent : DomainEvent {
         val application: Effect.Dto.EffectApplicationDto,
     ) : BattleUnitEvent
 
-    // Requested when an item is unequipped, so the battle unit loses the effects it applied while equipped.
     data class RequestRemoveEquippedEffects(
         val battleUnitId: String,
         val lootableItemId: String,
     ) : BattleUnitEvent
 
-    // Path: the tiles walked from the origin (excluded) to the destination (included). Swapped with: the battle unit that
-    // walked onto its tile at the same time, or null when it walked alone.
     data class BattleUnitMoved(
         val battleUnitId: String,
         val fromRow: Int,
@@ -89,7 +81,6 @@ sealed interface BattleUnitEvent : DomainEvent {
         val castGroup: List<Battlefield.Dto.PositionDto>,
     ) : BattleUnitEvent
 
-    // Published once every effect of a cast has been applied to its targets.
     data class AbilityCastResolved(
         val battleUnitId: String,
         val abilityId: String,
@@ -100,7 +91,6 @@ sealed interface BattleUnitEvent : DomainEvent {
         val effectId: String,
     ) : BattleUnitEvent
 
-    // Published every time an on player turn started effect triggers (e.g.: venom damage).
     data class OnPlayerTurnStartedEffectTriggered(
         val battleUnitId: String,
         val effectId: String,
@@ -127,13 +117,11 @@ sealed interface BattleUnitEvent : DomainEvent {
         val battleUnitId: String,
     ) : BattleUnitEvent
 
-    // The battle unit knows the ability for good, at the end of its abilities.
     data class AbilityLearned(
         val battleUnitId: String,
         val abilityId: String,
     ) : BattleUnitEvent
 
-    // A summon whose summon duration is over: it is gone, not defeated. It carries its unit and its tile, as it is deleted.
     data class BattleUnitVanished(
         val playerId: String,
         val battleUnitId: String,
@@ -142,7 +130,6 @@ sealed interface BattleUnitEvent : DomainEvent {
         val column: Int,
     ) : BattleUnitEvent
 
-    // A defeated battle unit back on the battlefield, as it was deployed.
     data class BattleUnitRespawned(
         val playerId: String,
         val battleUnitId: String,
@@ -150,7 +137,6 @@ sealed interface BattleUnitEvent : DomainEvent {
         val column: Int,
     ) : BattleUnitEvent
 
-    // It carries its unit, so its loot can be dropped.
     data class BattleUnitDefeated(
         val playerId: String,
         val battleUnitId: String,

@@ -28,7 +28,6 @@ class RequestEffectApplicationToCastTargets(
                 eventBus.publish(BattleUnitEvent.RequestApplyEffect(application = application))
             }
         }
-        // Published after the effect requests, so it is handled once all of them have been applied.
         eventBus.publish(BattleUnitEvent.AbilityCastResolved(battleUnitId = battleUnitId, abilityId = abilityId))
     }
 }

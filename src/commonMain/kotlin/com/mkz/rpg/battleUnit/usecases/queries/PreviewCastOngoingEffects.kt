@@ -6,11 +6,6 @@ import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.effect.domain.Effect.Dto.TimingDto.TimingTypeDto
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 
-/**
- * The effects that would stay on each battle unit (e.g.: a venom damaging it on every player turn started) when the ability
- * is cast on the cast group, keyed by battle unit id. Each effect is listed as many times as it would be received.
- * The effects applied immediately are not listed, as they do not stay on the battle units.
- */
 class PreviewCastOngoingEffects(
     private val searchAbilityById: SearchAbilityById,
     private val searchEffectById: SearchEffectById,
@@ -26,7 +21,6 @@ class PreviewCastOngoingEffects(
         castGroup: List<Battlefield.Dto.PositionDto>,
     ): Map<String, List<String>> {
         val ability = searchAbilityById(abilityId) ?: return emptyMap()
-        // The same applications as the cast, which applies the ability on each tile of the cast group.
         return castGroup
             .flatMap { position -> castResolution(casterId = battleUnitId, ability = ability, targetedRow = position.row, targetedColumn = position.column) }
             .filter { application -> searchEffectById(application.effectId)?.timing?.type in ONGOING_TIMINGS }

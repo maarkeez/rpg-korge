@@ -17,7 +17,6 @@ class WhereCanWalkTest {
     fun `should return positions that can be walked to when the battle unit can walk`() {
         // Given
         queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(maximumSteps = 2).toDto()))
-        // The tiles behind the wall are in range, but too far to walk to.
         queries.battlefieldRepository.create(
             battlefield(
                 """

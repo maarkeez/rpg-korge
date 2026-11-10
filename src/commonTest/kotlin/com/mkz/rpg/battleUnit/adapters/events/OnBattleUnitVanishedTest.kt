@@ -18,7 +18,7 @@ class OnBattleUnitVanishedTest {
 
     @Test
     fun `should request the summon to leave the battle, and its player to be defeated, when its last battle unit vanishes`() {
-        // Given: the vanished summon is no longer stored, and the cpu has no other battle unit.
+        // Given
         eventBus.publish(BattleUnitEvent.BattleUnitVanished(playerId = "cpu", battleUnitId = "bat-1", unitId = "bat", row = 0, column = 1))
         // When
         eventBus.dispatch()

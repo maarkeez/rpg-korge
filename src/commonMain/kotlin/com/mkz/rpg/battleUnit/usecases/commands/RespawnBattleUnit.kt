@@ -5,10 +5,6 @@ import com.mkz.rpg.battlefield.usecases.queries.IsTileVacant
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 
-/**
- * Brings a defeated battle unit back on the tile, as it was deployed. Nothing happens when it is not defeated or the
- * tile is not vacant (e.g.: another battle unit stands on it), so it can be requested again later.
- */
 class RespawnBattleUnit(
     private val battleUnitRepository: BattleUnitRepository,
     private val searchUnitById: SearchUnitById,

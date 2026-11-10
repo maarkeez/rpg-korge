@@ -9,10 +9,6 @@ import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 
-/**
- * Replaces every battle unit by the ones a save took, publishing no events. Fails when a battle unit names a unit, a
- * player, an ability or an effect the game no longer has.
- */
 class LoadBattleUnitsSnapshot(
     private val battleUnitRepository: BattleUnitRepository,
     private val searchUnitById: SearchUnitById,

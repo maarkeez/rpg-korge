@@ -11,10 +11,6 @@ import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.unit.usecases.queries.SearchMaximumAbilities
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 
-/**
- * Deploys a battle unit on the battlefield once its unit, its player and the tile are valid. Remaining summon duration: what a
- * summon lasts, none for the battle units that never vanish. Returns the events to publish.
- */
 class BattleUnitDeployment(
     private val battleUnitRepository: BattleUnitRepository,
     private val searchUnitById: SearchUnitById,

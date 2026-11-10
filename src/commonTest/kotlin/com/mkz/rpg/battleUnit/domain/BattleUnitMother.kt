@@ -21,7 +21,6 @@ object BattleUnitMother {
         val deployedBattleUnit = BattleUnit.deploy(id, unit, player, maximumAbilities, deployAtRow, deployAtColumn, remainingSummonDuration).pullEvents().second
         val damage = unit.baseMaximumHealth - remainingHealth
         if (damage == 0) return deployedBattleUnit
-        // A battle unit can only lose health by receiving damage.
         val damageEffect = damageEffect(damage = damage, timingType = "IMMEDIATELY").toDto()
         return deployedBattleUnit.triggerImmediateEffect(damageEffect, deployAtRow, deployAtColumn).pullEvents().second
     }
