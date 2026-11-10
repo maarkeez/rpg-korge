@@ -43,10 +43,6 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class InventoryPresenterTest {
-    // The battle has started with the human player turn. The human knight-1 (100 health points) stands at (1,1), and the
-    // cpu rat-1 at (1,3), on a 4x4 sand battlefield. The health potion (10 G) heals 10 and the hammer (50 G) raises the maximum health by 20.
-    // The knight can summon a bee next to it. The teleport essence teaches teleport, and the bee essence teaches bee. The knight explored before the
-    // battle, so it has an inventory.
     private val apis =
         SubdomainApis(
             terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
@@ -77,7 +73,6 @@ class InventoryPresenterTest {
                 ),
             units = listOf(unit(id = "knight", baseMaximumHealth = 100, startingAbilities = listOf("bee"), startingGold = 20).toDto(), unit(id = "rat").toDto(), unit(id = "bee").toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
-            // The rats drop nothing, so the items lying on the battlefield are only the ones the test places, as dropped by a rat.
             lootTables = listOf(lootTable(id = "rat-loot", entries = listOf(nothingEntry())).toDto()),
             lootDrops = listOf(lootDrop(unitId = "rat", lootTableIds = listOf("rat-loot")).toDto()),
             tiles = List(4) { List(4) { "sand" } },
@@ -96,7 +91,6 @@ class InventoryPresenterTest {
     private val callToActionView = FakeCallToActionView()
     private val timeline = gameSceneTimeline()
 
-    // The presenter is created once the battle has started, so it only reacts to what the test publishes.
     private val inventoryPresenter =
         InventoryPresenter(
             inventoryView = inventoryView,
@@ -122,7 +116,6 @@ class InventoryPresenterTest {
         eventBus.dispatch()
     }
 
-    // The battle unit loots the item from its tile.
     private fun loot(
         battleUnitId: String,
         lootableItemId: String,
@@ -138,14 +131,12 @@ class InventoryPresenterTest {
         column: Int,
     ) = publish(SelectionEvent.BattleUnitSelected(tile = TileDto(row, column), battleUnitId = battleUnitId, walkingRange = emptySet()))
 
-    // The player selects the knight and opens its inventory.
     private fun openKnightInventory() {
         select("knight-1", row = 1, column = 1)
         battleUnitInfoView.onInventoryButtonSelected.shouldNotBeNull().invoke()
         eventBus.dispatch()
     }
 
-    // The knight summons a bee next to it, and returns the tile it stands on.
     private fun summonBee(): TileDto {
         val castGroup = apis.battleUnitApi.whereCanCast("knight-1", "bee").first()
         apis.battleUnitApi.castAbility(battleUnitId = "knight-1", abilityId = "bee", castGroup = castGroup)
@@ -181,7 +172,6 @@ class InventoryPresenterTest {
 
     private fun fillKnightInventoryWithHealthPotions() = repeat(12) { loot("knight-1", "health-potion") }
 
-    // The knight finds an item lying on (1,2) while its inventory is full.
     private fun findWhileFull(lootableItemId: String) {
         apis.lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = lootableItemId, row = 1, column = 2)
         apis.inventoryApi.storeLootedItem(battleUnitId = "knight-1", lootableItemId = lootableItemId, row = 1, column = 2)
@@ -683,7 +673,6 @@ class InventoryPresenterTest {
     fun `ConsumeItem should consume the item out of the battles when the battle has finished while exploring`() {
         // Given
         loot("knight-1", "health-potion")
-        // The battle finishes during the cpu turn, as the rat leaves it.
         apis.battleApi.finishPlayerTurn()
         eventBus.dispatch()
         apis.battleApi.startNextRound(joiningPlayerId = null, joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = listOf("rat-1"))

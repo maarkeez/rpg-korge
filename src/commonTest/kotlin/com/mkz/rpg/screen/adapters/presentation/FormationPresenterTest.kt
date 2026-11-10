@@ -19,7 +19,6 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class FormationPresenterTest {
-    // The knight leads from (1,1), followed by the viking at (2,1) and the herbalist at (2,2). There is no battle.
     private val apis =
         SubdomainApis(
             terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
@@ -44,7 +43,6 @@ class FormationPresenterTest {
     private val vikingTile = TilePosition(row = 2, column = 1)
     private val herbalistTile = TilePosition(row = 2, column = 2)
 
-    // The party explores, and the formation opens, as when B is pressed.
     private fun openTheFormation() {
         apis.partyApi.startExploration()
         eventBus.dispatch()

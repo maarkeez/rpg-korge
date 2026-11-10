@@ -1,6 +1,5 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-// Records the options the presenter displays in the menu, so the tests can select them.
 class FakeWorldBuilderMenuView : WorldBuilderMenuView() {
     var displayedOptions: List<Option> = emptyList()
         private set

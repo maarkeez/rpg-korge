@@ -30,7 +30,6 @@ class BannerPresenter(
             eventBus.subscribe<ExplorationStarted> {
                 timeline.play { bannerView.displayExploring() }
             },
-            // A save is loaded exploring.
             eventBus.subscribe<GameLoaded> {
                 timeline.play { bannerView.displayExploring() }
             },
@@ -51,9 +50,6 @@ class BannerPresenter(
             },
         )
 
-    // Each function reads what it needs straight away and draws it once the previous timeline steps have been played.
-
-    // The header pops while the battlefield is tinted with the turn colour.
     fun announcePlayerTurn() {
         val battle = battleApi.searchBattle()!!
         val player = playerApi.searchPlayerById(battle.currentPlayerId)!!

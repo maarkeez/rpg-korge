@@ -3,7 +3,6 @@ package com.mkz.rpg.screen.adapters.presentation
 import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailabilities.AbilityAvailability
 
-/** Maps a battle unit to what the views of the battle unit draw, for the presenters displaying them. */
 internal object BattleUnitInfoMapper {
     fun battleUnitInfo(
         battleUnit: BattleUnit.Dto,

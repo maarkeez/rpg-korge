@@ -46,7 +46,6 @@ class QuestPresenterTest {
     private val callToActionView = FakeCallToActionView()
     private val timeline = gameSceneTimeline()
 
-    // The knight explores the sand, alone, with the quests given.
     private fun apis(
         vararg quests: Quest,
         npcs: List<Npc.Dto> = emptyList(),
@@ -83,7 +82,6 @@ class QuestPresenterTest {
         eventBus.dispatch()
     }
 
-    // The quest under way.
     private fun SubdomainApis.startedPresenter(): QuestPresenter {
         val presenter = presenter()
         startQuest()
@@ -156,7 +154,7 @@ class QuestPresenterTest {
         apis.presenter()
         apis.questApi.resolveNpcTalk("farmer")
         apis.eventBus.dispatch()
-        // When: pinned, then the pin is tapped again
+        // When
         apis.questApi.pinQuest("side")
         apis.eventBus.dispatch()
         apis.questApi.pinQuest("side")
@@ -216,7 +214,7 @@ class QuestPresenterTest {
         apis.eventBus.publish(QuestStarted(questId = "side"))
         apis.eventBus.publish(QuestCompleted(questId = "side"))
         apis.eventBus.dispatch()
-        // Then: the tracker stays on the main quest, as it was.
+        // Then
         announcementView.announcements.map { (moment, quest) -> moment to quest.id }.shouldContainExactly(Moment.STARTED to questId, Moment.STARTED to "side", Moment.COMPLETED to "side")
         trackerView.displayedQuests.map { quest -> quest.id }.shouldContainExactly(questId)
     }
@@ -241,7 +239,7 @@ class QuestPresenterTest {
         announcementView.fadeAnnouncement()
         apis.eventBus.publish(QuestCompleted(questId = "side"))
         apis.eventBus.dispatch()
-        // Then: with none left, the next one plays straight away.
+        // Then
         announcementView.announcements.size shouldBe 3
     }
 
@@ -417,7 +415,6 @@ class QuestPresenterTest {
             .shouldBeTrue()
     }
 
-    // The main quest under way and the side quests of the farmer started, with the party reading them.
     private fun SubdomainApis.presenterWithASideQuestOpen(): QuestPresenter {
         val presenter = presenter()
         startQuest()
@@ -464,7 +461,7 @@ class QuestPresenterTest {
 
     @Test
     fun `questJournalSelected should display Back alone when it is the main quest or a completed one`() {
-        // Given: the side quest completed before opening, as the last defeat also wins the battle, which closes the journal.
+        // Given
         val apis = apis(mainQuest(id = questId), sideQuest(id = "side", tasks = listOf(defeat(unitId = "rat", requiredDefeats = 1))))
         val presenter = apis.presenter()
         apis.startQuest()
@@ -485,7 +482,7 @@ class QuestPresenterTest {
 
     @Test
     fun `OpenQuest should open the detail view when only the main quest is listed`() {
-        // Given: a side quest that has not started is hidden.
+        // Given
         val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
         val presenter = apis.presenter()
         apis.startQuest()
@@ -841,7 +838,7 @@ class QuestPresenterTest {
 
     @Test
     fun `QuestPresenter should draw no marker when the npc is not on the battlefield`() {
-        // Given: nobody stands for the farmer.
+        // Given
         val apis = apis(mainQuest(id = questId), sideQuest(id = "side", questGiverNpcId = "farmer"))
         apis.presenter()
         // When

@@ -7,7 +7,6 @@ import com.mkz.rpg.localization.usecases.services.FakeLocalizationLoader
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 
 object MessagesMother {
-    /** The messages of the real catalogs, in English unless the [languageCode] says otherwise, e.g.: `es`. */
     fun messages(languageCode: String = ResourcesLocalizationLoader.SOURCE_LANGUAGE_CODE): Messages = Messages(localizationApi(languageCode))
 
     fun localizationApi(languageCode: String = ResourcesLocalizationLoader.SOURCE_LANGUAGE_CODE): LocalizationApi {

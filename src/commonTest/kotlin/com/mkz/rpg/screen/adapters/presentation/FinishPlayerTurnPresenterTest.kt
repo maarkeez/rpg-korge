@@ -19,7 +19,6 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class FinishPlayerTurnPresenterTest {
-    // The battle has started with the human player turn.
     private val apis =
         SubdomainApis(
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
@@ -38,7 +37,6 @@ class FinishPlayerTurnPresenterTest {
 
     private fun startTurnOf(playerId: String) = publish(PlayerTurnStarted(playerId = playerId, battleUnitIds = emptySet()))
 
-    // The player clicks on the finish turn the presenter displayed.
     private fun clickFinishPlayerTurn() {
         callToActionView.onPlayerTurnFinished.shouldNotBeNull().invoke()
         eventBus.dispatch()

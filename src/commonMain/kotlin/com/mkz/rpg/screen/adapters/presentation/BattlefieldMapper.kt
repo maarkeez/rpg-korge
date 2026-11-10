@@ -2,7 +2,6 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battlefield.domain.Battlefield
 
-/** Maps a battlefield and its positions to what the views of the battlefield draw, for the presenters displaying them. */
 internal object BattlefieldMapper {
     fun terrain(battlefield: Battlefield.Dto): BattlefieldTerrain =
         BattlefieldTerrain(

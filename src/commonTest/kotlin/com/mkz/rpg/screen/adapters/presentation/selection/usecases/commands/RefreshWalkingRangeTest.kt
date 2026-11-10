@@ -41,7 +41,6 @@ class RefreshWalkingRangeTest {
     fun `should display the current tile and walking range of the selected battle unit when it is selected`() {
         // Given
         queries.battleRepository.create(battle(battleUnitIds = setOf("battle-unit-1")))
-        // The battle unit has moved from where the selection displays it.
         selectionRepository.create(battleUnitSelected(tile = tile(0, 0), battleUnitId = "battle-unit-1"))
         queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(maximumSteps = 1).toDto()))
         queries.battlefieldRepository.create(battlefield(". K .", occupants = mapOf('K' to "battle-unit-1")))
@@ -73,7 +72,6 @@ class RefreshWalkingRangeTest {
     @Test
     fun `should not display the selected battle unit again when it has not moved out of the battles`() {
         // Given
-        // E.g.: a CPU battle unit wandering next to it while its inventory is displayed.
         val selection = battleUnitSelected(tile = tile(0, 1), battleUnitId = "battle-unit-1", walkingRange = emptySet())
         selectionRepository.create(selection)
         queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(maximumSteps = 1).toDto()))

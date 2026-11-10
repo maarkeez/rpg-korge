@@ -15,14 +15,6 @@ import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
 
-/**
- * The shop of the merchant the party talks to, where one party member at a time buys or sells. It opens to buy or to
- * sell, with the leader as buyer, and every tile dimmed but the buyer's and the merchant's. Tapping an item displays its
- * name and price, and tapping it again clears the selection, as switching the buyer does. The items the buyer can not
- * trade are dimmed. The row of the call to action holds Back, and beside it, while an item is selected, Buy, or Sell, or
- * why the buyer can not trade it, disabled. Back is handed to the listener set with [setOnBack], which returns to the
- * merchant's talk panel.
- */
 class ShopPresenter(
     private val shopView: ShopView,
     private val battlefieldView: BattlefieldView,
@@ -36,7 +28,6 @@ class ShopPresenter(
     private val timeline: GameSceneTimeline,
     eventBus: EventBus,
 ) : ShopView.Delegate {
-    // What the scene displays. Changed in timeline order, like the views.
     private var merchant: Npc.Dto? = null
     private var partyMemberIds: List<String> = emptyList()
     private var buyerIndex = 0
@@ -45,12 +36,10 @@ class ShopPresenter(
     private var selectedSlotIndex: Int? = null
     private var onBack: (() -> Unit)? = null
 
-    /** Whether the scene displays the shop. */
     val isOpen: Boolean get() = merchant != null
 
     private val subscriptions =
         listOf(
-            // After buying, the item stays selected, to buy another one. After selling, the item left.
             eventBus.subscribe<ItemBought> { event -> timeline.play { refresh(event.battleUnitId, keepsSelection = true) } },
             eventBus.subscribe<ItemSold> { event -> timeline.play { refresh(event.battleUnitId, keepsSelection = false) } },
         )
@@ -68,7 +57,6 @@ class ShopPresenter(
         onBack = listener
     }
 
-    /** Displays the shop of the merchant, to buy or to sell, with the leader as buyer. To be played in the timeline. */
     suspend fun open(
         merchant: Npc.Dto,
         mode: Mode,
@@ -82,7 +70,6 @@ class ShopPresenter(
         highlightBuyer()
     }
 
-    /** Hides the shop and restores the tiles. Nothing happens when it is not open. */
     fun close() {
         if (merchant == null) return
         merchant = null
@@ -95,7 +82,6 @@ class ShopPresenter(
 
     private fun buyerId(): String? = partyMemberIds.getOrNull(buyerIndex)
 
-    // Displays the items to buy or to sell, dimming the ones the buyer can not trade, and the buyer, clearing the selection.
     private fun displayShop() {
         val merchant = merchant ?: return
         val buyerId = buyerId() ?: return
@@ -128,7 +114,6 @@ class ShopPresenter(
         clearSelection()
     }
 
-    // Every tile but the buyer's and the merchant's is dimmed, and the battlefield scrolls to the buyer.
     private suspend fun highlightBuyer() {
         val merchant = merchant ?: return
         val buyerPosition = buyerId()?.let { buyerId -> battlefieldApi.searchPosition(buyerId) } ?: return
@@ -137,7 +122,6 @@ class ShopPresenter(
         battlefieldView.scrollToTile(buyerPosition.row, buyerPosition.column)
     }
 
-    // The hint tells what tapping an item does, or that the buyer has nothing to sell.
     private fun clearSelection() {
         selectedSlotIndex = null
         shopView.selectSlot(null)
@@ -153,8 +137,6 @@ class ShopPresenter(
 
     private fun backAction() = ButtonRowView.Action(messages[UiMessage.SHOP_BACK]) { whenIdle { onBack?.invoke() } }
 
-    // Displays the name and price of the item with Buy, or Sell, or why the buyer can not trade it, disabled. Tapping the
-    // selected item, or an empty slot, clears the selection.
     private fun selectItem(slotIndex: Int) {
         val buyerId = buyerId() ?: return
         if (slotIndex == selectedSlotIndex) return clearSelection()
@@ -191,7 +173,6 @@ class ShopPresenter(
             Mode.SELL -> inventoryApi.searchSellRefusal(buyerId, lootableItemId)
         }
 
-    // The refusals the shop can meet. The others (e.g.: no longer trading) leave Buy or Sell disabled.
     private fun refusalText(refusal: TradeRefusalDto): String? =
         when (refusal) {
             TradeRefusalDto.NOT_ENOUGH_GOLD -> messages[UiMessage.SHOP_NOT_ENOUGH_GOLD]
@@ -201,7 +182,6 @@ class ShopPresenter(
             TradeRefusalDto.NOT_TRADING, TradeRefusalDto.NOT_SOLD_BY_THE_MERCHANT, TradeRefusalDto.NOT_STORED -> null
         }
 
-    // Buys or sells the selected item, when the buyer can.
     private fun trade() {
         val buyerId = buyerId() ?: return
         val lootableItemId = selectedSlotIndex?.let { slotIndex -> displayedSlots.getOrNull(slotIndex) }?.lootableItemId ?: return
@@ -212,7 +192,6 @@ class ShopPresenter(
         }
     }
 
-    // Displays the buyer's new gold and inventory once it traded.
     private fun refresh(
         battleUnitId: String,
         keepsSelection: Boolean,
@@ -233,12 +212,10 @@ class ShopPresenter(
             }
         }
 
-    // The player can only act once the scene shows the current state of the shop.
     private fun whenIdle(action: () -> Unit) {
         if (!timeline.isPlaying && isOpen) action()
     }
 
-    // Delegates
     override fun shopSlotSelected(index: Int) = whenIdle { timeline.play { selectItem(index) } }
 
     override fun shopBuyerStepped(step: Int) = switchBuyer(buyerIndex + step)

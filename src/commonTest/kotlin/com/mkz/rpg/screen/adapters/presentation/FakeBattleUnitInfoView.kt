@@ -1,6 +1,5 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-// Records what the presenters ask the battle unit info view to display, instead of drawing it.
 class FakeBattleUnitInfoView : BattleUnitInfoView(GameSceneResourcesLoader(), MessagesMother.messages()) {
     data class DisplayedBattleUnit(
         val battleUnit: BattleUnitInfo,
@@ -19,7 +18,6 @@ class FakeBattleUnitInfoView : BattleUnitInfoView(GameSceneResourcesLoader(), Me
     var hideCount = 0
         private set
 
-    // The inventory button the player can click, or `null` while it is hidden.
     var onInventoryButtonSelected: (() -> kotlin.Unit)? = null
         private set
 

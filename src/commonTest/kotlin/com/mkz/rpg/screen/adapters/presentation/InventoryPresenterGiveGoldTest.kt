@@ -31,8 +31,6 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class InventoryPresenterGiveGoldTest {
-    // The human party explores a 4x4 sand battlefield, with no battle: the knight-1 leads at (1,1), followed by the viking-1
-    // at (1,2) and the mage-1 at (2,1). The cpu rat-1 wanders at (3,3). Each starts with the gold of its unit, set per test.
     private fun apis(
         knightGold: Int = 120,
         vikingGold: Int = 100,
@@ -100,7 +98,6 @@ class InventoryPresenterGiveGoldTest {
             eventBus.dispatch()
         }
 
-        // The player selects the knight and opens its inventory.
         fun openKnightInventory() {
             publish(SelectionEvent.BattleUnitSelected(tile = TileDto(1, 1), battleUnitId = "knight-1", walkingRange = emptySet()))
             battleUnitInfoView.onInventoryButtonSelected.shouldNotBeNull().invoke()

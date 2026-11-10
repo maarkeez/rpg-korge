@@ -26,8 +26,6 @@ class BannerPresenterTest {
     private lateinit var apis: SubdomainApis
     private lateinit var bannerPresenter: BannerPresenter
 
-    // Starts the battle in the given round, with the turn of the player-1, a knight each. The presenter is created once the battle has started,
-    // so it only reacts to what the test publishes.
     private fun turnOf(
         type: Player.Dto.PlayerTypeDto,
         round: Int = 1,

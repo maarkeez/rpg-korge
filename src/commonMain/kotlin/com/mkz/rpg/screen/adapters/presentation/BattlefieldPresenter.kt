@@ -51,13 +51,10 @@ class BattlefieldPresenter(
     AbilityButtonView.Delegate {
     private val selectionApi = SelectionApi(battlefieldApi, battleUnitApi, playerApi, battleApi, eventBus)
 
-    // The items displayed on each tile. Changed in timeline order, so each step draws the loot the battle had then.
     private val displayedDroppedItems = mutableMapOf<PositionDto, List<String>>()
 
-    // Takes the tapped tiles before the selection, e.g.: while giving an item. Returns whether it took the tap.
     private var tileInterceptor: ((row: Int, column: Int) -> Boolean)? = null
 
-    // The first battle unit of a swap and its unit, until the battle unit it swaps with has moved as well.
     private var pendingSwap: Pair<BattleUnitEvent.BattleUnitMoved, String>? = null
 
     private val subscriptions =
@@ -75,7 +72,6 @@ class BattlefieldPresenter(
             eventBus.subscribe<NpcEvent.NpcPlaced> { event ->
                 timeline.play { battlefieldView.displayNpc(event.row, event.column, event.npcId, event.unitId) }
             },
-            // A recruited npc leaves its tile, where the battle unit it joins the party as is displayed, blinking once it has joined.
             eventBus.subscribe<NpcEvent.NpcRecruited> { event ->
                 timeline.play { battlefieldView.removeNpc(event.row, event.column) }
             },
@@ -85,50 +81,40 @@ class BattlefieldPresenter(
             eventBus.subscribe<BattleUnitEvent.BattleUnitMoved> { event ->
                 moveUnit(event)
             },
-            // While exploring, the camera trails the leader, e.g.: once a battle finishes, and stops when a battle starts.
             eventBus.subscribe<PartyEvent.ExplorationStarted> { trailPartyLeader() },
-            // A save is loaded without announcing what it holds: it is all drawn at once, then the camera trails the leader.
             eventBus.subscribe<SaveEvent.GameLoaded> {
                 displayLoadedGame()
                 trailPartyLeader()
             },
             eventBus.subscribe<PartyEvent.ExplorationResumed> { trailPartyLeader() },
-            // The camera eases to the new leader once the formation is closed.
             eventBus.subscribe<PartyEvent.FormationClosed> { trailPartyLeader() },
-            // The health blinked while exploring is removed too, so it does not linger over the battle.
             eventBus.subscribe<PartyEvent.ExplorationInterrupted> {
                 timeline.play {
                     battlefieldView.stopTrailing()
                     battlefieldView.removeHealthBlinks()
                 }
             },
-            // The selected caster is displayed again once its cast has been resolved.
             eventBus.subscribe<BattleUnitEvent.AbilityCastResolved> {
                 selectionApi.refreshWalkingRange()
             },
-            // An occupied tile (e.g.: a battle unit moved or deployed) may close paths of the selected battle unit.
             eventBus.subscribe<BattlefieldEvent.TileOccupied> {
                 selectionApi.refreshWalkingRange()
             },
-            // While exploring, alongside the timeline, so the party keeps walking, e.g.: while standing on water heals it.
             eventBus.subscribe<BattleUnitEvent.EffectReceived> { event ->
                 blinkUnit(event.battleUnitId, isAlongside = !isBattling())
             },
             eventBus.subscribe<BattleUnitEvent.OnPlayerTurnStartedEffectTriggered> { event ->
                 blinkUnit(event.battleUnitId)
             },
-            // While exploring, the health is displayed as the battle unit blinks, e.g.: so standing on lava is seen hurting.
             eventBus.subscribe<BattleUnitEvent.BattleUnitDamaged> { event ->
                 if (!isBattling()) blinkHealth(event.battleUnitId)
             },
             eventBus.subscribe<BattleUnitEvent.BattleUnitHealed> { event ->
                 if (!isBattling()) blinkHealth(event.battleUnitId)
             },
-            // A vanished summon is deleted, so it is blinked from the event, before the occupant is removed.
             eventBus.subscribe<BattleUnitEvent.BattleUnitVanished> { event ->
                 timeline.play { battlefieldView.blinkBattleUnit(row = event.row, column = event.column, unitId = event.unitId) }
             },
-            // A removed occupant (e.g.: a battle unit defeated) may open paths of the selected battle unit.
             eventBus.subscribe<BattlefieldEvent.OccupantRemoved> { event ->
                 removeUnit(event.row, event.column)
                 selectionApi.refreshWalkingRange()
@@ -139,15 +125,11 @@ class BattlefieldPresenter(
             eventBus.subscribe<LootDropEvent.DroppedItemLooted> { event ->
                 timeline.play { lootDroppedItem(event.row, event.column, event.lootableItemId) }
             },
-            // The selection is cleared before the turn is announced, and can not be acted on during the new turn. A human
-            // turn then selects the party leader, so the player sees what it can do. Its selection is published while the
-            // turn starts, so it is drawn once the turn has been announced.
             eventBus.subscribe<BattleEvent.PlayerTurnStarted> { event ->
                 timeline.play { clearSelection() }
                 selectionApi.deselectBattleUnit()
                 selectPartyLeader(event)
             },
-            // The selection is cleared when the battle finishes, as the party explores again.
             eventBus.subscribe<BattleEvent.BattleFinishedWithoutWinner> {
                 timeline.play { clearSelection() }
                 selectionApi.deselectBattleUnit()
@@ -181,8 +163,6 @@ class BattlefieldPresenter(
         battleUnitInfoView.setDelegate(this)
     }
 
-    // Each function reads what it needs straight away and draws it once the previous timeline steps have been played.
-
     fun displayBattlefield() {
         val battlefield = battlefieldApi.searchBattlefield()!!
         timeline.play { battlefieldView.displayBattlefield(BattlefieldMapper.terrain(battlefield)) }
@@ -197,8 +177,6 @@ class BattlefieldPresenter(
         timeline.play { battlefieldView.displayBattleUnit(row, column, battleUnit.unitId) }
     }
 
-    // Every battle unit and npc on its tile, and every dropped item, as the game was saved. The buildings are already
-    // displayed, as they are placed when the scene is set up.
     private fun displayLoadedGame() {
         val battlefield = battlefieldApi.searchBattlefield() ?: return
         val occupants = battlefield.tiles.mapNotNull { (position, tile) -> tile.occupantId?.let { occupantId -> position to occupantId } }
@@ -223,12 +201,10 @@ class BattlefieldPresenter(
         subscriptions.forEach(Subscription::dispose)
     }
 
-    /** Hands the tapped tiles to the interceptor first, which returns whether it took the tap, e.g.: to give an item. */
     fun setTileInterceptor(interceptor: (row: Int, column: Int) -> Boolean) {
         tileInterceptor = interceptor
     }
 
-    /** Selects the battle unit, as if the player had tapped its tile, e.g.: the party member the inventory switches to. */
     fun select(battleUnitId: String) = selectionApi.selectBattleUnit(battleUnitId)
 
     private fun moveUnit(event: BattleUnitEvent.BattleUnitMoved) {
@@ -243,8 +219,6 @@ class BattlefieldPresenter(
         }
         val isBattling = isBattling()
         val stepDuration = if (isBattling) BattlefieldView.MOVE_STEP_DURATION else BattlefieldView.EXPLORING_STEP_DURATION
-        // While exploring, the battlefield only trails the leader, so it does not scroll from one party member to another,
-        // and the followers glide together with the leader, so the party walks a tile in a single step.
         val isFollowing = !isBattling && isPartyFollower(battleUnit)
         val following =
             when {
@@ -266,15 +240,12 @@ class BattlefieldPresenter(
         if (isFollowing) timeline.playTogether(step) else timeline.play(step)
     }
 
-    // Reads where the leader stands when the exploration starts or resumes, unless a battle has already started.
     private fun trailPartyLeader() {
         val party = partyApi.searchParty()?.takeIf { party -> party.isExploring } ?: return
         val leaderPosition = party.leaderBattleUnitId?.let(battlefieldApi.searchPosition::invoke) ?: return
         timeline.play { battlefieldView.trail(leaderPosition.row, leaderPosition.column) }
     }
 
-    // Both battle units of a swap are animated in a single step, once both have moved: the party leader hops over the
-    // member, whichever of them moved first.
     private fun swapUnit(
         event: BattleUnitEvent.BattleUnitMoved,
         unitId: String,
@@ -308,9 +279,6 @@ class BattlefieldPresenter(
         return battleUnit.id in party.battleUnitIds && battleUnit.id != party.leaderBattleUnitId
     }
 
-    // The CPU battle units out of the battles wander without scrolling the battlefield away from the party, nor clearing
-    // the selection (e.g.: to use the inventory). While exploring, alongside the timeline, so the party keeps walking
-    // smoothly. When a round finishes, in the timeline, so they are seen before the next round starts.
     private fun wanderUnit(
         event: BattleUnitEvent.BattleUnitMoved,
         unitId: String,
@@ -362,7 +330,6 @@ class BattlefieldPresenter(
         if (isAlongside) timeline.playAlongside(step) else timeline.play(step)
     }
 
-    // Alongside the timeline, as the blink while exploring, so the party keeps walking.
     private fun blinkHealth(battleUnitId: String) {
         val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return
         val position = battlefieldApi.searchPosition(battleUnitId) ?: return
@@ -379,8 +346,6 @@ class BattlefieldPresenter(
         val abilityAvailabilities = battleUnitApi.searchAbilityAvailabilities(battleUnit.id)
         val isBattling = isBattling()
         return {
-            // In a battle, the battlefield scrolls to the selected battle unit (e.g.: the party leader when its turn
-            // starts), when it is out of the viewport or on its edge.
             if (isBattling) battlefieldView.scrollToTile(row = battleUnitSelectedEvent.tile.row, column = battleUnitSelectedEvent.tile.column)
             battlefieldView.resetTiles()
             battleUnitInfoView.display(
@@ -402,7 +367,6 @@ class BattlefieldPresenter(
         }
     }
 
-    // The party leader, when it is in the battle and the turn is the human player's.
     private fun selectPartyLeader(event: BattleEvent.PlayerTurnStarted) {
         if (playerApi.searchPlayerById(event.playerId)?.type != Player.Dto.PlayerTypeDto.HUMAN) return
         val leaderId = partyApi.searchParty()?.leaderBattleUnitId ?: return
@@ -418,7 +382,6 @@ class BattlefieldPresenter(
     private fun displayAbilitySelected(event: SelectionEvent.AbilitySelected): suspend () -> Unit {
         val battleUnit = battleUnitApi.searchBattleUnitById(event.battleUnitId)!!
         val abilityIndex = battleUnit.knownAbilities.keys.indexOf(event.abilityId)
-        // A castable ability: no reason to tell.
         val abilityInfo = abilityInfo(event.abilityId)
         return {
             battlefieldView.resetTiles()
@@ -438,12 +401,10 @@ class BattlefieldPresenter(
         }
     }
 
-    // An ability only read: framed, with why it can not be cast, and the battlefield dimmed but the caster.
     private fun displayAbilityInfo(event: SelectionEvent.AbilityInfoDisplayed): suspend () -> Unit {
         val battleUnit = battleUnitApi.searchBattleUnitById(event.battleUnitId)!!
         val abilityIndex = battleUnit.knownAbilities.keys.indexOf(event.abilityId)
         val ability = abilityApi.searchAbilityById(event.abilityId)!!
-        // The CPU's abilities are never the player's to cast, so they tell no reason.
         val reason =
             if (isCpuBattleUnit(battleUnit)) {
                 null
@@ -524,15 +485,12 @@ class BattlefieldPresenter(
         }
     }
 
-    /** A tile of the previewed cast group, and the health its battle unit would have left. Null when the tile is vacant. */
     private data class CastGroupTile(
         val row: Int,
         val column: Int,
         val healthPreview: BattlefieldHealthBarPreviewView.PreviewOption?,
     )
 
-    // The health each battle unit would have left once the ability is cast on the cast group, keyed by battle unit id.
-    // Only the battle units whose health the cast changes are listed.
     private fun previewCastRemainingHealth(
         casterBattleUnitId: String,
         abilityId: String,
@@ -560,7 +518,6 @@ class BattlefieldPresenter(
             CastGroupTile(row = tile.row, column = tile.column, healthPreview = healthPreview)
         }
 
-    // The battle units of the cast group display the health they would have left, and the vacant tiles are selected.
     private fun displayCastGroup(castGroupTiles: List<CastGroupTile>) {
         castGroupTiles.forEach { tile ->
             if (tile.healthPreview == null) {
@@ -571,7 +528,6 @@ class BattlefieldPresenter(
         }
     }
 
-    // The effects that would stay on each battle unit once the ability is cast on the cast group, keyed by battle unit id.
     private fun previewCastOngoingEffects(
         casterBattleUnitId: String,
         abilityId: String,
@@ -583,7 +539,6 @@ class BattlefieldPresenter(
             castGroup = castGroup.tiles.map { tile -> PositionDto(row = tile.row, column = tile.column) },
         )
 
-    // The preview takes the place of the battle unit info, its ability info included.
     private fun displayCastPreview() {
         battleUnitInfoView.hideAbilityInfo()
         hudView.displayCastPreviewView()
@@ -593,27 +548,22 @@ class BattlefieldPresenter(
         )
     }
 
-    // The player can only act once the scene shows the current state of the battle.
     private fun whenIdle(action: () -> Unit) {
         if (!timeline.isPlaying) action()
     }
 
-    // Out of a battle (e.g.: while exploring), the battle units are not selected.
     private fun isBattling(): Boolean = battleApi.searchBattle()?.isFinished == false
 
     private fun isCpuBattleUnit(battleUnit: BattleUnit.Dto): Boolean = playerApi.searchPlayerById(battleUnit.playerId)?.type == Player.Dto.PlayerTypeDto.CPU
 
-    // A CPU battle unit out of the battles moves only to wander: while exploring, or out of the battle in progress.
     private fun isWandering(battleUnit: BattleUnit.Dto): Boolean {
         if (!isCpuBattleUnit(battleUnit)) return false
         val battle = battleApi.searchBattle()?.takeIf { battle -> !battle.isFinished } ?: return true
         return battleUnit.id !in battle.battleUnitIds
     }
 
-    // While talking to an npc, setting the party order in the formation, paused, or reading a quest, time stops: the tiles can not be selected.
     private fun isTimeStopped(): Boolean = partyApi.searchParty()?.let { party -> party.talkingNpcId != null || party.isInFormation || party.isPaused || party.isReadingQuest } == true
 
-    // Delegates
     override fun tileSelected(
         row: Int,
         column: Int,
@@ -622,6 +572,5 @@ class BattlefieldPresenter(
         selectionApi.processTileSelected(row = row, column = column)
     }
 
-    // Out of the battles (e.g.: while exploring), an ability is only read, never cast.
     override fun abilitySelected(abilityId: String) = whenIdle { selectionApi.processAbilitySelected(abilityId) }
 }

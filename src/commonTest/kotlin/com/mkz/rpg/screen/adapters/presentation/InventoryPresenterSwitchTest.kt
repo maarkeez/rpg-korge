@@ -27,9 +27,6 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class InventoryPresenterSwitchTest {
-    // The human party explores a 4x4 sand battlefield, with no battle: the knight-1 (20 G) leads at (1,1), followed by
-    // the viking-1 (30 G) at (1,2) and the mage-1 at (2,1). The cpu rat-1 wanders at (3,3). The health potion lies
-    // around, dropped by a rat.
     private val apis =
         SubdomainApis(
             terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
@@ -62,7 +59,6 @@ class InventoryPresenterSwitchTest {
     private val callToActionView = FakeCallToActionView()
     private val timeline = gameSceneTimeline()
 
-    // The battle units the inventory selects on the battlefield, as the selection would.
     private val selectedBattleUnitIds = mutableListOf<String>()
 
     private val inventoryPresenter =
@@ -91,7 +87,6 @@ class InventoryPresenterSwitchTest {
             }
         }
 
-    // The battle unit loots the item, as if it was lying on its tile.
     private fun loot(
         battleUnitId: String,
         lootableItemId: String,
@@ -102,7 +97,6 @@ class InventoryPresenterSwitchTest {
         eventBus.dispatch()
     }
 
-    // The player taps the tile of the battle unit and opens its inventory.
     private fun openInventoryOf(battleUnitId: String) {
         val position = apis.battlefieldApi.searchPosition(battleUnitId).shouldNotBeNull()
         eventBus.publish(SelectionEvent.BattleUnitSelected(tile = TileDto(position.row, position.column), battleUnitId = battleUnitId, walkingRange = emptySet()))

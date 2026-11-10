@@ -72,8 +72,7 @@ class BattlefieldHealthBarPreviewView(
                         PreviewOption.THREE_OUT_OF_THREE -> {
                             blinkFull(thirdPreview)
                         }
-                        PreviewOption.FULL -> {
-                        }
+                        PreviewOption.FULL -> Unit
                     }
                 }
             }

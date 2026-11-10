@@ -28,8 +28,6 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class ShopPresenterTest {
-    // The knight (20 G) leads from (1,1), followed by the viking (100 G) at (2,1). The merchant stands north of the knight,
-    // at (0,1), selling health potions (10 G) and hammers (50 G). There is no battle.
     private val merchant = npc(id = "merchant", row = 0, column = 1, stock = listOf("health-potion", "hammer")).toDto()
     private val apis =
         SubdomainApis(
@@ -74,7 +72,6 @@ class ShopPresenterTest {
     private val vikingTile = TilePosition(row = 2, column = 1)
     private val merchantTile = TilePosition(row = 0, column = 1)
 
-    // The party talks to the merchant, and its shop opens to buy, or to sell.
     private fun openTheShop(mode: Mode = Mode.BUY) {
         apis.partyApi.startExploration()
         eventBus.dispatch()
@@ -83,7 +80,6 @@ class ShopPresenterTest {
         timeline.play { presenter.open(merchant, mode) }
     }
 
-    // The viking buys a hammer, and the shop opens again to sell, with the viking as buyer.
     private fun reopenToSellTheVikingsHammer(beforeReopening: () -> Unit = {}) {
         openTheShop()
         presenter.shopBuyerStepped(1)
@@ -100,7 +96,6 @@ class ShopPresenterTest {
         eventBus.dispatch()
     }
 
-    // The label of Buy or Sell, beside Back, and whether it is enabled, or `null` while only Back is displayed.
     private fun action(): Pair<String, Boolean>? = callToActionView.displayedActions?.getOrNull(1)?.let { action -> action.label to action.isEnabled }
 
     @Test

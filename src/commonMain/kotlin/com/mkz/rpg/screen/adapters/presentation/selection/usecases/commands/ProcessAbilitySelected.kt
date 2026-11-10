@@ -18,11 +18,6 @@ import com.mkz.rpg.screen.adapters.presentation.selection.domain.SelectionError.
 import com.mkz.rpg.screen.adapters.presentation.selection.domain.SelectionRepository
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Selects an ability of the selected battle unit. It is cast only in a battle in progress, when the battle unit belongs
- * to the human player whose turn it is and can cast it: its cast range is displayed. Otherwise (e.g.: in cooldown, a CPU
- * battle unit's, or while exploring), only what it does is displayed. Selecting the ability on show again deselects it.
- */
 class ProcessAbilitySelected(
     private val canCastAbility: CanCastAbility,
     private val whereCanCast: WhereCanCast,
@@ -69,8 +64,6 @@ class ProcessAbilitySelected(
         eventBus.publish(events)
     }
 
-    // Only the human player casts, on its turn, with its own battle units. A finished battle keeps the turn it ended on,
-    // so it is no one's turn while exploring.
     private fun canCast(
         battleUnitId: String,
         abilityId: String,

@@ -1,7 +1,5 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-// Records what the presenters ask the panel to display, instead of drawing it.
-// The player actions are simulated by calling the delegate (e.g.: `amountChanged`).
 class FakeGiveGoldView : GiveGoldView(GameSceneResourcesLoader(), MessagesMother.messages()) {
     data class Displayed(
         val giver: Member,

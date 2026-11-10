@@ -1,6 +1,5 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-// Records the actions the presenter displays, so the tests can select them.
 class FakeWorldBuilderCallToActionView : WorldBuilderCallToActionView(MessagesMother.messages()) {
     sealed interface Actions {
         data class ExportAndBack(

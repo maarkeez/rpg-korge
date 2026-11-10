@@ -1,9 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-// Records what the presenters ask the call to action view to display, instead of drawing it.
-// The player actions are simulated by calling the callbacks it was given (e.g.: `onPlayerTurnFinished`).
 class FakeCallToActionView : CallToActionView(MessagesMother.messages()) {
-    // The finish turn the presenters displayed, `null` while it is hidden (e.g.: while exploring).
     var onPlayerTurnFinished: (() -> Unit)? = null
         private set
     var onCancelled: (() -> Unit)? = null
@@ -49,7 +46,6 @@ class FakeCallToActionView : CallToActionView(MessagesMother.messages()) {
         val onDismissed: () -> Unit,
     )
 
-    // What the call to action displays last, e.g.: the item buttons. `null` once dismissed.
     var displayedItemButtons: DisplayedItemButtons? = null
         private set
     var displayedDiscardQuestion: DisplayedDiscardQuestion? = null
@@ -70,10 +66,8 @@ class FakeCallToActionView : CallToActionView(MessagesMother.messages()) {
     val isFinishPlayerTurnEnabled: Boolean
         get() = finishPlayerTurnEnabledChanges.lastOrNull() ?: false
 
-    /** The labels of the buttons in the row, e.g.: Back and Abandon. Empty when no row is displayed. */
     fun actionLabels(): List<String> = displayedActions.orEmpty().map { action -> action.label }
 
-    /** Taps the button of the row with the label. */
     fun chooseAction(label: String) = requireNotNull(displayedActions) { "It displays no row" }.single { action -> action.label == label }.onSelected()
 
     override fun hide() {
@@ -98,7 +92,6 @@ class FakeCallToActionView : CallToActionView(MessagesMother.messages()) {
         displayedActions = null
     }
 
-    // As the real view, a tap does not dismiss it, and it is displayed also when the pad had hidden the call to action.
     override fun displayButtons(actions: List<ButtonRowView.Action>) {
         dismiss()
         displayedActions = actions
@@ -127,7 +120,6 @@ class FakeCallToActionView : CallToActionView(MessagesMother.messages()) {
         displayedGiveGold = displayedGiveGold?.copy(amount = amount, maximum = maximum)
     }
 
-    // As the real view, OK dismisses it.
     override fun displayGiveGoldRefusal(
         message: String,
         onDismissed: () -> Unit,
@@ -140,7 +132,6 @@ class FakeCallToActionView : CallToActionView(MessagesMother.messages()) {
             }
     }
 
-    // As the real view, it is dismissed once an action is selected, unless the action displayed something else (e.g.: Give).
     override fun displayItemButtons(
         itemName: String,
         itemSellPrice: Int,

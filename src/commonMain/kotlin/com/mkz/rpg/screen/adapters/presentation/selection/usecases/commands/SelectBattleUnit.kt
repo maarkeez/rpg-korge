@@ -13,12 +13,6 @@ import com.mkz.rpg.screen.adapters.presentation.selection.domain.SelectionReposi
 import com.mkz.rpg.screen.adapters.presentation.selection.usecases.services.WalkingRangeService
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Selects the battle unit with its walking range, as if the player had selected its tile, replacing any selection,
- * e.g.: the party leader when a human turn starts. A battle unit off the battlefield is not selected: the selection deselects.
- *
- * Out of the battles (e.g.: while exploring, the party member the inventory switches to), it has no walking range.
- */
 class SelectBattleUnit(
     private val searchPosition: SearchPosition,
     private val searchBattle: SearchBattle,

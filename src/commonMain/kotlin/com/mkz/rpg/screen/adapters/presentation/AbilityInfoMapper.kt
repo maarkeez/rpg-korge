@@ -9,10 +9,6 @@ import com.mkz.rpg.effect.domain.Effect.Dto.TimingDto.TimingTypeDto
 import com.mkz.rpg.screen.adapters.presentation.AbilityInfoView.AbilityInfo
 import com.mkz.rpg.unit.domain.Unit
 
-/**
- * Maps an ability, its effects and the units it summons to what the [AbilityInfoView] draws. Only the kinds of effect
- * the abilities use have a sentence: any other fails, naming the ability and the effect.
- */
 internal object AbilityInfoMapper {
     fun abilityInfo(
         ability: Ability.Dto,
@@ -29,7 +25,6 @@ internal object AbilityInfoMapper {
             reason = reason,
         )
 
-    /** Why the ability can not be cast now: the cooldown wins over the lack of mana, as on the button. */
     fun reason(
         ability: Ability.Dto,
         remainingCooldown: Int,
@@ -84,7 +79,6 @@ internal object AbilityInfoMapper {
             }
             outcome.type == EffectOutcomeDto.TypeDto.TELEPORT && timing.type == TimingTypeDto.IMMEDIATELY -> AbilityInfo.Effect.Teleport
             outcome.type == EffectOutcomeDto.TypeDto.APPLY_EFFECT_TO_ADJACENT_ALLIES && timing.type == TimingTypeDto.ON_DEFEATED -> {
-                // Expanded one level: the poison the allies get.
                 val nestedEffectId = outcome.applyEffectToAdjacentAllies!!.effectId
                 val nestedEffect = searchEffect(nestedEffectId) ?: error("The effect '${effect.id}' applies the effect '$nestedEffectId', which does not exist")
                 val isDamageOnPlayerTurnStarted = nestedEffect.outcome.type == EffectOutcomeDto.TypeDto.DAMAGE && nestedEffect.timing.type == TimingTypeDto.ON_PLAYER_TURN_STARTED

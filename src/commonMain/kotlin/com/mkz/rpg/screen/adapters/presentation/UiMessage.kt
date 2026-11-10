@@ -1,9 +1,5 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-/**
- * Every UI message of the game, by its key in the catalogs (resources/localization/messages.pot): the screen displays them
- * through [Messages], translated. A plural text has a plural form per count, e.g.: `Vanishes in 1 turn`, `Vanishes in 3 turns`.
- */
 enum class UiMessage(
     val key: String,
     val isPlural: Boolean = false,

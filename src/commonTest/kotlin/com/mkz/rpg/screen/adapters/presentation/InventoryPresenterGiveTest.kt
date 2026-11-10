@@ -35,9 +35,6 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class InventoryPresenterGiveTest {
-    // The human party explores a 4x4 sand battlefield, with no battle: the knight-1 leads at (1,1), followed by the viking-1
-    // at (1,2) and the mage-1 at (2,1). The cpu rat-1 wanders at (3,3). The health potion and the hammer (50 G) lie
-    // around, dropped by a rat.
     private val apis =
         SubdomainApis(
             terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
@@ -92,7 +89,6 @@ class InventoryPresenterGiveTest {
     private val vikingTile = TilePosition(row = 1, column = 2)
     private val mageTile = TilePosition(row = 2, column = 1)
 
-    // The battle unit loots the item, as if it was lying on its tile.
     private fun loot(
         battleUnitId: String,
         lootableItemId: String,
@@ -110,7 +106,6 @@ class InventoryPresenterGiveTest {
         eventBus.dispatch()
     }
 
-    // The player selects the knight, opens its inventory and taps its first item.
     private fun selectKnightFirstItem() {
         publish(SelectionEvent.BattleUnitSelected(tile = TileDto(1, 1), battleUnitId = "knight-1", walkingRange = emptySet()))
         battleUnitInfoView.onInventoryButtonSelected.shouldNotBeNull().invoke()
@@ -216,7 +211,6 @@ class InventoryPresenterGiveTest {
         inventoryView.selectedSlot.shouldBeNull()
         callToActionView.displayedGiveItem.shouldBeNull()
         battlefieldView.blinkedBattleUnits.last() shouldBe BattleUnitAt(row = 1, column = 2, unitId = "viking")
-        // The tiles look as when the giver was selected.
         battlefieldView.tileSelections.last() shouldBe knightTile
         battlefieldView.tilesNotDimmed.last() shouldBe setOf(knightTile)
     }

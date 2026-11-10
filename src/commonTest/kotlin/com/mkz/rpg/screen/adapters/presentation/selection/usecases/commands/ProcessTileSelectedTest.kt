@@ -45,16 +45,6 @@ class ProcessTileSelectedTest {
             walkingRangeService = WalkingRangeService(queries.searchBattleUnitById, queries.searchVacantTiles, queries.canWalkTo),
         )
 
-    /**
-     * Stores the players, the battle in the turn of the first one, and the battle units standing on the battlefield map, which walk one tile:
-     * - `K` is battle-unit-1, of the [knightPlayerType] player-1.
-     * - `S` is battle-unit-2, of player-1.
-     * - `E` is enemy-battle-unit-1, of player-2.
-     * - `F` is enemy-battle-unit-2, of player-2.
-     *
-     * Every battle unit is in the battle, but the [outOfBattle] ones. Without [isBattleStarted], no battle is stored, as
-     * while exploring before the first one.
-     */
     private fun givenBattle(
         map: String,
         knightPlayerType: Player.Dto.PlayerTypeDto = HUMAN,
@@ -347,7 +337,6 @@ class ProcessTileSelectedTest {
         eventBus.publishedEvents.shouldBeEmpty()
     }
 
-    // Out of the battles: the players and the battle units on the map are stored as for a battle, but the battle has finished.
     private fun givenExploring(map: String) {
         givenBattle(map)
         queries.battleRepository.create(battle(players = listOf("player-2", "player-1")).finishWithoutWinner())

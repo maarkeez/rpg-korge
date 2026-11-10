@@ -16,7 +16,6 @@ import com.mkz.rpg.screen.adapters.presentation.selection.usecases.commands.Sele
 import com.mkz.rpg.screen.adapters.presentation.selection.usecases.services.WalkingRangeService
 import com.mkz.rpg.shared.domain.EventBus
 
-/** What the player has selected on a battlefield: each battlefield presenter builds its own. */
 class SelectionApi(
     battlefieldApi: BattlefieldApi,
     battleUnitApi: BattleUnitApi,
@@ -24,10 +23,8 @@ class SelectionApi(
     battleApi: BattleApi,
     eventBus: EventBus,
 ) {
-    // Storage
     private val selectionRepository = InMemorySelectionRepository()
 
-    // Services
     private val walkingRangeService =
         WalkingRangeService(
             searchBattleUnitById = battleUnitApi.searchBattleUnitById,
@@ -35,7 +32,6 @@ class SelectionApi(
             canWalkTo = battleUnitApi.canWalkTo,
         )
 
-    // Commands
     val initializeSelection = InitializeSelection(selectionRepository)
     val processTileSelected =
         ProcessTileSelected(

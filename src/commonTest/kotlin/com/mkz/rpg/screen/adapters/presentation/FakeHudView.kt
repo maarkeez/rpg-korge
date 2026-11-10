@@ -2,7 +2,6 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import korlibs.math.geom.Size
 
-// Records which part of the HUD the presenters ask to display, instead of drawing it.
 class FakeHudView : HudView(Size(0, 0), FakeBattleUnitInfoView(), FakeCastPreviewView(), FakeInventoryView(), FakeGiveGoldView()) {
     enum class Display { BATTLE_UNIT_INFO, ATTACK_PREVIEW, INVENTORY, GIVE_GOLD, HIDDEN }
 

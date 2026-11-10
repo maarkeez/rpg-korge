@@ -27,30 +27,6 @@ import com.mkz.rpg.shared.domain.subscribe
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-/**
- * Walks the party with the virtual pad while exploring. The pad takes the place of the HUD and the player call
- * to action, which are displayed while battling, and while exploring when a battle unit of the party is selected (e.g.:
- * to use its inventory) or a found item does not fit in the inventory. It also counts the seconds while exploring, for the terrain
- * effects of the battle units standing still. Once the game is over, the pad is hidden and the seconds are no longer
- * counted.
- *
- * A press while the scene is still playing (e.g.: a battle unit blinking with its terrain effect) is not lost: the last
- * arrow or A pressed is acted on once the scene is idle, unless the pad is hidden meanwhile.
- *
- * Pressing A talks to the npc next to the leader: its talk panel takes the place of the pad until it is tapped. Time stops
- * meanwhile, as the party neither walks nor starts a second while talking. The talk panel of a merchant is not closed by
- * tapping it, but by its Leave choice, in the row of the call to action. Its Buy and Sell choices open its shop in place
- * of the talk panel (see [ShopPresenter]), until Back displays the talk panel again.
- *
- * Pressing B opens the party formation in place of the pad (see [FormationPresenter]), where the player sets the party
- * order, and who leads. Time stops meanwhile too, until Close displays the pad again.
- *
- * Pressing Start pauses the game: the pause screen takes the place of the pad (see [PausePresenter]), and time stops
- * until Resume displays the pad again.
- *
- * Tapping the tracker opens the quests in place of the pad (see [QuestPresenter]): the main quest in full when it is the only
- * one listed, else the journal, also from the empty tracker. Time stops until Back displays the pad again. A tap at any other moment is ignored, as it is no press of the pad.
- */
 class ExplorationPresenter(
     private val virtualPadView: VirtualPadView,
     private val talkView: TalkView,
@@ -67,11 +43,9 @@ class ExplorationPresenter(
     eventBus: EventBus,
 ) {
     companion object {
-        // How often the battle units standing still receive the effect of their terrain while exploring.
         val STANDING_TERRAIN_EFFECT_INTERVAL = 1.seconds
     }
 
-    // The last arrow, A, B or Start pressed, until it is acted on.
     private sealed interface Press {
         data class Arrow(
             val direction: VirtualPadView.Direction,
@@ -93,12 +67,9 @@ class ExplorationPresenter(
             eventBus.subscribe<ExplorationStarted> {
                 timeline.play { displayVirtualPad(isDisplayed = true) }
             },
-            // A save is loaded exploring.
             eventBus.subscribe<GameLoaded> {
                 timeline.play { displayVirtualPad(isDisplayed = true) }
             },
-            // As soon as the leader lands on its last tile, before the battle is announced, so the party does not look
-            // frozen meanwhile. The exploration is interrupted right after, which hides it again: it does nothing more.
             eventBus.subscribe<BattleStarted> {
                 if (!isGameOver) timeline.playNext { displayVirtualPad(isDisplayed = false) }
             },
@@ -108,15 +79,12 @@ class ExplorationPresenter(
             eventBus.subscribe<ExplorationResumed> {
                 timeline.play { displayVirtualPad(isDisplayed = true) }
             },
-            // While exploring, selecting a battle unit of the party displays its info and inventory in place of the pad,
-            // until the HUD deselects (e.g.: an empty tile is selected).
             eventBus.subscribe<SelectionEvent.BattleUnitSelected> {
                 if (isExploring()) timeline.play { displayVirtualPad(isDisplayed = false) }
             },
             eventBus.subscribe<SelectionEvent.Deselected> {
                 if (isExploring()) timeline.play { displayVirtualPad(isDisplayed = true) }
             },
-            // Straight away, as the timeline waits until the player chooses what to do with the found item.
             eventBus.subscribe<InventoryFull> {
                 if (isExploring()) displayVirtualPad(isDisplayed = false)
             },
@@ -190,10 +158,6 @@ class ExplorationPresenter(
         questPresenter.setOnTrackerSelected { openQuest() }
     }
 
-    /**
-     * Acts on the press pending since the scene was playing, counts the time elapsed since the previous frame, and applies
-     * the standing terrain effects every second.
-     */
     fun tick(elapsed: Duration) {
         if (isGameOver) return
         actOnPendingPress()
@@ -208,7 +172,6 @@ class ExplorationPresenter(
         subscriptions.forEach(Subscription::dispose)
     }
 
-    // A press is kept while the scene plays, and forgotten once the pad is hidden (e.g.: a battle starts).
     private fun actOnPendingPress() {
         if (!virtualPadView.visible) pendingPress = null
         when (val press = pendingPress) {
@@ -220,9 +183,6 @@ class ExplorationPresenter(
         }
     }
 
-    // The party only walks once the scene shows where it is, so a held arrow can not walk ahead of the animation, nor
-    // while the pad is hidden (e.g.: an arrow still held when the inventory is displayed). Walking towards the pressed
-    // arrow acts on its press, so it is not walked again.
     private fun stepParty(direction: VirtualPadView.Direction) {
         if (timeline.isPlaying || !virtualPadView.visible) return
         if (pendingPress == Press.Arrow(direction)) pendingPress = null
@@ -237,41 +197,34 @@ class ExplorationPresenter(
             VirtualPadView.Direction.WEST -> DirectionDto.WEST
         }
 
-    // As walking: once the scene shows where the party is, and while the pad is displayed.
     private fun talkToAdjacentNpc() {
         if (timeline.isPlaying || !virtualPadView.visible) return
         if (pendingPress == Press.A) pendingPress = null
         npcApi.talkToAdjacentNpc()
     }
 
-    // As walking: once the scene shows where the party is, and while the pad is displayed.
     private fun openFormation() {
         if (timeline.isPlaying || !virtualPadView.visible) return
         if (pendingPress == Press.B) pendingPress = null
         partyApi.openFormation()
     }
 
-    // As walking: once the scene shows where the party is, and while the pad is displayed.
     private fun openPause() {
         if (timeline.isPlaying || !virtualPadView.visible) return
         if (pendingPress == Press.Start) pendingPress = null
         partyApi.openPause()
     }
 
-    // As walking: once the scene shows where the party is, and while the pad is displayed. It clears no pending press, as
-    // a tap on the tracker is no press of the pad.
     private fun openQuest() {
         if (timeline.isPlaying || !virtualPadView.visible) return
         partyApi.openQuest()
     }
 
-    // Finishes the talk, but with a merchant, which is left with its Leave choice.
     private fun talkPanelTapped() {
         if (timeline.isPlaying || !talkView.visible || talkingNpc()?.let { npc -> npcApi.searchIsMerchant(npc.id) } == true) return
         partyApi.finishTalk()
     }
 
-    // The merchant's Buy or Sell choice.
     private fun openShop(mode: Mode) {
         if (timeline.isPlaying || !talkView.visible) return
         val merchant = talkingNpc() ?: return
@@ -281,13 +234,11 @@ class ExplorationPresenter(
         }
     }
 
-    // The merchant's Leave choice.
     private fun leaveMerchant() {
         if (timeline.isPlaying || !talkView.visible) return
         partyApi.finishTalk()
     }
 
-    // The party keeps talking to the merchant.
     private fun shopBackSelected() {
         val merchant = talkingNpc() ?: return
         timeline.play {
@@ -300,8 +251,6 @@ class ExplorationPresenter(
 
     private fun isExploring() = !isGameOver && partyApi.searchParty()?.isExploring == true
 
-    // The pad takes the place of the HUD and the call to action, or the other way around. Either closes the talk panel,
-    // the shop, the formation, the pause screen and the quest being read, and with them the buttons in the row.
     private fun displayVirtualPad(isDisplayed: Boolean) {
         talkView.visible = false
         shopPresenter.close()
@@ -314,7 +263,6 @@ class ExplorationPresenter(
         callToActionView.visible = !isDisplayed
     }
 
-    // The talk panel takes the place of the pad, with Leave, Sell and Buy in the row for a merchant.
     private fun displayNpcDialog(npc: Npc.Dto) {
         talkView.display(TalkInfo(npcId = npc.id, unitId = npc.unitId, name = messages.npcName(npc.id), line = messages.npcLine(npc.id)))
         virtualPadView.visible = false

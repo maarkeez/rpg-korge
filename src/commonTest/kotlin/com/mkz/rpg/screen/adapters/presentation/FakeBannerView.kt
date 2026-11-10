@@ -2,7 +2,6 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import korlibs.image.color.RGBA
 
-// Records what the presenters ask the banner view to display, instead of drawing it.
 class FakeBannerView : BannerView(MessagesMother.messages()) {
     data class Banner(
         val playerId: String,

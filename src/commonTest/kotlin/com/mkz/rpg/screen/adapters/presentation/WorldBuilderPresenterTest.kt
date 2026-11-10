@@ -15,7 +15,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlin.test.Test
 
 class WorldBuilderPresenterTest {
-    // As in the game, only sand has transitions: to lava and to water.
     private val apis =
         SubdomainApis(
             terrains =

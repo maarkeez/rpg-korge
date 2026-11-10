@@ -39,19 +39,14 @@ class ProcessTileSelected(
             is BattleUnitSelected -> if (isBattleInProgress) selectTileWhenBattleUnitSelected(selection, tile) else selectTileWhileExploring(selection, tile)
             is AbilitySelected -> selectTileWhenAbilitySelected(selection, tile)
             is AbilityInfoDisplayed -> {
-                // Any tile only closes it, back to the battle unit.
                 val (events, updatedSelection) = selection.hideAbilityInfo().pullEvents()
                 selectionRepository.update(updatedSelection)
                 eventBus.publish(events)
             }
-            is CastPreviewed -> {
-                // Do nothing
-            }
+            is CastPreviewed -> Unit
         }
     }
 
-    // Out of the battles (e.g.: while exploring), only the battle units of the human player can be selected, to use their
-    // inventory. They can not move by selecting a tile, so they have no walking range. Anything else deselects.
     private fun selectTileWhileExploring(
         selection: Selection,
         tile: TileDto,
@@ -80,7 +75,6 @@ class ProcessTileSelected(
         return battleUnitId.takeIf { searchPlayerById(battleUnit.playerId)?.type == Player.Dto.PlayerTypeDto.HUMAN }
     }
 
-    // The battle unit on the tile, when it is in the battle. Battle units out of it can not be selected, as an empty tile.
     private fun occupantInBattle(tile: TileDto): String? {
         val battleUnitId = searchOccupant(row = tile.row, column = tile.column) ?: return null
         return battleUnitId.takeIf { it in searchBattle()?.battleUnitIds.orEmpty() }
@@ -181,7 +175,6 @@ class ProcessTileSelected(
                 selectionRepository.update(updatedSelection)
                 eventBus.publish(events)
             } else {
-                // Every enemy of the cast group receives the cast, not only the selected one.
                 val recipientBattleUnitIds =
                     selectedCastGroup.tiles
                         .sortedWith(compareBy(TileDto::row, TileDto::column))

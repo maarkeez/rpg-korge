@@ -21,22 +21,6 @@ import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
 
-/**
- * Keeps the quests on the screen: the tracker names the current task of the pinned quest, or else of the main quest once
- * started, popping when it changes, also when a quest it does not name progresses, and stays ticked once the main quest is
- * completed. Before the main quest starts, it is the empty tracker while a side quest is active and none is pinned, and draws
- * nothing while no quest is active, as on a new game. A announcement
- * announces any quest starting or completing, one after the other, alongside the timeline, so it holds nothing. The tracker
- * is read only in a battle, and hidden once a player wins, as the winner is drawn across the whole top line.
- *
- * While the party reads the quests, in place of the pad, the journal lists every quest started and the detail view displays
- * one in full: [ExplorationPresenter] opens them when the tracker is tapped, the journal once a side quest is listed. Their
- * buttons are in the row of the call to action, where Back steps out one level at a time. Abandon asks first, and returns to
- * the journal, or to the pad when no side quest is left.
- *
- * While exploring, a quest marker over an npc's head says who to talk to. An npc can only be talked to then, so a battle
- * removes them all until it finishes.
- */
 class QuestPresenter(
     private val questTrackerView: QuestTrackerView,
     private val questDetailView: QuestDetailView,
@@ -53,28 +37,22 @@ class QuestPresenter(
     eventBus: EventBus,
 ) : QuestTrackerView.Delegate,
     QuestJournalView.Delegate {
-    /** Whether the scene displays the journal or the detail view. */
     var isQuestOpen = false
         private set
 
-    // Whether Back in the detail view returns to the journal.
     private var isDetailFromJournal = false
 
-    // The announcements still to play, and whether one is on its way out, so they never overlap.
     private val pendingAnnouncements = ArrayDeque<Pair<Moment, QuestInfo>>()
     private var isPlayingAnnouncements = false
 
     private var onTrackerSelected: (() -> Unit)? = null
 
-    // What the tracker displays, or will once the timeline gets to it, so nothing new draws nothing.
     private var displayedTracker: Tracker = Tracker.Cleared
 
-    // Each quest as its last event read it, so a defeat publishing two events pops the tracker once.
     private val lastSeenQuests = mutableMapOf<String, QuestInfo>()
 
     private var isInBattle = false
 
-    // What the battlefield displays, or will once the timeline gets to it.
     private var displayedMarkers = emptyMap<TilePosition, QuestMarkerView.Sign>()
 
     private val subscriptions =
@@ -133,15 +111,10 @@ class QuestPresenter(
         questJournalView.setDelegate(this)
     }
 
-    /** Hands the taps on the tracker over, e.g.: to open the quest when it can take the place of the pad. */
     fun setOnTrackerSelected(listener: () -> Unit) {
         onTrackerSelected = listener
     }
 
-    /**
-     * Displays the journal once a side quest is listed, and otherwise the main quest in full, so there is no list of one row.
-     * Read now, as time stops while it is open. To be played in the timeline.
-     */
     fun openQuest() {
         val quests = listedQuests()
         if (quests.isEmpty()) return
@@ -154,7 +127,6 @@ class QuestPresenter(
         }
     }
 
-    /** Hides whichever is open. Nothing happens when none is. */
     fun closeQuest() {
         if (!isQuestOpen) return
         isQuestOpen = false
@@ -167,7 +139,6 @@ class QuestPresenter(
         onTrackerSelected?.invoke()
     }
 
-    // The player can only act once the scene shows them.
     override fun questJournalSelected(questId: String) {
         if (!canAct()) return
         val quest = listedQuests().firstOrNull { quest -> quest.id == questId } ?: return
@@ -184,8 +155,6 @@ class QuestPresenter(
         subscriptions.forEach(Subscription::dispose)
     }
 
-    // A last defeat publishes three events: nothing draws while the quest is completed, as QuestCompleted follows. And a
-    // defeat completing a task publishes two, both reading the next task, so only the first one finds something new.
     private fun taskChanged(questId: String) {
         val quest = questInfos().firstOrNull { quest -> quest.id == questId } ?: return
         val lastSeen = lastSeenQuests.put(questId, quest)
@@ -198,9 +167,6 @@ class QuestPresenter(
         }
     }
 
-    // The reward is the one the quest defines, read as it completes, as RewardGranted names no quest, and never comes when
-    // nobody is left to receive it. A side quest starting does not take the pin, so it leaves a pinned quest on the tracker, but
-    // turns no tracker into the empty tracker before the main quest starts.
     private fun announce(
         moment: Moment,
         questId: String,
@@ -241,7 +207,6 @@ class QuestPresenter(
 
     private fun journalActions() = listOf(backAction { if (canAct()) partyApi.closeQuest() })
 
-    // Only an active side quest can be abandoned.
     private fun detailActions(quest: QuestInfo) =
         listOfNotNull(
             backAction { detailBackSelected() },
@@ -282,7 +247,6 @@ class QuestPresenter(
         displayDetail(quest)
     }
 
-    // With it gone from the list, the journal is displayed when a side quest is still listed, and otherwise the pad.
     private fun abandonQuest(quest: QuestInfo) {
         questApi.abandonQuest(quest.id)
         val quests = listedQuests()
@@ -294,8 +258,6 @@ class QuestPresenter(
         }
     }
 
-    // The main quest first while active, then the active side quests, then the completed quests, each group in the order
-    // the quests were created. The quests not started are hidden, the main quest too, so nothing is spoiled.
     private fun listedQuests(): List<QuestInfo> {
         val startedQuestIds = questApi.searchQuests().filter { quest -> quest.progress.status != StatusDto.NOT_STARTED }.map { quest -> quest.id }
         val (completed, active) =
@@ -311,7 +273,6 @@ class QuestPresenter(
         timeline.play { draw(tracker) }
     }
 
-    // The pinned quest when there is one, else the empty tracker while a side quest is active, else nothing.
     private fun tracker(): Tracker {
         trackedQuest()?.let { quest -> return Tracker.Named(quest) }
         val isSideQuestActive = questApi.searchQuests().any { quest -> quest.type == QuestTypeDto.SIDE && quest.progress.status == StatusDto.ACTIVE }
@@ -325,7 +286,6 @@ class QuestPresenter(
             Tracker.Cleared -> questTrackerView.clear()
         }
 
-    // Each marker on the tile of its npc. An npc no longer on the battlefield, e.g.: once recruited, has none.
     private fun displayMarkers() {
         if (isInBattle) return
         moveMarkersTo(

@@ -9,7 +9,6 @@ import com.mkz.rpg.screen.adapters.presentation.selection.domain.SelectionError.
 import com.mkz.rpg.screen.adapters.presentation.selection.domain.SelectionRepository
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Clears any selection, e.g.: when a turn starts, so a previous selection can not be acted on. */
 class DeselectBattleUnit(
     private val selectionRepository: SelectionRepository,
     private val eventBus: EventBus,

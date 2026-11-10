@@ -4,15 +4,6 @@ import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.save.adapters.presentation.SaveApi
 import com.mkz.rpg.save.domain.Save
 
-/**
- * The pause screen, opened with Start while exploring, in place of the pad: time stops until Resume.
- *
- * Save lists the save slots in its place: choosing an empty one saves into it straight away, and choosing one holding a
- * game asks to confirm first, as that game is lost. Once saved, the pause screen is displayed again, with Saved. Back,
- * in the row of the call to action as the choices of a question, goes back to it without saving.
- *
- * Quit to menu asks to confirm first, as the progress since the last save is lost, and goes back to the menu ([onQuit]).
- */
 class PausePresenter(
     private val pauseView: PauseView,
     private val saveSlotsView: SaveSlotsView,
@@ -25,7 +16,6 @@ class PausePresenter(
     private val onQuit: () -> Unit,
 ) : PauseView.Delegate,
     SaveSlotsView.Delegate {
-    /** Whether the scene displays the pause screen, or one of its dialogs. */
     var isOpen = false
         private set
 
@@ -37,14 +27,12 @@ class PausePresenter(
         saveSlotsView.setDelegate(this)
     }
 
-    /** Displays the pause screen. To be played in the timeline. */
     fun open() {
         isOpen = true
         pauseView.displaySaved(isDisplayed = false)
         displayPause()
     }
 
-    /** Hides the pause screen and its dialogs. Nothing happens when it is not open. */
     fun close() {
         if (!isOpen) return
         isOpen = false
@@ -67,7 +55,6 @@ class PausePresenter(
             )
         }
 
-    // An empty slot saves straight away, and a slot holding a game (or an incompatible one) asks to overwrite it first.
     override fun saveSlotSelected(number: Int) =
         whenIdle {
             val slot = saveApi.searchSaveSlots().firstOrNull { slot -> slot.slot == number } ?: return@whenIdle
@@ -83,7 +70,6 @@ class PausePresenter(
             }
         }
 
-    // Slots are only deleted from Load game, in the menu.
     override fun deleteSaveSelected(number: Int) = Unit
 
     private fun save(number: Int) {
@@ -92,7 +78,6 @@ class PausePresenter(
         pauseView.displaySaved(isDisplayed = true)
     }
 
-    // The pause screen has no row, as moving its options leaves the panel empty.
     private fun displayPause() {
         saveSlotsView.visible = false
         confirmDialogView.visible = false
@@ -128,7 +113,6 @@ class PausePresenter(
         )
     }
 
-    // The player can only act once the scene shows the pause screen.
     private fun whenIdle(action: () -> Unit) {
         if (isOpen && !timeline.isPlaying) action()
     }

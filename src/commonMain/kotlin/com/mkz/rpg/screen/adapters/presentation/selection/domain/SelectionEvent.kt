@@ -20,7 +20,6 @@ sealed interface SelectionEvent : DomainEvent {
         val castGroupsWhereCanCast: List<CastGroupDto>,
     ) : SelectionEvent
 
-    /** An ability selected only to read what it does, with no cast range. */
     data class AbilityInfoDisplayed(
         val casterTile: TileDto,
         val battleUnitId: String,
@@ -41,7 +40,6 @@ sealed interface SelectionEvent : DomainEvent {
         val casterBattleUnitId: String,
         val abilityId: String,
         val castGroup: CastGroupDto,
-        // By row and column.
         val recipientBattleUnitIds: List<String>,
     ) : SelectionEvent
 }

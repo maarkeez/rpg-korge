@@ -8,14 +8,8 @@ import java.io.File
 import kotlin.test.Test
 
 class CommentArchitectureTest {
-    private val rootPackage = "com.mkz.rpg"
     private val sourceRoot = File("src")
     private val productionSourceSets = setOf("commonMain", "jsMain", "jvmMain")
-
-    private val subdomainsWithComments: Set<String> =
-        setOf(
-            "screen",
-        )
 
     private val sourceFiles: List<SourceFile> =
         sourceRoot
@@ -73,11 +67,9 @@ class CommentArchitectureTest {
     }
 
     @Test
-    fun `Source files should have no comment other than the markers when their subdomain is not listed`() {
-        // Given
-        val checkedComments = fileComments.filter { fileComment -> fileComment.sourceFile.subdomain !in subdomainsWithComments }
+    fun `Source files should have no comment other than the markers`() {
         // When
-        val violations = checkedComments.filterNot { fileComment -> CommentScanner.isMarker(fileComment.comment) }.map(FileComment::describe)
+        val violations = fileComments.filterNot { fileComment -> CommentScanner.isMarker(fileComment.comment) }.map(FileComment::describe)
         // Then
         sourceFiles.shouldNotBeEmpty()
         withClue("Comments that are not allowed:\n${violations.joinToString("\n")}\nSay it in a name or a test name instead.") {
@@ -86,10 +78,9 @@ class CommentArchitectureTest {
     }
 
     @Test
-    fun `Production files should have no Given, When or Then marker when their subdomain is not listed`() {
+    fun `Production files should have no Given, When or Then marker`() {
         // Given
-        val productionComments =
-            fileComments.filter { fileComment -> fileComment.sourceFile.sourceSet in productionSourceSets && fileComment.sourceFile.subdomain !in subdomainsWithComments }
+        val productionComments = fileComments.filter { fileComment -> fileComment.sourceFile.sourceSet in productionSourceSets }
         // When
         val violations = productionComments.filter { fileComment -> CommentScanner.isMarker(fileComment.comment) }.map(FileComment::describe)
         // Then
@@ -98,48 +89,16 @@ class CommentArchitectureTest {
         }
     }
 
-    @Test
-    fun `Listed subdomains should still have a comment, so the list can only shrink`() {
-        // Given
-        val subdomainsStillCommented =
-            fileComments
-                .filter { fileComment -> !CommentScanner.isMarker(fileComment.comment) || fileComment.sourceFile.sourceSet in productionSourceSets }
-                .mapNotNull { fileComment -> fileComment.sourceFile.subdomain }
-                .toSet()
-        // When
-        val cleanSubdomains = subdomainsWithComments.filter { subdomain -> subdomain !in subdomainsStillCommented }.sorted()
-        // Then
-        withClue("Subdomains with no comment left: $cleanSubdomains. Remove them from subdomainsWithComments.") {
-            cleanSubdomains.shouldBeEmpty()
-        }
-    }
-
-    private fun sourceFileOf(file: File): SourceFile {
-        val text = file.readText()
-        val packageName =
-            Regex("""^package\s+([\w.]+)""", RegexOption.MULTILINE)
-                .find(text)
-                ?.groupValues
-                ?.get(1)
-                .orEmpty()
-        return SourceFile(
+    private fun sourceFileOf(file: File): SourceFile =
+        SourceFile(
             path = file.path,
             sourceSet = file.relativeTo(sourceRoot).invariantSeparatorsPath.substringBefore("/"),
-            subdomain = subdomainOf(packageName),
-            text = text,
+            text = file.readText(),
         )
-    }
-
-    private fun subdomainOf(packageName: String): String? =
-        packageName
-            .removePrefix("$rootPackage.")
-            .takeIf { it != packageName }
-            ?.substringBefore(".")
 
     private data class SourceFile(
         val path: String,
         val sourceSet: String,
-        val subdomain: String?,
         val text: String,
     )
 

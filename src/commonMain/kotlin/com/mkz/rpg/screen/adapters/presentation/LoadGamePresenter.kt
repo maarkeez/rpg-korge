@@ -3,14 +3,6 @@ package com.mkz.rpg.screen.adapters.presentation
 import com.mkz.rpg.save.adapters.presentation.SaveApi
 import com.mkz.rpg.save.domain.Save.Dto.SlotStateDto
 
-/**
- * Load game, from the menu: the save slots in place of its options. Choosing a saved slot loads its game ([onLoad]), and
- * Delete, on any slot that is not empty, deletes its game once confirmed. Back, in the row of the call to action as the
- * choices of the question, displays the options again.
- *
- * Incompatible slot: a slot whose game could not be loaded (e.g.: it names a unit the game no longer has), shown as an
- * incompatible save, as listing the slots only reads their summaries. Its save slots are then listed straight away.
- */
 class LoadGamePresenter(
     private val menuView: MenuView,
     private val saveSlotsView: SaveSlotsView,
@@ -28,7 +20,6 @@ class LoadGamePresenter(
         if (incompatibleSlot != null) open()
     }
 
-    /** Lists the save slots in place of the options. */
     fun open() {
         menuView.visible = false
         displaySlots()
@@ -53,7 +44,6 @@ class LoadGamePresenter(
         )
     }
 
-    // The options of the menu have no row.
     private fun backSelected() {
         saveSlotsView.visible = false
         menuView.visible = true
@@ -74,7 +64,6 @@ class LoadGamePresenter(
         callToActionView.displayButtons(listOf(ButtonRowView.Action(messages[UiMessage.SAVE_SLOTS_BACK]) { backSelected() }))
     }
 
-    // The slot that could not be loaded is incompatible, though its summary reads as saved.
     private fun slots() =
         saveApi.searchSaveSlots().map { slot ->
             if (slot.slot == incompatibleSlot && slot.state == SlotStateDto.SAVED) slot.copy(state = SlotStateDto.INCOMPATIBLE, summary = null) else slot

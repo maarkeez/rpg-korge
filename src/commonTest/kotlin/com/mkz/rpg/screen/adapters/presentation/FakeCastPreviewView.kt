@@ -1,6 +1,5 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-// Records what the presenters ask the cast preview view to display, instead of drawing it.
 class FakeCastPreviewView : CastPreviewView(GameSceneResourcesLoader(), MessagesMother.messages()) {
     data class DisplayedCastPreview(
         val abilityId: String,

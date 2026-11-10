@@ -41,11 +41,6 @@ class ProcessAbilitySelectedTest {
             eventBus = eventBus,
         )
 
-    /**
-     * Stores the knight of the human player, that knows the given abilities and has 4 mana, at (0,0), with a rat of the CPU
-     * on each side, in the battle in the [currentPlayer]'s turn: ability-1 hits one of them, ability-2 targets the knight,
-     * and ability-3 costs 10 mana. The battle is in progress, finished on that turn, or none at all, as [battleState] says.
-     */
     private fun givenKnightBetweenRats(
         knightAbilities: List<String>,
         currentPlayer: String = "human",

@@ -6,9 +6,7 @@ import com.mkz.rpg.quest.domain.Quest.Dto.QuestTypeDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
 import com.mkz.rpg.quest.domain.Quest.Dto.TaskDto
 
-/** Maps a quest to what the quest views draw, translated. The tasks after the current one are left out, so they can not be revealed. */
 internal object QuestMapper {
-    /** The main quest is pinned when no other quest is, once it has started. */
     fun questInfos(
         quests: List<Quest.Dto>,
         messages: Messages,
@@ -70,7 +68,6 @@ internal object QuestMapper {
             TaskDto.TypeDto.VISIT -> QuestInfo.Kind.VISIT
         }
 
-    // A talk or a visit has nothing to count.
     private fun requiredDefeatsOf(task: TaskDto): Int = task.defeat?.requiredDefeats ?: 1
 
     private fun portraitPathOf(task: TaskDto): String? =

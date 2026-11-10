@@ -20,7 +20,6 @@ import korlibs.time.DateTime
 import kotlin.test.Test
 
 class PausePresenterTest {
-    // The knight explores the sand, alone.
     private val apis =
         SubdomainApis(
             terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),

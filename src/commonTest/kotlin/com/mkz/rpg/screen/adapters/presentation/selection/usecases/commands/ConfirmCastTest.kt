@@ -40,7 +40,6 @@ class ConfirmCastTest {
         confirmCast()
         // Then
         selectionRepository.search() shouldBe battleUnitSelected(tile = tile(0, 0), battleUnitId = "battle-unit-1", walkingRange = setOf(tile(0, 1)))
-        // The caster walking range is displayed once the cast has been resolved.
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestCastAbility(
                 battleUnitId = "battle-unit-1",

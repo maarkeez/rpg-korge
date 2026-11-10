@@ -78,11 +78,6 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlin.test.Test
 
 class BattlefieldPresenterTest {
-    // The battle has started with the human player turn. The human knight-1, with 30 health points, stands at (1,1) and can walk 3 tiles,
-    // and the cpu rat-1 and rat-2, with 21 health points, stand at (1,3) and (0,3), on a 4x4 sand battlefield. The knight
-    // knows the mushroom, dealing 7 damage and leaving a venom, the heal, healing itself 5, and the bee, deploying a rat,
-    // each costing 10 mana, and has 4 mana.
-    // A health potion, healing 5, can be looted. The knight explored before the battle, so it has an inventory.
     private val apis =
         SubdomainApis(
             terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
@@ -92,7 +87,6 @@ class BattlefieldPresenterTest {
                     unit(id = "rat", baseMaximumHealth = 21).toDto(),
                 ),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
-            // The rats drop nothing, so the items lying on the battlefield are only the ones the test places, as dropped by a rat.
             lootTables = listOf(lootTable(id = "rat-loot", entries = listOf(nothingEntry())).toDto()),
             lootDrops = listOf(lootDrop(unitId = "rat", lootTableIds = listOf("rat-loot")).toDto()),
             effects =
@@ -136,7 +130,6 @@ class BattlefieldPresenterTest {
     private val castPreviewView = FakeCastPreviewView()
     private val timeline = gameSceneTimeline()
 
-    // The presenter is created once the battle has started, so it only reacts to what the test publishes.
     private val battlefieldPresenter =
         BattlefieldPresenter(
             battlefieldView = battlefieldView,
@@ -317,8 +310,6 @@ class BattlefieldPresenterTest {
         battlefieldView.moveFollowings.shouldContainExactly(BattlefieldView.Following.CENTER)
     }
 
-    // The same battlefield, before any battle has started: the human player explores it. The knight knows the given
-    // abilities, and has 4 mana.
     private fun exploringApis(
         deployments: List<Deployment> = listOf(Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 1, column = 1)),
         npcs: List<Npc.Dto> = emptyList(),
@@ -536,7 +527,6 @@ class BattlefieldPresenterTest {
         )
     }
 
-    // knight-1 leads the party, and knight-2 follows it.
     private val partyOfTwoKnights =
         listOf(
             Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 1, column = 1),
@@ -573,7 +563,7 @@ class BattlefieldPresenterTest {
 
     @Test
     fun `MoveUnit should move a cpu battle unit out of the battle in the timeline, without following it, when it wanders after a round`() {
-        // Given: rat-1 engaged the knight, and rat-2 stays out of the battle.
+        // Given
         val battlingApis =
             exploringApis(
                 deployments =
@@ -1042,7 +1032,6 @@ class BattlefieldPresenterTest {
         battleUnitInfoView.hideCount shouldBeGreaterThan hideCount
     }
 
-    // The player selects the knight-1, so its walking range is displayed.
     private fun selectKnight() {
         battlefieldPresenter.tileSelected(row = 1, column = 1)
         eventBus.dispatch()
@@ -1225,7 +1214,6 @@ class BattlefieldPresenterTest {
     @Test
     fun `SelectPartyLeader should select the new party leader when a human turn starts after the leader left the party`() {
         // Given
-        // E.g.: the knight-1 has been defeated, so the knight-2 leads the party.
         val battlingApis =
             SubdomainApis(
                 terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
@@ -1519,7 +1507,7 @@ class BattlefieldPresenterTest {
 
     @Test
     fun `GameLoaded should display every battle unit, npc and dropped item when a save is loaded`() {
-        // Given: a health potion was dropped at (2,2) by a rat, as the save holds it.
+        // Given
         apis.lootDropApi.snapshottable.load("""[{"unitId":"rat","droppedItems":[{"row":2,"column":2,"lootableItemIds":["health-potion"]}]}]""")
         // When
         eventBus.publish(SaveEvent.GameLoaded(slot = 1))

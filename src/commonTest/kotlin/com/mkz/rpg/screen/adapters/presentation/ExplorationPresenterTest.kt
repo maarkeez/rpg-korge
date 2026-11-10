@@ -42,8 +42,6 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 class ExplorationPresenterTest {
-    // The knight explores the sand from (1,1), next to the elder, who stands west of it at (1,0). The merchant stands at
-    // (2,2), selling a health potion and a mana potion. There is no battle yet.
     private val apis =
         SubdomainApis(
             terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
@@ -182,7 +180,7 @@ class ExplorationPresenterTest {
 
     @Test
     fun `BattleStarted should hide the virtual pad before the steps waiting in the timeline`() {
-        // Given: the leader is landing on its last tile, and the battle is waiting to be announced.
+        // Given
         createPresenter()
         startExploring()
         val leaderLanding = timeline.playLongStep()
@@ -338,7 +336,6 @@ class ExplorationPresenterTest {
         apis.battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 0, column = 0)
     }
 
-    // Three knights stand on water, healing them every second, in a column from (1,0), the leader first. Sand is north.
     private fun partyOnWaterApis() =
         SubdomainApis(
             terrains = listOf(terrainThatCanBeOccupied(id = "sand", transitionsTo = setOf("water")).toDto(), terrainThatCanBeOccupied(id = "water", effectId = "water-heal").toDto()),
@@ -349,7 +346,6 @@ class ExplorationPresenterTest {
             deployments = (1..3).map { index -> Deployment(battleUnitId = "knight-$index", unitId = "knight", playerId = "human", row = index, column = 0) },
         ).also(SubdomainApis::initialise)
 
-    // The battlefield presenter blinks the battle units on the same timeline the exploration presenter walks with.
     private fun partyOnWaterPresenters(
         apis: SubdomainApis,
         battlefieldView: FakeBattlefieldView,
@@ -659,7 +655,6 @@ class ExplorationPresenterTest {
         hudView.visible.shouldBeTrue()
     }
 
-    // The leader walks east to (1,2), next to the merchant, south of it, and talks to it.
     private fun talkToTheMerchant() {
         virtualPadView.holdArrow(Direction.EAST)
         virtualPadView.releaseArrow()
@@ -667,7 +662,6 @@ class ExplorationPresenterTest {
         talk()
     }
 
-    // ... and chooses to buy.
     private fun openTheShop() {
         talkToTheMerchant()
         callToActionView.chooseAction("Buy")
@@ -993,7 +987,6 @@ class ExplorationPresenterTest {
             .shouldBeTrue()
     }
 
-    // The knight walks onto the start tile of the main quest, so the tracker names it.
     private fun startTheMainQuest() {
         apis.questApi.startMainQuest(battleUnitId = "knight-1", path = listOf(Quest.Dto.PositionDto(row = 0, column = 0)))
         eventBus.dispatch()

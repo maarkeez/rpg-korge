@@ -34,7 +34,6 @@ class LoadGamePresenterTest {
     private val loadedSlots = mutableListOf<Int>()
 
     init {
-        // Slot 2 holds the knight's party of 3, and slot 3 a game of an older version.
         storage["save.slot2.summary"] = """{"version":${Save.SAVE_VERSION},"savedAt":0.0,"leaderUnitId":"knight","partySize":3}"""
         storage["save.slot2"] = """{"summary":{"version":${Save.SAVE_VERSION},"savedAt":0.0,"leaderUnitId":"knight","partySize":3},"snapshots":{}}"""
         storage["save.slot3.summary"] = """{"version":0,"savedAt":0.0,"leaderUnitId":"knight","partySize":1}"""

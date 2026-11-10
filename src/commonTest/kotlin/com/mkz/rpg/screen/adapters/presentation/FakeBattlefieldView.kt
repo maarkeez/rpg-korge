@@ -6,7 +6,6 @@ import korlibs.image.color.RGBA
 import kotlinx.coroutines.CompletableDeferred
 import kotlin.time.Duration
 
-// Records what the presenters ask the battlefield view to display, instead of drawing it.
 class FakeBattlefieldView : BattlefieldView(GameSceneResourcesLoader()) {
     data class BattleUnitAt(
         val row: Int,
@@ -61,7 +60,6 @@ class FakeBattlefieldView : BattlefieldView(GameSceneResourcesLoader()) {
     val potentialCasts = mutableListOf<TilePosition>()
     val tileSelections = mutableListOf<TilePosition>()
 
-    // The health preview last displayed on each tile.
     val healthPreviews = mutableMapOf<TilePosition, BattlefieldHealthBarPreviewView.PreviewOption>()
     var resetTilesCount = 0
         private set
@@ -72,11 +70,9 @@ class FakeBattlefieldView : BattlefieldView(GameSceneResourcesLoader()) {
     val movedBattleUnits = mutableListOf<MovedBattleUnit>()
     val moveStepDurations = mutableListOf<Duration>()
 
-    // How each move scrolls the battlefield to follow the battle unit.
     val moveFollowings = mutableListOf<BattlefieldView.Following>()
     val swappedBattleUnits = mutableListOf<SwappedBattleUnits>()
 
-    // The tiles the battlefield started trailing the battle unit on, and how many times it stopped trailing.
     val trailedTiles = mutableListOf<TilePosition>()
     var stopTrailingCount = 0
         private set
@@ -85,18 +81,15 @@ class FakeBattlefieldView : BattlefieldView(GameSceneResourcesLoader()) {
     val tints = mutableListOf<RGBA>()
     val blinkedBattleUnits = mutableListOf<BattleUnitAt>()
 
-    // The health blinked on each tile, in order.
     val blinkedHealth = mutableListOf<Pair<TilePosition, BattlefieldHealthBarPreviewView.PreviewOption>>()
 
-    // When set, every blink lasts until it is completed, e.g.: to keep the timeline playing while it blinks.
+    // When
     var blinking: CompletableDeferred<Unit>? = null
 
-    // The loot last displayed on each tile.
     val displayedDroppedItems = mutableMapOf<TilePosition, List<String>>()
     val pickedUpLoot = mutableListOf<PickedUpLoot>()
     val updatedTerrains = mutableListOf<UpdatedTerrain>()
 
-    // The image of each terrain, so presenters can display it elsewhere (e.g.: the world builder palette).
     val terrainBitmaps = mutableMapOf<String, Bitmap>()
 
     override fun setDelegate(delegate: Delegate) {

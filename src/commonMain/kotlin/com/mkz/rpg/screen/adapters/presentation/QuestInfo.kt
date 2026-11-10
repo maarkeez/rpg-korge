@@ -1,9 +1,5 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-/**
- * The plain data the quest views display, already translated. Tasks: the ones done and the current one, as those still
- * to come are never revealed.
- */
 data class QuestInfo(
     val id: String,
     val name: String,
@@ -18,7 +14,6 @@ data class QuestInfo(
 ) {
     enum class Kind { DEFEAT, TALK, VISIT }
 
-    /** Required defeats: only above 1 for a task to defeat several. Portrait path: who the task is about, e.g.: `unit/rat_portrait.png`, or null for a place. */
     data class Task(
         val kind: Kind,
         val text: String,
@@ -33,7 +28,6 @@ data class QuestInfo(
         val name: String,
     )
 
-    /** The task under way, or the last one once the quest is completed. */
     val currentTask: Task get() = tasks.lastOrNull { task -> !task.isDone } ?: tasks.last()
 
     val doneTasks: List<Task> get() = tasks.filter { task -> task.isDone }

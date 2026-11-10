@@ -13,10 +13,6 @@ import korlibs.io.async.launchImmediately
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 
-/**
- * Displays the world being built on the battlefield, as the battle would display it, and lets the player resize it,
- * paint its tiles, export it to the clipboard, import one from a file, and leave once they confirm it.
- */
 class WorldBuilderPresenter(
     private val battlefieldView: BattlefieldView,
     private val infoView: WorldBuilderInfoView,
@@ -80,7 +76,6 @@ class WorldBuilderPresenter(
         hudView.displayTerrains(terrains, selectedTerrainId = world.selectedTerrainId)
     }
 
-    // The tiles adjacent to the painted tile are drawn again too, as their transitions to it may have changed.
     private fun displayPaintedTile(
         row: Int,
         column: Int,
@@ -105,8 +100,6 @@ class WorldBuilderPresenter(
         }
     }
 
-    // Replaces the world with the one in the picked file, e.g.: exported earlier. The current world is lost. The picker is
-    // opened before suspending, as browsers only open it while handling the tap.
     private fun importWorld() {
         coroutineScope.launchImmediately {
             val text =
@@ -141,7 +134,6 @@ class WorldBuilderPresenter(
         callToActionView.displayLeaveConfirmation(onLeft = onLeft, onStayed = { displayExportAndBack() })
     }
 
-    // Delegates
     override fun tileSelected(
         row: Int,
         column: Int,

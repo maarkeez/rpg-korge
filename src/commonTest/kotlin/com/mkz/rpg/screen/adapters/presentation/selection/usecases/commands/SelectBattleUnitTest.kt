@@ -24,7 +24,6 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlin.test.Test
 
 class SelectBattleUnitTest {
-    // The battle unit-1 stands at (0,1) and can walk 1 tile in the battle: (0,0) and (0,2).
     private val queries = InMemoryQueries()
     private val selectionRepository = InMemorySelectionRepository()
     private val eventBus = FakeEventBus()
@@ -63,7 +62,6 @@ class SelectBattleUnitTest {
     @Test
     fun `should select the battle unit with no walking range out of the battles`() {
         // Given
-        // E.g.: the party member the inventory switches to while exploring.
         selectionRepository.create(battleUnitSelected(battleUnitId = "battle-unit-2", walkingRange = emptySet()))
         // When
         selectBattleUnit("battle-unit-1")

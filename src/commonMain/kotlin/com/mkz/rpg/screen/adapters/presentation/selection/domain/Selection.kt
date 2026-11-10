@@ -176,10 +176,6 @@ sealed interface Selection {
         )
     }
 
-    /**
-     * An ability selected only to read what it does: one the battle unit can not cast now (e.g.: in cooldown), or one of
-     * a battle unit the human player can not cast with (e.g.: a CPU battle unit). It has no cast range.
-     */
     data class AbilityInfoDisplayed(
         val casterTile: Dto.TileDto,
         val battleUnitId: String,
@@ -235,7 +231,6 @@ sealed interface Selection {
                     ),
         )
 
-        // Goes back to the battle unit and its walking range, as deselecting an ability does.
         fun hideAbilityInfo() =
             BattleUnitSelected(
                 tile = casterTile,
@@ -259,7 +254,6 @@ sealed interface Selection {
         val walkingRange: Set<Dto.TileDto>,
         val castGroupsWhereCanCast: List<Dto.CastGroupDto>,
         val castGroup: Dto.CastGroupDto,
-        // The battle units receiving the cast, by row and column. Empty when the cast does not target any enemy.
         val recipientBattleUnitIds: List<String>,
         private val events: Set<SelectionEvent>,
     ) : Selection {
@@ -267,10 +261,6 @@ sealed interface Selection {
 
         fun deselect() = NothingSelected(events + SelectionEvent.Deselected)
 
-        /**
-         * Keeps the caster selected. Its walking range is displayed once the cast has been resolved, since the cast
-         * changes the caster (e.g.: its mana, or its tile when teleported).
-         */
         fun confirmCast() =
             BattleUnitSelected(
                 tile = casterTile,
@@ -279,7 +269,6 @@ sealed interface Selection {
                 events = events,
             )
 
-        // Goes back to choosing where to cast the ability.
         fun cancelCast() =
             AbilitySelected(
                 casterTile = casterTile,

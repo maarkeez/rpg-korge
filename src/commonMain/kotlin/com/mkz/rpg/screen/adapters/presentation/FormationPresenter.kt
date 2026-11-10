@@ -4,12 +4,6 @@ import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 
-/**
- * The party formation, where the player sets the party order while exploring: its first member leads. It opens with
- * the party in its order, and every tile dimmed but the party's. Tapping a member selects it, framing its row and its
- * tile, and tapping another one reorders both, clearing the selection, as tapping the selected one again does. Close, in the
- * row of the call to action, applies the order displayed to the party, which explores again.
- */
 class FormationPresenter(
     private val formationView: FormationView,
     private val battlefieldView: BattlefieldView,
@@ -20,11 +14,9 @@ class FormationPresenter(
     private val messages: Messages,
     private val timeline: GameSceneTimeline,
 ) : FormationView.Delegate {
-    // What the scene displays. Changed in timeline order, like the views.
     private var order: List<String> = emptyList()
     private var selectedIndex: Int? = null
 
-    /** Whether the scene displays the formation. */
     var isOpen = false
         private set
 
@@ -33,7 +25,6 @@ class FormationPresenter(
         formationView.setDelegate(this)
     }
 
-    /** Displays the party in its order, the leader first. To be played in the timeline. */
     fun open() {
         order = partyApi.searchParty()?.battleUnitIds.orEmpty()
         isOpen = true
@@ -42,7 +33,6 @@ class FormationPresenter(
         callToActionView.displayButtons(listOf(ButtonRowView.Action(messages[UiMessage.FORMATION_CLOSE]) { whenIdle { partyApi.closeFormation(order) } }))
     }
 
-    /** Hides the formation and restores the tiles. Nothing happens when it is not open. */
     fun close() {
         if (!isOpen) return
         isOpen = false
@@ -52,7 +42,6 @@ class FormationPresenter(
         battlefieldView.resetTiles()
     }
 
-    // Displays the party in the order set so far, the crown on its first member, and clears the selection.
     private fun displayFormation() {
         val rows =
             order.mapIndexedNotNull { index, battleUnitId ->
@@ -71,7 +60,6 @@ class FormationPresenter(
         select(null)
     }
 
-    // Frames the selected member's row and tile, every tile but the party's dimmed, with the hint for the next tap.
     private fun select(index: Int?) {
         selectedIndex = index
         formationView.selectRow(index)
@@ -90,7 +78,6 @@ class FormationPresenter(
 
     private fun memberName(battleUnitId: String): String = battleUnitApi.searchBattleUnitById(battleUnitId)?.let { battleUnit -> messages.unitName(battleUnit.unitId) }.orEmpty()
 
-    // Selects the member, or reorders it with the selected one, or clears the selection when it is the selected one.
     private fun tapMember(index: Int) {
         if (index !in order.indices) return
         val selected = selectedIndex
@@ -108,11 +95,9 @@ class FormationPresenter(
         }
     }
 
-    // The player can only act once the scene shows the current state of the formation.
     private fun whenIdle(action: () -> Unit) {
         if (!timeline.isPlaying && isOpen) action()
     }
 
-    // Delegates
     override fun formationRowSelected(index: Int) = whenIdle { timeline.play { tapMember(index) } }
 }
