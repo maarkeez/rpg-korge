@@ -3,18 +3,6 @@ package com.mkz.rpg.cpuBattleBrain.usecases.queries
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.usecases.queries.IsTileOccupiable
 
-/**
- * How many tiles a wandering battle unit walks from its home to each tile: it only walks over the occupiable tiles
- * (e.g.: not void) whose terrain is not harmful (e.g.: not lava), as it never steps on harmful terrain while it
- * wanders. The battle units standing on them do not count, as they walk around. Home is 0 tiles away, even on harmful
- * terrain. The tiles it can not walk to from home are left out.
- *
- * The harmful tiles next to the walked ones are counted too, but never walked through, so a battle unit standing on one
- * (e.g.: after chasing the party onto lava) knows how far it is from home.
- *
- * Walking only where it can step means every tile away from home has a tile next to it nearer to home, so a battle unit
- * heading home never gets stuck behind harmful terrain.
- */
 class SearchDistancesFromHome(
     private val isTileOccupiable: IsTileOccupiable,
     private val searchTerrainHealthEffect: SearchTerrainHealthEffect,

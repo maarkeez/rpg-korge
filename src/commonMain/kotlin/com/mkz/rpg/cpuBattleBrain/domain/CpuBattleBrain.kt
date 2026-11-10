@@ -8,11 +8,6 @@ import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.CpuPlayerTurnFinish
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.CpuPlayerTurnStarted
 import kotlin.jvm.JvmInline
 
-/**
- * Plays a CPU player turn one decision at a time: it decides for its pending battle units in order, and waits for each
- * requested decision to be resolved before making the next one, so every decision is based on the state left by the
- * previous one.
- */
 @ConsistentCopyVisibility
 data class CpuBattleBrain private constructor(
     private val playerId: PlayerId,
@@ -22,7 +17,6 @@ data class CpuBattleBrain private constructor(
     private val events: Set<CpuBattleBrainEvent>,
 ) {
     companion object {
-        // Guards against endless player turns: every decision spends casts or steps, so a player turn should always end before.
         const val MAX_DECISIONS_PER_PLAYER_TURN = 20
 
         fun startPlayerTurn(
@@ -48,7 +42,6 @@ data class CpuBattleBrain private constructor(
             decisionsTaken = decisionsTaken.value,
         )
 
-    /** The battle unit to decide for next, or `null` when every battle unit is done. */
     fun nextBattleUnitId(): String? = pendingBattleUnits.value.firstOrNull()
 
     fun hasReachedDecisionLimit(): Boolean = decisionsTaken.value >= MAX_DECISIONS_PER_PLAYER_TURN
@@ -64,20 +57,17 @@ data class CpuBattleBrain private constructor(
         abilityId: String,
     ): CpuBattleBrain = requestDecision(AwaitedDecision.Cast(battleUnitId = battleUnitId, abilityId = abilityId))
 
-    /** Resolves the awaited walk when the battle unit occupies the requested tile. Otherwise, nothing changes. */
     fun resolveWalk(
         battleUnitId: String,
         row: Int,
         column: Int,
     ): CpuBattleBrain = resolveDecision(AwaitedDecision.Walk(battleUnitId = battleUnitId, row = row, column = column))
 
-    /** Resolves the awaited cast when the battle unit ability has been resolved. Otherwise, nothing changes. */
     fun resolveCast(
         battleUnitId: String,
         abilityId: String,
     ): CpuBattleBrain = resolveDecision(AwaitedDecision.Cast(battleUnitId = battleUnitId, abilityId = abilityId))
 
-    /** Marks the next battle unit as done, once it has nothing left to decide this player turn. */
     fun markDone(battleUnitId: String): CpuBattleBrain {
         requireNextBattleUnit(battleUnitId)
         if (awaitedDecision != null) throw AlreadyAwaitingADecision()
@@ -87,13 +77,8 @@ data class CpuBattleBrain private constructor(
         )
     }
 
-    /** Whether the player turn is being played: some battle units are still pending. */
     fun isPlayingPlayerTurn(): Boolean = pendingBattleUnits.value.isNotEmpty()
 
-    /**
-     * Leaves the battle unit pending after the ones already pending, e.g.: a battle unit summoned during the player turn,
-     * which plays it too. Nothing changes once the player turn is over, nor when it is already pending.
-     */
     fun addBattleUnit(battleUnitId: String): CpuBattleBrain {
         if (!isPlayingPlayerTurn() || battleUnitId in pendingBattleUnits.value) return this
         return copy(pendingBattleUnits = PendingBattleUnits(pendingBattleUnits.value + battleUnitId))

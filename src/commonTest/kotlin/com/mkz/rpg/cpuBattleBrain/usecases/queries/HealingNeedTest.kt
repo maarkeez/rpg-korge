@@ -11,7 +11,6 @@ class HealingNeedTest {
     private val queries = InMemoryQueries()
     private val healingNeed = queries.healingNeed
 
-    // Stores a battle unit of a unit with the given maximum health, that has the given health left.
     private fun battleUnitWithHealth(
         id: String,
         remainingHealth: Int,

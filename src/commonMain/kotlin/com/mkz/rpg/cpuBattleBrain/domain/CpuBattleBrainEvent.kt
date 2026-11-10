@@ -17,10 +17,6 @@ sealed interface CpuBattleBrainEvent : DomainEvent {
         val battleUnitId: String,
     ) : CpuBattleBrainEvent
 
-    /**
-     * Battle units: the CPU battle units with an enemy of the engaged player within reach, which engage it.
-     * Engaged battle units: every living battle unit of the engaged player.
-     */
     data class EnemiesEngaged(
         val playerId: String,
         val engagedPlayerId: String,
@@ -28,23 +24,16 @@ sealed interface CpuBattleBrainEvent : DomainEvent {
         val engagedBattleUnitIds: List<String>,
     ) : CpuBattleBrainEvent
 
-    /**
-     * Joining battle units: the CPU battle units out of the battle that now have an enemy within reach, so they join it.
-     * Leaving battle units: the CPU battle units in the battle without any enemy within reach, so they leave it.
-     * Player: the CPU player, whose battle units join and leave, null when there is none.
-     */
     data class CpuBattleUnitsJoinedAndLeft(
         val playerId: String?,
         val joiningBattleUnitIds: List<String>,
         val leavingBattleUnitIds: List<String>,
     ) : CpuBattleBrainEvent
 
-    // Requested once every CPU battle unit has wandered, while the player explores.
     data class RequestEngageEnemies(
         val exploringPlayerId: String,
     ) : CpuBattleBrainEvent
 
-    // Requested once every CPU battle unit out of the battle has wandered, after a round finished. Battle units: those in the battle.
     data class RequestJoinAndLeaveBattle(
         val battleUnitIds: Set<String>,
     ) : CpuBattleBrainEvent

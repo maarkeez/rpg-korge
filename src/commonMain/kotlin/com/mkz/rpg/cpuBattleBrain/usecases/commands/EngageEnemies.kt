@@ -7,11 +7,6 @@ import com.mkz.rpg.cpuBattleBrain.usecases.queries.SearchEnemiesWithinReach
 import com.mkz.rpg.player.usecases.queries.SearchOpponent
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Engages the exploring player when any CPU battle unit has one of their battle units within reach, with the same rule
- * the CPU battle units engage enemies in a battle: after the party walks, and after the CPU battle units wander. Every
- * living battle unit of the exploring player is engaged. The battle is requested to start right after.
- */
 class EngageEnemies(
     private val searchOpponent: SearchOpponent,
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId,

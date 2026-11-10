@@ -21,7 +21,6 @@ class EngageEnemiesTest {
     private val human = player(id = "human", type = PlayerTypeDto.HUMAN)
     private val cpu = player(id = "cpu", type = PlayerTypeDto.CPU)
 
-    // A knight, and two rats: the first one 5 tiles away from the knight, the second one 6 tiles away.
     private fun givenRatsAt(map: String) {
         queries.playerRepository.create(human)
         queries.playerRepository.create(cpu)

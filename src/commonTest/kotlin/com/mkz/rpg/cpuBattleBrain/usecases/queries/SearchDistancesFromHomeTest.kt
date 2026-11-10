@@ -22,8 +22,6 @@ class SearchDistancesFromHomeTest {
         queries.effectRepository.create(healEffect(id = "effect-water", healing = 10))
     }
 
-    // Stores a battlefield with one line per row and one terrain per tile ("sand", "lava", "water" or "void"), and the
-    // battle units standing on the given tiles.
     private fun givenBattlefield(
         map: String,
         occupants: Map<String, Pair<Int, Int>> = emptyMap(),

@@ -18,7 +18,6 @@ class OnCpuBattleUnitDoneTest {
     @Test
     fun `should make the next decision when the cpu battle unit is done`() {
         // Given
-        // The rat has been defeated, so it has nothing left to do this turn.
         queries.cpuBattleBrainRepository.save(CpuBattleBrain.startPlayerTurn(playerId = "cpu", battleUnitIds = listOf("rat-1")).pullEvents().second)
         eventBus.publish(CpuBattleBrainEvent.CpuBattleUnitDone(playerId = "cpu", battleUnitId = "skull-1"))
         // When

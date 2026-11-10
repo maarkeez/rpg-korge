@@ -8,11 +8,6 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchWalkingDistance
 import com.mkz.rpg.cpuBattleBrain.usecases.services.REACH
 import com.mkz.rpg.player.usecases.queries.SearchOpponent
 
-/**
- * The enemy battle units a CPU battle unit engages: the ones it can walk to in [REACH] tiles or fewer,
- * counting their tile, stepping only on tiles it could stand on. A summon reaches every enemy it can walk to, however
- * far, as it lasts only some turns, and spends them attacking.
- */
 class SearchEnemiesWithinReach(
     private val searchBattleUnitById: SearchBattleUnitById,
     private val searchOpponent: SearchOpponent,

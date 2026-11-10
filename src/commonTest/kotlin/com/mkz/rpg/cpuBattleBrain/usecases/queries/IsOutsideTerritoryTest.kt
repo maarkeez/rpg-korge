@@ -18,8 +18,6 @@ class IsOutsideTerritoryTest {
         queries.effectRepository.create(damageEffect(id = "effect-lava", damage = 10))
     }
 
-    // Stores a battlefield with one line per row and one terrain per tile ("sand", "lava" or "void"), and the battle
-    // units standing on the given tiles.
     private fun givenBattlefield(
         map: String,
         occupants: Map<String, Pair<Int, Int>>,
@@ -57,7 +55,7 @@ class IsOutsideTerritoryTest {
 
     @Test
     fun `should count the distance from home around harmful terrain`() {
-        // Given: the rat is 2 tiles away from home across the lava, but 4 tiles away around it.
+        // Given
         givenBattlefield(
             """
             sand lava sand

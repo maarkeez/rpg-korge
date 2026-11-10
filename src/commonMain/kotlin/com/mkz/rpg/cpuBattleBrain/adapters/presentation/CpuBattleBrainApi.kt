@@ -51,7 +51,6 @@ class CpuBattleBrainApi(
     eventBus: EventBus,
     random: Random,
 ) {
-    // Queries
     val healingNeed = HealingNeed(battleUnitApi.searchBattleUnitById)
     val searchTerrainHealthEffect = SearchTerrainHealthEffect(battlefieldApi.searchTerrainId, terrainApi.searchTerrainById, effectApi.searchEffectById)
     val searchDistancesFromHome = SearchDistancesFromHome(battlefieldApi.isTileOccupiable, searchTerrainHealthEffect)
@@ -102,10 +101,8 @@ class CpuBattleBrainApi(
             random,
         )
 
-    // Storage
     private val cpuBattleBrainRepository: CpuBattleBrainRepository = InMemoryCpuBattleBrainRepository()
 
-    // Commands
     val playPlayerTurn =
         PlayPlayerTurn(
             playerApi.searchPlayerById,
@@ -148,7 +145,6 @@ class CpuBattleBrainApi(
     val resolveCpuBattleUnitCast = ResolveCpuBattleUnitCast(cpuBattleBrainRepository, eventBus)
     val joinCpuPlayerTurn = JoinCpuPlayerTurn(cpuBattleBrainRepository, battleUnitApi.searchBattleUnitById)
 
-    // Events
     val onPlayerTurnStarted = OnPlayerTurnStarted(eventBus, playPlayerTurn)
     private val onCpuPlayerTurnStarted = OnCpuPlayerTurnStarted(makeNextDecision, eventBus)
     private val onCpuBattleUnitDecisionResolved = OnCpuBattleUnitDecisionResolved(makeNextDecision, eventBus)

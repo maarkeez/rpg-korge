@@ -3,7 +3,6 @@ package com.mkz.rpg.cpuBattleBrain.usecases.commands
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainRepository
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Lets the CPU battle brain continue once the walk it awaits has ended on its tile. Walks of other battle units are ignored. */
 class ResolveCpuBattleUnitWalk(
     private val cpuBattleBrainRepository: CpuBattleBrainRepository,
     private val eventBus: EventBus,

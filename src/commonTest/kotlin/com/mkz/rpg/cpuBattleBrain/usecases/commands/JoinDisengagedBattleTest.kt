@@ -20,8 +20,6 @@ class JoinDisengagedBattleTest {
     private val human = player(id = "human", type = PlayerTypeDto.HUMAN)
     private val cpu = player(id = "cpu", type = PlayerTypeDto.CPU)
 
-    // The rat-1, which battled the knight, was defeated. The rat-2 is 5 tiles away from the knight, and the rat-3 8 tiles
-    // away. Only the given rats are battle units of the cpu.
     private fun givenDisengagedBattle(ratIds: List<String>) {
         queries.playerRepository.create(human)
         queries.playerRepository.create(cpu)
@@ -66,7 +64,7 @@ class JoinDisengagedBattleTest {
 
     @Test
     fun `should not have the cpu battle units left in the battle join it again when the human player left it`() {
-        // Given: the knight left the battle, which the rat-2 is still in.
+        // Given
         givenDisengagedBattle(ratIds = listOf("rat-2"))
         // When
         joinDisengagedBattle(battleUnitIds = setOf("rat-2"))

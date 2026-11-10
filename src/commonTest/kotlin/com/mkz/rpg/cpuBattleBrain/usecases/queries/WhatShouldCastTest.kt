@@ -33,7 +33,6 @@ class WhatShouldCastTest {
     private val queries = InMemoryQueries(random = Random(seed = 0))
     private val whatShouldCast = queries.whatShouldCast
 
-    // The CPU rat (20 HP) stands at (0,0). Enemies stand next to it.
     private val ratId = "rat-1"
     private val casterPosition = WhereCanCast.PositionDto(row = 0, column = 0)
     private val east = WhereCanCast.PositionDto(row = 0, column = 1)
@@ -49,14 +48,11 @@ class WhatShouldCastTest {
     private val heal = ability(id = "heal", manaCost = 0, cooldown = 0, targeting = TargetingDto.CASTER, abilityEffects = listOf(abilityEffect("heal", CASTER)))
     private val teleport = ability(id = "teleport", manaCost = 0, cooldown = 0, targeting = VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT, abilityEffects = listOf(abilityEffect("teleport", CASTER)))
 
-    // The bat (sword dealing 10, walking 2 tiles per turn) is deployed on a vacant tile next to the caster.
     private val deployBat = ability(id = "deploy-bat", manaCost = 0, cooldown = 0, targeting = VACANT_TILE_ADJACENT_TO_CASTER, abilityEffects = listOf(abilityEffect("deploy-bat", TARGETED_TILE)))
 
-    // The scarecrow has no attack.
     private val deployScarecrow =
         ability(id = "deploy-scarecrow", manaCost = 0, cooldown = 0, targeting = VACANT_TILE_ADJACENT_TO_CASTER, abilityEffects = listOf(abilityEffect("deploy-scarecrow", TARGETED_TILE)))
 
-    // It costs more mana than the rat has.
     private val unaffordableHeal = ability(id = "heal", manaCost = 100, cooldown = 0, targeting = TargetingDto.CASTER, abilityEffects = listOf(abilityEffect("heal", CASTER)))
 
     init {
@@ -97,7 +93,6 @@ class WhatShouldCastTest {
         abilities.forEach(queries.abilityRepository::create)
         val ratUnit = unit(id = "rat", baseMaximumHealth = 20, baseMaximumMana = 10, startingAbilities = abilities.map { it.toDto().id }).also(queries.unitRepository::create)
         val rat = battleUnit(id = ratId, unit = ratUnit.toDto(), player = cpu, remainingHealth = remainingHealth)
-        // A rat with no casts left has already cast an ability this turn.
         val castRat = if (remainingCasts == 0) rat.castAbility(abilityId = "sword", abilityCooldown = 0, abilityManaCost = 0, castGroup = emptyList()).pullEvents().second else rat
         queries.battleUnitRepository.create(castRat)
         place(ratId, casterPosition)
@@ -205,7 +200,6 @@ class WhatShouldCastTest {
     fun `should cast another ability when no damage or heal is worth it`() {
         // Given
         givenRat(remainingHealth = 20, abilities = listOf(sword, heal, teleport))
-        // The knight is too far to attack, but the rat can teleport next to it.
         givenKnight(id = "knight-1", position = WhereCanCast.PositionDto(row = 0, column = 3), remainingHealth = 100)
         // When
         val decision = whatShouldCast(ratId)
@@ -298,7 +292,6 @@ class WhatShouldCastTest {
         decision.shouldBeNull()
     }
 
-    // The rat walks 7 tiles to the knight, further than it engages enemies.
     private val outOfReach = WhereCanCast.PositionDto(row = 2, column = 5)
 
     @Test

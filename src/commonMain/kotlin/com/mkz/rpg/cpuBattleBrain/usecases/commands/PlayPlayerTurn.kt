@@ -8,10 +8,6 @@ import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Starts playing the player turn of a CPU player. Its battle units in the battle are then pending, decided for one decision at a time by [MakeNextDecision].
- * Battle units: those in the battle.
- */
 class PlayPlayerTurn(
     private val searchPlayerById: SearchPlayerById,
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId,

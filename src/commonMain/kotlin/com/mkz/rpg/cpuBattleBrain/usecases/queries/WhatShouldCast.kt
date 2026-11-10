@@ -20,12 +20,6 @@ import kotlin.math.min
 import kotlin.math.pow
 import kotlin.random.Random
 
-/**
- * Decides which ability a CPU battle unit should cast, following the utility AI pattern:
- * every castable ability and target is scored as a damage, a heal or a summon, and the best one is cast
- * when it beats doing nothing. Otherwise, one of the other abilities (e.g.: teleport) is cast at random.
- * Only the enemies within reach are engaged: without any, the battle unit only heals.
- */
 class WhatShouldCast(
     private val searchBattleUnitById: SearchBattleUnitById,
     private val searchUnitById: SearchUnitById,
@@ -104,8 +98,6 @@ class WhatShouldCast(
     private fun effectsOf(ability: Ability.Dto): List<Pair<EffectTargetDto.Type, Effect.Dto>> =
         ability.abilityEffects.mapNotNull { abilityEffect -> searchEffectById(abilityEffect.effectId)?.let { effect -> abilityEffect.target.type to effect } }
 
-    // Removing more of what is left of the targets is better, e.g.: finishing off a weak enemy. Only the enemies within
-    // reach count. A badly hurt caster damages less eagerly, as it does when it walks towards enemies.
     private fun damageUtility(
         damage: Double,
         castGroup: WhereCanCast.CastGroup,
@@ -125,7 +117,6 @@ class WhatShouldCast(
         return casterHealthRatio * targetsUtility
     }
 
-    // Healing is worth more the more the caster needs it, and less when most of it would be wasted.
     private fun healUtility(
         healing: Double,
         caster: BattleUnit.Dto,
@@ -136,9 +127,6 @@ class WhatShouldCast(
         return healingNeed(battleUnitId = caster.id) * usefulHealing / healing
     }
 
-    // A summon is worth the damage it will deal to the enemy within reach of the caster nearest to its tile, discounted
-    // for every player turn it waits: it may need several player turns to walk next to the enemy. As with damage, a badly
-    // hurt caster summons less eagerly.
     private fun summonUtility(
         deployedUnitId: String,
         castGroup: WhereCanCast.CastGroup,
@@ -162,13 +150,11 @@ class WhatShouldCast(
         val (enemy, distance) = nearestEnemy
         val tilesToWalk = distance - 1
         if (tilesToWalk > 0 && deployedUnit.maximumSteps <= 0) return 0.0
-        // It walks and casts in the same player turn, so it deals damage in the player turn it walks its last tile.
         val playerTurnsToDamage = if (tilesToWalk <= 0) 1 else (tilesToWalk + deployedUnit.maximumSteps - 1) / deployedUnit.maximumSteps
         val casterHealthRatio = caster.remainingHealth.toDouble() / casterMaxHealth
         return casterHealthRatio * PLAYER_TURN_DISCOUNT.pow(playerTurnsToDamage) * min(damage, enemy.remainingHealth.toDouble()) / enemy.remainingHealth
     }
 
-    // Immediate effects count in full. Effects applied each player turn count their total, discounted for every player turn they wait.
     private fun expectedAmount(
         effects: List<Pair<EffectTargetDto.Type, Effect.Dto>>,
         target: EffectTargetDto.Type,

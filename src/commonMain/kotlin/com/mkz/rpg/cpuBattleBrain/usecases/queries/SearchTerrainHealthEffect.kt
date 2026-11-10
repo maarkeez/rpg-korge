@@ -6,10 +6,6 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.HEAL
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 
-/**
- * The health its terrain gives to the battle unit standing on the tile: positive when it heals (e.g.: water), negative
- * when it hurts (e.g.: lava), and 0 otherwise.
- */
 class SearchTerrainHealthEffect(
     private val searchTerrainId: SearchTerrainId,
     private val searchTerrainById: SearchTerrainById,

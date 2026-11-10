@@ -47,7 +47,6 @@ class MakeNextDecisionTest {
         queries.abilityRepository.create(ability(id = "sword", manaCost = 0, cooldown = 0, targeting = ADJACENT_ENEMY, abilityEffects = listOf(abilityEffect("damage", TARGETED_BATTLE_UNIT))))
     }
 
-    // Stores the CPU rats (`R` is unit-1 and `S` is unit-2), that know the given abilities, and the human knight `K`, standing on the battlefield map.
     private fun givenBattlefield(
         map: String,
         ratAbilities: List<String> = emptyList(),
@@ -65,7 +64,6 @@ class MakeNextDecisionTest {
     fun `should cast and await the cast when the next battle unit should cast`() {
         // Given
         cpuBattleBrainRepository.save(cpuBattleBrain())
-        // The rat stands next to the knight.
         givenBattlefield(
             """
             R K
@@ -90,7 +88,6 @@ class MakeNextDecisionTest {
     fun `should walk and await the walk when the next battle unit should walk and not cast`() {
         // Given
         cpuBattleBrainRepository.save(cpuBattleBrain())
-        // The rat has no abilities, and walks towards the knight.
         givenBattlefield(
             """
             R . . K
@@ -112,7 +109,6 @@ class MakeNextDecisionTest {
     fun `should mark the battle unit done when it has nothing left to do`() {
         // Given
         cpuBattleBrainRepository.save(cpuBattleBrain())
-        // The rat has no abilities, and there is no enemy to walk to.
         givenBattlefield(
             """
             R .

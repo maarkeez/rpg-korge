@@ -11,11 +11,6 @@ import com.mkz.rpg.cpuBattleBrain.usecases.queries.WhereShouldWalk
 import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Makes the next decision of the CPU player turn: the next battle unit casts or walks when it is worth it, and the CPU
- * battle brain waits for the decision to be resolved before making the next one. Otherwise, the battle unit is done and the
- * next one follows. Once every battle unit is done, the player turn is finished.
- */
 class MakeNextDecision(
     private val cpuBattleBrainRepository: CpuBattleBrainRepository,
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId,

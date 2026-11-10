@@ -21,11 +21,9 @@ class WhereShouldWalkTest {
 
     init {
         queries.playerRepository.create(player(id = "player-1", type = Player.Dto.PlayerTypeDto.CPU))
-        // The game always has an opponent, even when none of its battle units is left.
         queries.playerRepository.create(player(id = "player-2"))
     }
 
-    // Stores a battle unit that can walk two tiles, of a unit with the given maximum health.
     private fun givenBattleUnit(
         id: String,
         playerId: String,
@@ -36,7 +34,6 @@ class WhereShouldWalkTest {
         queries.battleUnitRepository.create(battleUnit(id = id, unit = unit.toDto(), player = player(id = playerId).toDto(), remainingHealth = remainingHealth))
     }
 
-    // Stores a terrain, and the effect it applies to its occupant.
     private fun givenTerrain(
         id: String,
         effect: Effect? = null,
@@ -45,13 +42,11 @@ class WhereShouldWalkTest {
         queries.terrainRepository.create(terrainThatCanBeOccupied(id = id, effectId = effect?.toDto()?.id))
     }
 
-    // Stores a single row battlefield with the given terrain on each tile, and the battle units standing on the given columns.
     private fun givenBattlefieldRow(
         terrainIds: List<String>,
         battleUnitColumns: Map<String, Int>,
     ) = givenBattlefield(listOf(terrainIds), battleUnitColumns.mapValues { (_, column) -> position(0, column) })
 
-    // Stores a battlefield with the given terrain on each tile, and the battle units standing on the given positions.
     private fun givenBattlefield(
         terrainIds: List<List<String>>,
         battleUnitPositions: Map<String, Battlefield.Dto.PositionDto>,
@@ -92,7 +87,6 @@ class WhereShouldWalkTest {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 10)
         givenBattleUnit(id = "enemy-battle-unit", playerId = "player-2", remainingHealth = 10)
-        // The battle unit walks 6 tiles to the enemy, further than it engages enemies.
         givenBattlefieldRow(List(7) { "sand" }, battleUnitColumns = mapOf("battle-unit-1" to 0, "enemy-battle-unit" to 6))
         // When
         val result = whereShouldWalk("battle-unit-1")
@@ -119,7 +113,6 @@ class WhereShouldWalkTest {
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 1)
         givenBattleUnit(id = "enemy-battle-unit", playerId = "player-2", remainingHealth = 10)
         givenBattleUnit(id = "ally-battle-unit", playerId = "player-1", remainingHealth = 10)
-        // The enemy stands on one side, and the ally on the other.
         givenBattlefieldRow(List(5) { "sand" }, battleUnitColumns = mapOf("enemy-battle-unit" to 0, "battle-unit-1" to 2, "ally-battle-unit" to 4))
         // When
         val result = whereShouldWalk("battle-unit-1")
@@ -132,7 +125,6 @@ class WhereShouldWalkTest {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 10)
         givenBattleUnit(id = "enemy-battle-unit", playerId = "player-2", remainingHealth = 10)
-        // The battle unit is already next to the enemy.
         givenBattlefieldRow(List(3) { "sand" }, battleUnitColumns = mapOf("battle-unit-1" to 1, "enemy-battle-unit" to 2))
         // When
         val result = whereShouldWalk("battle-unit-1")
@@ -238,7 +230,6 @@ class WhereShouldWalkTest {
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 10)
         givenBattleUnit(id = "enemy-battle-unit-1", playerId = "player-2", remainingHealth = 10)
         givenBattleUnit(id = "enemy-battle-unit-2", playerId = "player-2", remainingHealth = 10)
-        // The battle unit is next to an enemy wherever it stands.
         queries.battlefieldRepository.create(
             BattlefieldMother.battlefield(
                 "E K . F",
@@ -257,7 +248,6 @@ class WhereShouldWalkTest {
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 1)
         givenBattleUnit(id = "ally-battle-unit-1", playerId = "player-1", remainingHealth = 10)
         givenBattleUnit(id = "ally-battle-unit-2", playerId = "player-1", remainingHealth = 10)
-        // The battle unit is next to an ally wherever it stands.
         queries.battlefieldRepository.create(
             BattlefieldMother.battlefield(
                 "A K . B",
@@ -278,7 +268,6 @@ class WhereShouldWalkTest {
         enemyPositions.indices.forEach { index -> givenBattleUnit(id = "enemy-battle-unit-$index", playerId = "player-2", remainingHealth = 10) }
         givenTerrain(id = "neutral")
         givenTerrain(id = "healing", effect = healEffect(id = "effect-healing", healing = 10))
-        // The battle unit can only walk north, to neutral terrain, or south, to healing terrain, both next to two enemies.
         givenBattlefield(
             terrainIds =
                 listOf(

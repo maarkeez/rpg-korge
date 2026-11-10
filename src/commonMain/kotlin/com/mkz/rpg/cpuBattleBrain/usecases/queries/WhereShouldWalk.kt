@@ -29,7 +29,6 @@ class WhereShouldWalk(
         val enemyPreference = battleUnit.remainingHealth.toDouble() / battleUnit.maximumHealth.toDouble()
         val allyPreference = 1 - enemyPreference
 
-        // Only the enemies within reach attract the battle unit: the others are ignored.
         val enemyBattleUnits = searchEnemiesWithinReach(battleUnitId = battleUnit.id)
         val enemyBattleUnitsPositions =
             enemyBattleUnits.associate { battleUnit ->
@@ -40,12 +39,10 @@ class WhereShouldWalk(
             allyBattleUnits.associate { battleUnit ->
                 battleUnit.id to searchPosition(occupantId = battleUnit.id)
             }
-        // Initialize
         val utilityData = mutableMapOf<Battlefield.Dto.PositionDto, UtilityEvaluationData>()
         optionTiles.forEach { position ->
             utilityData[position] = UtilityEvaluationData()
         }
-        // Evaluate the tiles apart from every option to the nearest enemy
         optionTiles.forEach { position ->
             val hasDeployedEnemies = enemyBattleUnitsPositions.any { (_, position) -> position != null }
             if (!hasDeployedEnemies) {
@@ -59,7 +56,6 @@ class WhereShouldWalk(
                 utilityData[position] = utilityData[position]!!.copy(nearestEnemyDistance = nearestEnemyDistance)
             }
         }
-        // Evaluate the tiles apart from every option to the nearest ally
         optionTiles.forEach { position ->
             val hasDeployedAllies = allyBattleUnitsPositions.any { (_, position) -> position != null }
             if (!hasDeployedAllies) {
@@ -73,7 +69,6 @@ class WhereShouldWalk(
                 utilityData[position] = utilityData[position]!!.copy(nearestAllyDistance = nearestAllyDistance)
             }
         }
-        // Normalize enemy distances
         val minimumEnemyDistance =
             utilityData.entries
                 .filter { (_, evaluationData) -> evaluationData.nearestEnemyDistance != null }
@@ -87,11 +82,10 @@ class WhereShouldWalk(
                 utilityData[position] =
                     evaluationData.copy(
                         nearestEnemyDistanceNormalized =
-                            normalizedDistance(distance = evaluationData.nearestEnemyDistance, minimum = minimumEnemyDistance, maximum = maximumEnemyDistance),
+                            nearness(distance = evaluationData.nearestEnemyDistance, nearest = minimumEnemyDistance, farthest = maximumEnemyDistance),
                     )
             }
         }
-        // Normalize ally distances
         val minimumAllyDistance =
             utilityData.entries
                 .filter { (_, evaluationData) -> evaluationData.nearestAllyDistance != null }
@@ -105,18 +99,16 @@ class WhereShouldWalk(
                 utilityData[position] =
                     evaluationData.copy(
                         nearestAllyDistanceNormalized =
-                            normalizedDistance(distance = evaluationData.nearestAllyDistance, minimum = minimumAllyDistance, maximum = maximumAllyDistance),
+                            nearness(distance = evaluationData.nearestAllyDistance, nearest = minimumAllyDistance, farthest = maximumAllyDistance),
                     )
             }
         }
-        // Evaluate the health effect of the terrain of every option
         optionTiles.forEach { position ->
             utilityData[position] =
                 utilityData[position]!!.copy(
                     terrainHealthEffect = searchTerrainHealthEffect(row = position.row, column = position.column),
                 )
         }
-        // Calculate utility contribution
         val currentHealingNeed = healingNeed(battleUnitId = battleUnit.id)
         utilityData.entries.forEach { (position, evaluationData) ->
             val enemyContribution =
@@ -145,14 +137,11 @@ class WhereShouldWalk(
                     optionUtility = enemyContribution + allyContribution + terrainContribution,
                 )
         }
-        // Calculate the best option
         val (bestPosition, bestEvaluationData) = utilityData.entries.maxBy { (_, evaluationData) -> evaluationData.optionUtility!! }
-        // Check threshold to prevent walks with minimum gain
         val currentPositionUtility = utilityData[currentPosition]!!.optionUtility!!
         if (abs(bestEvaluationData.optionUtility!! - currentPositionUtility) <= MINIMUM_UTILITY_GAIN) {
             return null
         }
-        // Check if we are walking at all
         if (bestPosition == currentPosition) {
             return null
         }
@@ -171,13 +160,11 @@ class WhereShouldWalk(
         val optionUtility: Double? = null,
     )
 
-    // From 1 for the nearest option to 0 for the farthest. When every option is the same tiles apart, the distance can't
-    // tell them apart, so it is worth 0 for every option, as when there is nobody to be near.
-    private fun normalizedDistance(
+    private fun nearness(
         distance: Int,
-        minimum: Int,
-        maximum: Int,
-    ): Double = if (maximum == minimum) 0.0 else (maximum - distance).toDouble() / (maximum - minimum).toDouble()
+        nearest: Int,
+        farthest: Int,
+    ): Double = if (farthest == nearest) 0.0 else (farthest - distance).toDouble() / (farthest - nearest).toDouble()
 
     private fun tilesApart(
         from: Battlefield.Dto.PositionDto,

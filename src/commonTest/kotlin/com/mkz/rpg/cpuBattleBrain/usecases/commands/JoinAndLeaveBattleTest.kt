@@ -20,7 +20,6 @@ class JoinAndLeaveBattleTest {
     private val human = player(id = "human", type = PlayerTypeDto.HUMAN)
     private val cpu = player(id = "cpu", type = PlayerTypeDto.CPU)
 
-    // The rat-1 battles next to the knight. The rat-2 is 5 tiles away from the knight, and the rat-3 8 tiles away.
     private fun givenBattle() {
         queries.playerRepository.create(human)
         queries.playerRepository.create(cpu)
@@ -89,7 +88,7 @@ class JoinAndLeaveBattleTest {
 
     @Test
     fun `should never have the cpu summons in the battle leave it, even with no enemy within reach`() {
-        // Given: the bat can not walk to the knight.
+        // Given
         queries.playerRepository.create(human)
         queries.playerRepository.create(cpu)
         queries.battleUnitRepository.create(battleUnit(id = "knight-1", player = human.toDto()))
