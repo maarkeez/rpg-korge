@@ -12,7 +12,6 @@ import com.mkz.rpg.shared.adapters.toml.required
 import korlibs.io.file.VfsFile
 import kotlinx.serialization.Serializable
 
-/** Loads one loot table per `lootTable/<loot table id>.toml` resource. */
 class ResourcesLootTableLoader(
     private val lootTableRoot: VfsFile = ResourcesBundle.root["lootTable"],
 ) : LootTableLoader {

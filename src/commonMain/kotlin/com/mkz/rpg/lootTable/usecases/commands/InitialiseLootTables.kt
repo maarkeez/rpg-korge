@@ -8,7 +8,6 @@ import com.mkz.rpg.lootTable.usecases.services.LootTableLoader
 import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Creates every loaded loot table, unless it already exists, once all its lootable items exist. */
 class InitialiseLootTables(
     private val lootTableLoader: LootTableLoader,
     private val lootTableRepository: LootTableRepository,

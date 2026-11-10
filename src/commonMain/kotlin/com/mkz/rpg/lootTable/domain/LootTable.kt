@@ -10,10 +10,6 @@ import com.mkz.rpg.lootTable.domain.LootTableError.NonPositiveLootTableWeight
 import com.mkz.rpg.lootTable.domain.LootTableEvent.LootTableCreated
 import kotlin.jvm.JvmInline
 
-/**
- * The weighted entries loot drops roll on, shared by every loot drop that lists it. It only holds the weights: a loot
- * drop's roll turns them into chances.
- */
 @ConsistentCopyVisibility
 data class LootTable private constructor(
     private val id: Id,
@@ -56,7 +52,6 @@ data class LootTable private constructor(
         fun toDto(): List<EntryDto> = value.map(Entry::toDto)
     }
 
-    /** A lootable item, or nothing when [lootableItemId] is `null`, rolled with the given [weight]. */
     private data class Entry(
         val lootableItemId: LootableItemId?,
         val weight: Weight,

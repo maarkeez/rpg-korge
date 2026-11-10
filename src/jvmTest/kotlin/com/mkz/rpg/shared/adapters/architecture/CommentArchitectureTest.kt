@@ -23,7 +23,6 @@ class CommentArchitectureTest {
             "gameSetup",
             "inventory",
             "lootDrop",
-            "lootTable",
             "npc",
             "party",
             "quest",

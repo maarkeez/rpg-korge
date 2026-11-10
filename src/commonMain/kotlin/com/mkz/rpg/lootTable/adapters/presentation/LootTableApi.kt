@@ -14,16 +14,12 @@ class LootTableApi(
     eventBus: EventBus,
     private val lootTableLoader: LootTableLoader,
 ) {
-    // Storage
     private val lootTableRepository: LootTableRepository = InMemoryLootTableRepository()
 
-    // Commands
     val initialiseLootTables = InitialiseLootTables(lootTableLoader, lootTableRepository, lootableItemApi.searchLootableItemById, eventBus)
 
-    // Queries
     val searchLootTableById = SearchLootTableById(lootTableRepository)
 
-    // Events
     private val onRequestInitialiseLootTables = OnRequestInitialiseLootTables(initialiseLootTables, eventBus)
 
     suspend fun init() {
