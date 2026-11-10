@@ -26,8 +26,6 @@ class ResolveWanderingStepTest {
     private val resolveWanderingStep =
         ResolveWanderingStep(cpuWanderBrainRepository, WanderingSteps(cpuWanderBrainRepository, queries.whereShouldWander, queries.isOutsideTerritory, queries.searchPosition, eventBus))
 
-    // rat-1 stepped from its home (0,0) to (1,0), and rat-2 wanders next from its home (2,2). The party leader, knight-1,
-    // stands on K.
     private fun givenRatStepped(battleUnitIds: List<String>) {
         val cpu = player(id = "cpu", type = PlayerTypeDto.CPU)
         queries.playerRepository.create(cpu)

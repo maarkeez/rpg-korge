@@ -5,11 +5,6 @@ import com.mkz.rpg.battlefield.usecases.queries.IsTileVacant
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainRepository
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * The party took a party step: every defeated CPU battle unit counts it, and those that have counted enough steps are
- * requested to respawn on their home. The ones whose home is occupied (e.g.: by a battle unit of the party) wait, and
- * are requested again on the next step.
- */
 class RespawnDefeatedBattleUnits(
     private val cpuWanderBrainRepository: CpuWanderBrainRepository,
     private val isTileVacant: IsTileVacant,

@@ -11,7 +11,6 @@ class IsInSightTest {
     private val queries = InMemoryQueries()
     private val isInSight = queries.isInSight
 
-    // On a battlefield of 40 rows and 24 columns, the party leader, knight-1, and rat-1 stand on the given tiles.
     private fun givenBattlefield(
         leader: Pair<Int, Int>?,
         rat: Pair<Int, Int>,
@@ -42,7 +41,7 @@ class IsInSightTest {
 
     @Test
     fun `should shift the area in sight inside the battlefield near a border`() {
-        // Given: the camera does not scroll left of the first column, so it shows the columns 0 to 6, and 7 is 1 tile around.
+        // Given
         givenParty()
         givenBattlefield(leader = 10 to 1, rat = 10 to 7)
         // When / Then
@@ -51,7 +50,7 @@ class IsInSightTest {
 
     @Test
     fun `should shift the area in sight inside the battlefield near the last row`() {
-        // Given: the camera does not scroll below the last row, so it shows the rows 33 to 39, and 32 is 1 tile around.
+        // Given
         givenParty()
         givenBattlefield(leader = 38 to 12, rat = 32 to 12)
         // When / Then
@@ -80,7 +79,7 @@ class IsInSightTest {
         // Given
         givenParty()
         givenBattlefield(leader = 10 to 12, rat = 10 to 13)
-        // When / Then: rat-2 is not deployed.
+        // When / Then
         isInSight(battleUnitId = "rat-2").shouldBeFalse()
     }
 }

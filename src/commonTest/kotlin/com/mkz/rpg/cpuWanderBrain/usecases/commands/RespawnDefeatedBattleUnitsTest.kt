@@ -19,7 +19,6 @@ class RespawnDefeatedBattleUnitsTest {
     private val eventBus = FakeEventBus()
     private val respawnDefeatedBattleUnits = RespawnDefeatedBattleUnits(cpuWanderBrainRepository, queries.isTileVacant, eventBus)
 
-    // rat-1, at home on (0,0), and rat-2, at home on (2,2), were defeated, and the party has walked the given steps since.
     private fun givenRatsDefeated(
         partySteps: Int,
         map: String = ". . .\n. . .\n. . .",

@@ -39,7 +39,7 @@ class ClaimHomeTest {
 
     @Test
     fun `should keep the distances from home of the cpu battle unit when it claims its home`() {
-        // Given: the void tile, east, can not be walked to.
+        // Given
         queries.battlefieldRepository.create(battlefield(". . #\n. . ."))
         // When
         claimHome(battleUnitId = "rat-1", row = 0, column = 0)

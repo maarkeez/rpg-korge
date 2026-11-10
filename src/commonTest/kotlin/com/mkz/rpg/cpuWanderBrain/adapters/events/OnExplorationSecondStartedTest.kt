@@ -43,7 +43,7 @@ class OnExplorationSecondStartedTest {
 
     @Test
     fun `should wander the cpu battle units when a second starts while exploring`() {
-        // Given: the rat is at home, at (0,0), so it can step east or south.
+        // Given
         val cpu = player(id = "cpu", type = PlayerTypeDto.CPU)
         queries.playerRepository.create(cpu)
         queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = cpu.toDto()))

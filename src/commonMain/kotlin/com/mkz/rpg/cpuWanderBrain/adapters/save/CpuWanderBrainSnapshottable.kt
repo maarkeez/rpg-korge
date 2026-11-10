@@ -9,10 +9,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
-/**
- * The home of each CPU battle unit, the ones returning home, and the awaited respawns: the party steps each defeated
- * one has counted until it respawns, see [SearchCpuWanderBrainSnapshot] and [LoadCpuWanderBrainSnapshot].
- */
 class CpuWanderBrainSnapshottable(
     private val searchCpuWanderBrainSnapshot: SearchCpuWanderBrainSnapshot,
     private val loadCpuWanderBrainSnapshot: LoadCpuWanderBrainSnapshot,
@@ -53,7 +49,6 @@ class CpuWanderBrainSnapshottable(
         )
 }
 
-// Awaited respawns: the party steps counted by each battle unit awaiting its respawn.
 @Serializable
 private data class CpuWanderBrainSnapshot(
     val homes: List<HomeSnapshot>,
@@ -61,7 +56,6 @@ private data class CpuWanderBrainSnapshot(
     val awaitedRespawns: Map<String, Int>,
 )
 
-// Distances from home: [row, column, distance] for each tile, kept short as there is one per tile and home.
 @Serializable
 private data class HomeSnapshot(
     val battleUnitId: String,

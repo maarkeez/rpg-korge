@@ -12,7 +12,7 @@ class SearchCpuWanderBrainSnapshotTest {
 
     @Test
     fun `should return the battle units returning home and the party steps counted until each respawns`() {
-        // Given: rat-1 is returning home, and rat-2 was defeated 12 party steps ago.
+        // Given
         cpuWanderBrainRepository.save(
             cpuWanderBrain()
                 .leaveTerritory("rat-1")

@@ -37,21 +37,16 @@ class CpuWanderBrainApi(
     partyApi: PartyApi,
     eventBus: EventBus,
 ) {
-    // Storage
     private val cpuWanderBrainRepository: CpuWanderBrainRepository = InMemoryCpuWanderBrainRepository()
 
-    // Save
     private val searchCpuWanderBrainSnapshot = SearchCpuWanderBrainSnapshot(cpuWanderBrainRepository)
     private val loadCpuWanderBrainSnapshot = LoadCpuWanderBrainSnapshot(cpuWanderBrainRepository)
     val snapshottable: Snapshottable = CpuWanderBrainSnapshottable(searchCpuWanderBrainSnapshot, loadCpuWanderBrainSnapshot)
 
-    // Queries
     val isInSight = IsInSight(partyApi.searchParty, battlefieldApi.searchPosition, battlefieldApi.searchBattlefieldSize)
 
-    // Services
     private val wanderingSteps = WanderingSteps(cpuWanderBrainRepository, cpuBattleBrainApi.whereShouldWander, cpuBattleBrainApi.isOutsideTerritory, battlefieldApi.searchPosition, eventBus)
 
-    // Commands
     val claimHome = ClaimHome(cpuWanderBrainRepository, battleUnitApi.searchBattleUnitById, playerApi.searchPlayerById, cpuBattleBrainApi.searchDistancesFromHome)
     val wanderWhileExploring = WanderWhileExploring(cpuWanderBrainRepository, wanderingSteps, isInSight, eventBus)
     val wanderAfterRound = WanderAfterRound(cpuWanderBrainRepository, wanderingSteps, isInSight, eventBus)
@@ -60,7 +55,6 @@ class CpuWanderBrainApi(
     val respawnDefeatedBattleUnits = RespawnDefeatedBattleUnits(cpuWanderBrainRepository, battlefieldApi.isTileVacant, eventBus)
     val resolveRespawn = ResolveRespawn(cpuWanderBrainRepository)
 
-    // Events
     private val onBattleUnitDeployed = OnBattleUnitDeployed(claimHome, eventBus)
     private val onExplorationSecondStarted = OnExplorationSecondStarted(wanderWhileExploring, eventBus)
     private val onTileOccupied = OnTileOccupied(resolveWanderingStep, eventBus)

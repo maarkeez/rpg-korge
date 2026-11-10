@@ -10,16 +10,6 @@ import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainRepository
 import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Wanders the CPU battle units one at a time: the CPU battle brain decides whether each one rests or where it steps
- * ([WhereShouldWander]). The resting ones are done at once, and the first step is requested and awaited, so the next
- * battle unit decides once it has been walked.
- *
- * Each one decides from how far each tile is from its home, as remembered when it claimed it.
- *
- * Before deciding, a battle unit outside its territory ([IsOutsideTerritory]) starts returning home, and a returning one
- * standing at home stops, so it heads all the way back home before it wanders around it again.
- */
 class WanderingSteps(
     private val cpuWanderBrainRepository: CpuWanderBrainRepository,
     private val whereShouldWander: WhereShouldWander,

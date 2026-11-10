@@ -22,8 +22,6 @@ class WanderAfterRoundTest {
     private val cpuWanderBrainRepository = InMemoryCpuWanderBrainRepository()
     private val eventBus = FakeEventBus()
 
-    // rat-1 battles from (0,0), and rat-2 is out of the battle, at home at (2,2), so it can step north or west. A rest
-    // roll below 0.5 rests. Otherwise, the next roll picks the step. The party leader, knight-1, stands on K.
     private fun wanderAfterRound(
         vararg rolls: Double,
         map: String = withLeaderApart("A . .\n. . .\n. . B"),
@@ -74,11 +72,11 @@ class WanderAfterRoundTest {
 
     @Test
     fun `should only wander the cpu battle units out of the battle in sight of the party leader`() {
-        // Given: rat-2 is out of the battle, 11 tiles away from the party leader, out of sight.
+        // Given
         cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 1), "rat-2" to (0 to 11))))
         // When
         wanderAfterRound(0.9, 0.9, map = "K A . . . . . . . . . B . .")
-        // Then: it still recovers.
+        // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-2"), percentage = 10),
             CpuWanderBrainEvent.CpuBattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")),

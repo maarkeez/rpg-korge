@@ -11,7 +11,6 @@ class LoadCpuWanderBrainSnapshotTest {
     private val cpuWanderBrainRepository = InMemoryCpuWanderBrainRepository()
     private val loadCpuWanderBrainSnapshot = LoadCpuWanderBrainSnapshot(cpuWanderBrainRepository)
 
-    // rat-1 is returning home, and rat-2 was defeated 12 party steps ago.
     private val cpuWanderBrain: CpuWanderBrain =
         cpuWanderBrain()
             .leaveTerritory("rat-1")

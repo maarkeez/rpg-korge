@@ -7,15 +7,6 @@ import com.mkz.rpg.cpuWanderBrain.usecases.services.WANDERING_RECOVERY_PERCENTAG
 import com.mkz.rpg.cpuWanderBrain.usecases.services.WanderingSteps
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Every second while the player explores, each CPU battle unit with a home in sight of the party leader ([IsInSight])
- * rests or steps around it, one after another. The ones out of sight stay put, as nobody sees them wander, and deciding
- * where each one steps takes time. The ones no longer on the battlefield (e.g.: defeated) rest. A wandering still in
- * progress is abandoned.
- *
- * Every CPU battle unit with a home recovers [WANDERING_RECOVERY_PERCENTAGE] of its maximum health and mana on every
- * wandering, whether it rests, steps or is out of sight. The defeated ones do not.
- */
 class WanderWhileExploring(
     private val cpuWanderBrainRepository: CpuWanderBrainRepository,
     private val wanderingSteps: WanderingSteps,

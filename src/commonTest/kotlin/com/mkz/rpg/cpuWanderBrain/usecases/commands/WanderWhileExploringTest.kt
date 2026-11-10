@@ -30,8 +30,6 @@ class WanderWhileExploringTest {
     private val cpuWanderBrainRepository = InMemoryCpuWanderBrainRepository()
     private val eventBus = FakeEventBus()
 
-    // A rest roll below 0.5 rests. Otherwise, the next roll picks the step: each step from home is as likely. The party
-    // leader, knight-1, stands on K.
     private fun wanderWhileExploring(
         vararg rolls: Double,
         map: String = withLeaderApart("A . .\n. . .\n. . B"),
@@ -55,7 +53,7 @@ class WanderWhileExploringTest {
 
     @Test
     fun `should request the step of the first cpu battle unit that does not rest`() {
-        // Given: rat-1 is at home, at (0,0), so it can step east or south.
+        // Given
         cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2))))
         // When
         wanderWhileExploring(0.9, 0.9)
@@ -73,7 +71,7 @@ class WanderWhileExploringTest {
 
     @Test
     fun `should let the next cpu battle unit wander when the first one rests`() {
-        // Given: rat-2 is at home, at (2,2), so it can step north or west.
+        // Given
         cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2))))
         // When
         wanderWhileExploring(0.0, 0.9)
@@ -100,7 +98,7 @@ class WanderWhileExploringTest {
 
     @Test
     fun `should let the cpu battle units that are no longer on the battlefield rest`() {
-        // Given: rat-1 has been defeated.
+        // Given
         cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2))))
         // When
         wanderWhileExploring(0.9, 0.9, map = withLeaderApart(". . .\n. . .\n. . B"))
@@ -113,7 +111,7 @@ class WanderWhileExploringTest {
 
     @Test
     fun `should make a cpu battle unit outside its territory return home`() {
-        // Given: rat-1 is 4 tiles away from home, at (0,0), and rat-2 is not on the battlefield.
+        // Given
         cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2))))
         // When
         wanderWhileExploring(0.9, map = withLeaderApart(". . . . A"))
@@ -127,7 +125,7 @@ class WanderWhileExploringTest {
 
     @Test
     fun `should keep a returning cpu battle unit heading home without resting within its territory`() {
-        // Given: rat-1 left its territory, and is now 2 tiles away from home, at (0,0).
+        // Given
         cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2))).leaveTerritory("rat-1"))
         // When
         wanderWhileExploring(0.0, map = withLeaderApart(". . A"))
@@ -141,11 +139,11 @@ class WanderWhileExploringTest {
 
     @Test
     fun `should let a returning cpu battle unit wander again once it is back home`() {
-        // Given: rat-1 left its territory, and is now back home, at (0,0).
+        // Given
         cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2))).leaveTerritory("rat-1"))
         // When
         wanderWhileExploring(0.0, map = withLeaderApart("A . ."))
-        // Then: it rests, as any wandering battle unit at home may.
+        // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
             CpuWanderBrainEvent.CpuBattleUnitsWanderedWhileExploring(exploringPlayerId = "human"),
@@ -156,7 +154,7 @@ class WanderWhileExploringTest {
 
     @Test
     fun `should only wander the cpu battle units in sight of the party leader`() {
-        // Given: rat-1 is 3 tiles away from the party leader, and rat-2 is 14 tiles away, out of sight.
+        // Given
         cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 3), "rat-2" to (0 to 14))))
         // When
         wanderWhileExploring(0.9, 0.9, map = "K . . A . . . . . . . . . . B .")
@@ -174,7 +172,7 @@ class WanderWhileExploringTest {
 
     @Test
     fun `should request the recovery of every cpu battle unit with a home, in sight or not`() {
-        // Given: rat-2 is out of sight of the party leader.
+        // Given
         cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 3), "rat-2" to (0 to 14))))
         // When
         wanderWhileExploring(0.0, map = "K . . A . . . . . . . . . . B .")
