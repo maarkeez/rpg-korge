@@ -53,7 +53,7 @@ class FinishPlayerTurnTest {
 
     @Test
     fun `should not finish the player turn when the battle is finished`() {
-        // Given: the player turn of the cpu goes on, but its last battle unit in the battle was defeated, which finished the battle.
+        // Given
         val finishedBattle =
             battle(listOf("cpu", "human"), battleUnits = mapOf("knight-1" to "human"))
                 .finishWithoutWinner()

@@ -26,10 +26,8 @@ class BattleApi(
     eventBus: EventBus,
     playerApi: PlayerApi,
 ) {
-    // Storage
     private val battleRepository: BattleRepository = InMemoryBattleRepository()
 
-    // Commands
     val defeatPlayer = DefeatPlayer(playerApi.searchOpponent, battleRepository, eventBus)
     val finishBattleWithWinner = FinishBattleWithWinner(battleRepository, eventBus)
     val finishPlayerTurn = FinishPlayerTurn(battleRepository, eventBus)
@@ -39,10 +37,8 @@ class BattleApi(
     val startNextRound = StartNextRound(battleRepository, eventBus)
     val resolveDisengagedBattle = ResolveDisengagedBattle(battleRepository, eventBus)
 
-    // Queries
     val searchBattle = SearchBattle(battleRepository)
 
-    // Event Listeners
     val onRequestStartNextRound = OnRequestStartNextRound(eventBus, startNextRound)
     val onPlayerDefeated = OnPlayerDefeated(eventBus, finishBattleWithWinner)
     private val onRequestStartBattle = OnRequestStartBattle(startBattle, eventBus)

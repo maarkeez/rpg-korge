@@ -5,10 +5,6 @@ import com.mkz.rpg.battle.domain.BattleRepository
 import com.mkz.rpg.player.usecases.queries.SearchOpponent
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Defeats the player, e.g.: once all their battle units are defeated, in a battle or while exploring (e.g.: by the
- * terrain). Out of the battles, their opponent is left as the only player, so it wins.
- */
 class DefeatPlayer(
     private val searchOpponent: SearchOpponent,
     private val battleRepository: BattleRepository,

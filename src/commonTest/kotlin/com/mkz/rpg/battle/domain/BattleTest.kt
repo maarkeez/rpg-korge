@@ -304,7 +304,7 @@ class BattleTest {
 
     @Test
     fun `LeaveDuringRound should not disengage the battle again when a battle unit out of it leaves`() {
-        // Given: the battle was already disengaged, as the battle-unit-1 left it.
+        // Given
         val battle = battle(listOf("player-1", "player-2"), battleUnitIds).leave("battle-unit-1")
         // When
         val (events, _) = battle.leaveDuringRound("battle-unit-3").pullEvents()
@@ -314,7 +314,7 @@ class BattleTest {
 
     @Test
     fun `LeaveDuringRound should not disengage the battle when it is finished`() {
-        // Given: a battle unit joined the battle after it finished, e.g.: deployed while exploring.
+        // Given
         val battle =
             battle(listOf("player-1", "player-2"), battleUnits = mapOf("battle-unit-2" to "player-2"))
                 .finishWithoutWinner()

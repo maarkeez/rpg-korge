@@ -24,7 +24,6 @@ class StartNextRoundTest {
             eventBus = eventBus,
         )
 
-    // The rat-1, of the cpu, battles the knight-1, of the human. The rat-2, of the cpu, is out of the battle.
     private fun givenBattle() {
         battleRepository.create(battle(players, battleUnitIds))
     }
@@ -116,7 +115,7 @@ class StartNextRoundTest {
 
     @Test
     fun `should not start the next round when the battle is finished`() {
-        // Given: the last battle unit of the cpu vanished as the round finished, which defeated it.
+        // Given
         val finishedBattle = battle(players, battleUnitIds).defeatPlayer("cpu").pullEvents().second
         battleRepository.create(finishedBattle)
         // When

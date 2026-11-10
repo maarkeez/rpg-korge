@@ -18,7 +18,6 @@ class ResolveDisengagedBattleTest {
     private val eventBus = FakeEventBus()
     private val resolveDisengagedBattle = ResolveDisengagedBattle(battleRepository, eventBus)
 
-    // The rat-1, of the cpu, was defeated, which left the knight-1, of the human, alone in the battle. The rat-2, of the cpu, is out of the battle.
     private fun givenDisengagedBattle() {
         battleRepository.create(battle(players, battleUnits = mapOf("rat-1" to "cpu", "knight-1" to "human")).leave("rat-1"))
     }
@@ -54,7 +53,7 @@ class ResolveDisengagedBattleTest {
 
     @Test
     fun `should not finish the battle when the player who left it is defeated`() {
-        // Given: the rat-1 was the last battle unit of the cpu, so it was defeated, and the human wins.
+        // Given
         val defeatedBattle =
             battle(players, battleUnits = mapOf("rat-1" to "cpu", "knight-1" to "human"))
                 .leave("rat-1")

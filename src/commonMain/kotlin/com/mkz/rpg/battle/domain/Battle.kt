@@ -22,10 +22,6 @@ data class Battle private constructor(
     private val events: Set<BattleEvent>,
 ) {
     companion object {
-        /**
-         * Players: in the order they play each round. Battle units: those in the battle, which the player turns and rounds
-         * affect, each with the id of its player.
-         */
         fun startFirstRound(
             players: List<String>,
             battleUnits: Map<String, String>,
@@ -42,10 +38,6 @@ data class Battle private constructor(
             )
         }
 
-        /**
-         * Defeats the player out of the battles, e.g.: when their last battle units are defeated by the terrain while
-         * exploring. Only the winner is left in it, so it finishes as a battle with a single player left.
-         */
         fun defeatWhileExploring(
             defeatedPlayerId: String,
             winnerPlayerId: String,
@@ -101,20 +93,13 @@ data class Battle private constructor(
         }
     }
 
-    /** Adds the battle unit to the battle, e.g.: when it is deployed during the battle. */
     fun join(
         battleUnitId: String,
         playerId: String,
     ): Battle = copy(battleUnits = BattleUnits(battleUnits.value + (battleUnitId to playerId)))
 
-    /** Removes the battle unit from the battle, e.g.: when it is defeated. */
     fun leave(battleUnitId: String): Battle = copy(battleUnits = BattleUnits(battleUnits.value - battleUnitId))
 
-    /**
-     * Removes the battle unit from the battle during a round, e.g.: when it is defeated. The battle is disengaged when it
-     * leaves the last battle units of a player, e.g.: the last CPU battle unit in the battle is defeated. Nothing is recorded once
-     * the battle is finished, nor for a battle unit out of it.
-     */
     fun leaveDuringRound(battleUnitId: String): Battle {
         val leftBattle = leave(battleUnitId)
         val canDisengage = !isFinished.value && !isDisengaged()
@@ -124,13 +109,11 @@ data class Battle private constructor(
 
     fun hasWinner(): Boolean = turnOrder.value.size == 1
 
-    /** It is disengaged when fewer than two of its players are left with battle units in it. */
     fun isDisengaged(): Boolean {
         val playersInBattle = battleUnits.value.values.toSet()
         return turnOrder.value.count { playerId -> playerId in playersInBattle } < 2
     }
 
-    /** Finishes the battle without a winner, e.g.: when it is disengaged. */
     fun finishWithoutWinner(): Battle =
         copy(
             isFinished = IsFinished(true),
@@ -162,7 +145,6 @@ data class Battle private constructor(
         val value: List<String>,
     )
 
-    /** Battle unit ids, each with the id of its player. */
     @JvmInline private value class BattleUnits(
         val value: Map<String, String>,
     )

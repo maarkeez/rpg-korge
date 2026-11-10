@@ -60,7 +60,6 @@ class DefeatPlayerTest {
         // Given
         playerRepository.create(player(id = "human"))
         playerRepository.create(player(id = "cpu"))
-        // The battle finished once the player turn of the human, the last one of the round, finished.
         battleRepository.create(
             BattleMother
                 .battle(listOf("cpu", "human"))
