@@ -31,15 +31,12 @@ class LootDropApi(
     private val lootDropLoader: LootDropLoader,
     random: Random,
 ) {
-    // Storage
     private val lootDropRepository: LootDropRepository = InMemoryLootDropRepository()
 
-    // Save
     private val searchLootDropsSnapshot = SearchLootDropsSnapshot(lootDropRepository)
     private val loadLootDropsSnapshot = LoadLootDropsSnapshot(lootDropRepository)
     val snapshottable: Snapshottable = LootDropSnapshottable(searchLootDropsSnapshot, loadLootDropsSnapshot)
 
-    // Commands
     val initialiseLootDrops = InitialiseLootDrops(lootDropLoader, lootDropRepository, unitApi.searchUnitById, lootTableApi.searchLootTableById, eventBus)
     val rollLootDrop = RollLootDrop(lootDropRepository, lootTableApi.searchLootTableById, random, eventBus)
     val dropItems = DropItems(lootDropRepository, eventBus)
@@ -47,10 +44,8 @@ class LootDropApi(
     val findDroppedItems = FindDroppedItems(lootDropRepository, eventBus)
     val lootDroppedItem = LootDroppedItem(lootDropRepository, eventBus)
 
-    // Queries
     val searchDroppedItems = SearchDroppedItems(lootDropRepository)
 
-    // Events
     private val onRequestInitialiseLootDrops = OnRequestInitialiseLootDrops(initialiseLootDrops, eventBus)
     private val onBattleUnitDefeated = OnBattleUnitDefeated(rollLootDrop, eventBus)
     private val onBattleUnitMoved = OnBattleUnitMoved(findDroppedItems, eventBus)

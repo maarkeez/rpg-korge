@@ -12,7 +12,6 @@ class OnBattleUnitMoved(
 ) {
     val subscription =
         eventBus.subscribe<BattleUnitMoved> { event ->
-            // A teleport's path is only its destination.
             findDroppedItems(battleUnitId = event.battleUnitId, path = event.path.map { position -> PositionDto(row = position.row, column = position.column) })
         }
 }

@@ -10,7 +10,6 @@ import com.mkz.rpg.lootTable.usecases.queries.SearchLootTableById
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 
-/** Creates every loaded loot drop, unless it already exists, once its unit and all its loot tables exist, and the ownerless one, which nothing announces. */
 class InitialiseLootDrops(
     private val lootDropLoader: LootDropLoader,
     private val lootDropRepository: LootDropRepository,

@@ -20,7 +20,6 @@ import io.kotest.matchers.types.shouldBeTypeOf
 import kotlin.test.Test
 
 class LootDropTest {
-    // The health potion drops on rolls 0 to 9, and nothing drops on rolls 10 to 14.
     private val tierOne = lootTable(id = "tier-1", entries = listOf(lootableItemEntry(lootableItemId = "health-potion", weight = 10), nothingEntry(weight = 5))).toDto()
 
     @Test

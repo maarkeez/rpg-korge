@@ -7,6 +7,5 @@ interface LootDropRepository {
 
     fun searchByUnitId(unitId: String): LootDrop?
 
-    /** Every loot drop, in the order they were created. */
     fun searchAll(): List<LootDrop>
 }

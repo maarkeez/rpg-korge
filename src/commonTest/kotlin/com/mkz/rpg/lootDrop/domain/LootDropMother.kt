@@ -3,7 +3,6 @@ package com.mkz.rpg.lootDrop.domain
 import korlibs.io.util.UUID
 
 object LootDropMother {
-    /** The [droppedItems] lie on their tiles in the given order. */
     fun lootDrop(
         unitId: String = unitId(),
         lootTableIds: List<String> = listOf(lootTableId()),

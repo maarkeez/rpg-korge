@@ -11,7 +11,6 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class LootDropSnapshottableTest {
-    // The goblin dropped a health potion and a dagger at (1,1), the rat nothing.
     private val goblin = lootDrop(unitId = "goblin", lootTableIds = listOf("goblin-loot"), droppedItems = mapOf(PositionDto(1, 1) to listOf("health-potion", "dagger")))
     private val rat = lootDrop(unitId = "rat", lootTableIds = listOf("rat-loot"))
 
@@ -19,7 +18,7 @@ class LootDropSnapshottableTest {
 
     @Test
     fun `Load should rebuild the same state when it loads the snapshot it took`() {
-        // Given: as read from the resources, nothing dropped yet.
+        // Given
         val snapshot = snapshottable(InMemoryLootDropRepository().apply { listOf(goblin, rat).forEach(::create) }).snapshot()
         val loadedRepository =
             InMemoryLootDropRepository().apply {

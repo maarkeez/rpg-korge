@@ -9,7 +9,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
-/** The items lying on the battlefield, by the unit that dropped them, see [SearchLootDropsSnapshot] and [LoadLootDropsSnapshot]. */
 class LootDropSnapshottable(
     private val searchLootDropsSnapshot: SearchLootDropsSnapshot,
     private val loadLootDropsSnapshot: LoadLootDropsSnapshot,
@@ -40,7 +39,6 @@ private data class LootDropSnapshot(
     val droppedItems: List<DroppedItemsSnapshot>,
 )
 
-// The items lying on a tile, in the order they were dropped.
 @Serializable
 private data class DroppedItemsSnapshot(
     val row: Int,

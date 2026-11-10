@@ -8,7 +8,6 @@ import io.kotest.matchers.string.shouldContain
 import kotlin.test.Test
 
 class LoadLootDropsSnapshotTest {
-    // As read from the resources: the goblin dropped nothing yet, the rat some cheese since.
     private val lootDropRepository =
         InMemoryLootDropRepository().apply {
             create(lootDrop(unitId = "goblin", lootTableIds = listOf("goblin-loot")))
@@ -18,7 +17,7 @@ class LoadLootDropsSnapshotTest {
 
     @Test
     fun `should rebuild the same state when it loads the snapshot it took`() {
-        // Given: the goblin dropped a health potion and a dagger at (1,1), the rat nothing.
+        // Given
         val goblin = lootDrop(unitId = "goblin", lootTableIds = listOf("goblin-loot"), droppedItems = mapOf(PositionDto(1, 1) to listOf("health-potion", "dagger")))
         val rat = lootDrop(unitId = "rat", lootTableIds = listOf("rat-loot"))
         // When

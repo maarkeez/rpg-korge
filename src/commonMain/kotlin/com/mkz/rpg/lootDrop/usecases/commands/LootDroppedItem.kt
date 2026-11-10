@@ -4,7 +4,6 @@ import com.mkz.rpg.lootDrop.domain.LootDropError.DroppedItemNotFound
 import com.mkz.rpg.lootDrop.domain.LootDropRepository
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Takes a dropped item off its tile once a party member has looted it, from the first unit that dropped it there. */
 class LootDroppedItem(
     private val lootDropRepository: LootDropRepository,
     private val eventBus: EventBus,

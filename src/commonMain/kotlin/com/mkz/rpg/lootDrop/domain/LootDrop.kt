@@ -11,10 +11,6 @@ import com.mkz.rpg.lootTable.domain.LootTable
 import kotlin.jvm.JvmInline
 import kotlin.random.Random
 
-/**
- * The loot tables a unit rolls on when one of its battle units is defeated, and the items it dropped, lying on their tiles until a party
- * member loots them.
- */
 @ConsistentCopyVisibility
 data class LootDrop private constructor(
     private val unitId: UnitId,
@@ -23,7 +19,6 @@ data class LootDrop private constructor(
     private val events: Set<LootDropEvent>,
 ) {
     companion object {
-        // No unit has this id, so no battle unit rolls the ownerless loot drop.
         const val OWNERLESS_UNIT_ID = "ownerless"
 
         fun create(dto: Dto): LootDrop {
@@ -36,7 +31,6 @@ data class LootDrop private constructor(
             )
         }
 
-        /** The loot drop of the items no unit dropped, e.g.: a reward that did not fit in a bag. It has no loot tables, so nothing rolls it. */
         fun ownerless(): LootDrop =
             LootDrop(
                 unitId = UnitId(OWNERLESS_UNIT_ID),
@@ -48,10 +42,6 @@ data class LootDrop private constructor(
 
     fun pullEvents() = events to copy(events = emptySet())
 
-    /**
-     * Rolls the lootable item to drop, or `null` when it rolls nothing, from the entries of the given [lootTables] merged together,
-     * in proportion to their weights.
-     */
     fun roll(
         lootTables: List<LootTable.Dto>,
         random: Random,
@@ -67,7 +57,6 @@ data class LootDrop private constructor(
         return rolledEntry.lootableItemId
     }
 
-    /** Drops an item on its tile, e.g.: where the battle unit was defeated, where it lies until a party member loots it. */
     fun drop(
         lootableItemId: String,
         row: Int,
@@ -78,13 +67,11 @@ data class LootDrop private constructor(
             events = events + ItemDropped(lootableItemId = lootableItemId, row = row, column = column),
         )
 
-    /** The items dropped by the unit lying on the tile, in the order they were dropped. */
     fun droppedItems(
         row: Int,
         column: Int,
     ): List<String> = droppedItems.lootableItemIds(Position(row = row, column = column))
 
-    /** Takes one copy of a dropped item off its tile, once a party member has looted it. */
     fun loot(
         lootableItemId: String,
         row: Int,
@@ -95,10 +82,8 @@ data class LootDrop private constructor(
             events = events + DroppedItemLooted(lootableItemId = lootableItemId, row = row, column = column),
         )
 
-    /** Puts back the items dropped by the unit when the game was saved, in place of the ones lying now, publishing no events. */
     fun loadDroppedItems(droppedItems: Map<Dto.PositionDto, List<String>>): LootDrop = copy(droppedItems = DroppedItems.create(droppedItems))
 
-    /** Whether it is the ownerless loot drop with no item lying, which a save leaves out. */
     fun isOwnerlessAndEmpty(): Boolean = unitId.value == OWNERLESS_UNIT_ID && droppedItems.value.isEmpty()
 
     fun toDto() =
@@ -129,7 +114,6 @@ data class LootDrop private constructor(
         val value: String,
     )
 
-    /** The items lying on each tile, in the order they were dropped. A tile without items is left out. */
     @JvmInline private value class DroppedItems(
         val value: Map<Position, List<LootableItemId>>,
     ) {
@@ -165,7 +149,6 @@ data class LootDrop private constructor(
             value.map { (position, lootableItemIds) -> PositionDto(row = position.row, column = position.column) to lootableItemIds.map(LootableItemId::value) }.toMap()
     }
 
-    /** Dropped items: the items lying on each tile with items dropped by the unit, in the order they were dropped. */
     data class Dto(
         val unitId: String,
         val lootTableIds: List<String>,

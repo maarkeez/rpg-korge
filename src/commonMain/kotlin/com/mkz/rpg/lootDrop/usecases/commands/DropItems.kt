@@ -4,7 +4,6 @@ import com.mkz.rpg.lootDrop.domain.LootDrop
 import com.mkz.rpg.lootDrop.domain.LootDropRepository
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Drops the items no unit dropped on a tile, in the ownerless loot drop, where they lie until a party member loots them. */
 class DropItems(
     private val lootDropRepository: LootDropRepository,
     private val eventBus: EventBus,

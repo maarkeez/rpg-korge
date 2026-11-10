@@ -6,10 +6,6 @@ import com.mkz.rpg.lootTable.usecases.queries.SearchLootTableById
 import com.mkz.rpg.shared.domain.EventBus
 import kotlin.random.Random
 
-/**
- * Rolls the loot drop of a unit and drops the item rolled on the given tile, where one of its battle units was defeated, unless it rolls
- * nothing or the unit has no loot drop. The item lies there until a party member loots it.
- */
 class RollLootDrop(
     private val lootDropRepository: LootDropRepository,
     private val searchLootTableById: SearchLootTableById,

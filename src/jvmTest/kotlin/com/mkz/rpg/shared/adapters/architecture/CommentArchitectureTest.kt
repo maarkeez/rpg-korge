@@ -16,7 +16,6 @@ class CommentArchitectureTest {
         setOf(
             "cpuBattleBrain",
             "cpuWanderBrain",
-            "lootDrop",
             "screen",
             "storybook",
             "worldBuilder",

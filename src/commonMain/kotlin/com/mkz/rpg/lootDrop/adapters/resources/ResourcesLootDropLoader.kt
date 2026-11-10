@@ -8,7 +8,6 @@ import com.mkz.rpg.shared.adapters.toml.readTomlFiles
 import korlibs.io.file.VfsFile
 import kotlinx.serialization.Serializable
 
-/** Loads one loot drop per `lootDrop/<unit id>.toml` resource. */
 class ResourcesLootDropLoader(
     private val lootDropRoot: VfsFile = ResourcesBundle.root["lootDrop"],
 ) : LootDropLoader {

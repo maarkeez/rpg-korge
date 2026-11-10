@@ -22,7 +22,6 @@ class RollLootDropTest {
     private val lootTableRepository = InMemoryLootTableRepository()
     private val eventBus = FakeEventBus()
 
-    // The bat rolls on the tier 1 loot table: the health potion drops on rolls 0 to 9, and nothing drops on rolls 10 to 14.
     private fun givenABatLootDrop() {
         lootTableRepository.create(lootTable(id = "tier-1", entries = listOf(lootableItemEntry(lootableItemId = "health-potion", weight = 10), nothingEntry(weight = 5))))
         lootDropRepository.create(lootDrop(unitId = "bat", lootTableIds = listOf("tier-1")))
