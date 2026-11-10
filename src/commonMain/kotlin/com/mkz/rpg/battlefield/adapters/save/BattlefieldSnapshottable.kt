@@ -9,7 +9,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
-/** The occupant of each tile: the battle units, the npcs and the buildings, see [SearchBattlefieldSnapshot] and [LoadBattlefieldSnapshot]. */
 class BattlefieldSnapshottable(
     private val searchBattlefieldSnapshot: SearchBattlefieldSnapshot,
     private val loadBattlefieldSnapshot: LoadBattlefieldSnapshot,

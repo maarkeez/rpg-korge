@@ -5,10 +5,6 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 class SearchShortestPath(
     private val isTileVacant: IsTileVacant,
 ) {
-    /**
-     * Returns the tiles walked from the origin (excluded) to the destination (included), stepping only on vacant
-     * tiles, or null when the destination can not be reached.
-     */
     operator fun invoke(
         fromRow: Int,
         fromColumn: Int,

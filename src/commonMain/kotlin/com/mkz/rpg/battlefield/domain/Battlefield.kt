@@ -20,9 +20,6 @@ data class Battlefield private constructor(
     private val events: Set<BattlefieldEvent>,
 ) {
     companion object {
-        /**
-         * Tiles: first are rows, second are columns
-         */
         fun create(
             rows: Int,
             columns: Int,
@@ -61,10 +58,6 @@ data class Battlefield private constructor(
         return copy(tiles = updatedTiles, events = events + tileOccupiedEvent)
     }
 
-    /**
-     * Occupies every tile of the area at once, from its top-left tile, e.g.: a building. Fails when any of them is
-     * occupied or not found, occupying none. Its occupant can not be moved, removed nor swapped then.
-     */
     fun occupyTiles(
         row: Int,
         column: Int,
@@ -94,10 +87,6 @@ data class Battlefield private constructor(
         return copy(tiles = updatedTiles, events = events + occupantRemovedEvent)
     }
 
-    /**
-     * Swaps the tiles of both occupants at once, so a tile never holds two of them, e.g.: the leader of the party and
-     * the party member on its next tile. Nothing changes when any of them is not on the battlefield.
-     */
     fun swapOccupants(
         occupantId: String,
         otherOccupantId: String,
@@ -114,13 +103,8 @@ data class Battlefield private constructor(
 
     fun pullEvents() = events to copy(events = emptySet())
 
-    /** The occupant of each occupied tile, to save the game. An occupant of several tiles (e.g.: a building) is on each. */
     fun occupants(): List<Dto.OccupantDto> = tiles.occupants()
 
-    /**
-     * Puts back the occupants of a saved game, from its [occupants], no other tile with an occupant, publishing no events.
-     * Fails when a tile is not found, e.g.: the battlefield is smaller now.
-     */
     fun loadOccupants(occupants: List<Dto.OccupantDto>): Battlefield = copy(tiles = tiles.loadOccupants(occupants))
 
     fun isVacant(
@@ -128,7 +112,6 @@ data class Battlefield private constructor(
         column: Int,
     ): Boolean = tiles.hasNoOccupant(row, column) && tiles.isOccupiable(row, column)
 
-    /** Whether the tile is occupiable (e.g.: not void), whether an occupant stands on it or not. */
     fun isOccupiable(
         row: Int,
         column: Int,
@@ -143,7 +126,6 @@ data class Battlefield private constructor(
 
     fun position(occupantId: String): PositionDto? = tiles.position(occupantId)
 
-    /** The terrain of the tile, or `null` out of the battlefield. */
     fun terrainId(
         row: Int,
         column: Int,
@@ -572,7 +554,6 @@ data class Battlefield private constructor(
             val toTerrainId: String,
         )
 
-        /** An occupant on a tile, e.g.: to save the game. */
         data class OccupantDto(
             val occupantId: String,
             val row: Int,

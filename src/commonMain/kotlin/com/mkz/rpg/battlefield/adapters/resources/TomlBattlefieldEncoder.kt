@@ -2,23 +2,18 @@ package com.mkz.rpg.battlefield.adapters.resources
 
 import com.mkz.rpg.battlefield.usecases.services.BattlefieldEncoder
 
-/**
- * Writes the terrain id of each tile as the `battlefield/battlefield.toml` resource read by [ResourcesBattlefieldLoader]:
- * one row per line, with the terrain ids aligned in columns.
- */
 class TomlBattlefieldEncoder : BattlefieldEncoder {
     private companion object {
         const val HEADER = "# Terrain id of each tile. Each line is a row of the battlefield, from top to bottom."
         const val INDENTATION = "    "
 
-        // Spaces between a terrain id and the next one, after the longest terrain id.
-        const val COLUMN_GAP = 2
+        const val SPACES_BETWEEN_COLUMNS = 2
+        const val QUOTES_AND_COMMA = "\"\","
     }
 
     override fun encode(tiles: List<List<String>>): String {
         val longestTerrainId = tiles.flatten().maxOfOrNull { terrainId -> terrainId.length } ?: 0
-        // A quoted terrain id followed by its comma.
-        val columnWidth = longestTerrainId + "\"\",".length + COLUMN_GAP
+        val columnWidth = longestTerrainId + QUOTES_AND_COMMA.length + SPACES_BETWEEN_COLUMNS
         val rows =
             tiles.joinToString(separator = "") { row ->
                 val terrainIds = row.dropLast(1).joinToString(separator = "") { terrainId -> "\"$terrainId\",".padEnd(columnWidth) } + "\"${row.last()}\""

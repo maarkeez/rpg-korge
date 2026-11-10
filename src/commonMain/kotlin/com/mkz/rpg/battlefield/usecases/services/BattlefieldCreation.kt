@@ -6,10 +6,6 @@ import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldRepository
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 
-/**
- * Creates the battlefield, unless it already exists, from the terrain id of each tile. Returns the events to publish.
- * Two terrains without a transition between them can not be next to each other.
- */
 class BattlefieldCreation(
     private val battlefieldRepository: BattlefieldRepository,
     private val searchTerrainById: SearchTerrainById,
@@ -25,7 +21,6 @@ class BattlefieldCreation(
         return events
     }
 
-    /** Builds the battlefield the same way, without storing it, e.g.: to display a battlefield being designed. */
     fun preview(tiles: List<List<String>>): Battlefield.Dto = build(rows = tiles.size, columns = tiles.firstOrNull()?.size ?: 0, tiles = tiles).toDto()
 
     private fun build(

@@ -15,7 +15,6 @@ class BattlefieldSnapshottableTest {
         return repository to BattlefieldSnapshottable(SearchBattlefieldSnapshot(repository), LoadBattlefieldSnapshot(repository))
     }
 
-    // The knight at (0,0), the elder at (1,2), and a 2x1 house on (2,0) and (2,1).
     private fun occupiedBattlefield(): Battlefield =
         battlefield(rows = 3, columns = 3)
             .occupy(row = 0, column = 0, occupantId = "knight-1")

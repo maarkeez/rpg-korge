@@ -7,7 +7,6 @@ import com.mkz.rpg.shared.adapters.toml.readTomlFile
 import korlibs.io.file.VfsFile
 import kotlinx.serialization.Serializable
 
-/** Loads the battlefield from the `battlefield/battlefield.toml` resource. */
 class ResourcesBattlefieldLoader(
     private val battlefieldFile: VfsFile = ResourcesBundle.root["battlefield/battlefield.toml"],
 ) : BattlefieldLoader {

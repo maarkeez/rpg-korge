@@ -8,7 +8,6 @@ import com.mkz.rpg.effect.domain.Effect.Dto.RecipientDto
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 
-/** Triggers the effect of each terrain for the occupants standing on it, among the given ones (e.g.: the battle units in the battle). */
 class ApplyTerrainEffects(
     private val battlefieldRepository: BattlefieldRepository,
     private val searchTerrainById: SearchTerrainById,

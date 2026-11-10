@@ -47,18 +47,14 @@ class BattlefieldApi(
     battlefieldEncoder: BattlefieldEncoder,
     battlefieldDecoder: BattlefieldDecoder,
 ) {
-    // Storage
     private val battlefieldRepository = InMemoryBattlefieldRepository()
 
-    // Save
     private val searchBattlefieldSnapshot = SearchBattlefieldSnapshot(battlefieldRepository)
     private val loadBattlefieldSnapshot = LoadBattlefieldSnapshot(battlefieldRepository)
     val snapshottable: Snapshottable = BattlefieldSnapshottable(searchBattlefieldSnapshot, loadBattlefieldSnapshot)
 
-    // Services
     private val battlefieldCreation = BattlefieldCreation(battlefieldRepository, terrainApi.searchTerrainById)
 
-    // Commands
     val requestBattlefieldCreation =
         RequestBattlefieldCreation(
             battlefieldCreation = battlefieldCreation,
@@ -81,7 +77,6 @@ class BattlefieldApi(
             eventBus = eventBus,
         )
 
-    // Queries
     val searchBattlefield = SearchBattlefield(battlefieldRepository)
     val searchBattlefieldSize = SearchBattlefieldSize(battlefieldRepository)
     val searchTerrainId = SearchTerrainId(battlefieldRepository)
@@ -96,7 +91,6 @@ class BattlefieldApi(
     val exportBattlefield = ExportBattlefield(battlefieldEncoder)
     val parseBattlefield = ParseBattlefield(battlefieldDecoder)
 
-    // Event Listeners
     private val onRequestOccupyTile = OnRequestOccupyTile(occupyTile, eventBus)
     private val onRequestOccupyTiles = OnRequestOccupyTiles(occupyTiles, eventBus)
     private val onRequestMoveOccupant = OnRequestMoveOccupant(occupyTile, eventBus)

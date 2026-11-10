@@ -4,6 +4,8 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TerrainTransitionRuleDto
 import kotlin.random.Random
 
 object BattlefieldMother {
+    private const val VOID_TILE = '#'
+
     fun battlefield(
         rows: Int = 3,
         columns: Int = 3,
@@ -20,23 +22,13 @@ object BattlefieldMother {
             .pullEvents()
             .second
 
-    /**
-     * Creates a valid battlefield from a map, with one line per row and one character per tile, separated by spaces:
-     * - `.` is sand, which is occupiable.
-     * - `#` is void, which is not occupiable.
-     * - A letter is sand occupied by the battle unit that [occupants] maps the letter to.
-     *
-     * As in the game, sand in a corner between two void tiles (e.g.: void to the north and to the east) is not occupiable.
-     *
-     * For example: `battlefield("K . #\n. . #", occupants = mapOf('K' to "knight-1"))`.
-     */
     fun battlefield(
         map: String,
         occupants: Map<Char, String> = emptyMap(),
     ): Battlefield {
         val mapTiles = map.trimIndent().lines().map { line -> line.split(" ").filter(String::isNotBlank).map(String::single) }
         require(mapTiles.all { it.size == mapTiles.first().size }) { "Every row of the battlefield map must have the same number of tiles" }
-        val tiles = mapTiles.map { row -> row.map { tile -> if (tile == '#') "void" else "sand" } }
+        val tiles = mapTiles.map { row -> row.map { tile -> if (tile == VOID_TILE) "void" else "sand" } }
         val emptyBattlefield = battlefield(mapTiles.size, mapTiles.first().size, tiles, terrainTransitionRules(tiles))
         return mapTiles
             .flatMapIndexed { row, rowTiles -> rowTiles.mapIndexedNotNull { column, tile -> if (tile.isLetter()) Triple(row, column, tile) else null } }

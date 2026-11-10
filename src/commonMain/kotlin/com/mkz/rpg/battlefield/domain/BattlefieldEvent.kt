@@ -8,19 +8,16 @@ sealed interface BattlefieldEvent : DomainEvent {
 
     object RequestInitialiseBattlefield : BattlefieldEvent
 
-    /** Requests the effect of each terrain for the given occupants standing on it, e.g.: the battle units standing still while exploring. */
     data class RequestTerrainEffects(
         val occupantIds: Set<String>,
     ) : BattlefieldEvent
 
-    // Requested for an occupant placed on a tile, e.g.: a battle unit deployed or respawned.
     data class RequestOccupyTile(
         val occupantId: String,
         val row: Int,
         val column: Int,
     ) : BattlefieldEvent
 
-    // Requested for an occupant placed on several tiles at once, from its top-left tile, e.g.: a building.
     data class RequestOccupyTiles(
         val occupantId: String,
         val row: Int,
@@ -29,30 +26,25 @@ sealed interface BattlefieldEvent : DomainEvent {
         val columns: Int,
     ) : BattlefieldEvent
 
-    // Requested for an occupant that walked or teleported.
     data class RequestMoveOccupant(
         val occupantId: String,
         val toRow: Int,
         val toColumn: Int,
     ) : BattlefieldEvent
 
-    // Requested for two occupants that swap their tiles, e.g.: the leader of the party and the party member on its next tile.
     data class RequestSwapOccupants(
         val occupantId: String,
         val otherOccupantId: String,
     ) : BattlefieldEvent
 
-    // Requested for an occupant that is no longer on the battlefield, e.g.: a battle unit defeated or vanished.
     data class RequestRemoveOccupant(
         val occupantId: String,
     ) : BattlefieldEvent
 
-    /** The terrain under an occupant has an effect for it, e.g.: lava hurts, water heals. The application has the terrain as its source and the occupant as its recipient. */
     data class TerrainEffectApplied(
         val application: EffectApplicationDto,
     ) : BattlefieldEvent
 
-    // Occupant: a battle unit, an npc or a building.
     data class TileOccupied(
         val row: Int,
         val column: Int,

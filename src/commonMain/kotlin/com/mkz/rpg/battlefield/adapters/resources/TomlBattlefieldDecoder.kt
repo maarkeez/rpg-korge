@@ -5,7 +5,6 @@ import com.mkz.rpg.battlefield.domain.BattlefieldError.InvalidBattlefieldFormat
 import com.mkz.rpg.battlefield.usecases.services.BattlefieldDecoder
 import com.mkz.rpg.shared.adapters.toml.TomlService
 
-/** Reads the terrain id of each tile from a text like the `battlefield/battlefield.toml` resource, e.g.: an exported battlefield. */
 class TomlBattlefieldDecoder : BattlefieldDecoder {
     override fun decode(text: String): List<List<String>> =
         try {
