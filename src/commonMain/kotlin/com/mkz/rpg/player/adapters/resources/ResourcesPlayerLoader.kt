@@ -9,7 +9,6 @@ import com.mkz.rpg.shared.adapters.toml.readTomlFiles
 import korlibs.io.file.VfsFile
 import kotlinx.serialization.Serializable
 
-/** Loads one player per `player/<player id>.toml` resource. */
 class ResourcesPlayerLoader(
     private val playerRoot: VfsFile = ResourcesBundle.root["player"],
 ) : PlayerLoader {

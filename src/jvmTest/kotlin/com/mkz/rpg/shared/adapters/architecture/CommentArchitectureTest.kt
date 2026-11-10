@@ -28,7 +28,6 @@ class CommentArchitectureTest {
             "lootTable",
             "npc",
             "party",
-            "player",
             "quest",
             "save",
             "screen",

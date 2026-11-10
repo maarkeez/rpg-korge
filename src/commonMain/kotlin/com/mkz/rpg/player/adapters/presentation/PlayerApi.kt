@@ -16,19 +16,15 @@ class PlayerApi(
     eventBus: EventBus,
     private val playerLoader: PlayerLoader,
 ) {
-    // Storage
     private val playerRepository: PlayerRepository = InMemoryPlayerRepository()
 
-    // Commands
     val requestPlayerCreation = RequestPlayerCreation(playerRepository, eventBus)
     val initialisePlayers = InitialisePlayers(playerLoader, playerRepository, eventBus)
 
-    // Queries
     val searchPlayerById = SearchPlayerById(playerRepository)
     val searchOpponent = SearchOpponent(playerRepository)
     val searchHumanPlayer = SearchHumanPlayer(playerRepository)
 
-    // Events
     private val onRequestPlayerCreation = OnRequestPlayerCreation(requestPlayerCreation, eventBus)
     private val onRequestInitialisePlayers = OnRequestInitialisePlayers(initialisePlayers, eventBus)
 
