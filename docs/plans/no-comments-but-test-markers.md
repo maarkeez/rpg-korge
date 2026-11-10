@@ -46,7 +46,7 @@ Each milestone is a few commits straight on `main`, green on CI. A milestone tha
 | #  | Milestone                                     | Done when                                                                                                                                                                                    | Status | Done in  |
 |----|-----------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|----------|
 | M1 | Guard                                         | `CommentArchitectureTest` passes with every subdomain listed, `Main.kt` has no comment, and the testing guides state the rule.                                                               | ✅      | 61af2e2d |
-| M2 | shared                                        | `shared` has no comment and is off the list. This includes the architecture tests and the test helpers such as `ViewExtension` and `SubdomainApis`.                                          | ⬜      |          |
+| M2 | shared                                        | `shared` has no comment and is off the list. This includes the architecture tests and the test helpers such as `ViewExtension` and `SubdomainApis`.                                          | ✅      | 6db49c70 |
 | M3 | Leaf subdomains                               | `effect`, `localization`, `player`, `save`, `terrain`, `unit`, `ability`, `lootableItem`, `lootTable`, `building` and `gameSetup` have no comment and are off the list (about 160 comments). | ⬜      |          |
 | M4 | battle, battlefield, battleUnit, quest        | These four have no comment and are off the list (about 270 comments). `ApplyEffect`'s two TODOs are gone.                                                                                    | ⬜      |          |
 | M5 | party, inventory, npc, lootDrop, worldBuilder | These five have no comment and are off the list (about 300 comments).                                                                                                                        | ⬜      |          |
@@ -118,6 +118,12 @@ Written at the end of M9, apart from the usual report:
 - The ADRs written during the sweep, for approval.
 - The game domain terms that a deleted comment defined and `GLOSSARY.md` lacks, for the user to decide.
 - The renames and extractions of step 1, per subdomain.
+
+## Collected for the final report
+
+| Milestone | Renames and extractions of step 1                                                                                                                                                                                                                                                                                                                    | ADRs | Glossary candidates |
+|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------|---------------------|
+| M2        | `FixedDoublesRandom.cpuBattleUnitsAlwaysResting()` for the `FixedDoublesRandom(0.0)` of the acceptance and end-to-end tests; `blockingBuildersMissingOnJs` in `NoRunBlockingArchitectureTest`; `whyNotSaved` in `SnapshotCoverageArchitectureTest`; `widestValueWidth` in `BarView`; the Dto rules moved into the clues of `DomainArchitectureTest`. | None | None                |
 
 ## Known limitations
 
