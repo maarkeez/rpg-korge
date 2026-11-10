@@ -1,6 +1,6 @@
 # Plan: the main quest starts at the village entrance
 
-> **Status:** built on `main` in 698efb24, its screenshots still to be approved.
+> **Status:** done, built on `main` in 698efb24 and approved on screenshots.
 >
 > **Summary:** Today `SetUpGame` publishes `RequestStartMainQuest` as soon as a new game is set up. Before the player
 > has walked a tile, the "NEW QUEST" announcement plays for The Goat Wizard's Lair and the tracker names "Defeat the
