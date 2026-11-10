@@ -12,10 +12,6 @@ import com.mkz.rpg.lootableItem.domain.LootableItemRepository
 import com.mkz.rpg.lootableItem.usecases.services.LootableItemLoader
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Creates every loaded lootable item, unless it already exists, once all its effects exist and suit its type: a consumable's effects can not be
- * timed while equipped, and an equippable item's effects must be.
- */
 class InitialiseLootableItems(
     private val lootableItemLoader: LootableItemLoader,
     private val lootableItemRepository: LootableItemRepository,

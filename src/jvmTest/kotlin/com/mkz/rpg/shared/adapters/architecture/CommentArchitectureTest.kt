@@ -22,7 +22,6 @@ class CommentArchitectureTest {
             "cpuWanderBrain",
             "gameSetup",
             "inventory",
-            "lootableItem",
             "lootDrop",
             "lootTable",
             "npc",

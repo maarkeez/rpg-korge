@@ -15,17 +15,13 @@ class LootableItemApi(
     eventBus: EventBus,
     private val lootableItemLoader: LootableItemLoader,
 ) {
-    // Storage
     private val lootableItemRepository: LootableItemRepository = InMemoryLootableItemRepository()
 
-    // Commands
     val initialiseLootableItems = InitialiseLootableItems(lootableItemLoader, lootableItemRepository, effectApi.searchEffectById, eventBus)
 
-    // Queries
     val searchLootableItemById = SearchLootableItemById(lootableItemRepository)
     val searchSellPrice = SearchSellPrice(lootableItemRepository)
 
-    // Events
     private val onRequestInitialiseLootableItems = OnRequestInitialiseLootableItems(initialiseLootableItems, eventBus)
 
     suspend fun init() {

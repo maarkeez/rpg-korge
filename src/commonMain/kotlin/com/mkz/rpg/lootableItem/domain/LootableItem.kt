@@ -15,7 +15,7 @@ import kotlin.jvm.JvmInline
 @ConsistentCopyVisibility
 data class LootableItem private constructor(
     private val id: Id,
-    private val price: Price,
+    private val price: PriceInGold,
     private val lootType: LootType,
     private val events: Set<LootableItemEvent>,
 ) {
@@ -23,7 +23,7 @@ data class LootableItem private constructor(
         fun create(dto: Dto): LootableItem =
             LootableItem(
                 id = Id(dto.id),
-                price = Price(dto.price),
+                price = PriceInGold(dto.price),
                 lootType = LootType(dto.lootType),
                 events = setOf(LootableItemCreated(lootableItemId = dto.id)),
             )
@@ -31,7 +31,6 @@ data class LootableItem private constructor(
 
     fun pullEvents() = events to copy(events = emptySet())
 
-    /** What a merchant pays for it: half its price, rounded down. */
     fun sellPrice(): Int = price.value / 2
 
     fun toDto() =
@@ -45,8 +44,7 @@ data class LootableItem private constructor(
         val value: String,
     )
 
-    // In gold.
-    @JvmInline private value class Price(
+    @JvmInline private value class PriceInGold(
         val value: Int,
     ) {
         init {
