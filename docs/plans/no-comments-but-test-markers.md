@@ -43,17 +43,17 @@ For example, three comments in production code today:
 Each milestone is a few commits straight on `main`, green on CI. A milestone that clears a subdomain removes it from
 `subdomainsWithComments`.
 
-| #  | Milestone                                     | Done when                                                                                                                                                                                    | Status | Done in |
-|----|-----------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
-| M1 | Guard                                         | `CommentArchitectureTest` passes with every subdomain listed, `Main.kt` has no comment, and the testing guides state the rule.                                                               | ⬜      |         |
-| M2 | shared                                        | `shared` has no comment and is off the list. This includes the architecture tests and the test helpers such as `ViewExtension` and `SubdomainApis`.                                          | ⬜      |         |
-| M3 | Leaf subdomains                               | `effect`, `localization`, `player`, `save`, `terrain`, `unit`, `ability`, `lootableItem`, `lootTable`, `building` and `gameSetup` have no comment and are off the list (about 160 comments). | ⬜      |         |
-| M4 | battle, battlefield, battleUnit, quest        | These four have no comment and are off the list (about 270 comments). `ApplyEffect`'s two TODOs are gone.                                                                                    | ⬜      |         |
-| M5 | party, inventory, npc, lootDrop, worldBuilder | These five have no comment and are off the list (about 300 comments).                                                                                                                        | ⬜      |         |
-| M6 | CPU brains                                    | `cpuBattleBrain` and `cpuWanderBrain` have no comment and are off the list (about 200 comments).                                                                                             | ⬜      |         |
-| M7 | storybook                                     | `storybook` has no comment and is off the list (about 400 comments), `jsMain`'s `PlatformStoryLocation` included.                                                                            | ⬜      |         |
-| M8 | screen views                                  | The views of `screen` and their page objects and tests have no comment (about 770 comments in 129 files). `screen` stays listed.                                                             | ⬜      |         |
-| M9 | Rest of screen                                | The rest of `screen` has no comment: presenters, mappers, `selection` and their tests (about 370 comments in 72 files). `subdomainsWithComments` is gone, and the final report is written.   | ⬜      |         |
+| #  | Milestone                                     | Done when                                                                                                                                                                                    | Status | Done in  |
+|----|-----------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|----------|
+| M1 | Guard                                         | `CommentArchitectureTest` passes with every subdomain listed, `Main.kt` has no comment, and the testing guides state the rule.                                                               | ✅      | 61af2e2d |
+| M2 | shared                                        | `shared` has no comment and is off the list. This includes the architecture tests and the test helpers such as `ViewExtension` and `SubdomainApis`.                                          | ⬜      |          |
+| M3 | Leaf subdomains                               | `effect`, `localization`, `player`, `save`, `terrain`, `unit`, `ability`, `lootableItem`, `lootTable`, `building` and `gameSetup` have no comment and are off the list (about 160 comments). | ⬜      |          |
+| M4 | battle, battlefield, battleUnit, quest        | These four have no comment and are off the list (about 270 comments). `ApplyEffect`'s two TODOs are gone.                                                                                    | ⬜      |          |
+| M5 | party, inventory, npc, lootDrop, worldBuilder | These five have no comment and are off the list (about 300 comments).                                                                                                                        | ⬜      |          |
+| M6 | CPU brains                                    | `cpuBattleBrain` and `cpuWanderBrain` have no comment and are off the list (about 200 comments).                                                                                             | ⬜      |          |
+| M7 | storybook                                     | `storybook` has no comment and is off the list (about 400 comments), `jsMain`'s `PlatformStoryLocation` included.                                                                            | ⬜      |          |
+| M8 | screen views                                  | The views of `screen` and their page objects and tests have no comment (about 770 comments in 129 files). `screen` stays listed.                                                             | ⬜      |          |
+| M9 | Rest of screen                                | The rest of `screen` has no comment: presenters, mappers, `selection` and their tests (about 370 comments in 72 files). `subdomainsWithComments` is gone, and the final report is written.   | ⬜      |          |
 
 ### M1 commits
 
@@ -127,3 +127,13 @@ Written at the end of M9, apart from the usual report:
 - `CommentScanner` reads the text, not the Kotlin syntax tree: a `//` or `/*` inside a string nested in a string
   template (e.g.: `"${"//"}"`) could be misread. None is in `src` today.
 - The build files, `buildSrc`, `tools`, scripts, CI files and markdown docs keep their comments.
+
+## Changes while building
+
+- `CommentScanner` also reads string templates (`${…}`, nested in strings and raw strings), backtick test names and
+  nested block comments. So the known limitation about a `//` inside a string nested in a template no longer holds,
+  and a test name such as `` `should read // when it is a test name` `` holds no comment.
+- M1 took out more comments from the code examples of the testing guides than the plan listed. These were the
+  placeholders of `how-to-add-a-new-test.md` and `how-to-add-an-effect-outcome.md`, now written as ellipses, the
+  `// The battle has started with the human player turn.` example comment, and the two comments of
+  `how-to-take-a-game-snapshot.md`.
