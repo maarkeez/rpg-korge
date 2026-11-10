@@ -8,11 +8,6 @@ import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 import com.mkz.rpg.worldBuilder.domain.WorldBuilderError.WorldNotCreated
 import com.mkz.rpg.worldBuilder.domain.WorldBuilderRepository
 
-/**
- * Replaces the world with the one written in the text, in the format the battlefield is loaded from (e.g.: an exported
- * world). Its terrains must exist, and two different terrains can only be adjacent when there is a transition between
- * them, in either direction, as the battlefield requires.
- */
 class ImportWorld(
     private val worldBuilderRepository: WorldBuilderRepository,
     private val parseBattlefield: ParseBattlefield,

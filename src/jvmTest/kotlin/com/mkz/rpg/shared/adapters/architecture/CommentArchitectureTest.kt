@@ -18,7 +18,6 @@ class CommentArchitectureTest {
             "cpuWanderBrain",
             "screen",
             "storybook",
-            "worldBuilder",
         )
 
     private val sourceFiles: List<SourceFile> =

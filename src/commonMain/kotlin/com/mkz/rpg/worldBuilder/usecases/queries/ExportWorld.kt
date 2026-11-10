@@ -4,7 +4,6 @@ import com.mkz.rpg.battlefield.usecases.queries.ExportBattlefield
 import com.mkz.rpg.worldBuilder.domain.WorldBuilderError.WorldNotCreated
 import com.mkz.rpg.worldBuilder.domain.WorldBuilderRepository
 
-/** The world being built, written in the format the battlefield is loaded from. */
 class ExportWorld(
     private val worldBuilderRepository: WorldBuilderRepository,
     private val exportBattlefield: ExportBattlefield,

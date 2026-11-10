@@ -16,7 +16,6 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class WorldBuilderTest {
-    // Lava and water can only be next to sand, and to themselves.
     private val canBeAdjacent = { terrainId: String, adjacentTerrainId: String -> "sand" in setOf(terrainId, adjacentTerrainId) }
 
     private fun newWorld(): WorldBuilder = WorldBuilder.create().pullEvents().second

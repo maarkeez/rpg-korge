@@ -11,10 +11,6 @@ import com.mkz.rpg.worldBuilder.domain.WorldBuilderEvent.WorldImported
 import com.mkz.rpg.worldBuilder.domain.WorldBuilderEvent.WorldResized
 import kotlin.jvm.JvmInline
 
-/**
- * The world the player is building: a rectangular battlefield with the terrain id of each tile, and the terrain the
- * player paints the tiles with.
- */
 @ConsistentCopyVisibility
 data class WorldBuilder private constructor(
     private val tiles: Tiles,
@@ -27,7 +23,6 @@ data class WorldBuilder private constructor(
         const val DEFAULT_SIZE = 16
         const val DEFAULT_TERRAIN_ID = "sand"
 
-        /** A new world, with every tile of the default terrain, which is selected. */
         fun create(): WorldBuilder {
             val tiles = Tiles.filled(rows = DEFAULT_SIZE, columns = DEFAULT_SIZE, terrainId = TerrainId(DEFAULT_TERRAIN_ID))
             return WorldBuilder(
@@ -48,10 +43,6 @@ data class WorldBuilder private constructor(
             selectedTerrainId = selectedTerrainId.value,
         )
 
-    /**
-     * Changes the size, keeping the tiles that still fit and filling the new ones with the default terrain. A size out of
-     * [MINIMUM_SIZE] to [MAXIMUM_SIZE] is ignored.
-     */
     fun resize(
         rows: Int,
         columns: Int,
@@ -66,10 +57,6 @@ data class WorldBuilder private constructor(
 
     fun selectTerrain(terrainId: String): WorldBuilder = copy(selectedTerrainId = TerrainId(terrainId), events = events + TerrainSelected(terrainId = terrainId))
 
-    /**
-     * Paints the tile with the selected terrain. It is rejected, leaving the tile unchanged, when the terrain could not
-     * be next to the terrain of one of the adjacent tiles: [canBeAdjacent] tells whether two different terrains can.
-     */
     fun paint(
         row: Int,
         column: Int,
@@ -92,12 +79,6 @@ data class WorldBuilder private constructor(
         )
     }
 
-    /**
-     * Replaces the world with the imported tiles, keeping the selected terrain. The import is rejected, leaving the world
-     * unchanged, when [tiles] is `null` (the imported text is not a world), when its size is out of [MINIMUM_SIZE] to
-     * [MAXIMUM_SIZE], when [isKnownTerrain] does not know one of its terrains, or when two adjacent tiles have
-     * terrains that [canBeAdjacent] tells can not be next to each other.
-     */
     fun import(
         tiles: List<List<String>>?,
         isKnownTerrain: (terrainId: String) -> Boolean,
@@ -121,15 +102,14 @@ data class WorldBuilder private constructor(
         adjacentTerrainId: String? = null,
     ): WorldBuilder = copy(events = events + WorldImportRejected(reason = reason, terrainId = terrainId, adjacentTerrainId = adjacentTerrainId))
 
-    // The first two different terrains next to each other that can not be adjacent, checking each tile with the tiles
-    // to its east and to its south.
     private fun forbiddenAdjacentTerrains(
         tiles: List<List<String>>,
         canBeAdjacent: (terrainId: String, adjacentTerrainId: String) -> Boolean,
     ): Pair<String, String>? {
         tiles.forEachIndexed { row, terrainIds ->
             terrainIds.forEachIndexed { column, terrainId ->
-                listOfNotNull(terrainIds.getOrNull(column + 1), tiles.getOrNull(row + 1)?.get(column)).forEach { adjacentTerrainId ->
+                val eastAndSouthTerrainIds = listOfNotNull(terrainIds.getOrNull(column + 1), tiles.getOrNull(row + 1)?.get(column))
+                eastAndSouthTerrainIds.forEach { adjacentTerrainId ->
                     if (adjacentTerrainId != terrainId && !canBeAdjacent(terrainId, adjacentTerrainId)) return terrainId to adjacentTerrainId
                 }
             }
@@ -144,7 +124,6 @@ data class WorldBuilder private constructor(
         val value: String,
     )
 
-    // The terrain id of each tile: first are rows, second are columns.
     @JvmInline
     private value class Tiles(
         val value: List<List<TerrainId>>,

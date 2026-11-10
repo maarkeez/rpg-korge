@@ -19,7 +19,6 @@ class PaintTileTest {
     private val worldBuilderRepository = InMemoryWorldBuilderRepository()
     private val eventBus = FakeEventBus()
 
-    // Only sand has transitions: to lava and water.
     private val terrainRepository =
         InMemoryTerrainRepository().apply {
             create(terrainThatCanBeOccupied(id = "sand", transitionsTo = setOf("sand", "lava", "water")))

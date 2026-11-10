@@ -5,10 +5,6 @@ import com.mkz.rpg.terrain.usecases.queries.HasTerrainTransition
 import com.mkz.rpg.worldBuilder.domain.WorldBuilderError.WorldNotCreated
 import com.mkz.rpg.worldBuilder.domain.WorldBuilderRepository
 
-/**
- * Paints the tile with the selected terrain. Two different terrains can only be adjacent when there is a transition
- * between them, in either direction, as the battlefield requires.
- */
 class PaintTile(
     private val worldBuilderRepository: WorldBuilderRepository,
     private val hasTerrainTransition: HasTerrainTransition,
