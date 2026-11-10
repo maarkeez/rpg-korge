@@ -7,6 +7,11 @@ the enemies within reach and the terrain, and the best one is taken when it beat
 it because it blends those considerations into one comparable number, easy to tune and to extend per kind of ability,
 and cheap enough for the web build.
 
+The CPU battle units out of a battle wander the same way, one after another, each step awaited until its battle unit
+occupies the tile, so two never step on the same tile. Their steps are scored too (roaming away from home, heading back
+to it, and the terrain), but one is picked at random, weighted by its utility, rather than the best one, so they reach the
+edge of their territory now and then, instead of going back and forth between the same two tiles.
+
 ## Considered options
 
 - Behaviour trees: every situation would need a branch written by hand.
