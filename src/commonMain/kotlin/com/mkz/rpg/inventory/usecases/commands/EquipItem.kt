@@ -10,10 +10,6 @@ import com.mkz.rpg.party.domain.PartyEvent.RequestApplyMemberEffect
 import com.mkz.rpg.party.domain.PartyEvent.RequestRemoveMemberEquippedEffects
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Equips a stored item in its zone and applies its effects to its battle unit. When the zone already holds an item, it is unequipped: the new
- * item's effects are applied before the unequipped item's are removed, so the remaining health and mana are only lowered to the final maximums.
- */
 class EquipItem(
     private val inventoryRepository: InventoryRepository,
     private val searchLootableItemById: SearchLootableItemById,

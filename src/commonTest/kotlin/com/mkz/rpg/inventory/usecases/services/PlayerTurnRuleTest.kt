@@ -14,7 +14,6 @@ class PlayerTurnRuleTest {
     private val queries = InMemoryQueries()
     private val playerTurnRule = PlayerTurnRule(queries.searchParty, queries.searchBattle)
 
-    // The human player explores with the knight. The rat is no party member.
     @BeforeTest
     fun setUp() {
         queries.partyRepository.save(party(playerId = "human", battleUnitIds = listOf("knight-1")))

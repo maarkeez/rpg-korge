@@ -20,7 +20,6 @@ class SellItemTest {
     private val eventBus = FakeEventBus()
     private val sellItem = SellItem(trade.inventoryRepository, trade.queries.searchSellPrice, trade.tradeRule, eventBus)
 
-    // The viking carries 50 G, two hammers, the first one equipped, and a mana potion.
     @BeforeTest
     fun setUp() {
         trade.inventoryRepository.create(inventory(battleUnitId = "viking-1", storedItems = listOf("hammer", "hammer", "mana-potion"), equippedItems = mapOf(WEAPON to "hammer"), gold = 50))

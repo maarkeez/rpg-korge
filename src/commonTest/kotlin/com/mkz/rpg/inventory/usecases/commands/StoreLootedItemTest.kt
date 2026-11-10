@@ -27,7 +27,6 @@ class StoreLootedItemTest {
     private val storeLootedItem =
         StoreLootedItem(inventoryRepository, SearchLootableItemById(lootableItemRepository), eventBus)
 
-    // Only the knight has an inventory, as a party member. The rat and the bee, a summon, have none.
     @BeforeTest
     fun setUp() {
         lootableItemRepository.create(consumableLootableItem(id = "health-potion"))

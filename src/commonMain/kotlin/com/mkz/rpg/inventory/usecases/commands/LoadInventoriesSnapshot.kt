@@ -4,7 +4,6 @@ import com.mkz.rpg.inventory.domain.Inventory
 import com.mkz.rpg.inventory.domain.InventoryRepository
 import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
 
-/** Replaces every inventory by the ones a save took, publishing no events. Fails when an item is a lootable item the game no longer has. */
 class LoadInventoriesSnapshot(
     private val inventoryRepository: InventoryRepository,
     private val searchLootableItemById: SearchLootableItemById,

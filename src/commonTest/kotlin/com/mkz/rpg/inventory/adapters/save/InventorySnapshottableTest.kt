@@ -16,7 +16,6 @@ import kotlin.test.Test
 class InventorySnapshottableTest {
     private val searchLootableItemById = SearchLootableItemById(InMemoryLootableItemRepository().apply { listOf("health-potion", "iron-helmet").forEach { id -> create(lootableItem(id = id)) } })
 
-    // The knight carries a health potion and wears an iron helmet, with 40 gold. The mage carries nothing.
     private val inventories =
         listOf(
             inventory(battleUnitId = "knight-1", storedItems = listOf("health-potion", "iron-helmet"), equippedItems = mapOf(EquipmentZoneDto.HEAD to "iron-helmet"), gold = 40),

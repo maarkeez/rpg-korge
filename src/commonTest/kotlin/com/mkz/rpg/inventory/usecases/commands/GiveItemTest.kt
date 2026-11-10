@@ -22,7 +22,6 @@ class GiveItemTest {
     private val eventBus = FakeEventBus()
     private val giveItem = GiveItem(give.inventoryRepository, give.giveRule, eventBus)
 
-    // The knight stores a hammer, equipped, and two health potions. The viking stores a mana potion, and the mage's inventory is full.
     @BeforeTest
     fun setUp() {
         give.inventoryRepository.create(inventory(battleUnitId = "knight-1", storedItems = listOf("hammer", "health-potion", "health-potion"), equippedItems = mapOf(WEAPON to "hammer")))

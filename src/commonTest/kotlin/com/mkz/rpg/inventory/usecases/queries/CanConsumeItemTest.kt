@@ -27,7 +27,6 @@ class CanConsumeItemTest {
             ConsumptionRule(queries.searchEffectById, queries.canMemberLearnAbility),
         )
 
-    // The teleport essence teaches teleport, and the health potion heals. The viking and the knight explore, and the viking only knows sword.
     @BeforeTest
     fun setUp() {
         queries.effectRepository.create(learnAbilityEffect(id = "learn-teleport", abilityId = "teleport"))

@@ -5,7 +5,6 @@ import com.mkz.rpg.inventory.domain.InventoryRepository
 import com.mkz.rpg.inventory.usecases.services.PlayerTurnRule
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Removes an item from the inventory, freeing its storage space. The item leaves the game. */
 class DiscardItem(
     private val inventoryRepository: InventoryRepository,
     private val playerTurnRule: PlayerTurnRule,

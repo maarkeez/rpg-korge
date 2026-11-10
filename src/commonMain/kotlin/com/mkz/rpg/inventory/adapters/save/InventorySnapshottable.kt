@@ -10,7 +10,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
-/** The inventory of every battle unit: its stored and equipped items, and its gold, see [SearchInventoriesSnapshot] and [LoadInventoriesSnapshot]. */
 class InventorySnapshottable(
     private val searchInventoriesSnapshot: SearchInventoriesSnapshot,
     private val loadInventoriesSnapshot: LoadInventoriesSnapshot,
@@ -44,7 +43,6 @@ class InventorySnapshottable(
         )
 }
 
-// Equipped items: by the name of their equipment zone, e.g.: HEAD. They are also stored.
 @Serializable
 private data class InventorySnapshot(
     val battleUnitId: String,

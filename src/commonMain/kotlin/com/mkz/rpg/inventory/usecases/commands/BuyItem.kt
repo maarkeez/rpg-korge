@@ -7,7 +7,6 @@ import com.mkz.rpg.inventory.usecases.services.TradeRule
 import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Buys an item from the merchant the party talks to: the battle unit pays its price, and stores it. */
 class BuyItem(
     private val inventoryRepository: InventoryRepository,
     private val searchLootableItemById: SearchLootableItemById,

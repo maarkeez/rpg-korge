@@ -13,7 +13,6 @@ class SearchGiveGoldRefusalTest {
     private val searchGoldReceivers = SearchGoldReceivers(give.inventoryRepository, give.giveRule)
     private val searchGiveGoldRefusal = SearchGiveGoldRefusal(give.inventoryRepository, give.giveRule, searchGoldReceivers)
 
-    // The knight carries 120 G. The viking and the mage have room for more.
     @BeforeTest
     fun setUp() {
         give.inventoryRepository.create(inventory(battleUnitId = "knight-1", gold = 120))

@@ -15,7 +15,6 @@ class SearchGiveItemRefusalTest {
     private val searchItemReceivers = SearchItemReceivers(give.inventoryRepository, give.giveRule)
     private val searchGiveItemRefusal = SearchGiveItemRefusal(give.inventoryRepository, give.giveRule, searchItemReceivers)
 
-    // The knight carries a hammer, equipped, and a health potion. The viking and the mage have space left.
     @BeforeTest
     fun setUp() {
         give.inventoryRepository.create(inventory(battleUnitId = "knight-1", storedItems = listOf("hammer", "health-potion"), equippedItems = mapOf(WEAPON to "hammer")))

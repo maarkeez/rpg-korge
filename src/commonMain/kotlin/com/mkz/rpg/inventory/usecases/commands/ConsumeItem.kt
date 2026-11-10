@@ -10,10 +10,6 @@ import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
 import com.mkz.rpg.party.domain.PartyEvent.RequestApplyMemberEffect
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Removes a consumable from the inventory and applies its effects to its battle unit. Fails, keeping it stored, when its
- * battle unit can not learn the ability it teaches.
- */
 class ConsumeItem(
     private val inventoryRepository: InventoryRepository,
     private val searchLootableItemById: SearchLootableItemById,

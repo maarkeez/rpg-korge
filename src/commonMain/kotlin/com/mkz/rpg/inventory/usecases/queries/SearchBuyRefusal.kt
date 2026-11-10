@@ -7,10 +7,6 @@ import com.mkz.rpg.inventory.domain.InventoryRepository
 import com.mkz.rpg.inventory.usecases.services.TradeRule
 import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
 
-/**
- * Why the battle unit can not buy the item from the merchant the party talks to: it is not trading, the merchant does not
- * sell it, or the battle unit can not pay its price or has no space to store it. `null` when it can buy it.
- */
 class SearchBuyRefusal(
     private val inventoryRepository: InventoryRepository,
     private val searchLootableItemById: SearchLootableItemById,

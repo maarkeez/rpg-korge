@@ -4,10 +4,6 @@ import com.mkz.rpg.inventory.domain.Inventory.Dto.GiveGoldRefusalDto
 import com.mkz.rpg.inventory.domain.InventoryRepository
 import com.mkz.rpg.inventory.usecases.services.GiveRule
 
-/**
- * Why the battle unit can not give gold to any other party member: the party is not exploring, it carries no gold, it is
- * alone in the party, or every other member is at its maximum gold. `null` when it can give gold to someone.
- */
 class SearchGiveGoldRefusal(
     private val inventoryRepository: InventoryRepository,
     private val giveRule: GiveRule,

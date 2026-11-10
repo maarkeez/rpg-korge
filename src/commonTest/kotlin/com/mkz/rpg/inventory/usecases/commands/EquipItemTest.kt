@@ -44,7 +44,6 @@ class EquipItemTest {
             eventBus,
         )
 
-    // It is the turn of the human player, who explores with the knight. The rat is no party member.
     @BeforeTest
     fun setUp() {
         battleRepository.create(battle(players = listOf("human", "cpu")))

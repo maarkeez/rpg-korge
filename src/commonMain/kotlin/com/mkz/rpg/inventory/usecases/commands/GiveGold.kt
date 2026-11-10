@@ -5,10 +5,6 @@ import com.mkz.rpg.inventory.domain.InventoryRepository
 import com.mkz.rpg.inventory.usecases.services.GiveRule
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Gives an amount of gold to another member of the exploring party. Nothing is saved when either side fails, e.g.: the
- * receiver has no room for it.
- */
 class GiveGold(
     private val inventoryRepository: InventoryRepository,
     private val giveRule: GiveRule,

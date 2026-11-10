@@ -5,7 +5,6 @@ import com.mkz.rpg.party.domain.PartyEvent.ExplorationStarted
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.subscribe
 
-// Each battle unit of the party gets its inventory when the exploration starts, e.g.: when the game is set up.
 class OnExplorationStarted(
     createInventory: CreateInventory,
     eventBus: EventBus,

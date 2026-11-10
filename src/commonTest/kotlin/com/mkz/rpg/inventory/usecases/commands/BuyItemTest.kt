@@ -22,7 +22,6 @@ class BuyItemTest {
     private val eventBus = FakeEventBus()
     private val buyItem = BuyItem(trade.inventoryRepository, trade.queries.searchLootableItemById, trade.tradeRule, eventBus)
 
-    // The knight has 20 G, and the viking 100 G.
     @BeforeTest
     fun setUp() {
         trade.inventoryRepository.create(inventory(battleUnitId = "knight-1", gold = 20))

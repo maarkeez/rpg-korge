@@ -32,11 +32,6 @@ import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDt
 import com.mkz.rpg.shared.domain.DomainEvent
 import kotlin.jvm.JvmInline
 
-/**
- * The lootable items a battle unit of the human player stores, and its gold. Each item takes one storage space, even while equipped. Each
- * equipment zone holds one equipped item. Items are looted, bought, sold and given to other party members, and the gold, also given, goes
- * from 0 to its maximum gold, 99,999.
- */
 @ConsistentCopyVisibility
 data class Inventory private constructor(
     private val battleUnitId: BattleUnitId,
@@ -44,17 +39,13 @@ data class Inventory private constructor(
     private val storedItems: StoredItems,
     private val equippedItems: EquippedItems,
     private val gold: Gold,
-    // Its own events, each followed by the battlefield request it needs (e.g.: looting the item it stored),
-    // published together so the battlefield is up to date before anything reacting to the next events.
     private val events: Set<DomainEvent>,
 ) {
     companion object {
         private const val DEFAULT_MAXIMUM_STORAGE_SPACE = 12
 
-        // The maximum gold of an inventory. Only the inventory reads it: the shop gets GOLD_FULL instead.
         private const val MAXIMUM_GOLD = 99_999
 
-        /** Creates the empty inventory of a battle unit, with its starting gold, once it is deployed. */
         fun create(
             battleUnitId: String,
             gold: Int = 0,
@@ -68,7 +59,6 @@ data class Inventory private constructor(
                 events = emptySet(),
             )
 
-        /** Rebuilds the inventory as it was when the game was saved, from its [toDto], publishing no events. */
         fun load(dto: Dto): Inventory =
             Inventory(
                 battleUnitId = BattleUnitId(dto.battleUnitId),
@@ -84,10 +74,6 @@ data class Inventory private constructor(
 
     fun canStore(): Boolean = storedItems.value.size < maximumStorageSpace.value
 
-    /**
-     * Stores the item lying on the tile at [row] and [column], and requests its looting from the tile. Or announces the inventory is full, so the
-     * player chooses whether to discard an item to make room.
-     */
     fun store(
         lootableItemId: String,
         row: Int,
@@ -105,10 +91,6 @@ data class Inventory private constructor(
             copy(events = events + InventoryFull(battleUnitId = battleUnitId.value, lootableItemId = lootableItemId, row = row, column = column))
         }
 
-    /**
-     * Adds the gold, up to its maximum gold, the excess being lost, and stores the items in order while there is storage space. The items left
-     * are requested to drop on the tile at [row] and [column], as a grant can not fail. E.g.: 99,950 gold granted 150 receives 49.
-     */
     fun grantReward(
         gold: Int,
         lootableItemIds: List<String>,
@@ -131,7 +113,6 @@ data class Inventory private constructor(
         )
     }
 
-    /** Whether the item is stored, so it can be consumed. */
     fun canConsume(lootableItemId: String): Boolean = storedItems.count(LootableItemId(lootableItemId)) > 0
 
     fun consume(lootableItemId: String): Inventory =
@@ -140,7 +121,6 @@ data class Inventory private constructor(
             events = events + ItemConsumed(battleUnitId = battleUnitId.value, lootableItemId = lootableItemId),
         )
 
-    /** Discards a stored copy that is not equipped: an equipped item must be unequipped first. */
     fun discard(lootableItemId: String): Inventory {
         val item = LootableItemId(lootableItemId)
         if (equippedItems.isEquipped(item) && storedItems.count(item) == 1) throw EquippedItemCanNotBeDiscarded()
@@ -150,7 +130,6 @@ data class Inventory private constructor(
         )
     }
 
-    /** Equips a stored item in its zone, unequipping the item the zone held, if any. */
     fun equip(
         lootableItemId: String,
         equipmentZone: EquipmentZoneDto,
@@ -172,7 +151,6 @@ data class Inventory private constructor(
         )
     }
 
-    /** Why it can not buy an item: it has no space to store it, or can not pay its price. `null` when it can buy it. */
     fun buyRefusal(price: Int): TradeRefusalDto? =
         when {
             !canStore() -> TradeRefusalDto.INVENTORY_FULL
@@ -180,7 +158,6 @@ data class Inventory private constructor(
             else -> null
         }
 
-    /** Pays the price of an item and stores it. Fails when it can not pay it, or has no space left. */
     fun buy(
         lootableItemId: String,
         price: Int,
@@ -197,10 +174,6 @@ data class Inventory private constructor(
         )
     }
 
-    /**
-     * Why it can not sell an item for its sell price: it stores no copy, its only copy is equipped, or the sell price takes its
-     * gold above its maximum gold. `null` when it can sell it.
-     */
     fun sellRefusal(
         lootableItemId: String,
         sellPrice: Int,
@@ -215,7 +188,6 @@ data class Inventory private constructor(
         }
     }
 
-    /** Removes a stored copy that is not equipped, and receives its sell price. The item leaves the game. */
     fun sell(
         lootableItemId: String,
         sellPrice: Int,
@@ -233,7 +205,6 @@ data class Inventory private constructor(
         )
     }
 
-    /** Why it can not give the item to another party member: it stores no copy, or its only copy is equipped. `null` when it can give it. */
     fun giveItemRefusal(lootableItemId: String): GiveItemRefusalDto? {
         val item = LootableItemId(lootableItemId)
         val storedCopies = storedItems.count(item)
@@ -244,7 +215,6 @@ data class Inventory private constructor(
         }
     }
 
-    /** Removes a stored copy that is not equipped, given to the receiver's inventory. */
     fun giveItem(
         lootableItemId: String,
         receiverBattleUnitId: String,
@@ -260,7 +230,6 @@ data class Inventory private constructor(
         )
     }
 
-    /** Stores the item given by another party member, last and not equipped. Fails when it has no space left. */
     fun receiveItem(
         lootableItemId: String,
         giverBattleUnitId: String,
@@ -272,10 +241,8 @@ data class Inventory private constructor(
         )
     }
 
-    /** Its room: how much more gold it can carry before its maximum gold. */
     fun goldRoom(): Int = MAXIMUM_GOLD - gold.value
 
-    /** Removes the gold, given to the receiver's inventory. Fails below 1, and above the gold it carries. */
     fun giveGold(
         amount: Int,
         receiverBattleUnitId: String,
@@ -288,7 +255,6 @@ data class Inventory private constructor(
         )
     }
 
-    /** Adds the gold given by another party member. Fails above its maximum gold, as a give, unlike a grant, can fail. */
     fun receiveGold(
         amount: Int,
         giverBattleUnitId: String,
@@ -298,7 +264,6 @@ data class Inventory private constructor(
             events = events + GoldReceived(battleUnitId = battleUnitId.value, giverBattleUnitId = giverBattleUnitId, gold = amount),
         )
 
-    /** Unequips an item, which stays stored. */
     fun unequip(lootableItemId: String): Inventory {
         val item = LootableItemId(lootableItemId)
         val equipmentZone = equippedItems.zoneOf(item) ?: throw ItemNotEquipped()
@@ -362,54 +327,40 @@ data class Inventory private constructor(
         val battleUnitId: String,
         val maximumStorageSpace: Int,
         val storedItems: List<String>,
-        // The equipped items are also part of the stored items.
         val equippedItems: Map<EquipmentZoneDto, String>,
         val gold: Int,
     ) {
-        /** Why a battle unit can not buy or sell an item. */
         enum class TradeRefusalDto {
-            // The battle unit is not a party member talking to a merchant, e.g.: the party talks to no merchant.
             NOT_TRADING,
 
-            // Only buying.
             NOT_SOLD_BY_THE_MERCHANT,
             NOT_ENOUGH_GOLD,
             INVENTORY_FULL,
 
-            // Only selling.
             NOT_STORED,
             EQUIPPED,
             GOLD_FULL,
         }
 
-        /** Why a battle unit can not give an item to another party member. */
         enum class GiveItemRefusalDto {
-            // The battle unit is not a member of the exploring party, e.g.: in a battle, or while talking to an npc.
             NOT_EXPLORING,
             NOT_STORED,
             EQUIPPED,
 
-            // The battle unit is alone in the party.
             NO_ONE,
 
-            // Every other party member has no space left.
             INVENTORIES_FULL,
         }
 
-        /** Why a battle unit can not give gold to any other party member. */
         enum class GiveGoldRefusalDto {
-            // The battle unit is not a member of the exploring party, e.g.: in a battle, or while talking to an npc.
             NOT_EXPLORING,
             NO_GOLD,
 
-            // The battle unit is alone in the party.
             NO_ONE,
 
-            // Every other party member is at its maximum gold.
             GOLD_FULL,
         }
 
-        /** A party member who can receive gold: the gold it carries, and how much more it can carry. */
         data class GoldReceiverDto(
             val battleUnitId: String,
             val gold: Int,

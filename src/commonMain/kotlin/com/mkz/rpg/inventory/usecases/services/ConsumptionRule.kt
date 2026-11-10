@@ -5,11 +5,6 @@ import com.mkz.rpg.inventory.domain.InventoryError.AbilityCanNotBeLearned
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.ConsumableDto
 import com.mkz.rpg.party.usecases.queries.CanMemberLearnAbility
 
-/**
- * A consumable can only be consumed when its battle unit can learn the ability each of its effects teaches, e.g.: the
- * teleport essence can not be consumed once teleport is known. The other effects never prevent it, e.g.: a health potion
- * can be consumed at full health.
- */
 class ConsumptionRule(
     private val searchEffectById: SearchEffectById,
     private val canMemberLearnAbility: CanMemberLearnAbility,

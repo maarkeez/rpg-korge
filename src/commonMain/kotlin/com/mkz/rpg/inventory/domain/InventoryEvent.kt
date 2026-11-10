@@ -4,7 +4,6 @@ import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDt
 import com.mkz.rpg.shared.domain.DomainEvent
 
 sealed interface InventoryEvent : DomainEvent {
-    // Requested for the reward of a battle unit standing on the tile at row and column, where what does not fit in its inventory drops.
     data class RequestGrantReward(
         val battleUnitId: String,
         val gold: Int,
@@ -13,14 +12,12 @@ sealed interface InventoryEvent : DomainEvent {
         val column: Int,
     ) : InventoryEvent
 
-    /** The reward was granted: the gold below the maximum gold and the items that fit in the storage spaces left. */
     data class RewardGranted(
         val battleUnitId: String,
         val gold: Int,
         val lootableItemIds: List<String>,
     ) : InventoryEvent
 
-    /** The item was stored, from the tile at [row] and [column] it was lying on. */
     data class ItemStored(
         val battleUnitId: String,
         val lootableItemId: String,
@@ -28,7 +25,6 @@ sealed interface InventoryEvent : DomainEvent {
         val column: Int,
     ) : InventoryEvent
 
-    /** The item was not stored: the player chooses whether to discard an item to store it, or to leave it on the tile at [row] and [column]. */
     data class InventoryFull(
         val battleUnitId: String,
         val lootableItemId: String,
@@ -46,42 +42,36 @@ sealed interface InventoryEvent : DomainEvent {
         val lootableItemId: String,
     ) : InventoryEvent
 
-    /** The item was stored, and its price paid to the merchant. */
     data class ItemBought(
         val battleUnitId: String,
         val lootableItemId: String,
         val price: Int,
     ) : InventoryEvent
 
-    /** The item left the game, and the merchant paid its sell price. */
     data class ItemSold(
         val battleUnitId: String,
         val lootableItemId: String,
         val sellPrice: Int,
     ) : InventoryEvent
 
-    /** The item left the inventory, given to the inventory of another party member. */
     data class ItemGiven(
         val battleUnitId: String,
         val receiverBattleUnitId: String,
         val lootableItemId: String,
     ) : InventoryEvent
 
-    /** The item was stored, given by another party member. */
     data class ItemReceived(
         val battleUnitId: String,
         val giverBattleUnitId: String,
         val lootableItemId: String,
     ) : InventoryEvent
 
-    /** The gold left the inventory, given to the inventory of another party member. */
     data class GoldGiven(
         val battleUnitId: String,
         val receiverBattleUnitId: String,
         val gold: Int,
     ) : InventoryEvent
 
-    /** The gold was added, given by another party member. */
     data class GoldReceived(
         val battleUnitId: String,
         val giverBattleUnitId: String,

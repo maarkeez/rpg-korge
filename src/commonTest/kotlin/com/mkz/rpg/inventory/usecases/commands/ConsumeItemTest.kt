@@ -56,8 +56,6 @@ class ConsumeItemTest {
             eventBus,
         )
 
-    // It is the turn of the human player, who explores with the knight, which knows teleport. The rat is no party member.
-    // The teleport essence teaches teleport.
     @BeforeTest
     fun setUp() {
         battleRepository.create(battle(players = listOf("human", "cpu")))

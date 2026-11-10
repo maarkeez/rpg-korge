@@ -7,10 +7,6 @@ import com.mkz.rpg.npc.domain.NpcMother.npc
 import com.mkz.rpg.party.domain.PartyMother.party
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 
-/**
- * The knight and the viking explore, talking to the merchant, who sells health potions (10 G) and hammers (50 G). Mana
- * potions (10 G) exist, but the merchant does not sell them. The Guy sells nothing. The rat is no party member.
- */
 class TradeMother {
     val queries = InMemoryQueries()
     val inventoryRepository = InMemoryInventoryRepository()

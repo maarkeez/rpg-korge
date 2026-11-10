@@ -7,7 +7,6 @@ import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
 import com.mkz.rpg.party.domain.PartyEvent.RequestRemoveMemberEquippedEffects
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Unequips an item, which stays stored, and removes its effects from its battle unit. */
 class UnequipItem(
     private val inventoryRepository: InventoryRepository,
     private val searchLootableItemById: SearchLootableItemById,

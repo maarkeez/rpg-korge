@@ -20,7 +20,6 @@ class GiveGoldTest {
     private val eventBus = FakeEventBus()
     private val giveGold = GiveGold(give.inventoryRepository, give.giveRule, eventBus)
 
-    // The knight carries 120 G, the viking 100 G and the mage 99,990 G, so it has room for 9 G.
     @BeforeTest
     fun setUp() {
         give.inventoryRepository.create(inventory(battleUnitId = "knight-1", gold = 120))

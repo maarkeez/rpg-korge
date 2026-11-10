@@ -4,7 +4,6 @@ import com.mkz.rpg.inventory.adapters.storage.InMemoryInventoryRepository
 import com.mkz.rpg.party.domain.PartyMother.party
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 
-/** The knight, the viking and the mage explore, in that party order. The rat is no party member. */
 class GiveMother {
     val queries = InMemoryQueries()
     val inventoryRepository = InMemoryInventoryRepository()

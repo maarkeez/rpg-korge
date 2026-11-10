@@ -13,7 +13,6 @@ class SearchBuyRefusalTest {
     private val trade = TradeMother()
     private val searchBuyRefusal = SearchBuyRefusal(trade.inventoryRepository, trade.queries.searchLootableItemById, trade.tradeRule)
 
-    // The knight has 20 G, and the viking 100 G.
     @BeforeTest
     fun setUp() {
         trade.inventoryRepository.create(inventory(battleUnitId = "knight-1", gold = 20))

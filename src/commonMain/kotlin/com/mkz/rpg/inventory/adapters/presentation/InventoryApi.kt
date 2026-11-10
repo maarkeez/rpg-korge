@@ -51,21 +51,17 @@ class InventoryApi(
     npcApi: NpcApi,
     eventBus: EventBus,
 ) {
-    // Storage
     private val inventoryRepository: InventoryRepository = InMemoryInventoryRepository()
 
-    // Save
     private val searchInventoriesSnapshot = SearchInventoriesSnapshot(inventoryRepository)
     private val loadInventoriesSnapshot = LoadInventoriesSnapshot(inventoryRepository, lootableItemApi.searchLootableItemById)
     val snapshottable: Snapshottable = InventorySnapshottable(searchInventoriesSnapshot, loadInventoriesSnapshot)
 
-    // Services
     private val playerTurnRule = PlayerTurnRule(partyApi.searchParty, battleApi.searchBattle)
     private val tradeRule = TradeRule(partyApi.searchParty, npcApi.searchNpcById)
     private val giveRule = GiveRule(partyApi.searchParty)
     private val consumptionRule = ConsumptionRule(effectApi.searchEffectById, partyApi.canMemberLearnAbility)
 
-    // Commands
     val createInventory = CreateInventory(inventoryRepository, unitApi.searchUnitById)
     val storeLootedItem = StoreLootedItem(inventoryRepository, lootableItemApi.searchLootableItemById, eventBus)
     val grantReward = GrantReward(inventoryRepository, lootableItemApi.searchLootableItemById, eventBus)
@@ -78,7 +74,6 @@ class InventoryApi(
     val giveItem = GiveItem(inventoryRepository, giveRule, eventBus)
     val giveGold = GiveGold(inventoryRepository, giveRule, eventBus)
 
-    // Queries
     val searchInventoryByBattleUnitId = SearchInventoryByBattleUnitId(inventoryRepository)
     val canStoreItem = CanStoreItem(inventoryRepository)
     val canConsumeItem = CanConsumeItem(inventoryRepository, lootableItemApi.searchLootableItemById, consumptionRule)
@@ -89,7 +84,6 @@ class InventoryApi(
     val searchGoldReceivers = SearchGoldReceivers(inventoryRepository, giveRule)
     val searchGiveGoldRefusal = SearchGiveGoldRefusal(inventoryRepository, giveRule, searchGoldReceivers)
 
-    // Event Listeners
     private val onDroppedItemsFound = OnDroppedItemsFound(storeLootedItem, eventBus)
     private val onExplorationStarted = OnExplorationStarted(createInventory, eventBus)
     private val onPartyJoined = OnPartyJoined(createInventory, eventBus)

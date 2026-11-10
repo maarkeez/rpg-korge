@@ -26,7 +26,7 @@ class LoadInventoriesSnapshotTest {
 
     @Test
     fun `should rebuild the same state when it loads the snapshot it took`() {
-        // Given: the knight carries a health potion and wears an iron helmet, with 40 gold. The mage carries nothing.
+        // Given
         val inventories =
             listOf(
                 inventory(battleUnitId = "knight-1", storedItems = listOf("health-potion", "iron-helmet"), equippedItems = mapOf(EquipmentZoneDto.HEAD to "iron-helmet"), gold = 40),

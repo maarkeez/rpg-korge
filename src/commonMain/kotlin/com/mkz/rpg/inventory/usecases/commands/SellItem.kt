@@ -7,7 +7,6 @@ import com.mkz.rpg.inventory.usecases.services.TradeRule
 import com.mkz.rpg.lootableItem.usecases.queries.SearchSellPrice
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Sells a stored item that is not equipped to the merchant the party talks to, for its sell price. The item leaves the game. */
 class SellItem(
     private val inventoryRepository: InventoryRepository,
     private val searchSellPrice: SearchSellPrice,
