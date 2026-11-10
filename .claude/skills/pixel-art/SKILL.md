@@ -19,9 +19,8 @@ These are enforced by the architecture tests (see [ADR 0005](../../../docs/adr/0
 - Only the 64 FamiCube colours, fully opaque, or fully transparent. The tool can not write anything else.
 - Battle units, npcs, their portraits, lootable items, buildings and the chest are outlined with `W` (`#151515`): the
   dark pixels of the silhouette, diagonals included, must be `W`. Light or saturated trims on the silhouette are fine.
-- Sizes: units and npcs are 16x16, or 32x32 when drawn with the [humanoid brief](../../../docs/design/humanoid-characters.md);
-  items, abilities, effects and the chest are 16x16; portraits are 32x32 (`<id>_portrait`);
-  buildings are 16 pixels per tile; terrain transition strips are 256x16.
+- Sizes: units and npcs are 16x16 or 32x32; items, abilities, effects and the chest are 16x16; portraits are 32x32
+  (`<id>_portrait`); buildings are 16 pixels per tile; terrain transition strips are 256x16.
 
 ## Colours
 
@@ -62,9 +61,8 @@ exported.
 
 ## Workflow
 
-1. **Read the design brief** for the asset, under `docs/design/` (e.g. [humanoid characters](../../../docs/design/humanoid-characters.md)),
-   and look at the assets it must match: `pixel preview` them (e.g. for a humanoid, the A Link to the Past references
-   under `art/drafts/reference/`) and read the PNG it prints.
+1. **Read the [design brief](../../../docs/art/design-brief.md)**, and look at the assets the new one must match:
+   `pixel preview` them and read the PNG it prints.
 2. **Start the source**: `pixel new art/unit/goblin.aseprite --size 16x16 --layer outline --layer shade --layer base`,
    or `pixel layer add` on an existing one. Its PNG is exported right away, so the game can display it.
 3. **Draw** layer by layer, most of it in one `pixel apply` script, which saves once and only when every line

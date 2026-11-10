@@ -38,7 +38,7 @@ class SpriteTest {
 
     @Test
     fun `should not be exported when is a draft under art`() {
-        SpriteFiles.exportedPng(File("/project/art/drafts/humanoid/orc.aseprite")) shouldBe null
+        SpriteFiles.exportedPng(File("/project/art/drafts/unit/orc.aseprite")) shouldBe null
     }
 
     @Test
