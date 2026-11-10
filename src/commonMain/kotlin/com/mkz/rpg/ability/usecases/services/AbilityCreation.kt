@@ -9,10 +9,6 @@ import com.mkz.rpg.ability.domain.AbilityRepository
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.SUMMON
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 
-/**
- * Creates an ability, unless it already exists, once all its effects exist. An ability deploying a battle unit must say
- * how many turns it lasts, and the others must not. Returns the events to publish.
- */
 class AbilityCreation(
     private val abilityRepository: AbilityRepository,
     private val searchEffectById: SearchEffectById,

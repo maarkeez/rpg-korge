@@ -17,20 +17,15 @@ class AbilityApi(
     eventBus: EventBus,
     private val abilityLoader: AbilityLoader,
 ) {
-    // Storage
     private val abilityRepository: AbilityRepository = InMemoryAbilityRepository()
 
-    // Services
     private val abilityCreation = AbilityCreation(abilityRepository, effectApi.searchEffectById)
 
-    // Commands
     val requestAbilityCreation = RequestAbilityCreation(abilityCreation, eventBus)
     val initialiseAbilities = InitialiseAbilities(abilityLoader, abilityCreation, eventBus)
 
-    // Queries
     val searchAbilityById = SearchAbilityById(abilityRepository)
 
-    // Events
     private val onRequestAbilityCreation = OnRequestAbilityCreation(requestAbilityCreation, eventBus)
     private val onRequestInitialiseAbilities = OnRequestInitialiseAbilities(initialiseAbilities, eventBus)
 

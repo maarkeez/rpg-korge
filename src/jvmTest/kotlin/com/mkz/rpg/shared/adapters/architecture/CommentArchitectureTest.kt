@@ -14,7 +14,6 @@ class CommentArchitectureTest {
 
     private val subdomainsWithComments: Set<String> =
         setOf(
-            "ability",
             "battle",
             "battlefield",
             "battleUnit",

@@ -73,7 +73,6 @@ data class Ability private constructor(
         }
     }
 
-    // How many turns of its player the battle unit the ability deploys lasts.
     @JvmInline private value class SummonDuration(
         val value: Int,
     ) {

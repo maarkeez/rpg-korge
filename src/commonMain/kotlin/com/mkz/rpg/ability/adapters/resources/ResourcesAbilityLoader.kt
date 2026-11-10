@@ -12,7 +12,6 @@ import com.mkz.rpg.shared.adapters.toml.readTomlFiles
 import korlibs.io.file.VfsFile
 import kotlinx.serialization.Serializable
 
-/** Loads one ability per `ability/<ability id>.toml` resource. */
 class ResourcesAbilityLoader(
     private val abilityRoot: VfsFile = ResourcesBundle.root["ability"],
 ) : AbilityLoader {
