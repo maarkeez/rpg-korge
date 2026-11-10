@@ -2,10 +2,6 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import korlibs.image.bitmap.Bitmap
 
-/**
- * The art of the terrain tiles, shared by every [TerrainTileView]: each transition strip of the resources is split into
- * its tiles, the first and the last ones being the pure terrain tiles. They are split the first time they are asked for.
- */
 class TerrainBitmaps(
     private val resourcesLoader: GameSceneResourcesLoader,
 ) {
@@ -35,7 +31,6 @@ class TerrainBitmaps(
         }
     }
 
-    /** The tile of the terrain, or of its [transition] to another terrain, when it has one. */
     fun bitmap(
         terrainId: String,
         transition: TerrainTransition?,

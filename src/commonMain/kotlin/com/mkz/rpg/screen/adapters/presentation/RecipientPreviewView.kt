@@ -8,12 +8,6 @@ import korlibs.korge.view.text
 import korlibs.korge.view.xy
 import korlibs.math.geom.Size
 
-/**
- * A battle unit the previewed cast changes, as a row of the forecast ([CastPreviewView]): its portrait at 1x ringed
- * with its player's colour (grey when the cast would defeat it), its name, KO when it would be left with no health, and its
- * effects, the new ones blinking. Under the name, the health from before to after the cast and a slim mana bar. On the
- * right, the change of health, large: red for a loss (e.g.: -12), green for a gain (e.g.: +10).
- */
 class RecipientPreviewView(
     resourcesLoader: GameSceneResourcesLoader,
     private val messages: Messages,
@@ -46,7 +40,6 @@ class RecipientPreviewView(
     private val manaBarView = ManaBarView(Size(HEALTH_BAR_WIDTH, MANA_BAR_HEIGHT), showValue = false).also { view -> addChild(view.apply { xy(CONTENT_X, 36.0) }) }
     internal val changeText: Text = text("", textSize = CHANGE_TEXT_SIZE, color = Colors.WHITE) { y = 4.0 }
 
-    /** Displays the battle unit, the health the cast would leave it with, and the effects the cast would apply. */
     fun display(
         battleUnit: BattleUnitInfo,
         remainingHealth: Int,
@@ -76,7 +69,6 @@ class RecipientPreviewView(
         effectsView.display(effectIds = battleUnit.effectIds, newEffectIds = newEffectIds)
         effectsView.xy(x, 2.0)
         healthBarView.display(remainingBefore = battleUnit.remainingHealth, remainingAfter = remainingAfter, maximum = battleUnit.maximumHealth)
-        // As wide as the health bar, the value of the health after them.
         manaBarView.size = Size(healthBarView.barWidth, MANA_BAR_HEIGHT)
         manaBarView.display(remaining = battleUnit.remainingMana, maximum = battleUnit.maximumMana)
         val change = remainingAfter - battleUnit.remainingHealth

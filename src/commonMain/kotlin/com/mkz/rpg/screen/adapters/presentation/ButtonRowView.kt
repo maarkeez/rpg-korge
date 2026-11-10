@@ -9,10 +9,6 @@ import korlibs.korge.view.Container
 import korlibs.korge.view.xy
 import korlibs.math.geom.Size
 
-/**
- * The buttons of a panel, at the level of the finish turn and as tall as it, sharing its width equally: a lone one fills
- * the row, and the first one always starts on its left, so Back does not jump when stepping out.
- */
 class ButtonRowView(
     actions: List<Action>,
 ) : Container() {

@@ -5,15 +5,10 @@ import com.mkz.rpg.shared.adapters.presentation.descendants
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.view.Stage
 
-// Page object of [PauseView].
-
-/** The pause screen of the game screen, or `null` when the scene is not displayed yet. */
 fun Stage.pauseView(): PauseView? = descendants().filterIsInstance<PauseView>().firstOrNull()
 
-/** The labels of the options, from the top, e.g.: `Resume`. */
 fun PauseView.optionLabels(): List<String> = listOf(resumeButton.confirmButton.text, saveButton.cancelButton.text, quitButton.cancelButton.text)
 
-/** Whether Saved is displayed under the options. */
 fun PauseView.isSavedShown(): Boolean = savedText.visible
 
 fun PauseView.savedLabel(): String = savedText.text

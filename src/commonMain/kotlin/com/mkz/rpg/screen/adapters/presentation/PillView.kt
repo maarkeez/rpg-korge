@@ -14,11 +14,6 @@ import korlibs.korge.view.xy
 import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
 
-/**
- * A short value in a capsule as high as its text plus 8, tinted with its [color] and the text in it, e.g.: the mana an
- * ability costs. A [solid] one is filled with the colour, the text white, e.g.: KO. A [glyph] drawn as a vector goes
- * before the text, as the 8x8 pixel art icons would have to be scaled by a fraction.
- */
 class PillView(
     private val color: RGBA,
     private val glyph: Glyph = Glyph.NONE,
@@ -40,13 +35,10 @@ class PillView(
     enum class Glyph {
         NONE,
 
-        // An orb of mana: a blue circle with a white highlight.
         MANA,
 
-        // A clock: a ring with two hands.
         COOLDOWN,
 
-        // A coin: a gold circle with a darker middle.
         GOLD,
     }
 
@@ -91,7 +83,6 @@ class PillView(
         visible = false
     }
 
-    // Drawn in a square of [side], the colours inverted on a solid pill.
     private fun Container.drawGlyph(side: Double) {
         val radius = side / 2 - 1
         val ink = if (solid) Colors.WHITE else color

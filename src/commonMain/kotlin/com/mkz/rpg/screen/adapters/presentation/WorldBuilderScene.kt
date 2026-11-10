@@ -19,10 +19,6 @@ import korlibs.korge.view.SContainer
 import korlibs.korge.view.addUpdater
 import korlibs.math.geom.Size
 
-/**
- * Builds a world, laid out like the battle: the title, the battlefield, the HUD and the calls to action.
- * Storage: where the games are saved, handed back to the menu.
- */
 class WorldBuilderScene(
     private val localizationApi: LocalizationApi,
     private val storage: IStorage? = null,
@@ -31,7 +27,6 @@ class WorldBuilderScene(
         const val MENU_MARGIN = 6.0
     }
 
-    // Like the game scene, the scene coroutines run on the game window event loop, also in the headless tests.
     override val coroutineContext by lazy { super.coroutineContext + views.gameWindow.coroutineDispatcher }
 
     private val messages = Messages(localizationApi)
@@ -47,13 +42,11 @@ class WorldBuilderScene(
     }
 
     override suspend fun SContainer.sceneMain() {
-        // Event bus
         val eventBus = InMemoryEventBus()
         addUpdater {
             eventBus.dispatch()
         }
 
-        // Backend APIs: the world builder uses the terrains and the battlefield rules, but loads no battlefield
         val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
         val battlefieldApi = BattlefieldApi(terrainApi, eventBus, ResourcesBattlefieldLoader(), TomlBattlefieldEncoder(), TomlBattlefieldDecoder())
         val worldBuilderApi = WorldBuilderApi(terrainApi, battlefieldApi, eventBus)
@@ -89,7 +82,6 @@ class WorldBuilderScene(
             }
         }
 
-        // At the top right corner, over the rest of the scene, so the open menu covers it.
         menuView.x = GAME_WINDOW_SIZE.width - WorldBuilderMenuView.BUTTON_WIDTH - MENU_MARGIN
         menuView.y = MENU_MARGIN
         addChild(menuView)

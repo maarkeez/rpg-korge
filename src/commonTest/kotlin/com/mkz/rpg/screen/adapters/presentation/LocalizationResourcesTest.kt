@@ -14,12 +14,6 @@ import korlibs.image.font.CharacterSet
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
-/**
- * The catalogs under resources/localization must match the text the screen displays: every key it translates is in
- * messages.pot, messages.pot has no other key, and every translation matches messages.pot. Translations may be missing.
- * The screen translates the UI messages, and the game data from its ids: the name of each resource (e.g.: `unit.bat.name`
- * for resources/unit/bat.toml), the line of each npc, and the description and each task of each quest.
- */
 class LocalizationResourcesTest {
     private val sourceCatalog = PoFile.parse(TestCatalogs.files.getValue(SOURCE_FILE_NAME))
     private val sourceEntries = sourceCatalog.entries.associateBy { entry -> entry.context }
@@ -28,7 +22,6 @@ class LocalizationResourcesTest {
             .filterKeys { fileName -> fileName.endsWith(TRANSLATION_CATALOG_EXTENSION) }
             .mapValues { (_, content) -> PoFile.parse(content) }
 
-    // The game data folders whose resources are named, and the fields translated for each, e.g.: `npc.elder.line`.
     private val gameDataFields: Map<String, List<String>> =
         mapOf(
             "ability" to listOf("name"),
@@ -40,7 +33,6 @@ class LocalizationResourcesTest {
             "unit" to listOf("name"),
         )
 
-    // The characters the font draws, and the line breaks.
     private val drawnCharacters: Set<Int> = CharacterSet.LATIN_ALL.codePoints.toSet() + '\n'.code
 
     private val placeholder = Regex("""\{([A-Za-z][A-Za-z0-9]*)\}""")
@@ -141,7 +133,6 @@ class LocalizationResourcesTest {
                     .flatMap { fileName -> fields.map { field -> "$folder.${fileName.removeSuffix(".toml")}.$field" } }
             }.toSet()
 
-    // A quest has a text per task, e.g.: `quest.defeat-the-goat-wizard.task.0`, so its file alone does not tell how many.
     private suspend fun questTaskKeys(): Set<String> =
         ResourcesQuestLoader()
             .also { loader -> loader.initResources() }

@@ -8,7 +8,6 @@ import korlibs.korge.view.Container
 import korlibs.korge.view.xy
 import korlibs.math.geom.Size
 
-/** Cancel, All and Give, at the level of the finish turn and as tall as it, while the panel to give gold is displayed. */
 class GiveGoldActionsView(
     private val messages: Messages,
     onCancelled: () -> Unit,
@@ -37,7 +36,6 @@ class GiveGoldActionsView(
             onClick { onGiven() }
         }
 
-    /** Writes the amount on Give, e.g.: `Give 25 G`. All is disabled at the maximum, as it would change nothing. */
     fun displayAmount(
         amount: Int,
         maximum: Int,

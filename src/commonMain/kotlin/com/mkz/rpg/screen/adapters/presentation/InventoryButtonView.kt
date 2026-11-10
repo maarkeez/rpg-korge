@@ -8,7 +8,6 @@ import korlibs.korge.view.align.centerOn
 import korlibs.korge.view.image
 import korlibs.math.geom.Size
 
-/** Opens the inventory of the selected battle unit. Displayed with the chest drawn on the tiles with several items, at 2x in a slot. */
 class InventoryButtonView(
     size: Size,
     private val resourcesLoader: GameSceneResourcesLoader,
@@ -32,7 +31,6 @@ class InventoryButtonView(
 
     fun display(onInventoryButtonSelected: () -> Unit) {
         this.onInventoryButtonSelected = onInventoryButtonSelected
-        // Drawn once displayed, as the images are loaded after the views are created.
         if (findViewByName(CHEST) == null) {
             val inventoryButton = this
             resourcesLoader.bitmapOrNull(BattlefieldView.CHEST_PATH)?.let { chestBitmap ->

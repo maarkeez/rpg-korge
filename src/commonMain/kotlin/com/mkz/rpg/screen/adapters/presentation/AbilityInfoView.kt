@@ -16,12 +16,6 @@ import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
 import korlibs.math.geom.degrees
 
-/**
- * What a selected ability does, as a card: its icon at 2x in a slot, its name and who it is cast on, and its costs as
- * pills (its mana always, its cooldown only when it has one). Why it can not be cast now, if so, is a tinted banner under
- * them. Then a sentence per effect, led by a gold diamond, its numbers in gold, wrapped beside a 3x3 diagram around the
- * caster. In the diagram, the adjacent tiles are filled when the ability reaches all of them, and outlined when it reaches one.
- */
 open class AbilityInfoView(
     private val panelWidth: Double,
     private val resourcesLoader: GameSceneResourcesLoader,
@@ -30,11 +24,9 @@ open class AbilityInfoView(
     companion object {
         const val WIDTH = 380.0
 
-        // The mana bar's blue, and the cast points' orange.
         internal val MANA_COLOR = HudStyle.MANA
         internal val COOLDOWN_COLOR = BattleUnitInfoView.CAST_POINTS_COLOR
 
-        // The diagram: the caster, an enemy, an ally, and a tile with no one.
         internal val CASTER_COLOR = Colors.WHITE
         internal val ENEMY_COLOR = HudStyle.ENEMY
         internal val ALLY_COLOR = HudStyle.ALLY
@@ -61,14 +53,12 @@ open class AbilityInfoView(
         private const val DIAGRAM_MARGIN = 10.0
     }
 
-    /** The plain data of an ability the view displays: numbers and ids, translated by the view. */
     data class AbilityInfo(
         val abilityId: String,
         val manaCost: Int,
         val cooldown: Int,
         val targeting: Targeting,
         val effects: List<Effect>,
-        // Why it can not be cast now, or null when it can, or when it is not the player's to cast.
         val reason: Reason? = null,
     ) {
         enum class Targeting {
@@ -123,7 +113,6 @@ open class AbilityInfoView(
         }
     }
 
-    /** Who the ability reaches on a tile of the diagram. */
     enum class Mark {
         NONE,
         CASTER,
@@ -142,13 +131,10 @@ open class AbilityInfoView(
     internal var reasonBanner: RoundRect? = null
     internal lateinit var targetingText: Text
 
-    // The words of each effect, the numbers among them in gold.
     internal lateinit var effectWords: List<List<Text>>
 
-    /** The diagram, row by row, the caster in the middle. */
     internal var marks: List<Mark> = emptyList()
 
-    // When the ability reaches one of the adjacent tiles marked, not all of them, they are outlined.
     internal var isOneOfTheAdjacentTiles = false
 
     init {
@@ -158,7 +144,6 @@ open class AbilityInfoView(
     open fun display(abilityInfo: AbilityInfo) {
         content.removeChildren()
 
-        // The header: the icon in its slot, the name and who it is cast on, and the costs on the right
         content.panel(Size(ICON_SLOT_SIZE, ICON_SLOT_SIZE), fill = HudStyle.PANEL_RAISED, radius = HudStyle.SLOT_RADIUS).xy(PADDING, PADDING)
         resourcesLoader.bitmapOrNull("ability/${abilityInfo.abilityId}.png")?.let { bitmap ->
             content.image(bitmap) {
@@ -172,7 +157,6 @@ open class AbilityInfoView(
         displayCosts(abilityInfo)
         var cursorY = PADDING + ICON_SLOT_SIZE + SPACING
 
-        // Why it can not be cast now
         reasonText = null
         reasonBanner = null
         reason(abilityInfo.reason)?.let { (reason, color) ->
@@ -187,7 +171,6 @@ open class AbilityInfoView(
         content.solidRect(Size(panelWidth - 2 * PADDING, 1.0), HudStyle.STROKE) { xy(PADDING, cursorY) }
         cursorY += SPACING
 
-        // What it does, beside the diagram
         val effectsTop = cursorY
         displayDiagram(abilityInfo, top = effectsTop)
         effectWords =
@@ -210,7 +193,6 @@ open class AbilityInfoView(
         visible = false
     }
 
-    // The mana pill always, the cooldown pill only when the ability has one, right aligned.
     private fun displayCosts(abilityInfo: AbilityInfo) {
         var right = panelWidth - PADDING
         cooldownPill =
@@ -263,10 +245,6 @@ open class AbilityInfoView(
                 messages.plural(UiMessage.ABILITY_INFO_ON_DEFEATED_DAMAGE_ADJACENT_ALLIES, effect.turns, "damage" to effect.damage, "turns" to effect.turns)
         }
 
-    /**
-     * The sentence wrapped to the width left of the diagram, a text per word, the words with a number in gold. Returns
-     * the words and the height of the lines.
-     */
     private fun wrappedWords(
         sentence: String,
         top: Double,
@@ -310,7 +288,6 @@ open class AbilityInfoView(
                     Mark.ALLY -> ALLY_COLOR to true
                     Mark.EMPTY_TILE -> EMPTY_TILE_COLOR to false
                 }
-            // An outlined cell is inset by half its outline, as a stroke is drawn half outside its shape, which cuts it.
             val inset = if (isFilled) 0.0 else 0.75
             content.roundRect(
                 Size(CELL_SIZE - 2 * inset, CELL_SIZE - 2 * inset),
@@ -322,7 +299,6 @@ open class AbilityInfoView(
         }
     }
 
-    // The caster in the middle, and its four adjacent tiles marked by who the ability reaches there.
     private fun marks(abilityInfo: AbilityInfo): List<Mark> {
         val healsAllies = abilityInfo.effects.any { effect -> effect is AbilityInfo.Effect.HealAdjacentAllies }
         val (caster, neighbour) =

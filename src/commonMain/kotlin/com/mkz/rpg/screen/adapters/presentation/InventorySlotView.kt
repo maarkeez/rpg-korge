@@ -11,7 +11,6 @@ import korlibs.korge.view.image
 import korlibs.korge.view.solidRect
 import korlibs.math.geom.Size
 
-/** One storage space of the inventory: empty, or the icon of the stored item, framed in gold while it is equipped. */
 class InventorySlotView(
     private val slotSize: Size,
     private val resourcesLoader: GameSceneResourcesLoader,
@@ -21,14 +20,12 @@ class InventorySlotView(
         const val EQUIPPED_FRAME = "EQUIPPED_FRAME"
         const val SELECTION_FRAME = "SELECTION_FRAME"
 
-        // FamiCube palette colours: gold like the cast points, and white like the steps.
         val EQUIPPED_COLOR = RGBA(0xFF, 0xBB, 0x31)
         val SELECTION_COLOR = Colors.WHITE
         val EMPTY_COLOR = RGBA(0x34, 0x34, 0x34)
 
         private const val FRAME_THICKNESS = 3.0
 
-        // How visible a dimmed item is, e.g.: an item the buyer can not trade at a merchant.
         const val DIMMED_ALPHA = 0.35
     }
 
@@ -47,7 +44,6 @@ class InventorySlotView(
         this.onSelected = onSelected
     }
 
-    /** Displays the stored item, dimmed or not, or an empty space when [lootableItemId] is `null`. */
     fun display(
         lootableItemId: String?,
         isEquipped: Boolean,
@@ -78,7 +74,6 @@ class InventorySlotView(
         findViewByName(SELECTION_FRAME)?.removeFromParent()
     }
 
-    // A hollow square, drawn [inset] pixels inside the slot edges.
     private fun addFrame(
         frameName: String,
         color: RGBA,

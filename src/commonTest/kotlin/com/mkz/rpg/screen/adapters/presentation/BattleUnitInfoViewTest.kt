@@ -13,7 +13,6 @@ import kotlin.test.Test
 
 class BattleUnitInfoViewTest : ViewsForTesting() {
     private companion object {
-        // More frames than the 150ms slide takes.
         const val FOCUS_ANIMATION_FRAMES = 20
     }
 

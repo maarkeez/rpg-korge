@@ -12,7 +12,6 @@ class EffectsView(
 ) : Container() {
     internal lateinit var effectViews: Array<EffectView>
 
-    // Displayed after the effect icons when there are more effects than icons.
     internal lateinit var overflowLabel: Text
 
     private val effectViewsLayout =
@@ -28,7 +27,6 @@ class EffectsView(
         addChild(effectViewsLayout)
     }
 
-    /** Displays the [effectIds] of a battle unit, followed by the [newEffectIds] it would receive, which blink. */
     fun display(
         effectIds: Collection<String>,
         newEffectIds: Collection<String> = emptyList(),

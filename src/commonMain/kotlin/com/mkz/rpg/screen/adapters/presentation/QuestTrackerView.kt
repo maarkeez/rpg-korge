@@ -21,17 +21,10 @@ import korlibs.korge.view.xy
 import korlibs.math.geom.Size
 import korlibs.time.milliseconds
 
-/**
- * The current task of the quest it is given, with a pin when it is a side quest, or that it is completed, as a capsule on
- * the right of the top line, as wide as what it holds. As the empty tracker, it says no quest is pinned, and it draws nothing
- * while no quest is active. Only the capsule takes taps, so the left of the line stays free. Read only in a battle: no chevron, and
- * tapping it does nothing.
- */
 open class QuestTrackerView(
     private val messages: Messages,
 ) : UIContainer(Size(390, 33)) {
     companion object {
-        // When the task changes, the capsule grows to this scale and shrinks back.
         const val POP_SCALE = 1.15
         val POP_DURATION = 400.milliseconds
 
@@ -60,7 +53,6 @@ open class QuestTrackerView(
     private var isEmpty = false
     private var isTappable = true
 
-    // Its origin is the middle of its right edge, so it stays on the screen as it grows when it pops.
     internal val capsule: Container =
         container {
             xy(RIGHT_EDGE, TOP + HEIGHT / 2)
@@ -78,21 +70,18 @@ open class QuestTrackerView(
         this.delegate = delegate
     }
 
-    /** Draws the current task of the quest, or that it is completed. */
     open fun display(quest: QuestInfo) {
         this.quest = quest
         isEmpty = false
         draw(quest)
     }
 
-    /** Draws the empty tracker: no quest is pinned, and tapping it opens the journal to pin one. */
     open fun displayEmpty() {
         quest = null
         isEmpty = true
         drawEmpty()
     }
 
-    /** Draws nothing, e.g.: while no quest is active. A later [display] or [displayEmpty] draws it again, unlike [hide]. */
     open fun clear() {
         quest = null
         isEmpty = false
@@ -106,19 +95,16 @@ open class QuestTrackerView(
         chevronView = null
     }
 
-    /** Shows or hides the chevron, fitting the capsule to the right edge again. Tapping it does nothing when it is not tappable. */
     open fun setTappable(isTappable: Boolean) {
         this.isTappable = isTappable
         quest?.let(::draw)
         if (isEmpty) drawEmpty()
     }
 
-    /** Hides it for good, e.g.: once the winner takes the whole line. A later [display] does not bring it back. */
     open fun hide() {
         visible = false
     }
 
-    /** The capsule grows to the pop scale and shrinks back. */
     open suspend fun pop() {
         val popAnimator =
             animator {

@@ -16,14 +16,6 @@ import korlibs.korge.view.position
 import korlibs.korge.view.solidRect
 import korlibs.math.geom.Size
 
-/**
- * The items stored by the selected battle unit, one slot per storage space, and its gold on the title line. Displayed in the HUD instead of the
- * battle unit info.
- *
- * While exploring, the title line names the party member instead, between the arrows that switch to the previous or
- * next member, as swiping the inventory left or right does: `< Knight ........ [ 20 G ] >`. Its gold is a button then, to
- * give some, faded when it can not.
- */
 open class InventoryView(
     resourcesLoader: GameSceneResourcesLoader,
     private val messages: Messages,
@@ -42,21 +34,17 @@ open class InventoryView(
         private const val TITLE_LINE_WIDTH = WIDTH - CLOSE_WIDTH
         private const val TEXT_HEIGHT = 20.0
 
-        // The title and the gold leave room for both arrows, spaced apart and from Close, which hide while their space is not needed.
         private const val TEXT_WIDTH = TITLE_LINE_WIDTH - 2 * ARROW_WIDTH - 3 * TITLE_SPACING
         private const val HEIGHT = BAR_HEIGHT + 2 * SLOT_SIZE + SLOT_SPACING + PADDING
 
-        // How far the inventory is dragged left or right to switch the party member.
         const val SWIPE_THRESHOLD = 40.0
     }
 
-    /** A stored item, and whether it is the equipped copy. */
     data class Slot(
         val lootableItemId: String,
         val isEquipped: Boolean,
     )
 
-    /** The party member whose inventory is displayed while exploring, its position in the party, from the leader, and whether it can give gold. */
     data class Owner(
         val name: String,
         val partyIndex: Int,
@@ -67,20 +55,16 @@ open class InventoryView(
     interface Delegate {
         fun slotSelected(index: Int)
 
-        /** The inventory was switched to the party member on its left ([step] -1) or right ([step] 1), with an arrow or a swipe. */
         fun inventoryOwnerStepped(step: Int)
 
         fun inventoryClosed()
 
-        /** The gold button was tapped, also when faded, to give gold or to read why it can not. */
         fun goldSelected()
     }
 
     private var delegate: Delegate? = null
 
-    // Whether the finger was pressed on the inventory since it was last displayed. A tap that replaces the inventory, e.g.: the gold
-    // button opening the panel, takes it off the stage before its swipe ends, and the swipe would end on a later tap anywhere else.
-    private var isPressed = false
+    private var isPressedSinceDisplayed = false
     internal lateinit var previousOwnerButton: GameButton
     internal lateinit var nextOwnerButton: GameButton
     internal lateinit var titleView: UnitNameView
@@ -90,7 +74,6 @@ open class InventoryView(
     internal val slotViews: List<InventorySlotView> = List(SLOTS) { InventorySlotView(Size(SLOT_SIZE, SLOT_SIZE), resourcesLoader) }
 
     init {
-        // The whole inventory can be swiped, also between its slots and buttons.
         solidRect(Size(WIDTH, HEIGHT), Colors.TRANSPARENT)
         uiVerticalStack(padding = PADDING) {
             uiHorizontalStack {
@@ -106,9 +89,9 @@ open class InventoryView(
             }
         }
         slotViews.forEachIndexed { index, slotView -> slotView.setOnSelected { delegate?.slotSelected(index) } }
-        onDown { isPressed = true }
+        onDown { isPressedSinceDisplayed = true }
         onSwipe(threshold = SWIPE_THRESHOLD) { swipe ->
-            if (!isPressed) return@onSwipe
+            if (!isPressedSinceDisplayed) return@onSwipe
             when (swipe.direction) {
                 SwipeDirection.LEFT -> swiped(-1)
                 SwipeDirection.RIGHT -> swiped(1)
@@ -126,17 +109,12 @@ open class InventoryView(
         delegate?.inventoryOwnerStepped(step)
     }
 
-    /**
-     * Displays the stored items in their order, followed by the empty storage spaces, and the gold. The [owner], while
-     * exploring, is named between the arrows, which are disabled at the ends of the party, and its gold is a button.
-     * Clears the selected slot.
-     */
     open fun display(
         slots: List<Slot>,
         gold: Int,
         owner: Owner? = null,
     ) {
-        isPressed = false
+        isPressedSinceDisplayed = false
         displayTitle(owner)
         displayGold(gold, owner)
         slotViews.forEachIndexed { index, slotView ->
@@ -145,7 +123,6 @@ open class InventoryView(
         }
     }
 
-    /** Frames the selected slot, or none when [index] is `null`. */
     open fun selectSlot(index: Int?) {
         slotViews.forEachIndexed { slotIndex, slotView -> if (slotIndex == index) slotView.select() else slotView.unselect() }
     }
@@ -162,7 +139,6 @@ open class InventoryView(
         goldButton.position(goldView.x + TEXT_WIDTH - goldButton.buttonWidth, (BAR_HEIGHT - GoldButtonView.HEIGHT) / 2)
     }
 
-    // Inventory ........ 20 G, or < Knight ........ [ 20 G ] > while exploring. The gold stays right before Close, or before the next arrow.
     private fun displayTitle(owner: Owner?) {
         val hasArrows = owner != null
         previousOwnerButton.visible = hasArrows

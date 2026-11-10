@@ -8,10 +8,6 @@ import korlibs.korge.view.xy
 import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
 
-/**
- * Displays an amount out of a maximum without text: one rounded pip per point, filled while it remains and tinted with
- * an outline once it has been spent, e.g.: ▬▬▭ for 2 out of 3.
- */
 class PointsView(
     private val color: RGBA,
 ) : Container() {
@@ -36,7 +32,6 @@ class PointsView(
         removeChildren()
         repeat(maximum) { index ->
             val isFilled = index < remaining
-            // The outline is drawn half outside the pip, so spent pips are smaller to look as big as filled ones.
             val inset = if (isFilled) 0.0 else SPENT_POINT_STROKE_THICKNESS / 2
             roundRect(
                 Size(POINT_WIDTH - inset * 2, POINT_HEIGHT - inset * 2),

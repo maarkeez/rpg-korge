@@ -15,17 +15,10 @@ import korlibs.korge.view.position
 import korlibs.korge.view.solidRect
 import korlibs.math.geom.Size
 
-/**
- * The party formation, displayed in place of the pad while the player sets the party order. A row per party member, in
- * party order: the crown on the leader, the portrait, the name, and the health and mana bars. At the bottom, a hint. Close
- * is in the row of the call to action. Tapping a row is handed to the delegate, which selects it, or reorders it with the
- * selected one.
- */
 open class FormationView(
     private val resourcesLoader: GameSceneResourcesLoader,
 ) : Container() {
     companion object {
-        /** The party members displayed: the rows that fit in place of the pad. */
         const val ROWS = 5
         const val CROWN = "battlefield/crown.png"
 
@@ -37,7 +30,6 @@ open class FormationView(
         private const val BAR_HEIGHT = 32.0
     }
 
-    /** A party member, from the leader, with its health and mana left out of their maximum. */
     data class Row(
         val unitId: String,
         val name: String,
@@ -49,7 +41,6 @@ open class FormationView(
     )
 
     interface Delegate {
-        /** The row of the party member at [index] in the party order was tapped. */
         fun formationRowSelected(index: Int)
     }
 
@@ -75,7 +66,6 @@ open class FormationView(
         this.delegate = delegate
     }
 
-    /** Displays a row per party member, in party order, the crown on the leader, and hides the rest. Clears the selected row. */
     open fun display(rows: List<Row>) {
         rowViews.forEachIndexed { index, rowView ->
             val row = rows.getOrNull(index)
@@ -84,24 +74,20 @@ open class FormationView(
         selectRow(null)
     }
 
-    /** Frames the selected row, or none when [index] is `null`. */
     open fun selectRow(index: Int?) {
         rowViews.forEachIndexed { rowIndex, rowView -> rowView.isSelected = rowIndex == index }
     }
 
-    /** Displays the [hint] under the rows, e.g.: Tap two members to reorder them. */
     open fun displayHint(hint: String) {
         hintText.text = hint
     }
 }
 
-/** A party member in the formation: the crown when it leads, its portrait, its name, and its health and mana bars. */
 class FormationRowView(
     size: Size,
     private val resourcesLoader: GameSceneResourcesLoader,
 ) : Container() {
     companion object {
-        // FamiCube palette colours: grey, and the blue of the selected row.
         val ROW_COLOR = RGBA(0x34, 0x34, 0x34)
         val SELECTED_ROW_COLOR = RGBA(0x00, 0x52, 0x80)
 
@@ -118,7 +104,6 @@ class FormationRowView(
     internal var crownImage: Image? = null
         private set
 
-    /** Whether the row is crowned, as its party member leads. */
     var isCrowned = false
         private set
     internal val portraitView = UnitPortraitView(Size(size.height, size.height), resourcesLoader, PORTRAIT_SCALE)
@@ -126,7 +111,6 @@ class FormationRowView(
     internal val healthBarView: HealthBarView
     internal val manaBarView: ManaBarView
 
-    /** Whether the row is selected, to be reordered with the next row tapped. */
     var isSelected = false
         set(value) {
             field = value
@@ -151,7 +135,6 @@ class FormationRowView(
         manaBarView = ManaBarView(Size(barsWidth, BAR_HEIGHT)).also { bar -> bar.position(barsX, barsY + BAR_HEIGHT + SPACING / 2) }
         addChild(healthBarView)
         addChild(manaBarView)
-        // The whole row can be tapped, also on its portrait and its bars.
         onClick { onSelected?.invoke() }
     }
 

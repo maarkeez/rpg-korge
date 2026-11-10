@@ -11,10 +11,6 @@ import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
 import korlibs.math.geom.degrees
 
-/**
- * The sign over an npc's head, on its tile of 64, drawn over its sprite and over the tile above: in gold with an exclamation
- * mark when it can start a side quest, and in green with a speech bubble when a current task is to talk to it.
- */
 class QuestMarkerView(
     sign: Sign,
 ) : Container() {

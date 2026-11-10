@@ -10,23 +10,17 @@ import korlibs.korge.view.Image
 import korlibs.korge.view.View
 import korlibs.math.geom.Point
 
-// Page object of [BattlefieldView].
-
 fun BattlefieldView.isBattlefieldDisplayed(): Boolean = isDisplayed
 
-/** The tiles of the displayed battlefield, also the ones not created as they are far from the viewport. */
 fun BattlefieldView.tileCount(): Int = if (isDisplayed) rows * columns else 0
 
-/** The tiles created so far: on the screen, or kept out of it as they hold more than their terrain (e.g.: a battle unit). */
 fun BattlefieldView.createdTileCount(): Int = if (isDisplayed) tiles.size else 0
 
-/** Whether the tile is on the screen, i.e.: in the viewport or around it. */
 fun BattlefieldView.isTileOnScreen(
     row: Int,
     column: Int,
 ): Boolean = tileOrNull(row, column)?.parent != null
 
-/** The tiles on the screen: the ones in the viewport and around it. */
 fun BattlefieldView.tilesOnScreenCount(): Int = if (isDisplayed) battlefieldGrid.children.count { child -> child is UIButton } else 0
 
 fun BattlefieldView.hasTerrainAt(
@@ -34,7 +28,6 @@ fun BattlefieldView.hasTerrainAt(
     column: Int,
 ): Boolean = isDisplayed && tile(row, column).hasLayer(BattlefieldView.TERRAIN)
 
-/** Whether the tile casts a shadow over the tiles adjacent to it, which would draw a line along its borders. */
 fun BattlefieldView.hasShadowAt(
     row: Int,
     column: Int,
@@ -45,7 +38,6 @@ fun BattlefieldView.hasBattleUnitAt(
     column: Int,
 ): Boolean = isDisplayed && tileOrNull(row, column)?.hasLayer(BattlefieldView.BATTLE_UNIT) == true
 
-/** The image of the battle unit standing on the tile, or `null` when there is none. */
 fun BattlefieldView.battleUnitBitmapAt(
     row: Int,
     column: Int,
@@ -56,14 +48,12 @@ fun BattlefieldView.battleUnitBitmapAt(
         ?.bitmap
         ?.base
 
-/** A battle unit gliding between tiles: its name (e.g.: the swapping leader), and where its image is drawn, as a tile. */
 data class GlidingBattleUnit(
     val name: String,
     val x: Double,
     val y: Double,
 )
 
-/** The battle units gliding between tiles (e.g.: swapping), in drawing order: the last one is drawn over the others. */
 fun BattlefieldView.glidingBattleUnits(): List<GlidingBattleUnit> =
     if (!isDisplayed) {
         emptyList()
@@ -83,7 +73,6 @@ fun BattlefieldView.hasQuestMarkerAt(
     column: Int,
 ): Boolean = isDisplayed && tileOrNull(row, column)?.hasLayer(BattlefieldView.QUEST_MARKER) == true
 
-/** The colour of the sign of the tile, or `null` when it has none. */
 fun BattlefieldView.questMarkerColorAt(
     row: Int,
     column: Int,
@@ -94,19 +83,16 @@ fun BattlefieldView.hasNpcAt(
     column: Int,
 ): Boolean = isDisplayed && tileOrNull(row, column)?.hasLayer(BattlefieldView.NPC) == true
 
-/** Where the image of the npc standing on the tile is drawn inside it, and its size, or `null` when there is none. */
 fun BattlefieldView.npcPlacementAt(
     row: Int,
     column: Int,
 ): TilePlacement? = imagePlacementAt(row, column, BattlefieldView.NPC)
 
-/** Where the image of the battle unit standing on the tile is drawn inside it, and its size, or `null` when there is none. */
 fun BattlefieldView.battleUnitPlacementAt(
     row: Int,
     column: Int,
 ): TilePlacement? = imagePlacementAt(row, column, BattlefieldView.BATTLE_UNIT)
 
-/** Where the terrain of the tile is drawn inside it, and its size. */
 fun BattlefieldView.terrainPlacementAt(
     row: Int,
     column: Int,
@@ -121,7 +107,6 @@ private fun BattlefieldView.imagePlacementAt(
         TilePlacement(image.x, image.y, image.scaledWidth, image.scaledHeight)
     }
 
-/** Whether a piece of a building is drawn on the tile, right above its terrain, so the selection is drawn over it. */
 fun BattlefieldView.hasBuildingAt(
     row: Int,
     column: Int,
@@ -130,25 +115,20 @@ fun BattlefieldView.hasBuildingAt(
     return isDisplayed && BattlefieldView.BUILDING in layerNames && layerNames.indexOf(BattlefieldView.BUILDING) == layerNames.indexOf(BattlefieldView.TERRAIN) + 1
 }
 
-/** Whether the battle unit on the tile is blinking in white, e.g.: when it receives an effect. */
 fun BattlefieldView.isBlinkingAt(
     row: Int,
     column: Int,
 ): Boolean = isDisplayed && tileOrNull(row, column)?.hasLayer(BattlefieldView.BLINK) == true
 
-/** The colour the battlefield is tinted with, or `null` when it is not tinted. */
 fun BattlefieldView.tintColor(): RGBA? = tintOverlay?.color?.withA(255)
 
-/** How opaque the battlefield tint is: 0.0 when it is not tinted. */
 fun BattlefieldView.tintAlpha(): Double = tintOverlay?.alpha ?: 0.0
 
-/** Whether the tile is darkened by the mask over the tiles that can not be selected. */
 fun BattlefieldView.isDimmedAt(
     row: Int,
     column: Int,
 ): Boolean = isDisplayed && tile(row, column).hasLayer(BattlefieldView.DIM)
 
-/** Whether the battle unit on the tile is darkened by the mask, i.e.: the mask is displayed over it. */
 fun BattlefieldView.isBattleUnitDimmedAt(
     row: Int,
     column: Int,
@@ -159,7 +139,6 @@ fun BattlefieldView.isBattleUnitDimmedAt(
 
 fun BattlefieldView.dimmedTilesCount(): Int = if (!isDisplayed) 0 else tiles.count { tile -> tile.hasLayer(BattlefieldView.DIM) }
 
-/** The (row, column) of every tile displaying a battle unit. */
 fun BattlefieldView.battleUnitPositions(): List<Pair<Int, Int>> =
     if (!isDisplayed) {
         emptyList()
@@ -169,7 +148,6 @@ fun BattlefieldView.battleUnitPositions(): List<Pair<Int, Int>> =
             .filter { (row, column) -> hasBattleUnitAt(row, column) }
     }
 
-/** Whether the tile is highlighted (e.g.: walking range, cast range or selected tile). */
 fun BattlefieldView.hasSelectionAt(
     row: Int,
     column: Int,
@@ -182,10 +160,8 @@ fun BattlefieldView.selectionCountAt(
 
 fun BattlefieldView.tilesWithSelectionCount(): Int = if (!isDisplayed) 0 else tiles.count { tile -> tile.hasLayer(BattlefieldView.SELECTION) }
 
-/** How far the battlefield is scrolled inside the viewport, as (x, y). (0, 0) means not scrolled. */
 fun BattlefieldView.scrollOffset(): Pair<Double, Double> = battlefieldGrid.x to battlefieldGrid.y
 
-/** Whether the whole tile is inside the viewport, given how far the battlefield is scrolled. */
 fun BattlefieldView.isTileVisible(
     row: Int,
     column: Int,
@@ -198,7 +174,6 @@ fun BattlefieldView.isTileVisible(
         tileY + BattlefieldView.TILE_SIZE <= BattlefieldView.VIEWPORT_HEIGHT
 }
 
-/** The terrain image of the tile. */
 fun BattlefieldView.terrainBitmapAt(
     row: Int,
     column: Int,
@@ -209,16 +184,13 @@ fun BattlefieldView.terrainBitmapAt(
         ?.bitmap
         ?.base
 
-/** How many battlefields are displayed in the viewport: one once a battlefield is displayed, however many times. */
 fun BattlefieldView.displayedBattlefieldCount(): Int = if (!isDisplayed) 0 else battlefieldGrid.parent!!.children.count { child -> child.name == BattlefieldView.BATTLEFIELD }
 
-/** The image of the loot lying on the tile (an item icon or the chest), or `null` when there is none. */
 fun BattlefieldView.lootBitmapAt(
     row: Int,
     column: Int,
 ): Bitmap? = (tile(row, column).findViewByName(BattlefieldView.DROPPED_ITEMS) as? Image)?.bitmap?.base
 
-/** Whether the loot is drawn right above the terrain, so the battle unit and the selection are drawn over it. */
 fun BattlefieldView.isLootRightAboveTerrainAt(
     row: Int,
     column: Int,
@@ -227,7 +199,6 @@ fun BattlefieldView.isLootRightAboveTerrainAt(
     return layerNames.indexOf(BattlefieldView.DROPPED_ITEMS) == layerNames.indexOf(BattlefieldView.TERRAIN) + 1
 }
 
-/** The icon of the looted item lifted off the tile: how far it has risen from the tile center, its scale and opacity. */
 data class LiftedLoot(
     val bitmap: Bitmap?,
     val rise: Double,
@@ -235,7 +206,6 @@ data class LiftedLoot(
     val alpha: Double,
 )
 
-/** the looted item being lifted off the tile, or `null` when none is. */
 fun BattlefieldView.liftedLootAt(
     row: Int,
     column: Int,
@@ -249,7 +219,6 @@ fun BattlefieldView.liftedLootAt(
     )
 }
 
-/** Whether the looted item is drawn over the battle unit standing on the tile. */
 fun BattlefieldView.isLiftedLootOverBattleUnitAt(
     row: Int,
     column: Int,
@@ -258,10 +227,6 @@ fun BattlefieldView.isLiftedLootOverBattleUnitAt(
     return layerNames.indexOf(BattlefieldView.LOOTED_ITEM) > layerNames.indexOf(BattlefieldView.BATTLE_UNIT)
 }
 
-/**
- * Drags the battlefield from the center of its viewport through each of the [offsets], as (dx, dy) from where the drag
- * started, letting the scroll finish at each one. The battlefield must be on the stage.
- */
 suspend fun ViewsForTesting.dragBattlefield(
     battlefieldView: BattlefieldView,
     vararg offsets: Pair<Double, Double>,
@@ -282,7 +247,6 @@ suspend fun ViewsForTesting.clickTile(
     column: Int,
 ) = clickOn(battlefieldView.tile(row, column))
 
-// The image a layer of a tile draws: the layer itself when it is one, or the image of the view that draws it.
 private fun View?.layerImage(): Image? =
     when (this) {
         is Image -> this
@@ -296,7 +260,6 @@ private fun UIButton.hasLayer(layerName: String): Boolean = layerCount(layerName
 
 private fun UIButton.layerCount(layerName: String): Int = children.count { child -> child.name == layerName }
 
-/** Where a view is drawn inside its tile, and its size. */
 data class TilePlacement(
     val x: Double,
     val y: Double,
@@ -309,7 +272,6 @@ private fun BattlefieldView.healthPreview(
     column: Int,
 ): BattlefieldHealthBarPreviewView? = tile(row, column).findViewByName(BattlefieldView.HEALTH_PREVIEW) as? BattlefieldHealthBarPreviewView
 
-/** The health preview displayed on the tile, or `null` when there is none. */
 fun BattlefieldView.healthPreviewAt(
     row: Int,
     column: Int,
@@ -320,25 +282,21 @@ fun BattlefieldView.healthPreviewPlacementAt(
     column: Int,
 ): TilePlacement? = healthPreview(row, column)?.let { preview -> TilePlacement(preview.x, preview.y, preview.width, preview.height) }
 
-/** The health blinked on the tile, e.g.: by a terrain effect while exploring, or `null` when there is none. */
 fun BattlefieldView.blinkedHealthAt(
     row: Int,
     column: Int,
 ): BattlefieldHealthBarPreviewView.PreviewOption? = (tile(row, column).findViewByName(BattlefieldView.HEALTH_BLINK) as? BattlefieldHealthBarPreviewView)?.previewOption
 
-/** The health bar blinked on the tile, or `null` when there is none. */
 fun BattlefieldView.blinkedHealthBarAt(
     row: Int,
     column: Int,
 ): BattlefieldHealthBarPreviewView? = tile(row, column).findViewByName(BattlefieldView.HEALTH_BLINK) as? BattlefieldHealthBarPreviewView
 
-/** How many health bars are blinked on the tile, e.g.: to check one never piles up over another. */
 fun BattlefieldView.blinkedHealthCountAt(
     row: Int,
     column: Int,
 ): Int = tile(row, column).children.count { child -> child.name == BattlefieldView.HEALTH_BLINK }
 
-/** The health blinked over each battle unit gliding between tiles, `null` for the ones without it. */
 fun BattlefieldView.glidingBlinkedHealth(): List<BattlefieldHealthBarPreviewView.PreviewOption?> =
     if (!isDisplayed) {
         emptyList()
@@ -348,13 +306,11 @@ fun BattlefieldView.glidingBlinkedHealth(): List<BattlefieldHealthBarPreviewView
         }
     }
 
-/** The blinks of the health blinked on the tile, to check later whether they are still blinking. */
 fun BattlefieldView.blinkedHealthBlinksAt(
     row: Int,
     column: Int,
 ) = (tile(row, column).findViewByName(BattlefieldView.HEALTH_BLINK) as? BattlefieldHealthBarPreviewView)?.blinks().orEmpty()
 
-/** The blinks of the health preview displayed on the tile, to check later whether they are still blinking. */
 fun BattlefieldView.healthPreviewBlinksAt(
     row: Int,
     column: Int,

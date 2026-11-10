@@ -16,61 +16,40 @@ import korlibs.math.geom.Point
 import korlibs.math.geom.Size
 import korlibs.math.interpolation.Ratio
 
-/**
- * The pad the player explores with, laid out as a Game Boy Color: the north, east, south and west arrows on the left,
- * the round B and A buttons on the right, A higher and further right than B, and the Start pill centred at the bottom,
- * between both. The arrows are grey squares as big as A and B, of the same grey as Start.
- *
- * It is laid out from its bottom, which is lower than the bottom of the views it takes the place of (e.g.: the battle
- * HUD): Start lines up with the bottom of Finish turn, the lowest button while battling.
- *
- * Holding an arrow keeps walking the party towards it: the held listener is called when the arrow is pressed, and on
- * every frame while it is held. The pressed listener is called once before, so a tap is known even when it is released
- * before it can be walked. Tapping A, B or Start calls its listener once (e.g.: to talk, to open the party formation, or
- * to pause the game).
- */
 open class VirtualPadView(
     size: Size = SIZE,
 ) : UIContainer(size) {
     companion object {
-        // 57 taller than the HUD, down to the bottom of Finish turn below it.
         val SIZE = Size(390, 357)
 
         const val ARROW_SIZE = 64.0
 
-        // Half the side of the triangle drawn on each arrow.
         private const val ARROW_HALF_SIDE = 16.0
         private val ARROW_COLOR = RGBA(76, 76, 76)
         private val ARROW_HELD_COLOR = RGBA(110, 110, 110)
 
         const val BUTTON_SIZE = 64.0
 
-        // From the FamiCube palette.
         private val BUTTON_COLOR = RGBA(135, 22, 70)
         private val BUTTON_PRESSED_COLOR = RGBA(207, 60, 113)
         private val BUTTON_BORDER_COLOR = RGBA(79, 21, 7)
 
-        // The cross of arrows is this far from the left edge of the pad, as A from its right edge, and the buttons are
-        // centred on its right part. Both are centred this far above its bottom.
         private const val ARROWS_LEFT_MARGIN = 8.0
         private const val CONTROLS_CENTER_FROM_BOTTOM = 150.0
         private const val BUTTONS_CENTER_RATIO = 0.8
 
-        // How far each button is from the centre of the buttons, A up and to the right, B down and to the left.
         private const val BUTTON_OFFSET_X = 38.0
         private const val BUTTON_OFFSET_Y = 24.0
 
         const val START_WIDTH = 72.0
         const val START_HEIGHT = 22.0
 
-        // Start is centred between the arrows and the buttons, at the bottom of the pad.
         private const val START_CENTER_RATIO = 0.55
         private const val START_BOTTOM_MARGIN = 10.0
         private val START_COLOR = ARROW_COLOR
         private val START_PRESSED_COLOR = ARROW_HELD_COLOR
     }
 
-    /** An arrow of the pad, with the tile offsets of the direction it points to. */
     enum class Direction(
         val rowOffset: Int,
         val columnOffset: Int,
@@ -89,7 +68,6 @@ open class VirtualPadView(
     internal var heldDirection: Direction? = null
         private set
 
-    // The arrows form a cross, on the left part of the pad.
     private val centerX = ARROWS_LEFT_MARGIN + ARROW_SIZE
     private val centerY = size.height - CONTROLS_CENTER_FROM_BOTTOM - ARROW_SIZE / 2
     internal val northArrow = arrow(Direction.NORTH, x = centerX, y = centerY - ARROW_SIZE)
@@ -196,13 +174,11 @@ open class VirtualPadView(
             onClick { onPressed() }
         }
 
-    // The tip of the triangle points towards the direction, from the centre of the arrow.
     private fun triangle(direction: Direction): Triple<Point, Point, Point> {
         val center = ARROW_SIZE / 2
         val tip = Point(center + direction.columnOffset * ARROW_HALF_SIDE, center + direction.rowOffset * ARROW_HALF_SIDE)
         val baseX = center - direction.columnOffset * ARROW_HALF_SIDE
         val baseY = center - direction.rowOffset * ARROW_HALF_SIDE
-        // The base is across the direction: horizontal for north and south, vertical for east and west.
         val firstCorner = Point(baseX + direction.rowOffset * ARROW_HALF_SIDE, baseY + direction.columnOffset * ARROW_HALF_SIDE)
         val secondCorner = Point(baseX - direction.rowOffset * ARROW_HALF_SIDE, baseY - direction.columnOffset * ARROW_HALF_SIDE)
         return Triple(tip, firstCorner, secondCorner)

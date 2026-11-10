@@ -8,7 +8,6 @@ import korlibs.korge.ui.UIButton
 import korlibs.korge.ui.uiButton
 import korlibs.korge.view.Container
 
-/** A primary action button, e.g.: Confirm, in blue unless it is told another colour. */
 class ConfirmButton(
     label: String,
     buttonWidth: Double = 190.0,

@@ -23,12 +23,10 @@ import korlibs.korge.view.image
 import korlibs.korge.view.solidRect
 import korlibs.math.geom.Size
 
-/** The world builder controls: the world size, and the terrain the tiles are painted with. */
 open class WorldBuilderHudView(
     messages: Messages,
 ) : UIContainer(Size(width = 390, height = 300)) {
     companion object {
-        // The steps a size stepper changes the size by, so a large world takes a few taps.
         val SIZE_STEPS = listOf(-8, -1, 1, 8)
         const val STEP_BUTTON_WIDTH = 44.0
         const val LABEL_WIDTH = 80.0
@@ -86,7 +84,6 @@ open class WorldBuilderHudView(
         this.delegate = delegate
     }
 
-    /** Displays the world size, disabling the steps that would take it out of the [allowedSizes]. */
     open fun displaySize(
         rows: Int,
         columns: Int,
@@ -101,7 +98,6 @@ open class WorldBuilderHudView(
         columnsStepButtons.forEach { (step, button) -> button.enabled = isAllowedSize(columns + step) }
     }
 
-    /** Displays one button per terrain, with its tile image, and highlights the selected one. */
     open fun displayTerrains(
         terrains: List<TerrainOption>,
         selectedTerrainId: String,
@@ -127,7 +123,6 @@ open class WorldBuilderHudView(
         selectTerrain(selectedTerrainId)
     }
 
-    /** Highlights the selected terrain with a border around its button. */
     open fun selectTerrain(terrainId: String) {
         selectionBorder?.removeFromParent()
         selectionBorder = null
@@ -139,13 +134,11 @@ open class WorldBuilderHudView(
                 x = buttonPosition.x - SELECTION_BORDER
                 y = buttonPosition.y - SELECTION_BORDER
             }
-        // Drawn below the terrain buttons, so only the border shows around the selected one.
         terrainPalette.sendChildToBack(selectionBorder!!)
     }
 
     private fun isAllowedSize(size: Int): Boolean = size in allowedSizes
 
-    // A label, the buttons stepping the size down, the size, and the buttons stepping it up.
     private fun Container.stepper(
         label: String,
         onStep: (Int) -> Unit,

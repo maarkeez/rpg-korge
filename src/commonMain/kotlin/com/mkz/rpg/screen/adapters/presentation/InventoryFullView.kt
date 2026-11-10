@@ -13,7 +13,6 @@ import korlibs.korge.view.Image
 import korlibs.korge.view.image
 import korlibs.math.geom.Size
 
-/** Asks the player to tap a stored item to discard it for the found one, or to leave the found one on its tile. */
 class InventoryFullView(
     messages: Messages,
     foundItemName: String,
@@ -36,7 +35,6 @@ class InventoryFullView(
     init {
         uiVerticalStack(padding = 6.0) {
             uiHorizontalStack(padding = ICON_SPACING) {
-                // A fixed size box, as the stack would resize the icon.
                 val iconBox = UIContainer(Size(ICON_SIZE, ICON_SIZE))
                 resourcesLoader.bitmapOrNull("lootableItem/$foundItemId.png")?.let { itemBitmap ->
                     foundItemIcon =

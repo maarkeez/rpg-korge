@@ -11,7 +11,6 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class CastPreviewViewTest : ViewsForTesting() {
-    // The height of the HUD.
     private val battleHudHeight = 300.0
 
     private val casterBattleUnit = battleUnitInfo(unitId = "knight")

@@ -19,11 +19,6 @@ import korlibs.korge.view.text
 import korlibs.korge.view.xy
 import korlibs.math.geom.Size
 
-/**
- * A quest in full, in place of the pad, led by the portrait of who its current task is about: its name and description
- * beside it, the current task under them, the tasks done as a count, and the reward, evenly apart down the panel. It stays
- * open once completed, so the story can be read again.
- */
 class QuestDetailView(
     private val resourcesLoader: GameSceneResourcesLoader,
     private val messages: Messages,
@@ -77,7 +72,6 @@ class QuestDetailView(
     internal var tasksDoneText: Text? = null
     internal var rewardView: Container? = null
 
-    /** Draws the quest from scratch. */
     fun display(quest: QuestInfo) {
         removeChildren()
         panel(Size(WIDTH, HEIGHT))
@@ -92,7 +86,6 @@ class QuestDetailView(
         visible = false
     }
 
-    // The target, and beside it the caption, the name, and as many lines of the description as fit down to its bottom.
     private fun drawLeader(quest: QuestInfo) {
         val task = quest.currentTask
         targetSlot(task, resourcesLoader, PADDING, PADDING, TARGET_SIZE, portraitScale = 3.0, ring = if (quest.isCompleted) HudStyle.ALLY else ringOf(task))
@@ -114,8 +107,6 @@ class QuestDetailView(
         descriptionView = container { wrappedText(quest.description, TEXT_X, descriptionY, TEXT_WIDTH, DESCRIPTION_SIZE, HudStyle.MUTED, maximumLines = descriptionLines) }
     }
 
-    // The current task, in a banner, with its count and bar only when it counts above 1. It is lower with no tasks done under
-    // it, so the gaps stay even.
     private fun drawTask(quest: QuestInfo) {
         val task = quest.currentTask
         val bannerY = if (quest.hasTasksDoneDisplayed()) BANNER_Y else BANNER_Y_WITHOUT_TASKS_DONE

@@ -6,9 +6,6 @@ import com.mkz.rpg.shared.adapters.presentation.isShown
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.view.Stage
 
-// Page object of [MenuView] and [MenuScene].
-
-/** The menu on the screen, or `null` while the menu scene is not on the stage. */
 fun Stage.menuView(): MenuView? = descendants().filterIsInstance<MenuView>().firstOrNull()
 
 fun MenuView.playNewGameLabel(): String = playNewGameButton.confirmButton.text
@@ -23,17 +20,14 @@ suspend fun ViewsForTesting.clickLoadGame(menuView: MenuView) = clickOn(menuView
 
 suspend fun ViewsForTesting.clickBuildWorld(menuView: MenuView) = clickOn(menuView.buildWorldButton.cancelButton)
 
-/** Whether the options are on the screen, to select one. */
 fun MenuView.areOptionsShown(): Boolean = options.isShown()
 
 fun MenuView.languageLabel(): String = languageButton.cancelButton.text
 
 suspend fun ViewsForTesting.clickLanguage(menuView: MenuView) = clickOn(menuView.languageButton.cancelButton)
 
-/** The languages listed, by their names, e.g.: `Español`. */
 fun MenuView.languageNames(): List<String> = languageButtons.map { button -> button.cancelButton.text }
 
-/** Whether the languages are on the screen, to pick one. */
 fun MenuView.areLanguagesShown(): Boolean = languages.isShown()
 
 suspend fun ViewsForTesting.pickLanguage(

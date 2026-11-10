@@ -27,7 +27,6 @@ class AbilityButtonView(
         const val ABILITY_SELECTION = "ABILITY_SELECTION"
         const val COOLDOWN = "COOLDOWN"
 
-        // In cooldown: halves the colours.
         internal val DARK_MATRIX =
             Matrix4.fromRows(
                 0.5f,
@@ -48,7 +47,6 @@ class AbilityButtonView(
                 1f,
             )
 
-        // Not enough mana: the icon in shades of blue, as the mana bar, from its luminance (0.299 red, 0.587 green, 0.114 blue).
         internal val BLUE_MATRIX =
             Matrix4.fromRows(
                 0.06f,
@@ -72,16 +70,13 @@ class AbilityButtonView(
         const val SLOT = "SLOT"
         const val COST = "COST"
 
-        // In cooldown: a dark overlay over the darkened icon, with the turns left large in its middle.
         private const val COOLDOWN_TEXT_SIZE = 23.0
         private val COOLDOWN_OVERLAY_COLOR = RGBA(0, 0, 0, 0x70)
 
-        // Selected: a gold ring, with a faint glow around it.
         private const val SELECTION_THICKNESS = 2.0
         private const val GLOW_THICKNESS = 3.0
         private const val GLOW_ALPHA = 0.3
 
-        // The mana cost badge, at the bottom right corner, over the icon.
         private const val COST_TEXT_SIZE = 10.0
         private const val COST_MARGIN = 2.0
     }
@@ -107,11 +102,6 @@ class AbilityButtonView(
         this.delegate = delegate
     }
 
-    /**
-     * Displays the ability at 3x in its slot, darkened under a dark overlay with the turns left in its middle while in
-     * cooldown, else tinted blue with its [manaCost] in a badge when there is not enough mana to cast it. The cooldown
-     * wins, as it is the longer wait.
-     */
     fun display(
         abilityId: String,
         remainingCooldown: Int,
@@ -151,7 +141,6 @@ class AbilityButtonView(
         val abilityButton = this
         abilityButton.container {
             name = COOLDOWN
-            // Inside the selection ring, so it does not darken it.
             roundRect(
                 Size(abilityButton.width - 2 * SELECTION_THICKNESS, abilityButton.height - 2 * SELECTION_THICKNESS),
                 RectCorners(HudStyle.SLOT_RADIUS - SELECTION_THICKNESS),
@@ -172,10 +161,6 @@ class AbilityButtonView(
         badge.xy(abilityButton.width - badge.width - COST_MARGIN, abilityButton.height - badge.pillHeight - COST_MARGIN)
     }
 
-    /**
-     * Rings the ability in gold, with a faint glow around it. Both are filled shapes under the icon, the slot drawn inset
-     * over them, as a stroke is drawn thinner and fainter than its thickness.
-     */
     fun select() {
         if (findViewByName(ABILITY_SELECTION) != null) return
         val abilityButton = this
@@ -194,7 +179,6 @@ class AbilityButtonView(
                     fill = HudStyle.PANEL_RAISED,
                 ) { xy(SELECTION_THICKNESS, SELECTION_THICKNESS) }
             }
-        // Right over the slot, under the icon.
         val slot = findViewByName(SLOT)!!
         addChildAt(selection, slot.index + 1)
     }

@@ -18,10 +18,6 @@ import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
 import kotlin.math.roundToInt
 
-/**
- * Takes the place of the inventory to give gold: the giver and the receiver side by side, with what each would carry, and the
- * amount on a slider. Its buttons are in the call to action, so it keeps the height of the HUD.
- */
 open class GiveGoldView(
     resourcesLoader: GameSceneResourcesLoader,
     private val messages: Messages,
@@ -30,7 +26,6 @@ open class GiveGoldView(
         const val WIDTH = 378.0
         private const val HEIGHT = 292.0
 
-        // Centered in the HUD.
         const val X = 6.0
         private const val MARGIN = 12.0
         private const val COLUMN_WIDTH = (WIDTH - 2 * MARGIN) / 2
@@ -63,7 +58,6 @@ open class GiveGoldView(
         private const val POINTER = ">"
     }
 
-    /** A party member of the give: its name, its unit for the portrait, and the gold it carries. */
     data class Member(
         val name: String,
         val unitId: String,
@@ -71,13 +65,10 @@ open class GiveGoldView(
     )
 
     interface Delegate {
-        /** The amount changed, on every whole amount the slider goes through, and with - and +. */
         fun amountChanged(amount: Int)
 
-        /** The amount the player settled on: the finger left the slider, or - or + was tapped. */
         fun amountSettled(amount: Int) = Unit
 
-        /** The receiver was switched to the previous ([step] -1) or next ([step] 1) one. */
         fun receiverStepped(step: Int)
     }
 
@@ -125,7 +116,6 @@ open class GiveGoldView(
         fill = solidRect(Size(1.0, TRACK_THICKNESS), HudStyle.SELECTION) { xy(TRACK_X, trackY) }
         knob = circle(radius = KNOB / 2, fill = Colors.WHITE) { y = SLIDER_Y + (SLIDER_HEIGHT - KNOB) / 2 }
         slider = solidRect(Size(TRACK_WIDTH + KNOB, SLIDER_HEIGHT), Colors.TRANSPARENT) { xy(TRACK_X - KNOB / 2, SLIDER_Y) }
-        // The slider follows the finger on its own: displaying the view again is only needed when something else changes.
         var startX = 0.0
         slider.onMouseDrag { event ->
             if (event.start) startX = xOf(amount)
@@ -138,7 +128,6 @@ open class GiveGoldView(
         this.delegate = delegate
     }
 
-    /** Displays the give. The arrows hide with a single receiver, and are disabled at each end of the receivers. */
     open fun display(
         giver: Member,
         receiver: Member,
@@ -156,7 +145,6 @@ open class GiveGoldView(
         nextReceiverButton.visible = hasArrows
         previousReceiverButton.enabled = canStepToPrevious
         nextReceiverButton.enabled = canStepToNext
-        // The pointer stays in the middle of what is left between the portrait of the giver and the receiver or its arrow.
         pointer.x = (GIVER_RIGHT + if (hasArrows) PREVIOUS_ARROW_X else RECEIVER_LEFT) / 2 - pointer.width / 2
         giverPortrait.display(giver.unitId, HudStyle.SELECTION)
         receiverPortrait.display(receiver.unitId, HudStyle.ALLY)
@@ -191,7 +179,6 @@ open class GiveGoldView(
 
     private fun amountAt(x: Double): Int = if (maximum <= 1) maximum else (1 + (x / TRACK_WIDTH * (maximum - 1)).roundToInt()).coerceIn(1, maximum)
 
-    // A text too long for its column is drawn smaller, so it stays whole, e.g.: a long name.
     private fun Text.displayCentered(
         value: String,
         centerX: Double,

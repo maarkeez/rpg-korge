@@ -6,10 +6,6 @@ import korlibs.korge.view.Container
 import korlibs.korge.view.Image
 import korlibs.korge.view.image
 
-/**
- * The terrain of a tile of the battlefield, e.g.: sand, or the tile between sand and grass, drawn at a whole scale to
- * fill the tile. It is the bottom layer of the tile: everything else is drawn over it.
- */
 class TerrainTileView(
     private val terrainBitmaps: TerrainBitmaps,
 ) : Container() {
@@ -18,7 +14,6 @@ class TerrainTileView(
             smoothing = false
         }
 
-    /** Draws the terrain, or its transition to another terrain, replacing what was drawn. */
     fun display(
         terrainId: String,
         transition: TerrainTransition?,

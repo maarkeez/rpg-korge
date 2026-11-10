@@ -9,10 +9,6 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
-/**
- * Every ability under resources/ability must be told by the ability info: each kind of effect it has needs its sentence
- * in [AbilityInfoMapper] and in the catalogs. A new kind fails here until it gets one.
- */
 class AbilityInfoResourcesTest {
     @Test
     fun `AbilityInfoMapper should map every ability when it reads the game resources`() =

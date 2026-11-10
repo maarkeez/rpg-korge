@@ -126,7 +126,7 @@ class QuestJournalViewTest : ViewsForTesting() {
             // Given
             val journalView = journalView()
             journalView.display(tenQuests)
-            // When: the second row is cut by the top of the list, and the fifth one by its bottom.
+            // When
             journalView.scrollTo(100.0)
             // Then
             journalView.rowsInSight().shouldContainExactly("quest-1", "quest-2", "quest-3", "quest-4", "quest-5")

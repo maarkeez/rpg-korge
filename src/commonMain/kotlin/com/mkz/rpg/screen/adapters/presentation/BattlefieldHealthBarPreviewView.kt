@@ -14,14 +14,11 @@ import korlibs.korge.view.View
 import korlibs.korge.view.solidRect
 import korlibs.math.geom.Size
 
-/** The health a battle unit would have left after a cast, in thirds of its maximum health, displayed over its tile. */
 class BattlefieldHealthBarPreviewView(
     size: Size,
 ) : UIContainer(size) {
-    // The blinks of the previous preview are cancelled, as removing their views does not stop them.
     internal val blinkAnimators = mutableListOf<Animator>()
 
-    // The thirds blinking, and their alpha once the health is held.
     private val heldAlphas = mutableMapOf<View, Double>()
 
     internal val blinkingThirds: List<View>
@@ -45,8 +42,6 @@ class BattlefieldHealthBarPreviewView(
         val previewHeight = size.height * 0.4
         val totalSize = size
         val totalWidth = totalSize.width
-        // An empty progress bar draws the round background, as it is cut by the clip containers (e.g.: when the
-        // battlefield is scrolled), unlike the round rect views.
         uiProgressBar(size = totalSize, current = 0.0, maximum = 1.0).also { progressBar ->
             progressBar.styles.uiBackgroundColor = ColorPalette.SystemGray5.INCREASED_CONTRAST
         }
@@ -78,7 +73,6 @@ class BattlefieldHealthBarPreviewView(
                             blinkFull(thirdPreview)
                         }
                         PreviewOption.FULL -> {
-                            // Do nothing
                         }
                     }
                 }
@@ -86,16 +80,11 @@ class BattlefieldHealthBarPreviewView(
         }
     }
 
-    /** Stops blinking, e.g.: before the preview is removed. */
     fun stop() {
         blinkAnimators.forEach(Animator::cancel)
         blinkAnimators.clear()
     }
 
-    /**
-     * Stops blinking, leaving the health as it is after the change: the third that blinked is drawn when it is health
-     * left, and not drawn when no health is left, e.g.: once a battle unit has blinked while exploring.
-     */
     fun hold() {
         stop()
         heldAlphas.forEach { (third, alpha) -> third.alpha = alpha }
@@ -120,7 +109,6 @@ class BattlefieldHealthBarPreviewView(
         ;
 
         companion object {
-            /** The third of the [maximum] health the [remaining] health falls in. Only a battle unit with full health is [FULL]. */
             fun of(
                 remaining: Int,
                 maximum: Int,

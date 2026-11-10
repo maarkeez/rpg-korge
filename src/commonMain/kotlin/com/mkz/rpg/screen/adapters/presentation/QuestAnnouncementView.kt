@@ -22,10 +22,6 @@ import korlibs.math.geom.Size
 import korlibs.time.milliseconds
 import korlibs.time.seconds
 
-/**
- * A announcement over the top of the battlefield, announcing that a quest started, with its goal, or completed, with its reward.
- * It fades by itself and takes no taps, so whatever is under it can be pressed.
- */
 open class QuestAnnouncementView(
     private val resourcesLoader: GameSceneResourcesLoader,
     private val messages: Messages,
@@ -72,7 +68,6 @@ open class QuestAnnouncementView(
         visible = false
     }
 
-    /** Draws the announcement, holds it and fades it, hiding it once it has faded. */
     open suspend fun announce(
         moment: Moment,
         quest: QuestInfo,
@@ -87,7 +82,6 @@ open class QuestAnnouncementView(
         visible = false
     }
 
-    /** Draws the announcement and shows it, held for as long as it is looked at. */
     fun display(
         moment: Moment,
         quest: QuestInfo,

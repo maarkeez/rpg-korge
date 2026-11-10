@@ -11,11 +11,6 @@ import korlibs.korge.view.text
 import korlibs.korge.view.xy
 import korlibs.math.geom.Size
 
-/**
- * The forecast of a cast: the ability and its caster on a line, with the mana it spends, then a row per battle unit the
- * cast changes, all in sight: the caster first, when the cast changes its health or its effects (e.g.: a heal), then
- * the recipients. A cast reaches at most the caster and its 4 adjacent tiles, so the 5 rows fit in the HUD.
- */
 open class CastPreviewView(
     private val resourcesLoader: GameSceneResourcesLoader,
     private val messages: Messages,
@@ -34,7 +29,6 @@ open class CastPreviewView(
         internal const val ROW_PITCH = RecipientPreviewView.HEIGHT + 4
     }
 
-    /** A battle unit receiving the cast, the health it would have left and the effects that would stay on it. */
     data class Recipient(
         val battleUnit: BattleUnitInfo,
         val remainingHealth: Int,
@@ -51,10 +45,8 @@ open class CastPreviewView(
     internal val casterText: Text = header.text("", textSize = CASTER_TEXT_SIZE, color = HudStyle.MUTED) { xy(NAME_X, 28.0) }
     internal val manaPill = PillView(color = HudStyle.MANA, glyph = PillView.Glyph.MANA, textSize = MANA_TEXT_SIZE).also(header::addChild)
 
-    // A row per battle unit the cast changes. Grows to the largest number of rows displayed, the ones not needed are hidden.
     internal val rowViews = mutableListOf<RecipientPreviewView>()
 
-    // The row of the caster, or null when the cast does not change it.
     internal var casterRowView: RecipientPreviewView? = null
 
     init {
@@ -71,7 +63,6 @@ open class CastPreviewView(
     ) {
         displayHeader(abilityId, casterBattleUnit, manaCost)
 
-        // The caster gets a row only when the cast changes it, e.g.: a heal.
         val isCasterChanged = casterRemainingHealth != casterBattleUnit.remainingHealth || casterNewEffectIds.isNotEmpty()
         val rows =
             buildList {
@@ -100,7 +91,6 @@ open class CastPreviewView(
         visible = false
     }
 
-    // The ability's icon at 2x in its slot, its name, its caster, and the mana it spends, left out for a free ability.
     private fun displayHeader(
         abilityId: String,
         casterBattleUnit: BattleUnitInfo,

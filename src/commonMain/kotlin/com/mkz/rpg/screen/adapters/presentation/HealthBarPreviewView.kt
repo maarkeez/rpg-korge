@@ -9,6 +9,5 @@ class HealthBarPreviewView(
 ) : PreviewBarView(
         size = size,
         filledColor = RGBA(255, 55, 95),
-        // The part lost, lighter.
         previewColor = RGBA(0xFF, 0xC4, 0xCE),
     )

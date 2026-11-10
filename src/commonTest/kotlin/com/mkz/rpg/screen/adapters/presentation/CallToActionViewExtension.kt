@@ -5,14 +5,10 @@ import com.mkz.rpg.shared.adapters.presentation.isFaded
 import korlibs.image.color.RGBA
 import korlibs.korge.tests.ViewsForTesting
 
-// Page object of [CallToActionView]. Uses the page objects of the call to action it displays.
-
 fun CallToActionView.isDisplayingFinishPlayerTurn(): Boolean = visible && callToAction is FinishPlayerTurnView
 
-/** Whether the finish turn is displayed and can be clicked. */
 fun CallToActionView.isFinishPlayerTurnEnabled(): Boolean = isDisplayingFinishPlayerTurn() && (callToAction as FinishPlayerTurnView).isButtonEnabled()
 
-/** Whether the call to action is empty, e.g.: while exploring, when the player has nothing to choose. */
 fun CallToActionView.isDisplayingNothing(): Boolean = callToAction == null
 
 fun CallToActionView.isDisplayingCancelAndConfirm(): Boolean = visible && callToAction is CancelAndConfirmView
@@ -25,17 +21,14 @@ suspend fun ViewsForTesting.clickConfirm(callToActionView: CallToActionView) = c
 
 fun CallToActionView.isDisplayingItemButtons(): Boolean = visible && callToAction is ItemButtonsView
 
-/** The name of the selected inventory item, followed by its actions, e.g.: Consume, Discard and Cancel. */
 fun CallToActionView.itemName(): String = (callToAction as ItemButtonsView).itemNameView.nameText()
 
-/** The sell price of the selected inventory item, on the line of its name, e.g.: 50 G. */
 fun CallToActionView.itemSellPrice(): String = (callToAction as ItemButtonsView).itemSellPriceView.nameText()
 
 fun CallToActionView.itemButtonLabels(): List<String> = (callToAction as ItemButtonsView).gameButtons.map { button -> button.text }
 
 fun CallToActionView.enabledItemButtonLabels(): List<String> = (callToAction as ItemButtonsView).gameButtons.filter { button -> button.enabled }.map { button -> button.text }
 
-/** The actions displayed faded, as disabled ones, e.g.: No one. */
 fun CallToActionView.fadedItemButtonLabels(): List<String> = (callToAction as ItemButtonsView).gameButtons.filter { button -> button.isFaded() }.map { button -> button.text }
 
 suspend fun ViewsForTesting.clickItemAction(
@@ -43,14 +36,12 @@ suspend fun ViewsForTesting.clickItemAction(
     label: String,
 ) = clickOn((callToActionView.callToAction as ItemButtonsView).gameButtons.single { button -> button.text == label })
 
-/** The colour of the item action with the label, not pressed. */
 fun CallToActionView.itemButtonColor(label: String): RGBA = (callToAction as ItemButtonsView).gameButtons.single { button -> button.text == label }.bgColorOut
 
 fun CallToActionView.discardQuestion(): String = (callToAction as DiscardQuestionView).questionView.nameText()
 
 fun CallToActionView.discardQuestionLabels(): List<String> = (callToAction as DiscardQuestionView).rowView.buttons.map { button -> button.text }
 
-/** The colours of Back and Discard of the question, not pressed. */
 fun CallToActionView.discardQuestionColors(): List<RGBA> = (callToAction as DiscardQuestionView).rowView.buttons.map { button -> button.bgColorOut }
 
 suspend fun ViewsForTesting.clickDiscardQuestionBack(callToActionView: CallToActionView) = clickOn((callToActionView.callToAction as DiscardQuestionView).rowView.buttons.first())
@@ -73,7 +64,6 @@ suspend fun ViewsForTesting.clickCancelGiving(callToActionView: CallToActionView
 
 fun CallToActionView.isDisplayingGiveGold(): Boolean = visible && callToAction is GiveGoldActionsView
 
-/** The label of Give, with the amount, e.g.: `Give 25 G`. */
 fun CallToActionView.giveGoldLabel(): String = (callToAction as GiveGoldActionsView).giveButton.text
 
 fun CallToActionView.isGiveAllEnabled(): Boolean = (callToAction as GiveGoldActionsView).allButton.enabled
@@ -92,10 +82,8 @@ suspend fun ViewsForTesting.clickGiveGoldRefusalOk(callToActionView: CallToActio
 
 fun CallToActionView.isDisplayingActions(): Boolean = visible && callToAction is ButtonRowView
 
-/** The labels of the buttons in the row, e.g.: Back and Abandon. */
 fun CallToActionView.actionLabels(): List<String> = (callToAction as ButtonRowView).buttons.map { button -> button.text }
 
-/** The colour of the button of the row with the label, not pressed. */
 fun CallToActionView.actionColor(label: String): RGBA = (callToAction as ButtonRowView).buttons.single { button -> button.text == label }.bgColorOut
 
 suspend fun ViewsForTesting.clickAction(
@@ -103,8 +91,6 @@ suspend fun ViewsForTesting.clickAction(
     label: String,
 ) = clickOn((callToActionView.callToAction as ButtonRowView).buttons.single { button -> button.text == label })
 
-/** Chooses the secondary choice of a question, e.g.: Cancel. */
 suspend fun ViewsForTesting.clickCancelConfirmation(callToActionView: CallToActionView) = clickOn((callToActionView.callToAction as ButtonRowView).buttons.first())
 
-/** Chooses the primary choice of a question, e.g.: Quit to menu. */
 suspend fun ViewsForTesting.clickConfirmation(callToActionView: CallToActionView) = clickOn((callToActionView.callToAction as ButtonRowView).buttons.last())

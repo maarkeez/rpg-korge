@@ -12,12 +12,6 @@ import korlibs.korge.view.SContainer
 import korlibs.time.DateTime
 import kotlin.random.Random
 
-/**
- * The first scene of the game, opening the battle, a saved game or the world builder. Localization: the messages of the
- * selected language, kept by every scene. Storage: where the games are saved, `views.storage` by default, also kept by
- * every scene. Random: the rolls of the CPU battle brain in the battle. Incompatible slot: the slot whose game could not
- * be loaded, if any, so Load game lists the slots straight away, that one as incompatible.
- */
 class MenuScene(
     private val localizationApi: LocalizationApi,
     private val storage: IStorage? = null,
@@ -25,14 +19,11 @@ class MenuScene(
     private val incompatibleSlot: Int? = null,
 ) : Scene() {
     private companion object {
-        // The height of the save slots and of the question, as in place of the pad.
         const val PANEL_HEIGHT = 300.0
 
-        // The row of their buttons, directly below them, with the same 15 as in a game.
         val ROW_Y = (GAME_WINDOW_SIZE.height - PANEL_HEIGHT) / 2 + PANEL_HEIGHT + 15
     }
 
-    // Like the game scene, the scene coroutines run on the game window event loop, also in the headless tests.
     override val coroutineContext by lazy { super.coroutineContext + views.gameWindow.coroutineDispatcher }
 
     override suspend fun SContainer.sceneMain() {
@@ -55,7 +46,6 @@ class MenuScene(
                 onLoadGameSelected = { loadGamePresenter.open() },
                 onWorldBuilderSelected = { launchImmediately { sceneContainer.changeTo { WorldBuilderScene(localizationApi, storage) } } },
             )
-        // The save slots, and the question before deleting one, take the place of the options: as wide as the window.
         val saveSlotsView = SaveSlotsView(messages)
         val confirmDialogView = ConfirmDialogView()
         menuView.x = (GAME_WINDOW_SIZE.width - menuView.width) / 2

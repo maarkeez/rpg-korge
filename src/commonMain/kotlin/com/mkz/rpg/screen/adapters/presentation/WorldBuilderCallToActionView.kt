@@ -3,7 +3,6 @@ package com.mkz.rpg.screen.adapters.presentation
 import korlibs.korge.view.Container
 import korlibs.korge.view.View
 
-/** The world builder actions: exporting the world, or going back to the menu once the player confirms leaving it. */
 open class WorldBuilderCallToActionView(
     private val messages: Messages,
 ) : Container() {
@@ -18,7 +17,6 @@ open class WorldBuilderCallToActionView(
         display(CancelAndConfirmView(onCancelled = onBack, onConfirmed = onExported, cancelLabel = messages[UiMessage.WORLD_BUILDER_BACK], confirmLabel = messages[UiMessage.WORLD_BUILDER_EXPORT]))
     }
 
-    /** Asks the player to confirm leaving, as the world is lost. */
     open fun displayLeaveConfirmation(
         onLeft: () -> Unit,
         onStayed: () -> Unit,

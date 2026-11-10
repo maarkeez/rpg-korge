@@ -13,10 +13,6 @@ import korlibs.korge.view.solidRect
 import korlibs.math.geom.Point
 import korlibs.math.geom.Size
 
-/**
- * The world builder hamburger menu: a button which opens a list of options below it, over the screen. Choosing an
- * option, the button again, or anywhere else closes it.
- */
 open class WorldBuilderMenuView : Container() {
     companion object {
         const val BUTTON_WIDTH = 36.0
@@ -36,7 +32,6 @@ open class WorldBuilderMenuView : Container() {
 
     private var options: List<Option> = emptyList()
 
-    // Catches the taps out of the open menu to close it, covering the whole screen.
     internal var outsideTapCatcher: SolidRect? = null
     internal var dropdown: Container? = null
     internal val optionButtons = mutableListOf<UIButton>()
@@ -58,7 +53,6 @@ open class WorldBuilderMenuView : Container() {
     val isOpen: Boolean
         get() = dropdown != null
 
-    /** The options the menu lists when it is opened, in order. */
     open fun displayOptions(options: List<Option>) {
         this.options = options
         if (isOpen) {
@@ -76,7 +70,6 @@ open class WorldBuilderMenuView : Container() {
                 y = -origin.y
                 onClick { close() }
             }
-        // Kept over the catcher, so the menu button still toggles the menu.
         menuButton.removeFromParent()
         addChild(menuButton)
         dropdown =

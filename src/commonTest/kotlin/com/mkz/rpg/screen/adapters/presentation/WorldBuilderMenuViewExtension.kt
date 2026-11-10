@@ -5,9 +5,6 @@ import com.mkz.rpg.shared.adapters.presentation.descendants
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.view.Stage
 
-// Page object of [WorldBuilderMenuView].
-
-/** The labels of the options listed, or none while the menu is closed. */
 fun WorldBuilderMenuView.optionLabels(): List<String> = optionButtons.map { button -> button.text }
 
 suspend fun ViewsForTesting.clickMenuButton(menuView: WorldBuilderMenuView) = clickOn(menuView.menuButton)
@@ -17,11 +14,9 @@ suspend fun ViewsForTesting.clickMenuOption(
     label: String,
 ) = clickOn(menuView.optionButtons.single { button -> button.text == label })
 
-/** Taps the screen at a point out of the menu, e.g.: on the battlefield. */
 suspend fun ViewsForTesting.clickOutOfMenu(
     x: Double,
     y: Double,
 ) = mouseMoveAndClickTo(x, y)
 
-/** The menu on the screen, or `null` while the world builder scene is not on the stage. */
 fun Stage.worldBuilderMenuView(): WorldBuilderMenuView? = descendants().filterIsInstance<WorldBuilderMenuView>().firstOrNull()

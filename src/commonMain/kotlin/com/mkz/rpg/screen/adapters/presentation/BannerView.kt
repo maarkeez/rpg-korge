@@ -19,11 +19,9 @@ open class BannerView(
     private val messages: Messages,
 ) : UIContainer(Size(width = 390, height = 33)) {
     companion object {
-        // FamiCube palette colours of each player turn.
         val HUMAN_TURN_COLOR = RGBA(0x00, 0x84, 0xFF)
         val CPU_TURN_COLOR = RGBA(0xE0, 0x3C, 0x28)
 
-        // When a turn starts, the header lines grow to this scale and shrink back.
         const val POP_SCALE = 1.3
         val POP_DURATION = 400.milliseconds
     }
@@ -54,14 +52,12 @@ open class BannerView(
 
     private var displayedRound: Int? = null
 
-    /** Displays that the player is exploring, out of the battles. */
     open fun displayExploring() {
         this.round.text = messages[UiMessage.BANNER_EXPLORING]
         this.playerTurn.text = ""
         displayedRound = null
     }
 
-    /** Displays and pops that a battle starts, e.g.: when the CPU engages the exploring player. */
     open suspend fun announceBattle() {
         this.round.text = messages[UiMessage.BANNER_BATTLE]
         this.playerTurn.text = ""
@@ -69,7 +65,6 @@ open class BannerView(
         pop(listOf(this.round))
     }
 
-    /** Displays and pops that the battle is over, e.g.: when no CPU battle unit is left in it. */
     open suspend fun announceBattleFinished() {
         this.round.text = messages[UiMessage.BANNER_BATTLE_FINISHED]
         this.playerTurn.text = ""
@@ -88,7 +83,6 @@ open class BannerView(
         displayedRound = round
     }
 
-    /** Displays the banner and pops the player turn, and the round when it has changed. */
     open suspend fun announcePlayerTurn(
         playerId: String,
         round: Int,
@@ -99,7 +93,6 @@ open class BannerView(
         pop(if (isNewRound) listOf(this.round, playerTurn) else listOf(playerTurn))
     }
 
-    // The lines grow to the pop scale and shrink back.
     private suspend fun pop(poppingLines: List<UIText>) {
         val popAnimator =
             animator(parallel = true) {

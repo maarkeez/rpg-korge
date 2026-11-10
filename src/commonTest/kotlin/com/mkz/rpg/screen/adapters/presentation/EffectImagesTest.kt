@@ -10,7 +10,6 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
-// The effects staying on the battle units are displayed as icons, which fail when the effect has no image.
 class EffectImagesTest : ViewsForTesting() {
     @Test
     fun `should have an image when is an effect staying on the battle units`() =

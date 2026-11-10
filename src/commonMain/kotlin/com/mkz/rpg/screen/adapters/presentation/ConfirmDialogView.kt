@@ -10,11 +10,6 @@ import korlibs.korge.view.position
 import korlibs.korge.view.textBlock
 import korlibs.math.geom.Size
 
-/**
- * A question displayed in place of the pad before an action that can not be undone, e.g.: quitting to the menu, which
- * loses the progress since the last save. The message, centred and wrapping when long. Its choices are in the row of the
- * call to action, displayed by the presenter that asks.
- */
 open class ConfirmDialogView : Container() {
     companion object {
         private const val WIDTH = 390.0
@@ -30,7 +25,6 @@ open class ConfirmDialogView : Container() {
             wordWrap = true
         }
 
-    /** Asks the [message], e.g.: Quit to the menu? */
     open fun display(message: String) {
         messageText.text = RichTextData(message, font = DefaultTtfFontAsBitmap, textSize = MESSAGE_TEXT_SIZE, color = Colors.WHITE)
     }

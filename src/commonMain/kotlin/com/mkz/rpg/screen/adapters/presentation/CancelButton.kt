@@ -8,7 +8,6 @@ import korlibs.korge.ui.UIButton
 import korlibs.korge.ui.uiButton
 import korlibs.korge.view.Container
 
-/** A secondary action button, e.g.: Cancel. */
 class CancelButton(
     label: String,
     buttonWidth: Double = 190.0,

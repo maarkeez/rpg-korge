@@ -8,7 +8,6 @@ import korlibs.korge.view.align.centerOn
 import korlibs.korge.view.image
 import korlibs.math.geom.Size
 
-/** An effect icon at 1x in a rounded chip, outlined in gold when it is new. */
 class EffectView(
     size: Size,
     private val resourcesLoader: GameSceneResourcesLoader,
@@ -22,7 +21,6 @@ class EffectView(
 
     internal var blinkAnimator: Animator? = null
 
-    /** Displays the effect icon. A new effect, e.g.: one an ability cast would apply, is outlined in gold and blinks. */
     fun displayEffect(
         effectId: String,
         isNew: Boolean = false,

@@ -12,7 +12,6 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
 class GameWindowWorldFilePickerTest {
-    // A game window whose file dialog picks the given files, and records the filters it is opened with.
     private class FakeFileDialogGameWindow(
         private val pickedFiles: List<VfsFile>,
     ) : GameWindow() {

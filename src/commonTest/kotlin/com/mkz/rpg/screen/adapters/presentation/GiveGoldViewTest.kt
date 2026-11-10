@@ -14,7 +14,6 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class GiveGoldViewTest : ViewsForTesting() {
-    // Records what the player does on the panel.
     private class RecordingDelegate : GiveGoldView.Delegate {
         val amounts = mutableListOf<Int>()
         val settledAmounts = mutableListOf<Int>()

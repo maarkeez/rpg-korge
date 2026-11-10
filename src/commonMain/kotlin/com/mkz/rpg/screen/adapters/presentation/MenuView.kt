@@ -4,14 +4,6 @@ import korlibs.korge.ui.UIContainer
 import korlibs.korge.ui.uiVerticalStack
 import korlibs.math.geom.Size
 
-/**
- * The first screen of the game: playing a new game, its primary action, loading a saved game, building a world, or picking
- * the language. The options are hidden as soon as one of them is selected, as the scene it opens takes a while to load,
- * and so it can not be selected twice. Load game lists the save slots in their place, until [displayOptions].
- *
- * Language lists the languages in place of the options, each named in its own language. Selecting one translates the
- * game into it, for the rest of the session, and displays the options again, relabelled.
- */
 class MenuView(
     private val messages: Messages,
     onNewGameSelected: () -> Unit,
@@ -52,7 +44,6 @@ class MenuView(
             languageButtons.forEach(::addChild)
         }
 
-    /** Displays the options again, e.g.: Back from the save slots. */
     fun displayOptions() = displayLanguages(isDisplayed = false)
 
     private fun select(onSelected: () -> Unit) {

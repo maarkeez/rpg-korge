@@ -18,7 +18,6 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
 class GameSceneResourcesLoaderTest {
-    // Each image has a distinct width, so the tests can tell them apart.
     private fun resourcesRoot() =
         MemoryVfsMix(
             "unit/knight.png" to png(width = 1),

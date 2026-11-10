@@ -11,9 +11,6 @@ import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.Container
 import korlibs.math.geom.Size
 
-/**
- * The name and sell price of the selected item and what the player can do with it, e.g.: Consume, Discard or Cancel.
- */
 class ItemButtonsView(
     messages: Messages,
     itemName: String,
@@ -25,7 +22,6 @@ class ItemButtonsView(
         private const val SPACING = 10.0
     }
 
-    /** A disabled button is still displayed, faded, but can not be clicked. */
     data class Button(
         val label: String,
         val isEnabled: Boolean = true,
@@ -40,7 +36,6 @@ class ItemButtonsView(
 
     init {
         uiVerticalStack(padding = 4.0) {
-            // The sell price shares the line of the name, aligned to the right.
             val nameLine = UIContainer(Size(WIDTH, 16))
             nameLine.addChild(itemNameView)
             itemSellPriceView.alignTextToRight()

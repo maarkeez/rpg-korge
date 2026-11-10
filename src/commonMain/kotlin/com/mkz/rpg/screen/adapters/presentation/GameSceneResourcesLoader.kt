@@ -5,11 +5,6 @@ import korlibs.image.bitmap.Bitmap
 import korlibs.image.format.readBitmap
 import korlibs.io.file.VfsFile
 
-/**
- * Loads every image under [root] just once, so views can share them.
- * Images are identified by their path relative to [root], e.g.: `unit/knight.png`.
- * New images are discovered automatically: there is no need to change this loader when adding them.
- */
 class GameSceneResourcesLoader(
     private val root: VfsFile = ResourcesBundle.root,
 ) {

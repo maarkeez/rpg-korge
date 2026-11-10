@@ -12,17 +12,10 @@ import korlibs.korge.view.Container
 import korlibs.korge.view.position
 import korlibs.math.geom.Size
 
-/**
- * The save slots, displayed in place of the pad to save the game into one, or in place of the menu to load one. A
- * title, and a row per slot from the first, evenly apart, each with its number and what it holds (e.g.: Empty, or when it
- * was saved, the leader and the party size). A slot that can not be chosen is faded (e.g.: an empty one, to load), and a
- * slot that can be deleted has Delete on its right.
- */
 open class SaveSlotsView(
     messages: Messages,
 ) : Container() {
     companion object {
-        /** The slots displayed: one row each. */
         const val ROWS = 3
 
         private const val WIDTH = 390.0
@@ -35,7 +28,6 @@ open class SaveSlotsView(
         private const val DELETE_WIDTH = 80.0
     }
 
-    /** A save slot, numbered from 1. Label: what it holds. Enabled: whether it can be chosen. Deletable: whether it shows Delete. */
     data class Slot(
         val number: Int,
         val label: String,
@@ -85,7 +77,6 @@ open class SaveSlotsView(
         this.delegate = delegate
     }
 
-    /** Displays the [title] (e.g.: Save the game) over a row per slot, from the first. */
     open fun display(
         title: String,
         slots: List<Slot>,

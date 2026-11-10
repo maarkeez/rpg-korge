@@ -19,16 +19,13 @@ import korlibs.math.geom.Size
 import korlibs.time.milliseconds
 import korlibs.time.seconds
 
-/** The world builder header: its title, and a subtitle with the world size, which messages replace for a while. */
 open class WorldBuilderInfoView(
     private val messages: Messages,
 ) : UIContainer(Size(width = 390, height = 33)) {
     companion object {
-        // FamiCube palette colours of the messages.
         val ERROR_COLOR = RGBA(0xE0, 0x3C, 0x28)
         val INFO_COLOR = RGBA(0x00, 0x84, 0xFF)
 
-        // A message grows to this scale and shrinks back, like the battle turns, and stays until the size comes back.
         const val POP_SCALE = 1.3
         val POP_DURATION = 400.milliseconds
         val MESSAGE_DURATION = 2.seconds
@@ -54,10 +51,8 @@ open class WorldBuilderInfoView(
 
     private var sizeText = ""
 
-    // The message on display, until the size comes back.
     internal var messageAnimator: Animator? = null
 
-    /** Displays the world size, e.g.: "16 x 16". A message on display keeps it until the message goes away. */
     open fun displaySize(
         rows: Int,
         columns: Int,
@@ -66,17 +61,14 @@ open class WorldBuilderInfoView(
         if (messageAnimator == null) displaySizeText()
     }
 
-    /** Pops the error in the subtitle for a while, e.g.: why a tile can not be painted. */
     open fun displayError(message: String) = displayMessage(message, ERROR_COLOR)
 
-    /** Pops the information in the subtitle for a while, e.g.: the world was copied. */
     open fun displayInfo(message: String) = displayMessage(message, INFO_COLOR)
 
     private fun displayMessage(
         message: String,
         color: RGBA,
     ) {
-        // A new message replaces the one on display, and its own time starts again.
         messageAnimator?.cancel()
         subtitle.scale = 1.0
         subtitle.text = message

@@ -9,6 +9,5 @@ class ManaBarPreviewView(
 ) : PreviewBarView(
         size = size,
         filledColor = RGBA(0, 145, 255),
-        // The part spent, lighter.
         previewColor = RGBA(0x96, 0xCD, 0xFF),
     )

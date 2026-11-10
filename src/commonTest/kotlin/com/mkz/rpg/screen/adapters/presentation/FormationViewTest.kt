@@ -12,7 +12,6 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class FormationViewTest : ViewsForTesting() {
-    // Records what the player does on the formation.
     private class RecordingDelegate : FormationView.Delegate {
         val selectedRows = mutableListOf<Int>()
 

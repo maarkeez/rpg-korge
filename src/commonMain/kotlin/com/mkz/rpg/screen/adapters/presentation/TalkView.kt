@@ -15,11 +15,6 @@ import korlibs.korge.view.solidRect
 import korlibs.korge.view.textBlock
 import korlibs.math.geom.Size
 
-/**
- * What an npc says when the party talks to it, in place of the virtual pad: its portrait on the left, its name on top
- * and its line below it, wrapping when long. The whole line is displayed at once. Tapping anywhere on it closes it. The
- * choices of a merchant are in the row of the call to action.
- */
 open class TalkView(
     size: Size,
     private val resourcesLoader: GameSceneResourcesLoader,
@@ -32,7 +27,6 @@ open class TalkView(
         const val NAME_HEIGHT = 28.0
         const val LINE_TEXT_SIZE = 18.0
 
-        // From the FamiCube palette.
         private val BACKGROUND_COLOR = RGBA(33, 22, 64)
         private val NAME_COLOR = RGBA(255, 231, 55)
         private val LINE_COLOR = RGBA(255, 255, 255)
@@ -70,10 +64,6 @@ open class TalkView(
         onTapped?.invoke()
     }
 
-    /**
-     * Displays the npc saying its line, with its portrait: the one of its unit for a recruitable npc. Its portrait is
-     * left out when it has none.
-     */
     open fun display(npc: TalkInfo) {
         portrait?.removeFromParent()
         portrait =

@@ -4,33 +4,22 @@ import korlibs.io.async.launchImmediately
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 
-/**
- * Plays the visual steps of the game screen one after another, in the order they are added.
- *
- * The game resolves its events instantly (e.g.: a whole CPU turn), while some steps take time (e.g.: a unit walking
- * tile by tile). Hence, presenters read what they need when an event arrives and add a step that draws it once the
- * previous steps have been played.
- */
 class GameSceneTimeline(
     private val coroutineScope: CoroutineScope,
 ) {
     private val steps = ArrayDeque<suspend () -> Unit>()
     private var isPlayingSteps = false
 
-    // The steps played together with the step being played, which the next steps wait for.
     private val togetherSteps = ArrayDeque<Job>()
     private val playingListeners = mutableListOf<(isPlaying: Boolean) -> Unit>()
 
-    /** Whether a step is being played or waiting to be played. The player should not act on the scene meanwhile. */
     val isPlaying: Boolean
         get() = isPlayingSteps || steps.isNotEmpty()
 
-    /** Calls the listener every time the timeline starts or stops playing, e.g.: to disable what the player can not use. */
     fun onPlayingChanged(listener: (isPlaying: Boolean) -> Unit) {
         playingListeners += listener
     }
 
-    /** Adds a step to be played after the previous ones. When the timeline is idle, the step starts straight away. */
     fun play(step: suspend () -> Unit) {
         steps.addLast(step)
         if (isPlayingSteps) return
@@ -49,28 +38,16 @@ class GameSceneTimeline(
         }
     }
 
-    /**
-     * Adds a step to be played right after the step being played, before the steps waiting, e.g.: hiding the virtual pad
-     * as soon as the leader lands, before the battle is announced. When the timeline is idle, it plays as [play].
-     */
     fun playNext(step: suspend () -> Unit) {
         if (!isPlayingSteps) return play(step)
         steps.addFirst(step)
     }
 
-    /**
-     * Plays the step straight away, together with the step being played, and the next steps wait for both, e.g.: the
-     * followers of the party gliding with its leader. When the timeline is idle, it plays as [play].
-     */
     fun playTogether(step: suspend () -> Unit) {
         if (!isPlayingSteps) return play(step)
         togetherSteps.addLast(coroutineScope.launchImmediately { step() })
     }
 
-    /**
-     * Plays the step straight away, alongside the other steps, e.g.: a CPU battle unit wandering while the party walks.
-     * The timeline is not playing because of it, so the player can still act meanwhile.
-     */
     fun playAlongside(step: suspend () -> Unit) {
         coroutineScope.launchImmediately { step() }
     }

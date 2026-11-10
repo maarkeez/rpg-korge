@@ -6,9 +6,6 @@ import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.view.GraphicsRenderer
 import korlibs.korge.view.ShapeView
 
-// Page object of [QuestJournalView].
-
-/** The ids of the quests of the rows, from the top. */
 fun QuestJournalView.displayedRows(): List<String> = rows.map { row -> row.questId }
 
 fun QuestJournalView.displayedSections(): List<String> = rows.map { row -> row.sectionText.text }
@@ -19,17 +16,14 @@ fun QuestJournalView.displayedTasks(): List<String> = rows.map { row -> row.task
 
 fun QuestJournalView.displayedCounts(): List<String?> = rows.map { row -> row.countText?.text }
 
-/** How many rows are in sight, as those out of the list are hidden. */
 fun QuestJournalView.rowsInSight(): List<String> = rows.filter { row -> row.view.visible }.map { row -> row.questId }
 
-/** How far the list is scrolled down. */
 fun QuestJournalView.scrollPosition(): Double =
     -rows
         .first()
         .view.parent!!
         .y
 
-/** Whether no shape of the rows is drawn straight to the GPU, past the clip of the list. */
 fun QuestJournalView.rowsAreClippable(): Boolean =
     rows.all { row ->
         row.view
@@ -56,7 +50,6 @@ suspend fun ViewsForTesting.clickPin(
     questId: String,
 ) = clickOn(requireNotNull(questJournalView.rowOf(questId).pin) { "The row has no pin" })
 
-/** Drags the list from a row in sight, by [pixels], negative to drag it up. The journal must be on the stage. */
 suspend fun ViewsForTesting.dragJournal(
     questJournalView: QuestJournalView,
     pixels: Double,

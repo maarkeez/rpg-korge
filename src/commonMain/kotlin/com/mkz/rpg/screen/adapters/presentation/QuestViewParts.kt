@@ -16,7 +16,6 @@ import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
 import korlibs.math.geom.degrees
 
-/** What the quest views draw with: fitted and wrapped messages, vector glyphs, the slot of the target, progress bars and the reward. */
 internal object QuestViewParts {
     const val CAPTION_SIZE = 11.0
     const val REWARD_ROW_HEIGHT = 28.0
@@ -34,7 +33,6 @@ internal object QuestViewParts {
         textSize: Double,
     ): Double = Text(content, textSize = textSize).width
 
-    /** The text cut with an ellipsis so it fits the width. */
     fun fitted(
         content: String,
         textSize: Double,
@@ -46,7 +44,6 @@ internal object QuestViewParts {
         return cut.trimEnd() + ELLIPSIS
     }
 
-    /** The text wrapped to the width, a [Text] per line, cut with an ellipsis past [maximumLines]. Returns the height of the lines. */
     fun Container.wrappedText(
         content: String,
         x: Double,
@@ -67,7 +64,6 @@ internal object QuestViewParts {
             }
         }
         if (lines.size > maximumLines) {
-            // Both lines do not fit together, as they were wrapped apart, so the last one is always cut.
             lines[maximumLines - 1] = fitted("${lines[maximumLines - 1]} ${lines[maximumLines]}", textSize, width)
             lines.subList(maximumLines, lines.size).clear()
         }
@@ -89,7 +85,6 @@ internal object QuestViewParts {
         arm(x + side * 0.4, y + side * 0.76, side * 0.62, side * 0.15, (-45).degrees, color)
     }
 
-    /** A filled disc holding a white tick, e.g.: a task done. */
     fun Container.tickDisc(
         x: Double,
         y: Double,
@@ -109,7 +104,6 @@ internal object QuestViewParts {
         arm(x + side * 0.68, y + side * 0.46, side * 0.46, side * 0.14, 135.degrees, color)
     }
 
-    /** What the task asks for: a crosshair to defeat, as a sword read as a tick when small, a speech bubble to talk, a flag to reach. */
     fun Container.taskGlyph(
         kind: QuestInfo.Kind,
         x: Double,
@@ -139,10 +133,6 @@ internal object QuestViewParts {
         }
     }
 
-    /**
-     * A slot with the portrait at a whole scale, its ring a filled shape with the slot inset over it, as a stroke is drawn
-     * thin. A task about a place has no portrait: it shows the glyph of the task, at half the side.
-     */
     fun Container.targetSlot(
         task: QuestInfo.Task,
         resourcesLoader: GameSceneResourcesLoader,
@@ -168,7 +158,6 @@ internal object QuestViewParts {
         }
     }
 
-    /** The ring of the slot of a task: an enemy in red, whoever is talked to in green, a place in gold. */
     fun ringOf(task: QuestInfo.Task): RGBA =
         when (task.kind) {
             QuestInfo.Kind.DEFEAT -> HudStyle.ENEMY
@@ -176,7 +165,6 @@ internal object QuestViewParts {
             QuestInfo.Kind.VISIT -> HudStyle.SELECTION
         }
 
-    /** A bar, cut into a segment per unit up to [MAXIMUM_SEGMENTS], so 3 of 5 reads at a glance. */
     fun Container.progressBar(
         x: Double,
         y: Double,
@@ -197,7 +185,6 @@ internal object QuestViewParts {
         }
     }
 
-    /** The gold as a pill and each item in a slot, in one row. Returns its width. */
     fun Container.rewardRow(
         quest: QuestInfo,
         x: Double,
@@ -220,7 +207,6 @@ internal object QuestViewParts {
         return cursor - x - REWARD_GAP
     }
 
-    /** A head, a bar and a point, as rectangles, as a circle blurs at this size. Gold when the quest is the pinned one. */
     fun Container.pinGlyph(
         x: Double,
         y: Double,
@@ -232,7 +218,6 @@ internal object QuestViewParts {
         solidRect(Size(side * 0.14, side * 0.4), color) { xy(x + side * 0.43, y + side * 0.6) }
     }
 
-    /** A bar and a dot, as rectangles: an npc can start a side quest. */
     fun Container.exclamationGlyph(
         x: Double,
         y: Double,
@@ -243,7 +228,6 @@ internal object QuestViewParts {
         solidRect(Size(side * 0.2, side * 0.2), color) { xy(x + side * 0.4, y + side * 0.72) }
     }
 
-    /** The pill saying that a side quest can run again. */
     fun Container.repeatablePill(
         x: Double,
         y: Double,
@@ -256,7 +240,6 @@ internal object QuestViewParts {
         return pill
     }
 
-    /** The icon of a reward item, at its real size, in a slot. */
     fun Container.itemSlot(
         item: QuestInfo.RewardItem,
         x: Double,
@@ -272,7 +255,6 @@ internal object QuestViewParts {
         }
     }
 
-    // A straight stroke from a point, as a rotated rectangle, as KorGE draws thin shape strokes faint.
     private fun Container.arm(
         x: Double,
         y: Double,

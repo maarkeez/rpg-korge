@@ -3,7 +3,6 @@ package com.mkz.rpg.screen.adapters.presentation
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.Bitmap32
 
-/** The part of the bitmap from ([x], [y]) that is [width] by [height] pixels, e.g.: a tile of a strip, or of a building. */
 internal fun Bitmap.crop(
     x: Int,
     y: Int,

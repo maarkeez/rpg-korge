@@ -16,8 +16,6 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class AbilityInfoViewTest : ViewsForTesting() {
-    // The height left under the ability buttons once the header of the battle unit info is collapsed, in the
-    // 300-high HUD.
     private val heightUnderFocusedHeader = 178.0
 
     private val skull =

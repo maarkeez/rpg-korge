@@ -11,10 +11,6 @@ import korlibs.korge.view.xy
 import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
 
-/**
- * The gold of a party member on the title line of the inventory while exploring, looking like the buttons next to it, so the
- * player expects to tap it to give gold. A faded one can not give any, but can still be tapped, to read why.
- */
 class GoldButtonView(
     private val onSelected: () -> Unit,
 ) : Container() {
@@ -28,7 +24,6 @@ class GoldButtonView(
         private const val FADED_COIN_ALPHA = 0.45
     }
 
-    /** How wide it is drawn, to align it to the right. */
     var buttonWidth = 0.0
         private set
 
@@ -50,7 +45,6 @@ class GoldButtonView(
         removeChildren()
         val label = Text(text, textSize = TEXT_SIZE, color = if (isFaded) GameButton.DISABLED_LABEL else GameButton.LABEL)
         buttonWidth = PADDING * 2 + COIN + SPACING + label.width
-        // The border is a shape of its colour with the fill inset over it: a stroke is drawn thinner and fainter than its thickness.
         roundRect(Size(buttonWidth, HEIGHT), RectCorners(RADIUS), fill = if (isFaded) GameButton.DISABLED_BORDER else GameButton.BORDER)
         roundRect(Size(buttonWidth - 2, HEIGHT - 2), RectCorners(RADIUS - 1), fill = if (isFaded) GameButton.DISABLED else GameButton.GREY) { xy(1.0, 1.0) }
         container {

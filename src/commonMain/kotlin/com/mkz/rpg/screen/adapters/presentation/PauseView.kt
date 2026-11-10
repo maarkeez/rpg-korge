@@ -13,10 +13,6 @@ import korlibs.math.geom.Size
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-/**
- * The pause screen, displayed in place of the pad while the game is paused: Resume, its primary action, Save and Quit
- * to menu, one under the other, centred. Once the game is saved, Saved is displayed under them for [SAVED_DURATION].
- */
 open class PauseView(
     private val messages: Messages,
 ) : Container() {
@@ -54,7 +50,6 @@ open class PauseView(
             visible = false
         }
 
-    // The time Saved has been displayed, until it is hidden.
     private var savedElapsed: Duration? = null
 
     init {
@@ -75,7 +70,6 @@ open class PauseView(
         this.delegate = delegate
     }
 
-    /** Displays Saved under the options, which hides itself after [SAVED_DURATION], or hides it straight away. */
     open fun displaySaved(isDisplayed: Boolean) {
         savedText.visible = isDisplayed
         savedElapsed = if (isDisplayed) Duration.ZERO else null

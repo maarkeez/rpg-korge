@@ -18,7 +18,6 @@ class FinishPlayerTurnView(
             }
         }
 
-    /** A disabled button is still displayed, faded, but can not be clicked. */
     var isEnabled: Boolean
         get() = button.enabled
         set(value) {

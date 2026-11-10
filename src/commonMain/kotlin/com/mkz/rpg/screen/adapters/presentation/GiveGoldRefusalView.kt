@@ -8,7 +8,6 @@ import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.Container
 import korlibs.math.geom.Size
 
-/** Why no gold can be given, read after tapping the faded gold button, with OK. */
 class GiveGoldRefusalView(
     message: String,
     okLabel: String,

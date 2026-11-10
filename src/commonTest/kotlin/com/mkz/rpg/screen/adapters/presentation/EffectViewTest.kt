@@ -17,7 +17,6 @@ import kotlin.test.Test
 
 class EffectViewTest : ViewsForTesting() {
     private companion object {
-        // A blink fades the icon out and in for over a second, and each test frame lasts 10ms.
         const val BLINK_FRAMES = 150
     }
 

@@ -33,24 +33,18 @@ import kotlin.test.Test
 
 class BattlefieldViewTest : ViewsForTesting() {
     private companion object {
-        // The battlefield scroll animation lasts 300ms and each test frame 10ms.
         const val SCROLL_ANIMATION_FRAMES = 40
 
-        // A moving battle unit glides 150ms to each tile and each test frame lasts 10ms.
         const val MOVE_STEP_FRAMES = 15
 
-        // Trailing, the camera catches up with a battle unit 9 tiles away within this many frames of 10ms.
         const val CATCH_UP_FRAMES = 40
 
-        // A swap lasts 150ms and each test frame 10ms.
         const val SWAP_FRAMES = 15
 
-        // A blink blinks for 480ms, and the health blinked lasts 1.5s, fading out in its last 200ms, each test frame 10ms.
         const val BLINK_FRAMES = 48
         const val HEALTH_BLINK_FRAMES = 150
         const val HEALTH_BLINK_FADE_FRAMES = 20
 
-        // The tiles on the screen in each direction when the battlefield is not scrolled: the 6 in the viewport and 1 more.
         const val WINDOW_TILES = BattlefieldView.VISIBLE_TILES + BattlefieldView.TILE_WINDOW_MARGIN
     }
 
@@ -90,7 +84,7 @@ class BattlefieldViewTest : ViewsForTesting() {
             addChildScaled(battlefieldView, scale = 2.0)
             // When
             dragBattlefield(battlefieldView, -96.0 to -96.0)
-            // Then the battlefield, drawn twice its size, moves half as many of its units as the finger.
+            // Then
             battlefieldView.scrollOffset() shouldBe (-48.0 to -48.0)
         }
 
@@ -703,7 +697,6 @@ class BattlefieldViewTest : ViewsForTesting() {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(map = ". . .").toTerrain())
-            // As in the game, only sand has a transition to void.
             val paintedTiles = listOf(listOf("sand", "void", "sand"))
             val paintedBattlefield = battlefield(1, 3, paintedTiles, setOf(BattlefieldMother.terrainTransitionRule("sand", "void"))).toTerrain()
             // When
@@ -1204,7 +1197,7 @@ class BattlefieldViewTest : ViewsForTesting() {
             // When
             awaitCompletion(startMoving(battlefieldView, listOf(TilePosition(row = 6, column = 7)), TRAIL))
             repeat(CATCH_UP_FRAMES) { nextFrame() }
-            // Then: the camera caught up while the battle unit glided, until the battle unit was inside the deadzone.
+            // Then
             val (scrollX, scrollY) = battlefieldView.scrollOffset()
             val deadzone = BattlefieldView.DEADZONE_START.toDouble()..BattlefieldView.DEADZONE_END.toDouble()
             (7 * BattlefieldView.TILE_SIZE + scrollX in deadzone).shouldBeTrue()
@@ -1308,7 +1301,6 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     private fun Double.shouldBeAtWholePixel() = this shouldBe round(this)
 
-    // The leader, a knight, stands at (0,0), and the member, a rat, on its east at (0,1).
     private fun swappingBattlefieldView(resourcesLoader: GameSceneResourcesLoader): BattlefieldView {
         val battlefieldView = BattlefieldView(resourcesLoader)
         battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toTerrain())
@@ -1501,7 +1493,6 @@ class BattlefieldViewTest : ViewsForTesting() {
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             addChild(battlefieldView)
             val firstBlinking = startBlinkingHealth(battlefieldView, previewOption = PreviewOption.THREE_OUT_OF_THREE)
-            // A second later, as standing on lava.
             repeat(HEALTH_BLINK_FRAMES * 2 / 3) { nextFrame() }
             // When
             val secondBlinking = startBlinkingHealth(battlefieldView, previewOption = PreviewOption.TWO_OUT_OF_THREE)
@@ -1614,7 +1605,6 @@ class BattlefieldViewTest : ViewsForTesting() {
             addChild(battlefieldView)
             val firstBlinking = startBlinkingHealth(battlefieldView, previewOption = PreviewOption.THREE_OUT_OF_THREE)
             val previousBlinks = battlefieldView.blinkedHealthBlinksAt(row = 0, column = 0)
-            // A few frames later, so the first blink ends before the second one.
             repeat(3) { nextFrame() }
             // When
             val secondBlinking = startBlinkingHealth(battlefieldView, previewOption = PreviewOption.TWO_OUT_OF_THREE)

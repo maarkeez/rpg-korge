@@ -11,7 +11,6 @@ import kotlin.test.Test
 
 class WorldBuilderInfoViewTest : ViewsForTesting() {
     private companion object {
-        // Each test frame lasts 10ms: the pop and the time the message stays, plus a few frames.
         const val MESSAGE_FRAMES = 250
     }
 

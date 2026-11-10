@@ -109,7 +109,7 @@ class QuestAnnouncementViewTest : ViewsForTesting() {
     @Test
     fun `Announce should take no taps when it is displayed`() =
         sharedViewsTest {
-            // Given: a button under the announcement.
+            // Given
             var confirms = 0
             val button = buttonUnderTheAnnouncement { confirms++ }
             val announcementView = announcementView()

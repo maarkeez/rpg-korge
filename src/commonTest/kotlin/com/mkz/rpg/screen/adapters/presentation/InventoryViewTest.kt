@@ -13,7 +13,6 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class InventoryViewTest : ViewsForTesting() {
-    // Records what the player does on the inventory.
     private class RecordingDelegate : InventoryView.Delegate {
         val selectedSlots = mutableListOf<Int>()
         val steps = mutableListOf<Int>()

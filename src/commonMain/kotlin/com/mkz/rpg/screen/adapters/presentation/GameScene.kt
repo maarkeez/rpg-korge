@@ -52,9 +52,6 @@ import korlibs.math.geom.Size
 import korlibs.time.DateTime
 import kotlin.random.Random
 
-// Localization: the messages of the selected language. Storage: where the games are saved, `views.storage` by default.
-// Random: the rolls of the CPU battle brain, e.g.: whether a CPU battle unit rests while wandering. The tests choose them.
-// Slot: the save slot to load the game from, or `null` to play a new game.
 class GameScene(
     private val localizationApi: LocalizationApi,
     private val storage: IStorage? = null,
@@ -62,13 +59,9 @@ class GameScene(
     private val slot: Int? = null,
 ) : Scene() {
     private companion object {
-        // The detail of the main quest is centred in the slot of the pad, as it is narrower.
         const val QUEST_DETAIL_X = 6.0
     }
 
-    // The scene coroutines (e.g.: the presentation timeline) run on the game window event loop, like the frames, so
-    // the views are only changed from that loop. KorGE adds it to the views coroutine context when running the game,
-    // but not when running the headless tests (ViewsForTesting), which would run them on Dispatchers.Default instead.
     override val coroutineContext by lazy { super.coroutineContext + views.gameWindow.coroutineDispatcher }
 
     private val messages = Messages(localizationApi)
@@ -104,13 +97,11 @@ class GameScene(
     }
 
     override suspend fun SContainer.sceneMain() {
-        // Event bus
         val eventBus = InMemoryEventBus()
         addUpdater {
             eventBus.dispatch()
         }
 
-        // Backend APIs
         val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
         val unitApi = UnitApi(eventBus, ResourcesUnitLoader())
         val playerApi = PlayerApi(eventBus, ResourcesPlayerLoader())
@@ -130,7 +121,6 @@ class GameScene(
         val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
         val questApi = QuestApi(battlefieldApi, partyApi, eventBus, ResourcesQuestLoader())
         val gameSetupApi = GameSetupApi(eventBus)
-        // The subdomains holding runtime state, in the order they are initialised, so they are loaded in that order.
         val saveApi =
             SaveApi(
                 storage = storage ?: views.storage,
@@ -158,7 +148,6 @@ class GameScene(
                 now = { DateTime.nowUnixMillis() },
             )
 
-        // Resources: each subdomain loads its data before the game is set up
         terrainApi.init()
         effectApi.init()
         lootableItemApi.init()
@@ -173,7 +162,6 @@ class GameScene(
         npcApi.init()
         questApi.init()
 
-        // Main scene: the presenters replay the battle events in order on the timeline
         val timeline = GameSceneTimeline(this@GameScene)
         val battlefieldPresenter =
             BattlefieldPresenter(
@@ -219,7 +207,6 @@ class GameScene(
 
         uiVerticalStack(padding = 2.0) {
             uiSpacing(Size(0, 10))
-            // Banner, sharing the top line with the tracker of the main quest, so the stack does not move.
             val bannerView = BannerView(messages)
             fixedSizeContainer(Size(390, 33)) {
                 addChild(bannerView)
@@ -250,16 +237,10 @@ class GameScene(
                     timeline,
                     eventBus,
                 )
-            // Battlefield
             addChild(battlefieldView)
 
             uiVerticalStack(padding = 5.0) {
                 uiSpacing(Size(0, 10))
-                // While exploring, the virtual pad takes the place of the HUD, the talk panel the place of the pad, and a
-                // merchant's shop the place of its talk panel. The party formation, the pause screen and the detail of the main quest
-                // also take the place of the pad.
-                // It is as tall as the HUD: the taller pad reaches below it, over the empty call to action, without
-                // pushing the call to action down.
                 fixedSizeContainer(Size(390, 300)) {
                     addChild(hudView)
                     addChild(virtualPadView)
@@ -275,9 +256,6 @@ class GameScene(
                     questJournalView.xy(QUEST_DETAIL_X, 0.0)
                 }
                 uiSpacing(Size(0, 5))
-                // val finishPlayerTurnView = FinishPlayerTurnView()
-                // addChild(finishPlayerTurnView)
-                // val finishPlayerTurnPresenter = FinishPlayerTurnPresenter(finishPlayerTurnView, battleApi, eventBus)
                 addChild(callToActionView)
                 FinishPlayerTurnPresenter(callToActionView, battleApi, playerApi, timeline, eventBus)
                 val shopPresenter =
@@ -319,11 +297,8 @@ class GameScene(
             }
         }
 
-        // Over everything, taking no room in the stack.
         addChild(questAnnouncementView)
 
-        // Start game: a new one, or the one saved in the slot, loaded once the game data read from the resources is set
-        // up. A save that can not be loaded goes back to Load game, where it is shown as incompatible.
         if (slot == null) {
             gameSetupApi.setUpGame()
         } else {

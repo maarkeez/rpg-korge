@@ -28,10 +28,6 @@ import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
 import kotlin.math.abs
 
-/**
- * Every quest started, in place of the pad, one row per quest, each naming its section. It is dragged to scroll, keeping its
- * place when it is displayed again. Tapping a row opens the quest, and tapping its pin makes the tracker name it.
- */
 class QuestJournalView(
     private val resourcesLoader: GameSceneResourcesLoader,
     private val messages: Messages,
@@ -84,7 +80,6 @@ class QuestJournalView(
         fun questJournalPinSelected(questId: String)
     }
 
-    /** A row of the list, as the page object of the tests reads it. */
     internal class Row(
         val questId: String,
         val view: Container,
@@ -111,11 +106,9 @@ class QuestJournalView(
 
     init {
         visible = false
-        // It takes the taps between the rows, so a drag can start there, and nothing under it is pressed.
         panel(Size(WIDTH, HEIGHT)).mouseEnabled = true
         rowsView = clipContainer(Size(WIDTH, LIST_HEIGHT)).xy(0.0, LIST_Y).container()
         scrollbar = container()
-        // Around the list, taking the taps, so a row half out of it can only be tapped on the part in sight.
         solidRect(Size(CONTENT_WIDTH + 2, LIST_Y - 1), HudStyle.PANEL) {
             xy(PADDING - 1, 1.0)
             mouseEnabled = true
@@ -126,7 +119,6 @@ class QuestJournalView(
         }
         text(messages[UiMessage.QUEST_JOURNAL_TITLE], textSize = TITLE_SIZE, color = Colors.WHITE) { xy(PADDING, TITLE_Y) }
         activeText = text("", textSize = ACTIVE_SIZE, color = HudStyle.FAINT)
-        // The distance so far is measured from where the drag started, against the rows, so a tap, which does not move, keeps the scroll.
         var draggedY = 0.0
         onMouseDrag { event ->
             if (event.start) {
@@ -144,11 +136,9 @@ class QuestJournalView(
         this.delegate = delegate
     }
 
-    /** Draws the quests in the order given, keeping the scroll, up to what still fits. */
     fun display(quests: List<QuestInfo>) {
         rowsView.removeChildren()
         rows = quests.mapIndexed { index, quest -> rowsView.drawRow(quest, index * (ROW_HEIGHT + ROW_SPACING)) }
-        // KorGE draws its rounded shapes straight to the GPU, past the clip of the list, so the rows draw theirs as bitmaps.
         rowsView.foreachDescendant { view -> (view as? ShapeView)?.renderer = GraphicsRenderer.SYSTEM }
         contentHeight = (quests.size * (ROW_HEIGHT + ROW_SPACING) - ROW_SPACING).coerceAtLeast(0.0)
         val active = quests.count { quest -> !quest.isCompleted }
@@ -167,21 +157,17 @@ class QuestJournalView(
         visible = false
     }
 
-    /** Scrolls the list down by [pixels] from its top, up to what still fits. */
     fun scrollTo(pixels: Double) = moveRowsTo(-pixels)
 
     private fun moveRowsTo(y: Double) {
         rowsView.y = y.coerceIn(minOf(0.0, LIST_HEIGHT - contentHeight), 0.0)
         scrollbar.y = LIST_Y + if (contentHeight > 0.0) -rowsView.y / contentHeight * LIST_HEIGHT else 0.0
-        // The rows out of the list are hidden, so they take no taps. The one crossing its edge is clipped there.
         rows.forEach { row ->
             val top = rowsView.y + row.view.y
             row.view.visible = top + ROW_HEIGHT > 0.0 && top < LIST_HEIGHT
         }
     }
 
-    // The body takes the taps of the row. The pin takes its own, beside it and not inside it, as a tap reaches every view it
-    // is inside of.
     private fun Container.drawRow(
         quest: QuestInfo,
         rowY: Double,
@@ -197,7 +183,6 @@ class QuestJournalView(
                 panel(Size(CONTENT_WIDTH, ROW_HEIGHT), fill = HudStyle.PANEL_RAISED, radius = HudStyle.SLOT_RADIUS)
                 targetSlot(task, resourcesLoader, TARGET_X, TARGET_Y, TARGET_SIZE, portraitScale = 1.0, ring = if (quest.isCompleted) HudStyle.ALLY else ringOf(task))
                 if (quest.isCompleted) tickDisc(TARGET_X + TARGET_TICK_OFFSET, TARGET_Y + TARGET_TICK_OFFSET, TARGET_TICK_SIZE)
-                // What ends the row, from the right, up to where the messages have to stop.
                 var right = CONTENT_WIDTH - END_PADDING - CHEVRON_SIZE
                 chevron(right, (ROW_HEIGHT - CHEVRON_SIZE) / 2, CHEVRON_SIZE, HudStyle.MUTED)
                 val countText =
@@ -238,7 +223,6 @@ class QuestJournalView(
         return row
     }
 
-    // The pin, with the 32 around it to tap, as a pin of 14 is hard to hit.
     private fun Container.drawPin(
         quest: QuestInfo,
         pinX: Double,

@@ -9,7 +9,6 @@ import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.Container
 import korlibs.math.geom.Size
 
-/** Asks the player to tap the party member who receives the item, or to cancel giving it. */
 class GiveItemView(
     messages: Messages,
     itemName: String,

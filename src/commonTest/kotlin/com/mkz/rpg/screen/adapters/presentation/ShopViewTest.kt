@@ -12,7 +12,6 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class ShopViewTest : ViewsForTesting() {
-    // Records what the player does on the shop.
     private class RecordingDelegate : ShopView.Delegate {
         val selectedSlots = mutableListOf<Int>()
         val steps = mutableListOf<Int>()
@@ -28,7 +27,6 @@ class ShopViewTest : ViewsForTesting() {
         }
     }
 
-    // The second of three party members, with 20 G and 11 of its 12 storage spaces used.
     private val knight = ShopView.Buyer(name = "Knight", gold = 20, usedStorageSpace = 11, maximumStorageSpace = 12, partyIndex = 1, partySize = 3)
 
     private fun ShopView.displayMerchant(

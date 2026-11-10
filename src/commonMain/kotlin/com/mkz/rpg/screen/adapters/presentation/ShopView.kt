@@ -17,12 +17,6 @@ import korlibs.korge.view.position
 import korlibs.korge.view.solidRect
 import korlibs.math.geom.Size
 
-/**
- * A merchant's shop, displayed in place of its talk panel once the player chooses to buy or sell, until Back. On top, the
- * buyer's name, gold and inventory, between the arrows that switch the buyer, as swiping the shop left or right does. Under
- * it, the items to buy or to sell, one slot per item, as the inventory does. At the bottom, a hint until an item is
- * selected, then its name and price. Back and Buy or Sell are in the row of the call to action.
- */
 open class ShopView(
     resourcesLoader: GameSceneResourcesLoader,
     private val messages: Messages,
@@ -37,26 +31,21 @@ open class ShopView(
         private const val ARROW_WIDTH = 40.0
         private const val HEIGHT = 300.0
 
-        // The even gap around the header, the slots and the line of the item.
         private const val GAP = 27.0
         private const val SLOTS_Y = GAP + BAR_HEIGHT + GAP
         private const val ITEM_Y = SLOTS_Y + 2 * SLOT_SIZE + SLOT_SPACING + GAP
 
-        // How far the shop is dragged left or right to switch the buyer.
         const val SWIPE_THRESHOLD = 40.0
     }
 
-    /** Whether the buyer buys the merchant's items, or sells its own. */
     enum class Mode { BUY, SELL }
 
-    /** An item to buy or to sell, dimmed when the buyer can not trade it, and whether it is the buyer's equipped copy. */
     data class Slot(
         val lootableItemId: String,
         val isEquipped: Boolean,
         val isTradeable: Boolean,
     )
 
-    /** The party member trading: its position in the party, from the leader, and its gold and inventory. */
     data class Buyer(
         val name: String,
         val gold: Int,
@@ -69,7 +58,6 @@ open class ShopView(
     interface Delegate {
         fun shopSlotSelected(index: Int)
 
-        /** The buyer was switched to the party member on its left ([step] -1) or right ([step] 1), with an arrow or a swipe. */
         fun shopBuyerStepped(step: Int)
     }
 
@@ -82,7 +70,6 @@ open class ShopView(
     internal lateinit var itemPriceText: UIText
 
     init {
-        // The whole shop can be swiped, also between its slots and buttons.
         solidRect(Size(WIDTH, HEIGHT), Colors.TRANSPARENT)
         addChild(header().position(0.0, GAP))
         slotViews.chunked(SLOTS_PER_ROW).forEachIndexed { rowIndex, rowSlots ->
@@ -119,10 +106,6 @@ open class ShopView(
         delegate?.shopBuyerStepped(step)
     }
 
-    /**
-     * Displays the items in their order followed by the empty slots, the ones the buyer can not trade dimmed, and the buyer, e.g.: Knight · 20 G · Inventory 11/12, or
-     * Inventory full. The arrows are disabled at the ends of the party. Clears the selected slot.
-     */
     open fun display(
         slots: List<Slot>,
         buyer: Buyer,
@@ -143,18 +126,15 @@ open class ShopView(
         selectSlot(null)
     }
 
-    /** Frames the selected slot, or none when [index] is `null`. */
     open fun selectSlot(index: Int?) {
         slotViews.forEachIndexed { slotIndex, slotView -> if (slotIndex == index) slotView.select() else slotView.unselect() }
     }
 
-    /** Displays the [hint] under the slots, e.g.: Tap an item to buy. */
     open fun displayHint(hint: String) {
         itemNameText.text = hint
         itemPriceText.text = ""
     }
 
-    /** Displays the selected item's name and price under the slots. */
     open fun displayItem(
         itemName: String,
         itemPrice: Int,
@@ -163,7 +143,6 @@ open class ShopView(
         itemPriceText.text = messages.gold(itemPrice)
     }
 
-    // < Knight · 20 G · Inventory 11/12 >
     private fun header(): UIContainer =
         UIContainer(Size(WIDTH, BAR_HEIGHT)).apply {
             previousBuyerButton = button("<", ARROW_WIDTH) { delegate?.shopBuyerStepped(-1) }
