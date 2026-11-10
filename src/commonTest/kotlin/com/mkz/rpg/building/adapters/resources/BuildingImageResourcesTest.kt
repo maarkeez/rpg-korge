@@ -7,7 +7,6 @@ import korlibs.image.format.readBitmap
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
-// The game logic does not depend on the images, so the size of a building is declared in its data: this checks its image matches it.
 class BuildingImageResourcesTest {
     @Test
     fun `should find the image of every building in the resources, of 16 pixels per tile`() =

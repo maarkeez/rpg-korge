@@ -8,11 +8,6 @@ import com.mkz.rpg.building.usecases.services.BuildingLoader
 import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Places every loaded building on its tiles, unless it is already placed, failing when any of its tiles is not
- * vacant (e.g.: void, out of the battlefield). Each building requests the battlefield to occupy its tiles, right
- * after `BuildingPlaced`.
- */
 class PlaceBuildings(
     private val buildingLoader: BuildingLoader,
     private val buildingRepository: BuildingRepository,

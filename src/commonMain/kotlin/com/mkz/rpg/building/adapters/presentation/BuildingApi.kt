@@ -13,13 +13,10 @@ class BuildingApi(
     eventBus: EventBus,
     private val buildingLoader: BuildingLoader,
 ) {
-    // Storage
     private val buildingRepository: BuildingRepository = InMemoryBuildingRepository()
 
-    // Commands
     val placeBuildings = PlaceBuildings(buildingLoader, buildingRepository, battlefieldApi.isTileVacant, eventBus)
 
-    // Events
     private val onRequestPlaceBuildings = OnRequestPlaceBuildings(placeBuildings, eventBus)
 
     suspend fun init() {

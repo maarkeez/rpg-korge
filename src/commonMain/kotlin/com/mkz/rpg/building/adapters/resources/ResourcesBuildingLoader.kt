@@ -7,7 +7,6 @@ import com.mkz.rpg.shared.adapters.toml.readTomlFiles
 import korlibs.io.file.VfsFile
 import kotlinx.serialization.Serializable
 
-/** Loads one building per `building/<building id>.toml` resource. */
 class ResourcesBuildingLoader(
     private val buildingRoot: VfsFile = ResourcesBundle.root["building"],
 ) : BuildingLoader {

@@ -17,7 +17,6 @@ class CommentArchitectureTest {
             "battle",
             "battlefield",
             "battleUnit",
-            "building",
             "cpuBattleBrain",
             "cpuWanderBrain",
             "gameSetup",
