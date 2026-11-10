@@ -16,14 +16,6 @@ import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.terrain.domain.TerrainEvent
 import com.mkz.rpg.unit.domain.UnitEvent
 
-/**
- * Initialises each subdomain from its resources, then starts exploring. No quest starts with a new game: the main quest starts
- * later, once a party member walks or teleports onto one of its start tiles. The order matters, as each
- * subdomain requires the ones it refers to (e.g.: abilities require their effects). The battle starts once the CPU engages.
- *
- * To load a save, only what never changes while playing is initialised, up to the quests: the save loads
- * the rest (the battle units, the npcs and the party) and how far each quest went.
- */
 class SetUpGame(
     private val eventBus: EventBus,
 ) {

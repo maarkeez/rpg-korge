@@ -19,7 +19,6 @@ class CommentArchitectureTest {
             "battleUnit",
             "cpuBattleBrain",
             "cpuWanderBrain",
-            "gameSetup",
             "inventory",
             "lootDrop",
             "npc",
