@@ -49,10 +49,24 @@ class WhereShouldWalkTest {
     private fun givenBattlefieldRow(
         terrainIds: List<String>,
         battleUnitColumns: Map<String, Int>,
+    ) = givenBattlefield(listOf(terrainIds), battleUnitColumns.mapValues { (_, column) -> position(0, column) })
+
+    // Stores a battlefield with the given terrain on each tile, and the battle units standing on the given positions.
+    private fun givenBattlefield(
+        terrainIds: List<List<String>>,
+        battleUnitPositions: Map<String, Battlefield.Dto.PositionDto>,
     ) {
-        val tiles = listOf(terrainIds)
-        val emptyBattlefield = BattlefieldMother.battlefield(rows = 1, columns = terrainIds.size, tiles = tiles, terrainTransitionRules = BattlefieldMother.terrainTransitionRules(tiles))
-        val battlefield = battleUnitColumns.entries.fold(emptyBattlefield) { battlefield, (battleUnitId, column) -> battlefield.occupy(0, column, battleUnitId).pullEvents().second }
+        val emptyBattlefield =
+            BattlefieldMother.battlefield(
+                rows = terrainIds.size,
+                columns = terrainIds.first().size,
+                tiles = terrainIds,
+                terrainTransitionRules = BattlefieldMother.terrainTransitionRules(terrainIds),
+            )
+        val battlefield =
+            battleUnitPositions.entries.fold(emptyBattlefield) { battlefield, (battleUnitId, position) ->
+                battlefield.occupy(position.row, position.column, battleUnitId).pullEvents().second
+            }
         queries.battlefieldRepository.create(battlefield)
     }
 
@@ -216,5 +230,69 @@ class WhereShouldWalkTest {
         val result = whereShouldWalk("battle-unit-1")
         // Then
         result shouldBe position(0, 1)
+    }
+
+    @Test
+    fun `should not walk when every option is the same tiles apart from the nearest enemy`() {
+        // Given
+        givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 10)
+        givenBattleUnit(id = "enemy-battle-unit-1", playerId = "player-2", remainingHealth = 10)
+        givenBattleUnit(id = "enemy-battle-unit-2", playerId = "player-2", remainingHealth = 10)
+        // The battle unit is next to an enemy wherever it stands.
+        queries.battlefieldRepository.create(
+            BattlefieldMother.battlefield(
+                "E K . F",
+                occupants = mapOf('K' to "battle-unit-1", 'E' to "enemy-battle-unit-1", 'F' to "enemy-battle-unit-2"),
+            ),
+        )
+        // When
+        val result = whereShouldWalk("battle-unit-1")
+        // Then
+        result.shouldBeNull()
+    }
+
+    @Test
+    fun `should not walk when every option is the same tiles apart from the nearest ally`() {
+        // Given
+        givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 1)
+        givenBattleUnit(id = "ally-battle-unit-1", playerId = "player-1", remainingHealth = 10)
+        givenBattleUnit(id = "ally-battle-unit-2", playerId = "player-1", remainingHealth = 10)
+        // The battle unit is next to an ally wherever it stands.
+        queries.battlefieldRepository.create(
+            BattlefieldMother.battlefield(
+                "A K . B",
+                occupants = mapOf('K' to "battle-unit-1", 'A' to "ally-battle-unit-1", 'B' to "ally-battle-unit-2"),
+            ),
+        )
+        // When
+        val result = whereShouldWalk("battle-unit-1")
+        // Then
+        result.shouldBeNull()
+    }
+
+    @Test
+    fun `should walk to the healing terrain when every option is the same tiles apart from the nearest enemy and the battle unit has low health`() {
+        // Given
+        givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 10, maxHealthPoints = 100)
+        val enemyPositions = listOf(position(0, 0), position(0, 2), position(1, 0), position(1, 2), position(2, 0), position(2, 2))
+        enemyPositions.indices.forEach { index -> givenBattleUnit(id = "enemy-battle-unit-$index", playerId = "player-2", remainingHealth = 10) }
+        givenTerrain(id = "neutral")
+        givenTerrain(id = "healing", effect = healEffect(id = "effect-healing", healing = 10))
+        // The battle unit can only walk north, to neutral terrain, or south, to healing terrain, both next to two enemies.
+        givenBattlefield(
+            terrainIds =
+                listOf(
+                    listOf("neutral", "neutral", "neutral"),
+                    listOf("neutral", "neutral", "neutral"),
+                    listOf("neutral", "healing", "neutral"),
+                ),
+            battleUnitPositions =
+                mapOf("battle-unit-1" to position(1, 1)) +
+                    enemyPositions.mapIndexed { index, position -> "enemy-battle-unit-$index" to position },
+        )
+        // When
+        val result = whereShouldWalk("battle-unit-1")
+        // Then
+        result shouldBe position(2, 1)
     }
 }

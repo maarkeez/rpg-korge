@@ -87,7 +87,7 @@ class WhereShouldWalk(
                 utilityData[position] =
                     evaluationData.copy(
                         nearestEnemyDistanceNormalized =
-                            (maximumEnemyDistance.toDouble() - evaluationData.nearestEnemyDistance.toDouble()) / (maximumEnemyDistance.toDouble() - minimumEnemyDistance.toDouble()),
+                            normalizedDistance(distance = evaluationData.nearestEnemyDistance, minimum = minimumEnemyDistance, maximum = maximumEnemyDistance),
                     )
             }
         }
@@ -105,7 +105,7 @@ class WhereShouldWalk(
                 utilityData[position] =
                     evaluationData.copy(
                         nearestAllyDistanceNormalized =
-                            (maximumAllyDistance.toDouble() - evaluationData.nearestAllyDistance.toDouble()) / (maximumAllyDistance.toDouble() - minimumAllyDistance.toDouble()),
+                            normalizedDistance(distance = evaluationData.nearestAllyDistance, minimum = minimumAllyDistance, maximum = maximumAllyDistance),
                     )
             }
         }
@@ -170,6 +170,14 @@ class WhereShouldWalk(
         val terrainContribution: Double? = null,
         val optionUtility: Double? = null,
     )
+
+    // From 1 for the nearest option to 0 for the farthest. When every option is the same tiles apart, the distance can't
+    // tell them apart, so it is worth 0 for every option, as when there is nobody to be near.
+    private fun normalizedDistance(
+        distance: Int,
+        minimum: Int,
+        maximum: Int,
+    ): Double = if (maximum == minimum) 0.0 else (maximum - distance).toDouble() / (maximum - minimum).toDouble()
 
     private fun tilesApart(
         from: Battlefield.Dto.PositionDto,
