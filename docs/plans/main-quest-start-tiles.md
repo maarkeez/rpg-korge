@@ -1,6 +1,6 @@
 # Plan: the main quest starts at the village entrance
 
-> **Status:** to do.
+> **Status:** built on `main` in 698efb24, its screenshots still to be approved.
 >
 > **Summary:** Today `SetUpGame` publishes `RequestStartMainQuest` as soon as a new game is set up. Before the player
 > has walked a tile, the "NEW QUEST" announcement plays for The Goat Wizard's Lair and the tracker names "Defeat the
@@ -153,3 +153,17 @@
 - Older local saves holding `the-elders-errand` no longer load.
 - In a save whose main quest was active on "Defeat the Goat Wizard", the main quest is now on "Talk to the Elder", as
   saves are not migrated.
+
+## Changes while building
+
+- The start tiles are (14,10), (14,11) and (14,12), not (14,9) to (14,11): the plan misread the map by one column, and
+  (14,9) is void, so `CreateQuests` failed with `QuestTileNotVacant`.
+- `Quest.Dto.startTiles` has no default value, as `DomainArchitectureTest` forbids defaults in an aggregate root's Dto:
+  every Dto names it, empty for a side quest.
+- `QuestTrackerView.clear()` is added for the hidden tracker, as `hide()` hides it for good once a player wins, and a
+  later `display` must draw it again.
+- `QuestEndToEndTest` starts the main quest, or moves the knight north of the entrance, by editing the save, as it
+  already does for the farmer and the gate bat, rather than walking a whole game to the village.
+- `ResourcesQuestLoaderTest` reads the start tiles in its existing main quest test, renamed, rather than in a new one.
+- Three `ExplorationPresenterTest` tests that tap the tracker, and three `QuestPresenterTest` tests that open the quest,
+  start the main quest first, as no quest is listed before it starts.
