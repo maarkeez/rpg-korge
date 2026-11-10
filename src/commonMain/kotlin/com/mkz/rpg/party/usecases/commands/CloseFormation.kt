@@ -5,10 +5,6 @@ import com.mkz.rpg.party.domain.Party.Dto.PositionDto
 import com.mkz.rpg.party.domain.PartyRepository
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Closes the formation with the new party order, the leader first, so the party explores again: nobody moves, and the
- * followers fall in behind the new leader. Nothing happens when it is not in formation.
- */
 class CloseFormation(
     private val partyRepository: PartyRepository,
     private val searchPosition: SearchPosition,

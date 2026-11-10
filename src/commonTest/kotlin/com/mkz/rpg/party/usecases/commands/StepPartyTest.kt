@@ -115,7 +115,7 @@ class StepPartyTest {
 
     @Test
     fun `should swap the leader with any party member on the next tile and rebuild the walking order when it is not the one behind`() {
-        // Given the corridor ". M K L", K leading, after K swapped with L: the line is K, L, M, as L and M are as close to K
+        // Given
         queries.battlefieldRepository.create(battlefield(". M K L", occupants = mapOf('K' to "knight-1", 'L' to "knight-2", 'M' to "knight-3")))
         val positions = mapOf("knight-1" to PositionDto(0, 3), "knight-2" to PositionDto(0, 2), "knight-3" to PositionDto(0, 1))
         partyRepository.save(
@@ -125,7 +125,7 @@ class StepPartyTest {
                 .pullEvents()
                 .second,
         )
-        // When K swaps with M
+        // When
         stepParty(DirectionDto.WEST)
         // Then
         eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestSwapBattleUnits(battleUnitId = "knight-1", otherBattleUnitId = "knight-3"))

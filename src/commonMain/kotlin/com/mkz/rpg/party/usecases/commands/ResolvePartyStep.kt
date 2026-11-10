@@ -3,7 +3,6 @@ package com.mkz.rpg.party.usecases.commands
 import com.mkz.rpg.party.domain.PartyRepository
 import com.mkz.rpg.party.usecases.services.PartyStepping
 
-/** Lets the party step continue once the step it awaits has been walked. Other occupied tiles are ignored. */
 class ResolvePartyStep(
     private val partyRepository: PartyRepository,
     private val partyStepping: PartyStepping,

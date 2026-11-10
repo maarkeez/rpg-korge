@@ -3,7 +3,6 @@ package com.mkz.rpg.party.usecases.commands
 import com.mkz.rpg.party.domain.PartyRepository
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Interrupts the exploration when a battle starts, so the party no longer steps, talks, sets its order nor stays paused. */
 class InterruptExploration(
     private val partyRepository: PartyRepository,
     private val eventBus: EventBus,

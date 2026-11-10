@@ -8,10 +8,6 @@ import com.mkz.rpg.party.domain.PartyRepository
 import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Walks a party step one battle unit's step at a time: it requests the walk of the next step, and skips the steps whose
- * battle unit can not reach its tile (e.g.: the battle unit ahead could not leave it), so the party step is always done.
- */
 class PartyStepping(
     private val partyRepository: PartyRepository,
     private val searchPosition: SearchPosition,
@@ -37,7 +33,6 @@ class PartyStepping(
         eventBus.publish(events)
     }
 
-    /** Whether the battle unit can walk to the tile, which must be another tile than its own. */
     fun canReach(
         battleUnitId: String,
         row: Int,

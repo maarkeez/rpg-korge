@@ -19,7 +19,6 @@ class ApplyStandingTerrainEffectsTest {
     private val eventBus = FakeEventBus()
     private val applyStandingTerrainEffects = ApplyStandingTerrainEffects(partyRepository, queries.searchBattlefield, queries.searchBattleUnitById, eventBus)
 
-    // The knights explore, and the rat stands still.
     private fun givenBattlefield() {
         givenBattleUnits("knight-1", "knight-2", "rat-1")
         queries.battlefieldRepository.create(battlefield("K L . R", occupants = mapOf('K' to "knight-1", 'L' to "knight-2", 'R' to "rat-1")))

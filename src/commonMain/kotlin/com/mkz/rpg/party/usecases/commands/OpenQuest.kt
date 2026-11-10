@@ -3,10 +3,6 @@ package com.mkz.rpg.party.usecases.commands
 import com.mkz.rpg.party.domain.PartyRepository
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Reads a quest, so time stops until it is closed. Nothing happens when the party can not step (e.g.: it is still
- * stepping, talking, in formation, paused or battling).
- */
 class OpenQuest(
     private val partyRepository: PartyRepository,
     private val eventBus: EventBus,

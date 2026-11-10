@@ -6,12 +6,6 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchBattlefield
 import com.mkz.rpg.party.domain.PartyRepository
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Called every second while exploring: the battle units that stood still during that second receive the effect of
- * their terrain (e.g.: lava hurts, water heals), the CPU battle units included. Walking over a tile does not apply it,
- * and the other occupants (e.g.: the npcs) receive none.
- * Then, the next second starts (`ExplorationSecondStarted`).
- */
 class ApplyStandingTerrainEffects(
     private val partyRepository: PartyRepository,
     private val searchBattlefield: SearchBattlefield,
@@ -35,7 +29,6 @@ class ApplyStandingTerrainEffects(
         if (standingBattleUnitIds.isNotEmpty()) {
             eventBus.publish(BattlefieldEvent.RequestTerrainEffects(occupantIds = standingBattleUnitIds))
         }
-        // After the effects, so the battle units moving during the new second (e.g.: wandering) count as moved in it.
         eventBus.publish(events)
     }
 }

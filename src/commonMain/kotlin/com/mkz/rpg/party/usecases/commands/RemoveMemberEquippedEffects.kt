@@ -4,7 +4,6 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.RequestRemoveEquippedEffect
 import com.mkz.rpg.party.domain.PartyRepository
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Removes the effects an unequipped item applied to a party member. Nothing happens when it is not a party member. */
 class RemoveMemberEquippedEffects(
     private val partyRepository: PartyRepository,
     private val eventBus: EventBus,

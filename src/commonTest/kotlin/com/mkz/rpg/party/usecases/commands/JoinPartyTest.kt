@@ -19,7 +19,6 @@ class JoinPartyTest {
     private val eventBus = FakeEventBus()
     private val joinParty = JoinParty(partyRepository, queries.searchBattleUnitById, eventBus)
 
-    // The viking is a battle unit of the viking unit.
     @BeforeTest
     fun setUp() {
         queries.battleUnitRepository.create(battleUnit(id = "viking-1", unit = unit(id = "viking").toDto()))

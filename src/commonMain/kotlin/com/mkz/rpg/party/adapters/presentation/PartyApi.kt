@@ -51,18 +51,14 @@ class PartyApi(
     battlefieldApi: BattlefieldApi,
     eventBus: EventBus,
 ) {
-    // Storage
     private val partyRepository: PartyRepository = InMemoryPartyRepository()
 
-    // Save
     private val searchPartySnapshot = SearchPartySnapshot(partyRepository)
     private val loadPartySnapshot = LoadPartySnapshot(partyRepository, battleUnitApi.searchBattleUnitById)
     val snapshottable: Snapshottable = PartySnapshottable(searchPartySnapshot, loadPartySnapshot)
 
-    // Services
     private val partyStepping = PartyStepping(partyRepository, battlefieldApi.searchPosition, battlefieldApi.searchShortestPath, eventBus)
 
-    // Commands
     val startExploration = StartExploration(playerApi.searchHumanPlayer, battleUnitApi.searchBattleUnitsByPlayerId, partyRepository, eventBus)
     val stepParty = StepParty(partyRepository, battlefieldApi.searchPosition, battlefieldApi.searchOccupant, partyStepping, eventBus)
     val resolvePartyStep = ResolvePartyStep(partyRepository, partyStepping)
@@ -84,11 +80,9 @@ class PartyApi(
     val applyMemberEffect = ApplyMemberEffect(partyRepository, eventBus)
     val removeMemberEquippedEffects = RemoveMemberEquippedEffects(partyRepository, eventBus)
 
-    // Queries
     val searchParty = SearchParty(partyRepository)
     val canMemberLearnAbility = CanMemberLearnAbility(partyRepository, battleUnitApi.canLearnAbility)
 
-    // Events
     private val onRequestStartExploration = OnRequestStartExploration(startExploration, eventBus)
     private val onTileOccupied = OnTileOccupied(resolvePartyStep, eventBus)
     private val onBattleStarted = OnBattleStarted(interruptExploration, eventBus)

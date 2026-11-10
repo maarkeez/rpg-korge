@@ -17,7 +17,6 @@ class LoadPartySnapshotTest {
     private val partyRepository = InMemoryPartyRepository()
     private val loadPartySnapshot = LoadPartySnapshot(partyRepository, searchBattleUnitById)
 
-    // K leads in the corridor "M L K", after swapping with M: the line is K, M, L.
     private val party =
         party(battleUnitIds = listOf("knight-1", "knight-2", "knight-3"))
             .swapLeader(followerId = "knight-3", positions = mapOf("knight-1" to PositionDto(0, 3), "knight-2" to PositionDto(0, 4), "knight-3" to PositionDto(0, 2)))

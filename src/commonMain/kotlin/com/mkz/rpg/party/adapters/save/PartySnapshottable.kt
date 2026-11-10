@@ -9,10 +9,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
-/**
- * The party exploring: its members and its walking order. What it was doing (e.g.: stepping) is not saved, as the game
- * is only saved while exploring, done stepping: it explores again once loaded, see [LoadPartySnapshot].
- */
 class PartySnapshottable(
     private val searchPartySnapshot: SearchPartySnapshot,
     private val loadPartySnapshot: LoadPartySnapshot,

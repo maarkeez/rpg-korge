@@ -11,12 +11,6 @@ import com.mkz.rpg.party.domain.PartyRepository
 import com.mkz.rpg.party.usecases.services.PartyStepping
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Steps the party: the leader one tile towards the direction, and each follower, in walking order, onto the tile the
- * battle unit ahead of it left. When a party member stands on that tile, the leader swaps tiles with it instead, and the
- * rest stay. Nothing happens when the party can not step (e.g.: it is still stepping, or battling) or the leader can not
- * occupy the tile.
- */
 class StepParty(
     private val partyRepository: PartyRepository,
     private val searchPosition: SearchPosition,

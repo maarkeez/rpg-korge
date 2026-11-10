@@ -24,7 +24,6 @@ class ResolvePartyStepTest {
             partyStepping = PartyStepping(partyRepository, queries.searchPosition, queries.searchShortestPath, eventBus),
         )
 
-    // The leader walked north from (1,0) to (0,0), and the follower at (2,0) walks to the tile the leader left.
     private fun givenLeaderWalkedNorth(map: String) {
         queries.battlefieldRepository.create(battlefield(map, occupants = mapOf('K' to "knight-1", 'L' to "knight-2", 'R' to "rat-1")))
         partyRepository.save(

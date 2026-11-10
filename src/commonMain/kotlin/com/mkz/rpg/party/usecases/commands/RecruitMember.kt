@@ -5,11 +5,6 @@ import com.mkz.rpg.party.domain.PartyEvent.RequestJoinParty
 import com.mkz.rpg.party.domain.PartyRepository
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Recruits a battle unit of the unit for the human player, e.g.: a recruited npc: it is deployed on the tile, and then
- * joins the party. Both requests are published together, so the battle unit is deployed before it joins. Nothing
- * happens when there is no party.
- */
 class RecruitMember(
     private val partyRepository: PartyRepository,
     private val eventBus: EventBus,

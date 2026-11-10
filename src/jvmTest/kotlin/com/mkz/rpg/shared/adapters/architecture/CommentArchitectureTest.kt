@@ -19,7 +19,6 @@ class CommentArchitectureTest {
             "inventory",
             "lootDrop",
             "npc",
-            "party",
             "screen",
             "storybook",
             "worldBuilder",

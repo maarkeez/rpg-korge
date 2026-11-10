@@ -15,7 +15,6 @@ class SearchPartySnapshotTest {
     @Test
     fun `should return the members and the walking order of the party`() {
         // Given
-        // K leads in the corridor "M L K", after swapping with M: the line is K, M, L.
         partyRepository.save(
             party(battleUnitIds = listOf("knight-1", "knight-2", "knight-3"))
                 .swapLeader(followerId = "knight-3", positions = mapOf("knight-1" to PositionDto(0, 3), "knight-2" to PositionDto(0, 4), "knight-3" to PositionDto(0, 2)))

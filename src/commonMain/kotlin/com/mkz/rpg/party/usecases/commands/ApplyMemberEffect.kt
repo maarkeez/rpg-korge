@@ -7,7 +7,6 @@ import com.mkz.rpg.effect.domain.Effect.Dto.RecipientDto
 import com.mkz.rpg.party.domain.PartyRepository
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Applies the effect of an item to a party member, e.g.: a consumed potion. Nothing happens when it is not a party member. */
 class ApplyMemberEffect(
     private val partyRepository: PartyRepository,
     private val eventBus: EventBus,

@@ -100,9 +100,9 @@ class PartyTest {
 
     @Test
     fun `SwapLeader should rebuild the walking order with the closest member following next when the leader swaps in a corridor`() {
-        // Given the corridor "M K L", K leading, then L and M
+        // Given
         val positions = mapOf("knight-1" to PositionDto(0, 3), "knight-2" to PositionDto(0, 4), "knight-3" to PositionDto(0, 2))
-        // When K swaps with M: "K M L"
+        // When
         val swappingParty = party(battleUnitIds = listOf("knight-1", "knight-2", "knight-3")).swapLeader(followerId = "knight-3", positions = positions)
         // Then
         swappingParty.toDto().walkingOrderBattleUnitIds.shouldContainExactly("knight-1", "knight-3", "knight-2")
@@ -111,11 +111,11 @@ class PartyTest {
 
     @Test
     fun `SwapLeader should break ties by party order when two members are as close`() {
-        // Given L and M both next to the tile the leader swaps onto
+        // Given
         val positions = mapOf("knight-1" to PositionDto(1, 1), "knight-2" to PositionDto(1, 2), "knight-3" to PositionDto(1, 0), "knight-4" to PositionDto(0, 1))
         // When
         val swappingParty = party(battleUnitIds = listOf("knight-1", "knight-2", "knight-3", "knight-4")).swapLeader(followerId = "knight-4", positions = positions)
-        // Then K stands on (0, 1), and the swapped member on (1, 1)
+        // Then
         swappingParty.toDto().walkingOrderBattleUnitIds.shouldContainExactly("knight-1", "knight-4", "knight-2", "knight-3")
     }
 
@@ -476,12 +476,12 @@ class PartyTest {
 
     @Test
     fun `CloseFormation should reorder the party and rebuild the walking order from the new leader`() {
-        // Given the corridor "M L K", K leading, then L and M
+        // Given
         val positions = mapOf("knight-1" to PositionDto(0, 2), "knight-2" to PositionDto(0, 1), "knight-3" to PositionDto(0, 0))
         val formationParty = party(battleUnitIds = listOf("knight-1", "knight-2", "knight-3")).openFormation().pullEvents().second
-        // When M leads, then K and L
+        // When
         val party = formationParty.closeFormation(battleUnitIds = listOf("knight-3", "knight-1", "knight-2"), positions = positions)
-        // Then L, the closest to M, follows it
+        // Then
         party.toDto().leaderBattleUnitId shouldBe "knight-3"
         party.toDto().battleUnitIds.shouldContainExactly("knight-3", "knight-1", "knight-2")
         party.toDto().walkingOrderBattleUnitIds.shouldContainExactly("knight-3", "knight-2", "knight-1")
@@ -492,7 +492,7 @@ class PartyTest {
 
     @Test
     fun `CloseFormation should keep the walking order when the order is the same`() {
-        // Given the line K, M, L after K swapped with M in the corridor "K M L"
+        // Given
         val positions = mapOf("knight-1" to PositionDto(0, 3), "knight-2" to PositionDto(0, 4), "knight-3" to PositionDto(0, 2))
         val swappedParty =
             party(battleUnitIds = listOf("knight-1", "knight-2", "knight-3"))
