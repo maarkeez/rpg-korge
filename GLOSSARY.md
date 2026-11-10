@@ -887,7 +887,12 @@ A line of tasks the party completes one after the other, the last one earning a 
 _Avoid_: Mission
 
 **Main quest**:
-The one quest that starts with a new game, which runs once and can not be abandoned.
+The one quest that starts once a party member walks or teleports onto one of its start tiles, which runs once and can
+not be abandoned.
+
+**Start tiles**:
+The tiles of the main quest that start it once a party member walks or teleports onto one of them, such as the
+entrance of the village.
 
 **Side quest**:
 A quest that starts when the party finishes talking to its quest giver.
@@ -953,7 +958,7 @@ _Avoid_: Reach, touch
 The player choosing the active side quest the tracker shows.
 
 **Pinned quest**:
-The quest the tracker shows: the pinned side quest, or the main quest when none is.
+The quest the tracker shows: the pinned side quest, or else the main quest once started.
 _Avoid_: Followed quest, tracked quest
 
 **Quest marker**:
@@ -1102,6 +1107,10 @@ _Avoid_: Store, market
 
 **Tracker**:
 The capsule naming the current task of the pinned quest while exploring.
+
+**Empty tracker**:
+The tracker while a side quest is active, none is pinned and the main quest has not started, which opens the journal
+to pin a side quest.
 
 **Journal**:
 The list of every quest started, read with time stopped.
