@@ -38,22 +38,12 @@ import kotlinx.serialization.json.JsonElement
 import java.io.File
 import kotlin.test.Test
 
-/**
- * The saves of each version, kept as golden fixtures under src/jvmTest/fixtures/save: the game saved with
- * [Save.SAVE_VERSION] must still be saved as `v<SAVE_VERSION>.json`, and load from it, so a change to the shape of a
- * snapshot is noticed. Then bump [Save.SAVE_VERSION], and write the new fixture, keeping the older ones:
- * `./gradlew jvmTest --tests '*SaveFixtureTest*' -Drpg.updateSaveFixtures=true`.
- */
 class SaveFixtureTest {
     private val fixtures = File("src/jvmTest/fixtures/save")
     private val currentFixture = File(fixtures, "v${Save.SAVE_VERSION}.json")
     private val isUpdating = System.getProperty("rpg.updateSaveFixtures") == "true"
     private val prettyJson = Json { prettyPrint = true }
 
-    // The game of the fixture, as read from the resources: a 3x6 sand field split by a column of void, a knight carrying
-    // 40 gold, and a rat that drops health potions. Played: the knight explores from (1,0), the elder at (0,3) sells
-    // health potions, a rat wanders from its home at (2,5), past the void, out of the knight's reach, and a health potion
-    // lies at (1,1). The main quest asks to defeat a rat. Nothing is random, so the game is saved the same every time.
     private class Game(
         isPlayed: Boolean,
     ) {
@@ -118,7 +108,6 @@ class SaveFixtureTest {
             apis.initialise()
         }
 
-        // The main quest starts, the knight walks east onto the health potion, which it stores, then the game is saved in slot 1.
         fun playAndSave(): String {
             apis.questApi.startMainQuest(battleUnitId = "knight-1", path = listOf(PositionDto(row = 0, column = 0)))
             apis.lootDropApi.snapshottable.load("""[{"unitId":"rat","droppedItems":[{"row":1,"column":1,"lootableItemIds":["health-potion"]}]}]""")

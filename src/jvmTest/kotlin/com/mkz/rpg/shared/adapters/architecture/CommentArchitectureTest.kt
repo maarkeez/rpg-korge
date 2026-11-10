@@ -29,7 +29,6 @@ class CommentArchitectureTest {
             "npc",
             "party",
             "quest",
-            "save",
             "screen",
             "storybook",
             "terrain",

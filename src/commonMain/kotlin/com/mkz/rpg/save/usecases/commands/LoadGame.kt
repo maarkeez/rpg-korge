@@ -7,14 +7,6 @@ import com.mkz.rpg.save.domain.SaveRepository
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Snapshottable
 
-/**
- * Loads the game saved in the slot: loads the snapshot of each subdomain, in order, as the game was saved, without
- * announcing any of them, then announces the game is loaded (`GameLoaded`), so the screen draws it all.
- *
- * Fails with [IncompatibleSave] when it was saved with another version, or a snapshot can not be loaded (e.g.: it
- * names a unit the game no longer has, or a subdomain has no snapshot): the subdomains loaded so far are left as they
- * are, so the scene is to be left.
- */
 class LoadGame(
     private val saveRepository: SaveRepository,
     private val snapshottables: List<Snapshottable>,

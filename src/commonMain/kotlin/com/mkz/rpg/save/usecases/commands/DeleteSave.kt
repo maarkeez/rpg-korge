@@ -5,7 +5,6 @@ import com.mkz.rpg.save.domain.SaveEvent.SaveDeleted
 import com.mkz.rpg.save.domain.SaveRepository
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Deletes the save in the slot, even an incompatible one, so the slot is empty. */
 class DeleteSave(
     private val saveRepository: SaveRepository,
     private val eventBus: EventBus,

@@ -15,7 +15,7 @@ class SearchSaveSlotsTest {
 
     @Test
     fun `SearchSaveSlots should list the 3 slots, empty, saved or incompatible, when some are saved`() {
-        // Given: slot 2 saved by this game, slot 3 by an older one.
+        // Given
         saveRepository.save(Save.save(slot = 2, savedAt = 0.0, leaderUnitId = "knight", partySize = 3, snapshots = emptyMap()))
         storage["save.slot3.summary"] = """{"version":0,"savedAt":0.0,"leaderUnitId":"knight","partySize":1}"""
         // When

@@ -4,10 +4,6 @@ import com.mkz.rpg.save.domain.Save
 import com.mkz.rpg.save.domain.SaveError.IncompatibleSave
 import com.mkz.rpg.save.domain.SaveRepository
 
-/**
- * Every save slot, from the first: empty, saved with its summary, or incompatible. Only the summaries are read, so a save
- * naming what the game no longer has shows as saved, until it is loaded.
- */
 class SearchSaveSlots(
     private val saveRepository: SaveRepository,
 ) {

@@ -5,10 +5,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 
-/**
- * A save as it is stored: its summary, and the snapshot of each subdomain, kept as the JSON it wrote, so the file
- * reads as one document. A key it does not know fails to decode, so a save of another shape is incompatible.
- */
 @Serializable
 data class SaveFile(
     val summary: SaveSummaryFile,
@@ -27,7 +23,6 @@ data class SaveFile(
     fun toDto(slot: Int) = Save.Dto(slot = slot, summary = summary.toDto(), snapshots = snapshots.mapValues { (_, snapshot) -> snapshot.toString() })
 }
 
-/** What a slot shows, stored apart too, so listing the slots does not read their snapshots. Saved at: in milliseconds since the epoch. */
 @Serializable
 data class SaveSummaryFile(
     val version: Int,

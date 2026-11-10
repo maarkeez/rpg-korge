@@ -6,13 +6,6 @@ import com.mkz.rpg.save.domain.SaveEvent.GameLoaded
 import com.mkz.rpg.save.domain.SaveEvent.GameSaved
 import kotlin.jvm.JvmInline
 
-/**
- * A game saved into one of the [SLOTS] save slots: the snapshot of each subdomain holding runtime state, keyed by its
- * name (e.g.: `battleUnit`), and the summary the slot shows: when it was saved, the leader of the party and its size.
- *
- * It is saved with [SAVE_VERSION]. A save of another version can not be loaded, as the snapshots may have another shape:
- * there are no migrations.
- */
 @ConsistentCopyVisibility
 data class Save private constructor(
     private val slot: Slot,
@@ -22,12 +15,10 @@ data class Save private constructor(
     private val events: Set<SaveEvent>,
 ) {
     companion object {
-        /** The version of the saves written by this game. Bump it whenever a snapshot changes its shape. */
         const val SAVE_VERSION = 9
 
         const val SLOTS = 3
 
-        /** Saves the game into the slot, overwriting the save there, if any. Saved at: in milliseconds since the epoch. */
         fun save(
             slot: Int,
             savedAt: Double,
@@ -43,7 +34,6 @@ data class Save private constructor(
                 events = setOf(GameSaved(slot = slot)),
             )
 
-        /** The game as it was saved, read from the slot. */
         fun read(dto: Dto): Save =
             Save(
                 slot = Slot(dto.slot),
@@ -53,12 +43,10 @@ data class Save private constructor(
                 events = emptySet(),
             )
 
-        /** Fails when the slot is not one of the [SLOTS] save slots. */
         fun requireSlot(slot: Int) {
             Slot(slot)
         }
 
-        /** What a slot shows, from its summary, or `null` when it is empty. */
         fun slotOf(
             slot: Int,
             summary: Dto.SummaryDto?,
@@ -77,10 +65,6 @@ data class Save private constructor(
             snapshots = snapshots.value,
         )
 
-    /**
-     * The snapshot of each subdomain, to load them, then announces the game is loaded. Fails with
-     * [SaveError.IncompatibleSave] when it was saved with another version.
-     */
     fun load(): Pair<Map<String, String>, Save> {
         if (version.value != SAVE_VERSION) throw IncompatibleSave(slot.value)
         return snapshots.value to copy(events = events + GameLoaded(slot = slot.value))
@@ -112,16 +96,11 @@ data class Save private constructor(
         val value: Map<String, String>,
     )
 
-    /** Snapshots: the snapshot of each subdomain, by its name, e.g.: `battleUnit`. */
     data class Dto(
         val slot: Int,
         val summary: SummaryDto,
         val snapshots: Map<String, String>,
     ) {
-        /**
-         * What a slot shows. Saved at: in milliseconds since the epoch. Leader: the unit of the party leader, or `null`
-         * when every member was defeated.
-         */
         data class SummaryDto(
             val version: Int,
             val savedAt: Double,
@@ -129,7 +108,6 @@ data class Save private constructor(
             val partySize: Int,
         )
 
-        /** A save slot, from 1 to [SLOTS]. Summary: only when a game of this version is saved in it. */
         data class SlotDto(
             val slot: Int,
             val state: SlotStateDto,
@@ -140,7 +118,6 @@ data class Save private constructor(
             EMPTY,
             SAVED,
 
-            // Saved by another version of the game, or unreadable: it can only be deleted.
             INCOMPATIBLE,
         }
     }

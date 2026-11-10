@@ -9,11 +9,6 @@ import korlibs.korge.service.storage.IStorage
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
-/**
- * The saves in KorGE's storage, which keeps them across sessions on every target: the game gives it `views.storage`, a
- * `game.storage` file in the settings folder on the JVM and the `localStorage` of the browser, and the tests an
- * `InmemoryStorage`. The save of slot N is under `save.slot<N>`, and its summary under `save.slot<N>.summary`.
- */
 class NativeStorageSaveRepository(
     private val storage: IStorage,
 ) : SaveRepository {
