@@ -4,7 +4,6 @@ import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
 import com.mkz.rpg.npc.domain.Npc
 import com.mkz.rpg.npc.domain.NpcRepository
 
-/** Replaces every npc by the ones a save took, publishing no events. Fails when a stock holds a lootable item the game no longer has. */
 class LoadNpcsSnapshot(
     private val npcRepository: NpcRepository,
     private val searchLootableItemById: SearchLootableItemById,

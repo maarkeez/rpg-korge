@@ -15,7 +15,6 @@ class TalkToAdjacentNpcTest {
     private val eventBus = FakeEventBus()
     private val talkToAdjacentNpc = TalkToAdjacentNpc(queries.searchParty, queries.searchPosition, queries.searchAdjacentNpc, eventBus)
 
-    // The knight-1 leads from the centre of the map, and the knight-2 follows it. Each letter of the npcs is an npc.
     private fun givenParty(
         map: String,
         npcs: Map<Char, String> = emptyMap(),

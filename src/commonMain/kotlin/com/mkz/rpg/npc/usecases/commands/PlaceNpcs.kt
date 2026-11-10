@@ -10,11 +10,6 @@ import com.mkz.rpg.npc.usecases.services.NpcLoader
 import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Places every loaded npc on its tile, unless it is already placed, failing when its tile is not vacant (e.g.:
- * void, out of the battlefield), or when an item sold by a merchant does not exist. Each npc requests the battlefield to
- * occupy its tile, right after `NpcPlaced`. The unit of a recruitable npc is checked by `NpcUnitResourcesTest` instead.
- */
 class PlaceNpcs(
     private val npcLoader: NpcLoader,
     private val npcRepository: NpcRepository,

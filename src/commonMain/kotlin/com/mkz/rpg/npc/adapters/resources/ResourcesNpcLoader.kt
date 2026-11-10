@@ -7,7 +7,6 @@ import com.mkz.rpg.shared.adapters.toml.readTomlFiles
 import korlibs.io.file.VfsFile
 import kotlinx.serialization.Serializable
 
-/** Loads one npc per `npc/<npc id>.toml` resource. Unit: only for a recruitable npc. Stock: only for a merchant. */
 class ResourcesNpcLoader(
     private val npcRoot: VfsFile = ResourcesBundle.root["npc"],
 ) : NpcLoader {

@@ -6,7 +6,6 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
-// The game does not check the unit of a recruitable npc when it starts, so that npc does not depend on unit: this does.
 class NpcUnitResourcesTest {
     @Test
     fun `should find the unit of every recruitable npc in the unit resources`() =

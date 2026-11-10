@@ -17,7 +17,6 @@ class CommentArchitectureTest {
             "cpuBattleBrain",
             "cpuWanderBrain",
             "lootDrop",
-            "npc",
             "screen",
             "storybook",
             "worldBuilder",

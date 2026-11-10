@@ -27,25 +27,20 @@ class NpcApi(
     eventBus: EventBus,
     private val npcLoader: NpcLoader,
 ) {
-    // Storage
     private val npcRepository: NpcRepository = InMemoryNpcRepository()
 
-    // Save
     private val searchNpcsSnapshot = SearchNpcsSnapshot(npcRepository)
     private val loadNpcsSnapshot = LoadNpcsSnapshot(npcRepository, lootableItemApi.searchLootableItemById)
     val snapshottable: Snapshottable = NpcSnapshottable(searchNpcsSnapshot, loadNpcsSnapshot)
 
-    // Queries
     val searchNpcById = SearchNpcById(npcRepository)
     val searchAdjacentNpc = SearchAdjacentNpc(npcRepository)
     val searchIsMerchant = SearchIsMerchant(npcRepository)
 
-    // Commands
     val placeNpcs = PlaceNpcs(npcLoader, npcRepository, battlefieldApi.isTileVacant, lootableItemApi.searchLootableItemById, eventBus)
     val recruitNpc = RecruitNpc(npcRepository, eventBus)
     val talkToAdjacentNpc = TalkToAdjacentNpc(partyApi.searchParty, battlefieldApi.searchPosition, searchAdjacentNpc, eventBus)
 
-    // Events
     private val onRequestPlaceNpcs = OnRequestPlaceNpcs(placeNpcs, eventBus)
     private val onNpcTalkFinished = OnNpcTalkFinished(recruitNpc, eventBus)
 

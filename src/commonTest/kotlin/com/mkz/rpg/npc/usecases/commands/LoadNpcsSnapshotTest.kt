@@ -15,7 +15,7 @@ class LoadNpcsSnapshotTest {
 
     @Test
     fun `should rebuild the same state when it loads the snapshot it took`() {
-        // Given: the elder was recruited meanwhile, and another npc placed.
+        // Given
         val npcs = listOf(npc(id = "elder", row = 1, column = 0, unitId = "mage"), npc(id = "merchant", row = 2, column = 2, stock = listOf("health-potion")))
         npcRepository.save(npc(id = "guard"))
         // When

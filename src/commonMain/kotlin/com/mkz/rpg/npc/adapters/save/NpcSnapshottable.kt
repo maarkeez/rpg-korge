@@ -9,7 +9,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
-/** The npcs left on the battlefield, with their tiles and stocks, see [SearchNpcsSnapshot] and [LoadNpcsSnapshot]. */
 class NpcSnapshottable(
     private val searchNpcsSnapshot: SearchNpcsSnapshot,
     private val loadNpcsSnapshot: LoadNpcsSnapshot,
