@@ -21,7 +21,6 @@ for a view without callbacks, or
 one with a `Delegate`:
 
 ```kotlin
-/** The stories of [ManaBarView], at the size the battle unit info displays it. */
 object ManaBarViewStories : StoryBinding {
     private val SIZE = Size(281.5, 16)
     private const val REMAINING = "remaining"

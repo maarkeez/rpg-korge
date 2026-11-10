@@ -14,7 +14,7 @@
 
 ## Test structure
 
-- All the tests MUST have the following three comments `// Given`, `// When`, `// Then`
+- All the tests MUST have the markers `// Given`, `// When` and `// Then`, or `// When / Then`, alone on their line. They are the only comments allowed in `src`, which [`CommentArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/CommentArchitectureTest.kt) enforces: the code and the test names explain the rest.
 - The `// Given` section MUST contain the preconditions
 - The `// When` section MUST contain the function call under test
 - The `// Then` section MUST contain the assertions
@@ -60,17 +60,15 @@ val battlefield =
 - Commands and queries use cases tests MUST NOT prefix their test names. They are expected to have only one single public function.
 - A setup only needed by some tests SHOULD be a private function called in their `// Given` section, instead of a `@BeforeTest`, which runs before every test of the class.
 
-For example:
+For example, the tests of `Battle` start with the function they test:
 
 ```kotlin
-// Class under test
 class Battle {
     fun startFirstRound(players: List<String>, battleUnitIds: Set<String>): Battle { ... }
 
     fun toDto(): Dto { ... }
 }
 
-// Test example
 class BattleTest {
     @Test
     fun `StartFirstRound should start the first round with the first player when two players join`() { ... }
@@ -82,10 +80,9 @@ class BattleTest {
 
 ## Test example
 
-For example, here you are a command test:
+For example, here is a command test, `src/commonTest/kotlin/com/mkz/rpg/ability/usecases/commands/RequestAbilityCreationTest.kt`:
 
 ```kotlin
-// src/commonTest/kotlin/com/mkz/rpg/ability/usecases/commands/RequestAbilityCreationTest.kt
 package ability.usecases.commands
 
 import ability.adapters.storage.*
@@ -134,7 +131,6 @@ You can use this example as reference:
 ```kotlin
 package com.mkz.rpg.battle.adapters.events
 
-// Imports goes here
 
 class OnRequestDefeatPlayerTest {
     private val eventBus = InMemoryEventBus()
@@ -174,16 +170,13 @@ Each view has a page object: a `<View>Extension.kt` file next to its test (e.g.:
 * Page objects of composite views **SHOULD** reuse the page objects of their child views (e.g.: `BattleUnitInfoView.abilityButtons()` plus `AbilityButtonView.isSelected()`).
 * Shared helpers (`clickOn`, `isShown`, `descendants`) live in [`ViewExtension.kt`](../../src/commonTest/kotlin/com/mkz/rpg/shared/adapters/presentation/ViewExtension.kt).
 
-Here is an example of a page object:
+Here is an example of a page object, `src/commonTest/kotlin/com/mkz/rpg/screen/adapters/presentation/FinishPlayerTurnViewExtension.kt`:
 
 ```kotlin
-// src/commonTest/kotlin/com/mkz/rpg/screen/adapters/presentation/FinishPlayerTurnViewExtension.kt
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.clickOn
 import korlibs.korge.tests.ViewsForTesting
-
-// Page object of [FinishPlayerTurnView].
 
 fun FinishPlayerTurnView.buttonText(): String = button.text
 
@@ -234,7 +227,6 @@ Some view functions take time and suspend (e.g.: `BattlefieldView.moveBattleUnit
 
 ```kotlin
 class FinishPlayerTurnPresenterTest {
-    // The battle has started with the human player turn.
     private val apis =
         SubdomainApis(
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
@@ -287,17 +279,16 @@ Here is a test example
 ```kotlin
 package com.mkz.rpg.shared.usecases.acceptance
 
-// Imports goes here
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class SimpleBattleAcceptanceTest {
 
-    // Subdomain APIs setup goes here
+    ...
 
     private suspend fun setUp() {
-        // Common setup for the acceptance test scenario goes here (e.g.: `terrainApi.init()` to load the resources)
+        ...
     }
 
     @Test

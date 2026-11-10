@@ -17,7 +17,6 @@ Create the test class under `src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/e2e`
 class KnightSelectedSnapshotTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     private lateinit var glContext: KmlGlContext
 
-    // Renders the frames with an offscreen OpenGL context, instead of only logging the draw calls.
     override fun createAg(): AG {
         glContext = createKmlGlContext(GAME_WINDOW_SIZE.width.toInt(), GAME_WINDOW_SIZE.height.toInt())
         glContext.set()
@@ -49,7 +48,6 @@ Add this function to the test class. It renders the stage with the game backgrou
 
 ```kotlin
 private suspend fun Stage.takeSnapshot(name: String) {
-    // The game background, see Main.kt.
     views.clearColor = Colors["#2b2b2b"]
     val snapshot = renderToBitmap(views, includeBackground = true)
     val file = localCurrentDirVfs["build/snapshots/$name.png"]
