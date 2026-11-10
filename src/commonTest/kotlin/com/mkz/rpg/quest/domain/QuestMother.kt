@@ -12,7 +12,11 @@ object QuestMother {
         id: String = id(),
         tasks: List<TaskDto> = listOf(defeat()),
         reward: RewardDto = reward(),
-    ): Quest = Quest.create(Quest.Dto(id = id, type = QuestTypeDto.MAIN, questGiverNpcId = null, repeatable = false, tasks = tasks, reward = reward, progress = ProgressDto.notStarted(id)))
+        startTiles: List<PositionDto> = listOf(PositionDto(row = 0, column = 0)),
+    ): Quest =
+        Quest.create(
+            Quest.Dto(id = id, type = QuestTypeDto.MAIN, questGiverNpcId = null, startTiles = startTiles, repeatable = false, tasks = tasks, reward = reward, progress = ProgressDto.notStarted(id)),
+        )
 
     fun sideQuest(
         id: String = id(),
@@ -21,7 +25,18 @@ object QuestMother {
         tasks: List<TaskDto> = listOf(defeat()),
         reward: RewardDto = reward(),
     ): Quest =
-        Quest.create(Quest.Dto(id = id, type = QuestTypeDto.SIDE, questGiverNpcId = questGiverNpcId, repeatable = repeatable, tasks = tasks, reward = reward, progress = ProgressDto.notStarted(id)))
+        Quest.create(
+            Quest.Dto(
+                id = id,
+                type = QuestTypeDto.SIDE,
+                questGiverNpcId = questGiverNpcId,
+                startTiles = emptyList(),
+                repeatable = repeatable,
+                tasks = tasks,
+                reward = reward,
+                progress = ProgressDto.notStarted(id),
+            ),
+        )
 
     fun defeat(
         unitId: String = "goat-wizard",

@@ -24,12 +24,13 @@ class ResourcesQuestLoaderTest {
     }
 
     @Test
-    fun `should load a main quest when its file holds one task and a reward of gold`() =
+    fun `should load a main quest with its start tiles when its file holds them, one task and a reward of gold`() =
         runTest {
             // Given
             val toml =
                 """
                 type = "MAIN"
+                startTiles = [[14, 9], [14, 10]]
 
                 [[tasks]]
                 type = "DEFEAT"
@@ -47,6 +48,7 @@ class ResourcesQuestLoaderTest {
                     id = "defeat-the-goat-wizard",
                     type = QuestTypeDto.MAIN,
                     questGiverNpcId = null,
+                    startTiles = listOf(PositionDto(row = 14, column = 9), PositionDto(row = 14, column = 10)),
                     repeatable = false,
                     tasks = listOf(TaskDto.defeat(unitId = "goat-wizard", requiredDefeats = 1)),
                     reward = RewardDto(gold = 150, lootableItemIds = emptyList()),
@@ -85,6 +87,7 @@ class ResourcesQuestLoaderTest {
                     id = "help-the-farmer",
                     type = QuestTypeDto.SIDE,
                     questGiverNpcId = "farmer",
+                    startTiles = emptyList(),
                     repeatable = true,
                     tasks =
                         listOf(

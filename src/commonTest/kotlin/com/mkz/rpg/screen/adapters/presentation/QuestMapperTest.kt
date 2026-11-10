@@ -34,16 +34,16 @@ class QuestMapperTest {
     @Test
     fun `questInfo should translate the name, the description and each task when given a quest`() {
         // Given
-        val quest = mainQuest(id = goatWizardQuestId, tasks = listOf(defeat()))
+        val quest = mainQuest(id = goatWizardQuestId, tasks = listOf(talk("elder"), defeat()))
         // When
         val spanish = QuestMapper.questInfos(listOf(quest.toDto()), MessagesMother.messages("es")).single()
-        val english = questInfo(quest)
+        val english = questInfo(quest, status = StatusDto.COMPLETED, currentTaskIndex = 1)
         // Then
         english.name shouldBe "The Goat Wizard's Lair"
         english.description shouldBe "A goat swallowed a wizard's magic and now rules the lair down south."
-        english.tasks.single().text shouldBe "Defeat the Goat Wizard"
+        english.tasks.map { task -> task.text }.shouldContainExactly("Talk to the Elder", "Defeat the Goat Wizard")
         spanish.name shouldBe "La guarida del Mago Cabra"
-        spanish.tasks.single().text shouldBe "Derrota al Mago Cabra"
+        spanish.tasks.single().text shouldBe "Habla con el Anciano"
     }
 
     @Test
@@ -129,9 +129,17 @@ class QuestMapperTest {
     @Test
     fun `QuestInfo should pin the main quest when no other quest is pinned`() {
         // When
-        val infos = QuestMapper.questInfos(listOf(mainQuest().toDto(), sideQuest().start().toDto()), MessagesMother.messages())
+        val infos = QuestMapper.questInfos(listOf(mainQuest().start().toDto(), sideQuest().start().toDto()), MessagesMother.messages())
         // Then
         infos.map { info -> info.isPinned }.shouldContainExactly(true, false)
+    }
+
+    @Test
+    fun `questInfos should not pin the main quest when it has not started`() {
+        // When
+        val infos = QuestMapper.questInfos(listOf(mainQuest().toDto(), sideQuest().start().toDto()), MessagesMother.messages())
+        // Then
+        infos.map { info -> info.isPinned }.shouldContainExactly(false, false)
     }
 
     @Test

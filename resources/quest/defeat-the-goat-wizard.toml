@@ -1,4 +1,10 @@
 type = "MAIN"
+# The entrance of the village: the only walking path into it from the north.
+startTiles = [[14, 10], [14, 11], [14, 12]]
+
+[[tasks]]
+type = "TALK"
+npcId = "elder"
 
 [[tasks]]
 type = "DEFEAT"

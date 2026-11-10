@@ -34,6 +34,7 @@ class ResourcesQuestLoader(
     data class QuestDefinition(
         val type: String,
         val questGiverNpcId: String? = null,
+        val startTiles: List<List<Int>> = emptyList(),
         val repeatable: Boolean = false,
         val tasks: List<TaskDefinition> = emptyList(),
         val reward: RewardDefinition,
@@ -43,6 +44,7 @@ class ResourcesQuestLoader(
                 id = questId,
                 type = enumOf<QuestTypeDto>("type", type),
                 questGiverNpcId = questGiverNpcId,
+                startTiles = startTiles.map { tile -> positionOf("startTiles", tile) },
                 repeatable = repeatable,
                 tasks = tasks.map(TaskDefinition::toDto),
                 reward = reward.toDto(),
@@ -65,10 +67,7 @@ class ResourcesQuestLoader(
                 TaskDto.TypeDto.VISIT ->
                     TaskDto.visit(
                         tiles =
-                            required("tasks.tiles", tiles).map { tile ->
-                                require(tile.size == 2) { "'tasks.tiles' must hold lists of [row, column], but held $tile" }
-                                PositionDto(row = tile[0], column = tile[1])
-                            },
+                            required("tasks.tiles", tiles).map { tile -> positionOf("tasks.tiles", tile) },
                     )
             }
     }
@@ -79,5 +78,15 @@ class ResourcesQuestLoader(
         val lootableItemIds: List<String> = emptyList(),
     ) {
         fun toDto(): RewardDto = RewardDto(gold = gold, lootableItemIds = lootableItemIds)
+    }
+
+    private companion object {
+        fun positionOf(
+            field: String,
+            tile: List<Int>,
+        ): PositionDto {
+            require(tile.size == 2) { "'$field' must hold lists of [row, column], but held $tile" }
+            return PositionDto(row = tile[0], column = tile[1])
+        }
     }
 }

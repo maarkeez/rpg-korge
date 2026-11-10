@@ -3,6 +3,7 @@ package com.mkz.rpg.quest.usecases.commands
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.quest.adapters.storage.InMemoryQuestRepository
 import com.mkz.rpg.quest.domain.Quest
+import com.mkz.rpg.quest.domain.Quest.Dto.PositionDto
 import com.mkz.rpg.quest.domain.QuestError.MainQuestNotUnique
 import com.mkz.rpg.quest.domain.QuestError.QuestTileNotVacant
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
@@ -62,5 +63,10 @@ class CreateQuestsTest {
     @Test
     fun `CreateQuests should fail when a tile of a visit task is not vacant`() {
         shouldThrow<QuestTileNotVacant> { createQuests(mainQuest(tasks = listOf(visit(0 to 0, 9 to 9))).toDto()) }
+    }
+
+    @Test
+    fun `CreateQuests should fail when a start tile is not vacant`() {
+        shouldThrow<QuestTileNotVacant> { createQuests(mainQuest(startTiles = listOf(PositionDto(row = 0, column = 0), PositionDto(row = 9, column = 9))).toDto()) }
     }
 }

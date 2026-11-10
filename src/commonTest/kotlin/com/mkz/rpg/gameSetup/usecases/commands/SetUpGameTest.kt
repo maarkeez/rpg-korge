@@ -23,7 +23,7 @@ class SetUpGameTest {
     private val setUpGame = SetUpGame(eventBus)
 
     @Test
-    fun `should request each subdomain initialisation after the subdomains it refers to, then exploring, then the main quest, when the game is set up`() {
+    fun `should request each subdomain initialisation after the subdomains it refers to, then exploring, when the game is set up`() {
         // Given
         // When
         setUpGame()
@@ -43,7 +43,6 @@ class SetUpGameTest {
             BattleUnitEvent.RequestInitialiseBattleUnits,
             NpcEvent.RequestPlaceNpcs,
             PartyEvent.RequestStartExploration,
-            QuestEvent.RequestStartMainQuest,
         )
     }
 

@@ -1,5 +1,5 @@
 type = "SIDE"
-questGiverNpcId = "elder"
+questGiverNpcId = "blacksmith"
 
 [[tasks]]
 type = "VISIT"
@@ -7,7 +7,7 @@ tiles = [[25, 3], [25, 4]]
 
 [[tasks]]
 type = "TALK"
-npcId = "elder"
+npcId = "blacksmith"
 
 [reward]
 gold = 25

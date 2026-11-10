@@ -123,6 +123,7 @@ enum class UiMessage(
     CAST_PREVIEW_BY("ui.castPreview.by"),
     CAST_PREVIEW_MANA("ui.castPreview.mana"),
     QUEST_TRACKER_COMPLETED("ui.questTracker.completed"),
+    QUEST_TRACKER_EMPTY("ui.questTracker.empty"),
     QUEST_DETAIL_MAIN_QUEST("ui.questDetail.mainQuest"),
     QUEST_DETAIL_COMPLETED("ui.questDetail.completed"),
     QUEST_DETAIL_REWARD("ui.questDetail.reward"),

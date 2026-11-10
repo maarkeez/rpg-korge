@@ -5,8 +5,6 @@ import com.mkz.rpg.shared.domain.DomainEvent
 sealed interface QuestEvent : DomainEvent {
     object RequestCreateQuests : QuestEvent
 
-    object RequestStartMainQuest : QuestEvent
-
     data class QuestStarted(
         val questId: String,
     ) : QuestEvent
@@ -29,7 +27,7 @@ sealed interface QuestEvent : DomainEvent {
         val questId: String,
     ) : QuestEvent
 
-    /** The quest is the pinned quest: the main quest, when no side quest is pinned. */
+    /** The quest is the pinned quest: the main quest, when no side quest is pinned, once it has started. */
     data class QuestPinned(
         val questId: String,
     ) : QuestEvent

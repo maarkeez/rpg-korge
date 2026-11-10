@@ -569,6 +569,11 @@ msgctxt "ui.questTracker.completed"
 msgid "Quest completed"
 msgstr ""
 
+#. On the tracker while a side quest is active, none is pinned and the main quest has not started. Tapping it opens the journal.
+msgctxt "ui.questTracker.empty"
+msgid "No quest pinned"
+msgstr ""
+
 #. Over the name of the quest, in its detail.
 msgctxt "ui.questDetail.mainQuest"
 msgid "MAIN QUEST"
@@ -839,6 +844,11 @@ msgstr ""
 
 #. A task of a quest, by its place in the line of tasks, as a whole sentence.
 msgctxt "quest.defeat-the-goat-wizard.task.0"
+msgid "Talk to the Elder"
+msgstr ""
+
+#. A task of a quest, by its place in the line of tasks, as a whole sentence.
+msgctxt "quest.defeat-the-goat-wizard.task.1"
 msgid "Defeat the Goat Wizard"
 msgstr ""
 
@@ -858,23 +868,23 @@ msgid "Defeat 2 Rats"
 msgstr ""
 
 #. The name of a quest.
-msgctxt "quest.the-elders-errand.name"
-msgid "The Elder's Errand"
+msgctxt "quest.the-blacksmiths-errand.name"
+msgid "The Blacksmith's Errand"
 msgstr ""
 
 #. What a quest is about, displayed when it starts and in its detail.
-msgctxt "quest.the-elders-errand.description"
-msgid "The Elder wants to know whether the path to the southern fields is still open."
+msgctxt "quest.the-blacksmiths-errand.description"
+msgid "The Blacksmith wants to know whether the path to the southern fields is still open."
 msgstr ""
 
 #. A task of a quest, by its place in the line of tasks, as a whole sentence.
-msgctxt "quest.the-elders-errand.task.0"
+msgctxt "quest.the-blacksmiths-errand.task.0"
 msgid "Visit the southern fields"
 msgstr ""
 
 #. A task of a quest, by its place in the line of tasks, as a whole sentence.
-msgctxt "quest.the-elders-errand.task.1"
-msgid "Talk to the Elder"
+msgctxt "quest.the-blacksmiths-errand.task.1"
+msgid "Talk to the Blacksmith"
 msgstr ""
 
 #. Displayed in the world builder, e.g.: "{terrain} can not be next to {adjacentTerrain}".

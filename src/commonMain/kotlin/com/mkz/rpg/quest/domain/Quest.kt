@@ -13,10 +13,12 @@ import com.mkz.rpg.quest.domain.QuestError.InvalidTask
 import com.mkz.rpg.quest.domain.QuestError.MainQuestCanNotBeAbandoned
 import com.mkz.rpg.quest.domain.QuestError.MainQuestRepeatable
 import com.mkz.rpg.quest.domain.QuestError.MainQuestWithQuestGiver
+import com.mkz.rpg.quest.domain.QuestError.MainQuestWithoutStartTiles
 import com.mkz.rpg.quest.domain.QuestError.NegativeQuestRewardGold
 import com.mkz.rpg.quest.domain.QuestError.QuestNotActive
 import com.mkz.rpg.quest.domain.QuestError.QuestWithoutTasks
 import com.mkz.rpg.quest.domain.QuestError.RequiredDefeatsBelowOne
+import com.mkz.rpg.quest.domain.QuestError.SideQuestWithStartTiles
 import com.mkz.rpg.quest.domain.QuestError.SideQuestWithoutQuestGiver
 import com.mkz.rpg.quest.domain.QuestEvent.DefeatCounted
 import com.mkz.rpg.quest.domain.QuestEvent.QuestAbandoned
@@ -27,14 +29,15 @@ import com.mkz.rpg.quest.domain.QuestEvent.TaskCompleted
 import kotlin.jvm.JvmInline
 
 /**
- * A line of tasks, completed one after the other, ending in a reward granted to the party leader. The game has one main quest, which runs once from a
- * new game, and any number of side quests, each started by talking to its quest giver.
+ * A line of tasks, completed one after the other, ending in a reward granted to the party leader. The game has one main quest, which runs once from when a
+ * party member walks or teleports onto one of its start tiles, and any number of side quests, each started by talking to its quest giver.
  */
 @ConsistentCopyVisibility
 data class Quest private constructor(
     private val id: Id,
     private val type: QuestTypeDto,
     private val questGiverNpcId: QuestGiverNpcId?,
+    private val startTiles: List<PositionDto>,
     private val repeatable: Boolean,
     private val tasks: Tasks,
     private val reward: Reward,
@@ -46,11 +49,14 @@ data class Quest private constructor(
         fun create(dto: Dto): Quest {
             if (dto.type == QuestTypeDto.MAIN && dto.questGiverNpcId != null) throw MainQuestWithQuestGiver()
             if (dto.type == QuestTypeDto.MAIN && dto.repeatable) throw MainQuestRepeatable()
+            if (dto.type == QuestTypeDto.MAIN && dto.startTiles.isEmpty()) throw MainQuestWithoutStartTiles()
             if (dto.type == QuestTypeDto.SIDE && dto.questGiverNpcId == null) throw SideQuestWithoutQuestGiver()
+            if (dto.type == QuestTypeDto.SIDE && dto.startTiles.isNotEmpty()) throw SideQuestWithStartTiles()
             return Quest(
                 id = Id(dto.id),
                 type = dto.type,
                 questGiverNpcId = dto.questGiverNpcId?.let(::QuestGiverNpcId),
+                startTiles = dto.startTiles,
                 repeatable = dto.repeatable,
                 tasks = Tasks(dto.tasks.map(Task::create)),
                 reward = Reward(gold = dto.reward.gold, lootableItemIds = dto.reward.lootableItemIds),
@@ -64,6 +70,9 @@ data class Quest private constructor(
 
     /** Whether talking to the npc starts it: it is a side quest of that quest giver, not started, or completed and repeatable. */
     fun canBeStartedBy(npcId: String): Boolean = questGiverNpcId?.value == npcId && (progress.status == StatusDto.NOT_STARTED || (progress.status == StatusDto.COMPLETED && repeatable))
+
+    /** Whether a party member walking or teleporting onto the tiles starts it: it is the main quest, not started, and one of the tiles is a start tile. */
+    fun canBeStartedOn(tiles: List<PositionDto>): Boolean = type == QuestTypeDto.MAIN && progress.status == StatusDto.NOT_STARTED && tiles.any(startTiles::contains)
 
     /** The sign the npc has because of this quest: a talk task when its current task is to talk to it, a quest to start when it can start it, or none. */
     fun markerFor(npcId: String): QuestMarkerDto? =
@@ -149,6 +158,7 @@ data class Quest private constructor(
             id = id.value,
             type = type,
             questGiverNpcId = questGiverNpcId?.value,
+            startTiles = startTiles,
             repeatable = repeatable,
             tasks = tasks.value.map(Task::toDto),
             reward = RewardDto(gold = reward.gold, lootableItemIds = reward.lootableItemIds),
@@ -240,6 +250,7 @@ data class Quest private constructor(
         val id: String,
         val type: QuestTypeDto,
         val questGiverNpcId: String?,
+        val startTiles: List<PositionDto>,
         val repeatable: Boolean,
         val tasks: List<TaskDto>,
         val reward: RewardDto,

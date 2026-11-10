@@ -12,10 +12,12 @@ import com.mkz.rpg.quest.domain.QuestError.InvalidTask
 import com.mkz.rpg.quest.domain.QuestError.MainQuestCanNotBeAbandoned
 import com.mkz.rpg.quest.domain.QuestError.MainQuestRepeatable
 import com.mkz.rpg.quest.domain.QuestError.MainQuestWithQuestGiver
+import com.mkz.rpg.quest.domain.QuestError.MainQuestWithoutStartTiles
 import com.mkz.rpg.quest.domain.QuestError.NegativeQuestRewardGold
 import com.mkz.rpg.quest.domain.QuestError.QuestNotActive
 import com.mkz.rpg.quest.domain.QuestError.QuestWithoutTasks
 import com.mkz.rpg.quest.domain.QuestError.RequiredDefeatsBelowOne
+import com.mkz.rpg.quest.domain.QuestError.SideQuestWithStartTiles
 import com.mkz.rpg.quest.domain.QuestError.SideQuestWithoutQuestGiver
 import com.mkz.rpg.quest.domain.QuestEvent.DefeatCounted
 import com.mkz.rpg.quest.domain.QuestEvent.QuestAbandoned
@@ -99,9 +101,53 @@ class QuestTest {
     @Test
     fun `Quest should fail when a main quest is repeatable`() {
         // Given
-        val dto = sideQuest(repeatable = true).toDto().copy(type = QuestTypeDto.MAIN, questGiverNpcId = null)
+        val dto = sideQuest(repeatable = true).toDto().copy(type = QuestTypeDto.MAIN, questGiverNpcId = null, startTiles = listOf(PositionDto(row = 14, column = 10)))
         // When / Then
         shouldThrow<MainQuestRepeatable> { Quest.create(dto) }
+    }
+
+    @Test
+    fun `Quest should fail when a main quest has no start tiles`() {
+        // Given
+        val dto = mainQuest().toDto().copy(startTiles = emptyList())
+        // When / Then
+        shouldThrow<MainQuestWithoutStartTiles> { Quest.create(dto) }
+    }
+
+    @Test
+    fun `Quest should fail when a side quest has start tiles`() {
+        // Given
+        val dto = sideQuest().toDto().copy(startTiles = listOf(PositionDto(row = 14, column = 10)))
+        // When / Then
+        shouldThrow<SideQuestWithStartTiles> { Quest.create(dto) }
+    }
+
+    @Test
+    fun `CanBeStartedOn should be true when a tile is a start tile of a main quest not started`() {
+        // Given
+        val quest = mainQuest(startTiles = listOf(PositionDto(row = 14, column = 9), PositionDto(row = 14, column = 10)))
+        // When / Then
+        quest.canBeStartedOn(listOf(PositionDto(row = 13, column = 10), PositionDto(row = 14, column = 10))) shouldBe true
+    }
+
+    @Test
+    fun `CanBeStartedOn should be false when no tile is a start tile`() {
+        // Given
+        val quest = mainQuest(startTiles = listOf(PositionDto(row = 14, column = 10)))
+        // When / Then
+        quest.canBeStartedOn(listOf(PositionDto(row = 15, column = 10))) shouldBe false
+        sideQuest().canBeStartedOn(listOf(PositionDto(row = 14, column = 10))) shouldBe false
+    }
+
+    @Test
+    fun `CanBeStartedOn should be false when the main quest is active or completed`() {
+        // Given
+        val startTiles = listOf(PositionDto(row = 14, column = 10))
+        val activeQuest = mainQuest(startTiles = startTiles).start()
+        val completedQuest = mainQuest(startTiles = startTiles, tasks = listOf(defeat(unitId = "goat-wizard"))).start().defeated("goat-wizard")
+        // When / Then
+        activeQuest.canBeStartedOn(startTiles) shouldBe false
+        completedQuest.canBeStartedOn(startTiles) shouldBe false
     }
 
     @Test

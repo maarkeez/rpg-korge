@@ -48,8 +48,8 @@ import kotlin.time.Duration.Companion.seconds
  * Pressing Start pauses the game: the pause screen takes the place of the pad (see [PausePresenter]), and time stops
  * until Resume displays the pad again.
  *
- * Tapping the tracker of the main quest opens it in full in place of the pad (see [QuestPresenter]), and time stops until
- * Back displays the pad again. A tap at any other moment is ignored, as it is no press of the pad.
+ * Tapping the tracker opens the quests in place of the pad (see [QuestPresenter]): the main quest in full when it is the only
+ * one listed, else the journal, also from the empty tracker. Time stops until Back displays the pad again. A tap at any other moment is ignored, as it is no press of the pad.
  */
 class ExplorationPresenter(
     private val virtualPadView: VirtualPadView,

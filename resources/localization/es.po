@@ -569,6 +569,11 @@ msgctxt "ui.questTracker.completed"
 msgid "Quest completed"
 msgstr "Misión completada"
 
+#. On the tracker while a side quest is active, none is pinned and the main quest has not started. Tapping it opens the journal.
+msgctxt "ui.questTracker.empty"
+msgid "No quest pinned"
+msgstr "Ninguna misión fijada"
+
 #. Over the name of the quest, in its detail.
 msgctxt "ui.questDetail.mainQuest"
 msgid "MAIN QUEST"
@@ -839,6 +844,11 @@ msgstr "Una cabra se tragó la magia de un mago y ahora gobierna la guarida del 
 
 #. A task of a quest, by its place in the line of tasks, as a whole sentence.
 msgctxt "quest.defeat-the-goat-wizard.task.0"
+msgid "Talk to the Elder"
+msgstr "Habla con el Anciano"
+
+#. A task of a quest, by its place in the line of tasks, as a whole sentence.
+msgctxt "quest.defeat-the-goat-wizard.task.1"
 msgid "Defeat the Goat Wizard"
 msgstr "Derrota al Mago Cabra"
 
@@ -858,24 +868,24 @@ msgid "Defeat 2 Rats"
 msgstr "Derrota 2 Ratas"
 
 #. The name of a quest.
-msgctxt "quest.the-elders-errand.name"
-msgid "The Elder's Errand"
-msgstr "El encargo del Anciano"
+msgctxt "quest.the-blacksmiths-errand.name"
+msgid "The Blacksmith's Errand"
+msgstr "El encargo de la Herrera"
 
 #. What a quest is about, displayed when it starts and in its detail.
-msgctxt "quest.the-elders-errand.description"
-msgid "The Elder wants to know whether the path to the southern fields is still open."
-msgstr "El Anciano quiere saber si el paso a los campos del sur sigue abierto."
+msgctxt "quest.the-blacksmiths-errand.description"
+msgid "The Blacksmith wants to know whether the path to the southern fields is still open."
+msgstr "La Herrera quiere saber si el paso a los campos del sur sigue abierto."
 
 #. A task of a quest, by its place in the line of tasks, as a whole sentence.
-msgctxt "quest.the-elders-errand.task.0"
+msgctxt "quest.the-blacksmiths-errand.task.0"
 msgid "Visit the southern fields"
 msgstr "Visita los campos del sur"
 
 #. A task of a quest, by its place in the line of tasks, as a whole sentence.
-msgctxt "quest.the-elders-errand.task.1"
-msgid "Talk to the Elder"
-msgstr "Habla con el Anciano"
+msgctxt "quest.the-blacksmiths-errand.task.1"
+msgid "Talk to the Blacksmith"
+msgstr "Habla con la Herrera"
 
 #. Displayed in the world builder, e.g.: "{terrain} can not be next to {adjacentTerrain}".
 msgctxt "terrain.grass.name"

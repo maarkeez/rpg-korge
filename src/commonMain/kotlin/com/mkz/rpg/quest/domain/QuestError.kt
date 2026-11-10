@@ -17,7 +17,11 @@ sealed class QuestError(
 
     class SideQuestWithoutQuestGiver : QuestError("A side quest needs a quest giver")
 
-    class MainQuestWithQuestGiver : QuestError("The main quest starts with a new game, so it has no quest giver")
+    class MainQuestWithQuestGiver : QuestError("The main quest starts on its start tiles, so it has no quest giver")
+
+    class MainQuestWithoutStartTiles : QuestError("The main quest needs at least one start tile")
+
+    class SideQuestWithStartTiles : QuestError("A side quest starts by talking to its quest giver, so it has no start tiles")
 
     class MainQuestRepeatable : QuestError("The main quest runs once, so it is not repeatable")
 

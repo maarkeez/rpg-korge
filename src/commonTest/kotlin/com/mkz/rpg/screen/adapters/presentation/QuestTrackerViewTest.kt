@@ -167,4 +167,53 @@ class QuestTrackerViewTest : ViewsForTesting() {
             // Then
             trackerView.isVisibleToUser().shouldBeFalse()
         }
+
+    @Test
+    fun `displayEmpty should draw No quest pinned with the chevron and no pin, glyph or count`() =
+        sharedViewsTest {
+            // Given
+            val trackerView = QuestTrackerView(MessagesMother.messages())
+            trackerView.display(questInfo(isMain = false, isPinned = true))
+            val rightEdge = trackerView.capsuleRightEdge()
+            // When
+            trackerView.displayEmpty()
+            // Then
+            trackerView.displayedTask() shouldBe "No quest pinned"
+            trackerView.isChevronShown().shouldBeTrue()
+            trackerView.isPinShown().shouldBeFalse()
+            trackerView.isTaskGlyphShown().shouldBeFalse()
+            trackerView.displayedCount().shouldBeNull()
+            trackerView.capsuleRightEdge() shouldBe (rightEdge plusOrMinus 0.01)
+        }
+
+    @Test
+    fun `setTappable should hide the chevron of the empty tracker when it is not tappable`() =
+        sharedViewsTest {
+            // Given
+            val trackerView = QuestTrackerView(MessagesMother.messages())
+            trackerView.displayEmpty()
+            // When
+            trackerView.setTappable(false)
+            // Then
+            trackerView.displayedTask() shouldBe "No quest pinned"
+            trackerView.isChevronShown().shouldBeFalse()
+        }
+
+    @Test
+    fun `clear should draw nothing until a quest is displayed again`() =
+        sharedViewsTest {
+            // Given
+            val trackerView = QuestTrackerView(MessagesMother.messages())
+            trackerView.display(questInfo())
+            // When
+            trackerView.clear()
+            val taskWhenCleared = trackerView.displayedTask()
+            trackerView.setTappable(false)
+            val taskWhenClearedAndReadOnly = trackerView.displayedTask()
+            trackerView.display(questInfo())
+            // Then
+            taskWhenCleared.shouldBeNull()
+            taskWhenClearedAndReadOnly.shouldBeNull()
+            trackerView.displayedTask() shouldBe "Defeat the Goat Wizard"
+        }
 }

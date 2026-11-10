@@ -222,12 +222,12 @@ const DATA = {
     {"name": "lootTable", "files": 11, "fanIn": 3, "fanOut": 2, "instability": 0.4, "importsIn": 7, "importsOut": 12},
     {"name": "lootableItem", "files": 12, "fanIn": 5, "fanOut": 2, "instability": 0.29, "importsIn": 28, "importsOut": 14},
     {"name": "npc", "files": 19, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 12, "importsOut": 29},
-    {"name": "party", "files": 43, "fanIn": 7, "fanOut": 6, "instability": 0.46, "importsIn": 54, "importsOut": 75},
+    {"name": "party", "files": 43, "fanIn": 7, "fanOut": 6, "instability": 0.46, "importsIn": 55, "importsOut": 75},
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 36, "importsOut": 12},
-    {"name": "quest", "files": 28, "fanIn": 2, "fanOut": 5, "instability": 0.71, "importsIn": 16, "importsOut": 37},
+    {"name": "quest", "files": 27, "fanIn": 2, "fanOut": 5, "instability": 0.71, "importsIn": 17, "importsOut": 35},
     {"name": "save", "files": 11, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 12, "importsOut": 8},
-    {"name": "screen", "files": 108, "fanIn": 1, "fanOut": 23, "instability": 0.96, "importsIn": 115, "importsOut": 273},
-    {"name": "shared", "files": 14, "fanIn": 24, "fanOut": 0, "instability": 0.0, "importsIn": 502, "importsOut": 0},
+    {"name": "screen", "files": 108, "fanIn": 1, "fanOut": 23, "instability": 0.96, "importsIn": 115, "importsOut": 274},
+    {"name": "shared", "files": 14, "fanIn": 24, "fanOut": 0, "instability": 0.0, "importsIn": 499, "importsOut": 0},
     {"name": "storybook", "files": 106, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 133},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 15, "importsOut": 7},
     {"name": "unit", "files": 14, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 17, "importsOut": 11},
@@ -1098,14 +1098,15 @@ const DATA = {
     {"from": "quest", "to": "inventory", "weight": 1, "files": 1, "imports": [
       {"file": "com/mkz/rpg/quest/usecases/commands/RequestQuestReward.kt", "layer": "usecases", "name": "inventory.domain.InventoryEvent.RequestGrantReward"}
     ]},
-    {"from": "quest", "to": "party", "weight": 5, "files": 5, "imports": [
+    {"from": "quest", "to": "party", "weight": 6, "files": 6, "imports": [
       {"file": "com/mkz/rpg/quest/adapters/events/OnNpcTalkFinished.kt", "layer": "adapters", "name": "party.domain.PartyEvent.NpcTalkFinished"},
       {"file": "com/mkz/rpg/quest/adapters/presentation/QuestApi.kt", "layer": "adapters", "name": "party.adapters.presentation.PartyApi"},
       {"file": "com/mkz/rpg/quest/usecases/commands/ProgressDefeatTasks.kt", "layer": "usecases", "name": "party.usecases.queries.SearchParty"},
       {"file": "com/mkz/rpg/quest/usecases/commands/ProgressVisitTasks.kt", "layer": "usecases", "name": "party.usecases.queries.SearchParty"},
-      {"file": "com/mkz/rpg/quest/usecases/commands/RequestQuestReward.kt", "layer": "usecases", "name": "party.usecases.queries.SearchParty"}
+      {"file": "com/mkz/rpg/quest/usecases/commands/RequestQuestReward.kt", "layer": "usecases", "name": "party.usecases.queries.SearchParty"},
+      {"file": "com/mkz/rpg/quest/usecases/commands/StartMainQuest.kt", "layer": "usecases", "name": "party.usecases.queries.SearchParty"}
     ]},
-    {"from": "quest", "to": "shared", "weight": 26, "files": 14, "imports": [
+    {"from": "quest", "to": "shared", "weight": 23, "files": 12, "imports": [
       {"file": "com/mkz/rpg/quest/adapters/events/OnBattleUnitDefeated.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/quest/adapters/events/OnBattleUnitDefeated.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/quest/adapters/events/OnBattleUnitMoved.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
@@ -1116,8 +1117,6 @@ const DATA = {
       {"file": "com/mkz/rpg/quest/adapters/events/OnQuestCompleted.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/quest/adapters/events/OnRequestCreateQuests.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/quest/adapters/events/OnRequestCreateQuests.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
-      {"file": "com/mkz/rpg/quest/adapters/events/OnRequestStartMainQuest.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/quest/adapters/events/OnRequestStartMainQuest.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/quest/adapters/presentation/QuestApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/quest/adapters/presentation/QuestApi.kt", "layer": "adapters", "name": "shared.domain.Snapshottable"},
       {"file": "com/mkz/rpg/quest/adapters/resources/ResourcesQuestLoader.kt", "layer": "adapters", "name": "shared.adapters.resources.ResourcesBundle"},
@@ -1130,7 +1129,6 @@ const DATA = {
       {"file": "com/mkz/rpg/quest/domain/QuestEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/quest/usecases/commands/PinQuest.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/quest/usecases/commands/RequestQuestReward.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/quest/usecases/commands/StartMainQuest.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/quest/usecases/services/PublishQuestProgress.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
     ]},
     {"from": "save", "to": "shared", "weight": 8, "files": 5, "imports": [
@@ -1344,7 +1342,7 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/selection/usecases/commands/ProcessTileSelected.kt", "layer": "adapters", "name": "player.domain.Player"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/selection/usecases/commands/ProcessTileSelected.kt", "layer": "adapters", "name": "player.usecases.queries.SearchPlayerById"}
     ]},
-    {"from": "screen", "to": "quest", "weight": 15, "files": 3, "imports": [
+    {"from": "screen", "to": "quest", "weight": 16, "files": 3, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/GameScene.kt", "layer": "adapters", "name": "quest.adapters.presentation.QuestApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/GameScene.kt", "layer": "adapters", "name": "quest.adapters.resources.ResourcesQuestLoader"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestMapper.kt", "layer": "adapters", "name": "quest.domain.Quest"},
@@ -1353,6 +1351,7 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestMapper.kt", "layer": "adapters", "name": "quest.domain.Quest.Dto.StatusDto"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestMapper.kt", "layer": "adapters", "name": "quest.domain.Quest.Dto.TaskDto"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.adapters.presentation.QuestApi"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.domain.Quest.Dto.QuestTypeDto"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.domain.Quest.Dto.StatusDto"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.domain.QuestEvent.DefeatCounted"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.domain.QuestEvent.QuestAbandoned"},

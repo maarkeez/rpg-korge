@@ -11,6 +11,7 @@ import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.quest.domain.Quest
+import com.mkz.rpg.quest.domain.Quest.Dto.PositionDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
 import com.mkz.rpg.quest.domain.QuestEvent.QuestCompleted
 import com.mkz.rpg.quest.domain.QuestEvent.QuestStarted
@@ -78,7 +79,7 @@ class QuestPresenterTest {
         )
 
     private fun SubdomainApis.startQuest() {
-        questApi.startMainQuest()
+        questApi.startMainQuest(battleUnitId = "knight-1", path = listOf(PositionDto(row = 0, column = 0)))
         eventBus.dispatch()
     }
 
@@ -104,9 +105,105 @@ class QuestPresenterTest {
         // Then
         trackerView.displayedQuests
             .single()
-            .currentTask.text shouldBe "Defeat the Goat Wizard"
+            .currentTask.text shouldBe "Talk to the Elder"
         trackerView.pops shouldBe 0
         announcementView.announcements.map { (moment, _) -> moment }.shouldContainExactly(Moment.STARTED)
+    }
+
+    @Test
+    fun `QuestPresenter should keep the tracker hidden when a new game is set up`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
+        // When
+        apis.presenter()
+        apis.eventBus.dispatch()
+        // Then
+        trackerView.drawnStates.shouldBeEmpty()
+        announcementView.announcements.shouldBeEmpty()
+    }
+
+    @Test
+    fun `QuestPresenter should display the empty tracker when a side quest starts before the main quest`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", questGiverNpcId = "farmer"), npcs = listOf(npc(id = "farmer", row = 1, column = 0).toDto()))
+        apis.presenter()
+        // When
+        apis.questApi.resolveNpcTalk("farmer")
+        apis.eventBus.dispatch()
+        // Then
+        trackerView.drawnStates.shouldContainExactly("empty")
+        announcementView.announcements.map { (moment, quest) -> moment to quest.id }.shouldContainExactly(Moment.STARTED to "side")
+    }
+
+    @Test
+    fun `QuestPresenter should hide the tracker when the last active side quest is abandoned before the main quest starts`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", questGiverNpcId = "farmer"), npcs = listOf(npc(id = "farmer", row = 1, column = 0).toDto()))
+        apis.presenter()
+        apis.questApi.resolveNpcTalk("farmer")
+        apis.eventBus.dispatch()
+        // When
+        apis.questApi.abandonQuest("side")
+        apis.eventBus.dispatch()
+        // Then
+        trackerView.drawnStates.shouldContainExactly("empty", "cleared")
+    }
+
+    @Test
+    fun `QuestPresenter should name the pinned side quest when it is pinned before the main quest starts`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", questGiverNpcId = "farmer"), npcs = listOf(npc(id = "farmer", row = 1, column = 0).toDto()))
+        apis.presenter()
+        apis.questApi.resolveNpcTalk("farmer")
+        apis.eventBus.dispatch()
+        // When: pinned, then the pin is tapped again
+        apis.questApi.pinQuest("side")
+        apis.eventBus.dispatch()
+        apis.questApi.pinQuest("side")
+        apis.eventBus.dispatch()
+        // Then
+        trackerView.drawnStates.shouldContainExactly("empty", "side", "empty")
+    }
+
+    @Test
+    fun `QuestPresenter should keep the pinned side quest on the tracker when the main quest starts`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", questGiverNpcId = "farmer"), npcs = listOf(npc(id = "farmer", row = 1, column = 0).toDto()))
+        apis.presenter()
+        apis.questApi.resolveNpcTalk("farmer")
+        apis.eventBus.dispatch()
+        apis.questApi.pinQuest("side")
+        apis.eventBus.dispatch()
+        // When
+        apis.startQuest()
+        // Then
+        trackerView.drawnStates.shouldContainExactly("empty", "side")
+        announcementView.announcements.map { (moment, quest) -> moment to quest.id }.shouldContainExactly(Moment.STARTED to "side", Moment.STARTED to questId)
+    }
+
+    @Test
+    fun `OpenQuest should open the journal when the empty tracker is tapped`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", questGiverNpcId = "farmer"), npcs = listOf(npc(id = "farmer", row = 1, column = 0).toDto()))
+        val presenter = apis.presenter()
+        apis.questApi.resolveNpcTalk("farmer")
+        apis.eventBus.dispatch()
+        // When
+        presenter.openQuest()
+        // Then
+        journalView.visible.shouldBeTrue()
+        detailView.visible.shouldBeFalse()
+    }
+
+    @Test
+    fun `OpenQuest should open nothing when no quest has started`() {
+        // Given
+        val presenter = apis(mainQuest(id = questId)).presenter()
+        // When
+        presenter.openQuest()
+        // Then
+        journalView.visible.shouldBeFalse()
+        detailView.visible.shouldBeFalse()
     }
 
     @Test
@@ -218,6 +315,7 @@ class QuestPresenterTest {
     fun `QuestPresenter should draw the tracker without announcing when a save is loaded`() {
         // Given
         val apis = apis(mainQuest(id = questId))
+        apis.startQuest()
         apis.presenter()
         // When
         apis.eventBus.publish(GameLoaded(slot = 1))
@@ -261,7 +359,7 @@ class QuestPresenterTest {
     fun `QuestPresenter should close the detail view when a player wins`() {
         // Given
         val apis = apis(mainQuest(id = questId))
-        val presenter = apis.presenter()
+        val presenter = apis.startedPresenter()
         presenter.openQuest()
         // When
         apis.eventBus.publish(PlayerVictory(playerId = "human"))
@@ -288,7 +386,7 @@ class QuestPresenterTest {
     fun `Back should close the quest when the detail view is open`() {
         // Given
         val apis = apis(mainQuest(id = questId))
-        val presenter = apis.presenter()
+        val presenter = apis.startedPresenter()
         apis.partyApi.openQuest()
         apis.eventBus.dispatch()
         presenter.openQuest()
@@ -305,7 +403,7 @@ class QuestPresenterTest {
     fun `Back should do nothing when the timeline is playing`() {
         // Given
         val apis = apis(mainQuest(id = questId))
-        val presenter = apis.presenter()
+        val presenter = apis.startedPresenter()
         apis.partyApi.openQuest()
         apis.eventBus.dispatch()
         presenter.openQuest()

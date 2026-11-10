@@ -8,13 +8,20 @@ import com.mkz.rpg.quest.domain.Quest.Dto.TaskDto
 
 /** Maps a quest to what the quest views draw, translated. The tasks after the current one are left out, so they can not be revealed. */
 internal object QuestMapper {
-    /** The main quest is pinned when no other quest is. */
+    /** The main quest is pinned when no other quest is, once it has started. */
     fun questInfos(
         quests: List<Quest.Dto>,
         messages: Messages,
     ): List<QuestInfo> {
         val isSideQuestPinned = quests.any { quest -> quest.progress.isPinned }
-        return quests.map { quest -> questInfo(quest, messages, isPinned = quest.progress.isPinned || (quest.type == QuestTypeDto.MAIN && !isSideQuestPinned)) }
+        return quests.map { quest ->
+            questInfo(
+                quest,
+                messages,
+                isPinned =
+                    quest.progress.isPinned || (quest.type == QuestTypeDto.MAIN && quest.progress.status != StatusDto.NOT_STARTED && !isSideQuestPinned),
+            )
+        }
     }
 
     private fun questInfo(

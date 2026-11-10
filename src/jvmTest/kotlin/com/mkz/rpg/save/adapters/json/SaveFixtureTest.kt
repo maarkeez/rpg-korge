@@ -15,6 +15,7 @@ import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
+import com.mkz.rpg.quest.domain.Quest.Dto.PositionDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
 import com.mkz.rpg.quest.domain.QuestMother.defeat
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
@@ -119,7 +120,7 @@ class SaveFixtureTest {
 
         // The main quest starts, the knight walks east onto the health potion, which it stores, then the game is saved in slot 1.
         fun playAndSave(): String {
-            apis.questApi.startMainQuest()
+            apis.questApi.startMainQuest(battleUnitId = "knight-1", path = listOf(PositionDto(row = 0, column = 0)))
             apis.lootDropApi.snapshottable.load("""[{"unitId":"rat","droppedItems":[{"row":1,"column":1,"lootableItemIds":["health-potion"]}]}]""")
             apis.partyApi.stepParty(DirectionDto.EAST)
             apis.eventBus.dispatch()

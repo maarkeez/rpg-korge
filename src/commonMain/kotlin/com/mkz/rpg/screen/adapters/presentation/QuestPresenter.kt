@@ -7,6 +7,7 @@ import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationInterrupted
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationResumed
 import com.mkz.rpg.quest.adapters.presentation.QuestApi
+import com.mkz.rpg.quest.domain.Quest.Dto.QuestTypeDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
 import com.mkz.rpg.quest.domain.QuestEvent.DefeatCounted
 import com.mkz.rpg.quest.domain.QuestEvent.QuestAbandoned
@@ -21,8 +22,10 @@ import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
 
 /**
- * Keeps the quests on the screen: the tracker names the current task of the pinned quest, or else of the main quest, popping
- * when it changes, also when a quest it does not name progresses, and stays ticked once the main quest is completed. A announcement
+ * Keeps the quests on the screen: the tracker names the current task of the pinned quest, or else of the main quest once
+ * started, popping when it changes, also when a quest it does not name progresses, and stays ticked once the main quest is
+ * completed. Before the main quest starts, it is the empty tracker while a side quest is active and none is pinned, and draws
+ * nothing while no quest is active, as on a new game. A announcement
  * announces any quest starting or completing, one after the other, alongside the timeline, so it holds nothing. The tracker
  * is read only in a battle, and hidden once a player wins, as the winner is drawn across the whole top line.
  *
@@ -64,7 +67,7 @@ class QuestPresenter(
     private var onTrackerSelected: (() -> Unit)? = null
 
     // What the tracker displays, or will once the timeline gets to it, so nothing new draws nothing.
-    private var displayedQuest: QuestInfo? = null
+    private var displayedTracker: Tracker = Tracker.Cleared
 
     // Each quest as its last event read it, so a defeat publishing two events pops the tracker once.
     private val lastSeenQuests = mutableMapOf<String, QuestInfo>()
@@ -188,7 +191,7 @@ class QuestPresenter(
         val lastSeen = lastSeenQuests.put(questId, quest)
         if (quest.isCompleted || quest == lastSeen) return
         val isNamed = quest.id == trackedQuest()?.id
-        if (isNamed) displayedQuest = quest
+        if (isNamed) displayedTracker = Tracker.Named(quest)
         timeline.play {
             if (isNamed) questTrackerView.display(quest)
             timeline.playAlongside { questTrackerView.pop() }
@@ -196,17 +199,18 @@ class QuestPresenter(
     }
 
     // The reward is the one the quest defines, read as it completes, as RewardGranted names no quest, and never comes when
-    // nobody is left to receive it. A side quest starting does not take the pin, so it leaves the tracker as it is.
+    // nobody is left to receive it. A side quest starting does not take the pin, so it leaves a pinned quest on the tracker, but
+    // turns no tracker into the empty tracker before the main quest starts.
     private fun announce(
         moment: Moment,
         questId: String,
     ) {
         val quest = questInfos().firstOrNull { quest -> quest.id == questId } ?: return
         lastSeenQuests[questId] = quest
-        val trackedQuest = trackedQuest()?.takeIf { tracked -> tracked != displayedQuest && (quest.isMain || moment == Moment.COMPLETED) }
-        trackedQuest?.let { tracked -> displayedQuest = tracked }
+        val tracker = tracker().takeIf { tracker -> tracker != displayedTracker }
+        tracker?.let { changed -> displayedTracker = changed }
         timeline.play {
-            trackedQuest?.let(questTrackerView::display)
+            tracker?.let(::draw)
             pendingAnnouncements.addLast(moment to quest)
             if (!isPlayingAnnouncements) {
                 isPlayingAnnouncements = true
@@ -291,21 +295,35 @@ class QuestPresenter(
     }
 
     // The main quest first while active, then the active side quests, then the completed quests, each group in the order
-    // the quests were created. The side quests not started are hidden, so nothing is spoiled.
+    // the quests were created. The quests not started are hidden, the main quest too, so nothing is spoiled.
     private fun listedQuests(): List<QuestInfo> {
         val startedQuestIds = questApi.searchQuests().filter { quest -> quest.progress.status != StatusDto.NOT_STARTED }.map { quest -> quest.id }
         val (completed, active) =
             questInfos()
-                .filter { quest -> quest.isMain || quest.id in startedQuestIds }
+                .filter { quest -> quest.id in startedQuestIds }
                 .partition { quest -> quest.isCompleted }
         return active.sortedByDescending { quest -> quest.isMain } + completed
     }
 
     private fun displayTracker() {
-        val quest = trackedQuest()?.takeIf { tracked -> tracked != displayedQuest } ?: return
-        displayedQuest = quest
-        timeline.play { questTrackerView.display(quest) }
+        val tracker = tracker().takeIf { tracker -> tracker != displayedTracker } ?: return
+        displayedTracker = tracker
+        timeline.play { draw(tracker) }
     }
+
+    // The pinned quest when there is one, else the empty tracker while a side quest is active, else nothing.
+    private fun tracker(): Tracker {
+        trackedQuest()?.let { quest -> return Tracker.Named(quest) }
+        val isSideQuestActive = questApi.searchQuests().any { quest -> quest.type == QuestTypeDto.SIDE && quest.progress.status == StatusDto.ACTIVE }
+        return if (isSideQuestActive) Tracker.Empty else Tracker.Cleared
+    }
+
+    private fun draw(tracker: Tracker) =
+        when (tracker) {
+            is Tracker.Named -> questTrackerView.display(tracker.quest)
+            Tracker.Empty -> questTrackerView.displayEmpty()
+            Tracker.Cleared -> questTrackerView.clear()
+        }
 
     // Each marker on the tile of its npc. An npc no longer on the battlefield, e.g.: once recruited, has none.
     private fun displayMarkers() {
@@ -329,4 +347,14 @@ class QuestPresenter(
     private fun questInfos(): List<QuestInfo> = QuestMapper.questInfos(questApi.searchQuests(), messages)
 
     private fun trackedQuest(): QuestInfo? = questInfos().firstOrNull { quest -> quest.isPinned }
+
+    private sealed interface Tracker {
+        data class Named(
+            val quest: QuestInfo,
+        ) : Tracker
+
+        data object Empty : Tracker
+
+        data object Cleared : Tracker
+    }
 }

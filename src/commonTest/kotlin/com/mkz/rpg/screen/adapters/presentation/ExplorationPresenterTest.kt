@@ -14,6 +14,7 @@ import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
+import com.mkz.rpg.quest.domain.Quest
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
 import com.mkz.rpg.save.adapters.presentation.SaveApi
 import com.mkz.rpg.save.domain.SaveEvent
@@ -992,6 +993,12 @@ class ExplorationPresenterTest {
             .shouldBeTrue()
     }
 
+    // The knight walks onto the start tile of the main quest, so the tracker names it.
+    private fun startTheMainQuest() {
+        apis.questApi.startMainQuest(battleUnitId = "knight-1", path = listOf(Quest.Dto.PositionDto(row = 0, column = 0)))
+        eventBus.dispatch()
+    }
+
     private fun tapTracker() {
         questPresenter.questTrackerSelected()
         eventBus.dispatch()
@@ -1004,6 +1011,7 @@ class ExplorationPresenterTest {
         // Given
         createPresenter()
         startExploring()
+        startTheMainQuest()
         // When
         tapTracker()
         // Then
@@ -1036,6 +1044,7 @@ class ExplorationPresenterTest {
         // Given
         createPresenter()
         startExploring()
+        startTheMainQuest()
         tapTracker()
         // When
         callToActionView.chooseAction("Back")
@@ -1053,6 +1062,7 @@ class ExplorationPresenterTest {
         // Given
         createPresenter()
         startExploring()
+        startTheMainQuest()
         // When
         tapTracker()
         // Then

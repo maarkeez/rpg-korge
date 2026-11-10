@@ -41,6 +41,7 @@ import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.quest.adapters.presentation.QuestApi
 import com.mkz.rpg.quest.adapters.resources.ResourcesQuestLoader
 import com.mkz.rpg.quest.domain.Quest
+import com.mkz.rpg.quest.domain.Quest.Dto.PositionDto
 import com.mkz.rpg.quest.domain.Quest.Dto.QuestTypeDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
 import com.mkz.rpg.quest.domain.QuestMother.defeat
@@ -112,14 +113,62 @@ class QuestAcceptanceTest {
             )
         }
 
+    // The hero teleports onto the tile, which counts as a walk onto it for the quests.
+    private fun teleportTheHero(
+        row: Int,
+        column: Int,
+    ) {
+        battleUnitApi.applyEffect(
+            EffectApplicationDto(
+                source = SourceDto.terrain("lava"),
+                recipient = RecipientDto.battleUnit("hero"),
+                effectId = "teleport",
+                destination = RecipientDto.position(row = row, column = column),
+            ),
+        )
+        eventBus.dispatch()
+    }
+
+    // The hero steps onto the village entrance, then next to the Elder at (16,8), and talks to the Elder.
+    private fun talkToTheElder() {
+        teleportTheHero(row = 14, column = 10)
+        teleportTheHero(row = 16, column = 9)
+        npcApi.talkToAdjacentNpc()
+        eventBus.dispatch()
+        partyApi.finishTalk()
+        eventBus.dispatch()
+    }
+
+    private fun mainQuest() = questApi.searchQuests().first { quest -> quest.type == QuestTypeDto.MAIN }
+
     @Test
-    fun `The main quest should be active when a new game is set up`() =
+    fun `The main quest should not be started when a new game is set up`() =
         scenarioTest(::setUp) {
             // When
-            val mainQuest = questApi.searchQuests().first { quest -> quest.type == QuestTypeDto.MAIN }
+            val mainQuest = mainQuest()
             // Then
             mainQuest.id shouldBe "defeat-the-goat-wizard"
-            mainQuest.progress.status shouldBe StatusDto.ACTIVE
+            mainQuest.progress.status shouldBe StatusDto.NOT_STARTED
+        }
+
+    @Test
+    fun `The main quest should start when the leader walks onto the village entrance`() =
+        scenarioTest(::setUp) {
+            // When
+            teleportTheHero(row = 14, column = 10)
+            // Then
+            mainQuest().progress.status shouldBe StatusDto.ACTIVE
+            mainQuest().progress.currentTaskIndex shouldBe 0
+        }
+
+    @Test
+    fun `The main quest should move on to defeating the Goat Wizard when the leader talks to the Elder`() =
+        scenarioTest(::setUp) {
+            // When
+            talkToTheElder()
+            // Then
+            mainQuest().progress.status shouldBe StatusDto.ACTIVE
+            mainQuest().progress.currentTaskIndex shouldBe 1
         }
 
     @Test
@@ -128,6 +177,7 @@ class QuestAcceptanceTest {
             // Given
             require(partyApi.searchParty()!!.leaderBattleUnitId == "hero")
             require(inventoryApi.searchInventoryByBattleUnitId("hero")!!.gold == 30)
+            talkToTheElder()
             defeatTheGoatWizard()
             // When
             eventBus.dispatch()
@@ -162,7 +212,7 @@ class QuestAcceptanceTest {
             explore = true,
         ).also { apis ->
             apis.initialise()
-            apis.questApi.startMainQuest()
+            apis.questApi.startMainQuest(battleUnitId = "knight-1", path = listOf(PositionDto(row = 0, column = 0)))
             apis.eventBus.dispatch()
         }
 

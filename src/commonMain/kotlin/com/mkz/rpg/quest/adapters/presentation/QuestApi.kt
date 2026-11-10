@@ -7,7 +7,6 @@ import com.mkz.rpg.quest.adapters.events.OnBattleUnitMoved
 import com.mkz.rpg.quest.adapters.events.OnNpcTalkFinished
 import com.mkz.rpg.quest.adapters.events.OnQuestCompleted
 import com.mkz.rpg.quest.adapters.events.OnRequestCreateQuests
-import com.mkz.rpg.quest.adapters.events.OnRequestStartMainQuest
 import com.mkz.rpg.quest.adapters.save.QuestSnapshottable
 import com.mkz.rpg.quest.adapters.storage.InMemoryQuestRepository
 import com.mkz.rpg.quest.domain.QuestRepository
@@ -47,7 +46,7 @@ class QuestApi(
 
     // Commands
     val createQuests = CreateQuests(questLoader, questRepository, battlefieldApi.isTileVacant)
-    val startMainQuest = StartMainQuest(questRepository, eventBus)
+    val startMainQuest = StartMainQuest(questRepository, partyApi.searchParty, publishQuestProgress)
     val progressDefeatTasks = ProgressDefeatTasks(questRepository, partyApi.searchParty, publishQuestProgress)
     val progressVisitTasks = ProgressVisitTasks(questRepository, partyApi.searchParty, publishQuestProgress)
     val resolveNpcTalk = ResolveNpcTalk(questRepository, publishQuestProgress)
@@ -61,9 +60,8 @@ class QuestApi(
 
     // Events
     private val onRequestCreateQuests = OnRequestCreateQuests(createQuests, eventBus)
-    private val onRequestStartMainQuest = OnRequestStartMainQuest(startMainQuest, eventBus)
     private val onBattleUnitDefeated = OnBattleUnitDefeated(progressDefeatTasks, eventBus)
-    private val onBattleUnitMoved = OnBattleUnitMoved(progressVisitTasks, eventBus)
+    private val onBattleUnitMoved = OnBattleUnitMoved(startMainQuest, progressVisitTasks, eventBus)
     private val onNpcTalkFinished = OnNpcTalkFinished(resolveNpcTalk, eventBus)
     private val onQuestCompleted = OnQuestCompleted(requestQuestReward, eventBus)
 

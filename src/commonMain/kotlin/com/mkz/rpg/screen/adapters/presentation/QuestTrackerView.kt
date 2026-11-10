@@ -23,7 +23,8 @@ import korlibs.time.milliseconds
 
 /**
  * The current task of the quest it is given, with a pin when it is a side quest, or that it is completed, as a capsule on
- * the right of the top line, as wide as what it holds. Only the capsule takes taps, so the left of the line stays free. Read only in a battle: no chevron, and
+ * the right of the top line, as wide as what it holds. As the empty tracker, it says no quest is pinned, and it draws nothing
+ * while no quest is active. Only the capsule takes taps, so the left of the line stays free. Read only in a battle: no chevron, and
  * tapping it does nothing.
  */
 open class QuestTrackerView(
@@ -56,6 +57,7 @@ open class QuestTrackerView(
 
     private var delegate: Delegate? = null
     private var quest: QuestInfo? = null
+    private var isEmpty = false
     private var isTappable = true
 
     // Its origin is the middle of its right edge, so it stays on the screen as it grows when it pops.
@@ -79,13 +81,36 @@ open class QuestTrackerView(
     /** Draws the current task of the quest, or that it is completed. */
     open fun display(quest: QuestInfo) {
         this.quest = quest
+        isEmpty = false
         draw(quest)
+    }
+
+    /** Draws the empty tracker: no quest is pinned, and tapping it opens the journal to pin one. */
+    open fun displayEmpty() {
+        quest = null
+        isEmpty = true
+        drawEmpty()
+    }
+
+    /** Draws nothing, e.g.: while no quest is active. A later [display] or [displayEmpty] draws it again, unlike [hide]. */
+    open fun clear() {
+        quest = null
+        isEmpty = false
+        capsule.removeChildren()
+        background = null
+        taskText = null
+        countText = null
+        pin = null
+        glyph = null
+        tick = null
+        chevronView = null
     }
 
     /** Shows or hides the chevron, fitting the capsule to the right edge again. Tapping it does nothing when it is not tappable. */
     open fun setTappable(isTappable: Boolean) {
         this.isTappable = isTappable
         quest?.let(::draw)
+        if (isEmpty) drawEmpty()
     }
 
     /** Hides it for good, e.g.: once the winner takes the whole line. A later [display] does not bring it back. */
@@ -101,6 +126,25 @@ open class QuestTrackerView(
                 scaleTo(capsule, 1.0, time = POP_DURATION / 2)
             }
         popAnimator.awaitComplete()
+    }
+
+    private fun drawEmpty() {
+        val label = fitted(messages[UiMessage.QUEST_TRACKER_EMPTY], TEXT_SIZE, MAXIMUM_TEXT_WIDTH)
+        val labelWidth = widthOf(label, TEXT_SIZE)
+        val chevronWidth = if (isTappable) CHEVRON_SPACING + CHEVRON_SIZE else 0.0
+        val capsuleWidth = LEFT_PADDING + labelWidth + chevronWidth + RIGHT_PADDING
+        val textY = (HEIGHT - TEXT_SIZE) / 2 - 1
+        capsule.removeChildren()
+        capsule.container {
+            xy(-capsuleWidth, -HEIGHT / 2)
+            background = panel(Size(capsuleWidth, HEIGHT), radius = HEIGHT / 2)
+            pin = null
+            glyph = null
+            tick = null
+            countText = null
+            taskText = text(label, textSize = TEXT_SIZE, color = HudStyle.MUTED) { xy(LEFT_PADDING, textY) }
+            chevronView = if (isTappable) container { chevron(capsuleWidth - RIGHT_PADDING - CHEVRON_SIZE, (HEIGHT - CHEVRON_SIZE) / 2, CHEVRON_SIZE, HudStyle.MUTED) } else null
+        }
     }
 
     private fun draw(quest: QuestInfo) {
