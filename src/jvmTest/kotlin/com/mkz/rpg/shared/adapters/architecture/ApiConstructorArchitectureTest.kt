@@ -7,12 +7,7 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import kotlin.test.Test
 
-/**
- * A presentation Api takes every collaborator from its caller, so each scene shows all of its wiring: its primary
- * constructor is its only one and none of its parameters has a default value.
- */
 class ApiConstructorArchitectureTest {
-    // The presentation Apis, e.g.: `BattlefieldApi`, and the nested `SelectionApi`.
     private val apis =
         Konsist
             .scopeFromProduction()

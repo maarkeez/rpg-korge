@@ -29,8 +29,6 @@ import com.mkz.rpg.unit.adapters.resources.ResourcesUnitLoader
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// Uses the effects, abilities and units defined in the resources: a CPU rat (20 HP, sword and heal) next to a human knight,
-// which has left the rat badly hurt.
 class CpuCastingBadlyHurtRatAcceptanceTest {
     private val eventBus = InMemoryEventBus()
     private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
@@ -42,8 +40,7 @@ class CpuCastingBadlyHurtRatAcceptanceTest {
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
     private val battleApi = BattleApi(eventBus, playerApi)
 
-    // The CPU battle units out of the battle rest when a round finishes, rather than wandering.
-    private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(0.0))
+    private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom.cpuBattleUnitsAlwaysResting())
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, partyApi, eventBus)
 
@@ -68,8 +65,6 @@ class CpuCastingBadlyHurtRatAcceptanceTest {
         battleUnitApi.deployBattleUnit(ratBattleUnitId, "rat", cpuPlayerId, deployAtRow = 1, deployAtColumn = 2)
         battleApi.startBattleWithEveryBattleUnit(battleUnitApi, humanPlayerId, cpuPlayerId)
         eventBus.dispatch()
-        // The knight's skull leaves the rat at 10 of 20 HP. Its damage is applied through several events,
-        // so it is applied here, before the CPU turn starts.
         battleUnitApi.castAbility(
             battleUnitId = knightBattleUnitId,
             abilityId = "skull",

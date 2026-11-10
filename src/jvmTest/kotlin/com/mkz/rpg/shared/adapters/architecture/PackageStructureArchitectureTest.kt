@@ -8,8 +8,6 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import kotlin.test.Test
 
 class PackageStructureArchitectureTest {
-    // Each subdomain lives in `com.mkz.rpg.<subdomain>`.
-    // `selection` is a presentation-only subdomain nested in the `screen` presentation adapter.
     private val subdomainRoots =
         listOf(
             """com\.mkz\.rpg\.[^.]+""",
@@ -43,7 +41,6 @@ class PackageStructureArchitectureTest {
         withClue(violations.joinToString("\n")) { violations.shouldBeEmpty() }
     }
 
-    // The tools under `tools` are standalone builds, with their own packages.
     private fun KoFileDeclaration.isTool(): Boolean = path.contains("/tools/")
 
     private fun KoFileDeclaration.isEntryPoint(): Boolean = packagee?.fullyQualifiedName == "com.mkz.rpg" && nameWithExtension == "Main.kt"

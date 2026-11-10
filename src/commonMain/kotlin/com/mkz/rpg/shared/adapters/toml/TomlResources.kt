@@ -4,10 +4,6 @@ import korlibs.io.file.VfsFile
 
 private const val TOML_EXTENSION = ".toml"
 
-/**
- * Reads every `<id>.toml` file of this directory, keyed by id and sorted by id.
- * Returns no definitions when the directory does not exist.
- */
 suspend inline fun <reified T> VfsFile.readTomlFiles(): Map<String, T> {
     if (!exists()) return emptyMap()
     return listNames()
@@ -16,7 +12,6 @@ suspend inline fun <reified T> VfsFile.readTomlFiles(): Map<String, T> {
         .associate { name -> name.removeSuffix(tomlExtension()) to this[name].readTomlFile<T>() }
 }
 
-/** Reads this TOML file, failing with the file path when it is missing or invalid. */
 suspend inline fun <reified T> VfsFile.readTomlFile(): T {
     check(exists()) { "Resource '$path' not found" }
     val toml = readString()
@@ -27,7 +22,6 @@ suspend inline fun <reified T> VfsFile.readTomlFile(): T {
     }
 }
 
-/** Converts a definition read from the resource at [path], failing with the [path] when the definition is not valid. */
 inline fun <T> fromResource(
     path: String,
     conversion: () -> T,
@@ -38,7 +32,6 @@ inline fun <T> fromResource(
         throw IllegalStateException("Resource '$path' is invalid: ${exception.message}", exception)
     }
 
-/** Parses an enum [value] by its name, e.g.: `"DAMAGE"`. */
 inline fun <reified E : Enum<E>> enumOf(
     field: String,
     value: String,
@@ -46,7 +39,6 @@ inline fun <reified E : Enum<E>> enumOf(
     enumValues<E>().firstOrNull { it.name == value }
         ?: throw IllegalArgumentException("'$field' must be one of ${enumValues<E>().map { it.name }}, but was '$value'")
 
-/** Requires a [value] that is only optional for some types, e.g.: `damage` is required by `DAMAGE` outcomes. */
 fun <T : Any> required(
     field: String,
     value: T?,

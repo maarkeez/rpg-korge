@@ -23,8 +23,6 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
-    // The party walks to the battle with the knight at (2,7), which can walk 3 tiles across the start room: (2,6) and
-    // (2,5), back west, are sand tiles. (2,3) is 4 tiles away, out of its walking range.
     private val knightRow = LEADER_ROW_IN_BATTLE
     private val knightColumn = LEADER_COLUMN_IN_BATTLE
     private val targetRow = LEADER_ROW_IN_BATTLE

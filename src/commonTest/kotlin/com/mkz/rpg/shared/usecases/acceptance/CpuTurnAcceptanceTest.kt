@@ -30,7 +30,6 @@ import io.kotest.matchers.shouldNotBe
 import kotlin.math.abs
 import kotlin.test.Test
 
-// Uses the effects, abilities and units defined in the resources: CPU rats (20 HP, sword and heal) and a human knight.
 class CpuTurnAcceptanceTest {
     private val eventBus = InMemoryEventBus()
     private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
@@ -42,8 +41,7 @@ class CpuTurnAcceptanceTest {
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
     private val battleApi = BattleApi(eventBus, playerApi)
 
-    // The CPU battle units out of the battle rest when a round finishes, rather than wandering.
-    private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(0.0))
+    private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom.cpuBattleUnitsAlwaysResting())
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, partyApi, eventBus)
 
@@ -103,7 +101,6 @@ class CpuTurnAcceptanceTest {
     fun `should move each cpu rat to a different tile next to the knight and attack with both when they are two tiles away`() =
         scenarioTest(::setUp) {
             // Given
-            // On both sides of the knight, so the first rat to move does not stand in the way of the other.
             deployRat(battleUnitId = "cpu-rat-1", row = 3, column = 5)
             deployRat(battleUnitId = "cpu-rat-2", row = 3, column = 1)
             startBattle()

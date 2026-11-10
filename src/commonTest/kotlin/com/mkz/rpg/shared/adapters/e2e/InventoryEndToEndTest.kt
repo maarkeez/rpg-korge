@@ -58,9 +58,6 @@ private const val HERBALIST_ROW = 2
 private const val HERBALIST_COLUMN = 2
 
 class InventoryEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
-    // The party walks to the battle with the knight at (2,7), and the cpu bat engaging it walks to (2,8), next to it.
-    // Nothing has been looted yet. The knight is selected once the human player turn starts.
-
     @Test
     fun `should open the empty inventory of the knight and go back to its info when the human player opens and closes its inventory`() =
         sharedViewsTest {
@@ -91,7 +88,6 @@ class InventoryEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             withClue("Expected the bat, which has no inventory, to have no inventory button") { battleUnitInfoView()?.isInventoryButtonDisplayed()?.shouldBeFalse() }
         }
 
-    // The herbalist is a long way from where the party starts, so it is saved next to the hero, and joins once talked to.
     private suspend fun ViewsForTesting.startWithTheHerbalistInTheParty() {
         val storage = InmemoryStorage()
         startNewGame(storage = storage)
@@ -122,14 +118,13 @@ class InventoryEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         waitUntil { talkView.isDialogShown() }
         clickDialog(talkView)
         waitUntil { stage.virtualPadView()?.isPadShown() == true && stage.battlefieldView()?.hasBattleUnitAt(HERBALIST_ROW, HERBALIST_COLUMN) == true }
-        // The screen blinks it as it joins, and tapping a tile meanwhile is ignored.
         waitFor(1.seconds)
     }
 
     @Test
     fun `should give gold to another party member from the inventory, and read it in its inventory`() =
         sharedViewsTest {
-            // Given: the hero carries 30 G, and the herbalist 10 G.
+            // Given
             startWithTheHerbalistInTheParty()
             clickTile(requireNotNull(battlefieldView()), KNIGHT_START_ROW, KNIGHT_START_COLUMN)
             waitUntil { battleUnitInfoView()?.isInventoryButtonDisplayed() == true }

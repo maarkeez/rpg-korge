@@ -56,7 +56,6 @@ class LearnTeleportAcceptanceTest {
     private val vikingRow = 2
     private val vikingColumn = 2
 
-    // The party explores with a viking of the human player, as if recruited next to the knight, which only knows sword.
     private suspend fun setUp() {
         terrainApi.init()
         effectApi.init()
@@ -100,7 +99,6 @@ class LearnTeleportAcceptanceTest {
             eventBus.dispatch()
             // Then
             val viking = battleUnitApi.searchBattleUnitById(vikingBattleUnitId)!!
-            // Teleport is at the end of the ability bar, ready to be cast.
             viking.knownAbilities.toList().shouldContainExactly("sword" to 0, "teleport" to 0)
             inventoryApi.searchInventoryByBattleUnitId(vikingBattleUnitId)!!.storedItems.shouldBeEmpty()
         }

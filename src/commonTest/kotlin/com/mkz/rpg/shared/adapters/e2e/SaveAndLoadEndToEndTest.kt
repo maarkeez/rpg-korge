@@ -33,7 +33,6 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class SaveAndLoadEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
-    // Two steps east of where the game setup deploys the hero: out of reach of the CPU battle units.
     private val savedRow = KNIGHT_START_ROW
     private val savedColumn = KNIGHT_START_COLUMN + 2
 
@@ -42,7 +41,7 @@ class SaveAndLoadEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     @Test
     fun `Game should be back where it was saved when the slot is loaded after quitting to the menu`() =
         sharedViewsTest {
-            // Given: the hero walks two steps east, and the game is saved in slot 1.
+            // Given
             startNewGame(storage = storage)
             waitUntil { virtualPadView()?.isPadShown() == true && battlefieldView()?.hasBattleUnitAt(KNIGHT_START_ROW, KNIGHT_START_COLUMN) == true }
             repeat(2) { step ->
@@ -55,7 +54,6 @@ class SaveAndLoadEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             waitUntil { saveSlotsView()?.isShown() == true }
             clickSlot(requireNotNull(saveSlotsView()), 1)
             waitUntil { pauseView()?.isSavedShown() == true }
-            // And the human player quits to the menu.
             clickQuit(requireNotNull(pauseView()))
             waitUntil { confirmDialogView()?.isShown() == true }
             clickConfirmation(requireNotNull(stage.callToActionView()))

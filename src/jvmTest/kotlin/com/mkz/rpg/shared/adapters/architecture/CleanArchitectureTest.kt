@@ -16,9 +16,6 @@ class CleanArchitectureTest {
             ClassFileImporter().importPath(File(codeSourceLocation.toURI()).toPath())
         }
 
-    // Kotlin stdlib, JDK, kotlinx and JetBrains annotations are part of the compiled bytecode
-    // and are not considered architecture dependencies.
-    // Note: in ArchUnit package identifiers '*' matches a single package level, '..' matches all subpackages.
     private val externalPackages =
         arrayOf(
             "kotlin",
@@ -68,12 +65,8 @@ class CleanArchitectureTest {
     @Test
     fun `should allow adapters to depend on any layer when class is declared in an adapters folder`() {
         // Given
-        // The adapters layer is the outermost layer and is intentionally unrestricted:
-        // it may depend on domain classes, usecases and any external library
-        // (presentation, storage, events, ...). There is no ArchRule to check.
         val adapterClassCount = productionClasses.count { it.getPackageName().split(".").contains("adapters") }
         // When
-        // no dependency restrictions apply to the adapters layer
         // Then
         adapterClassCount.shouldBeGreaterThan(0)
     }

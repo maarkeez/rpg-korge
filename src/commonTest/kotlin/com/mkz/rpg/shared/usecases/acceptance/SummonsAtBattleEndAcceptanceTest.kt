@@ -37,7 +37,6 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import kotlin.test.Test
 
-// Uses the units defined in the resources: two human knights, which summon bees lasting 5 turns, and two CPU rats.
 class SummonsAtBattleEndAcceptanceTest {
     private val eventBus = InMemoryEventBus()
     private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
@@ -49,8 +48,7 @@ class SummonsAtBattleEndAcceptanceTest {
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
     private val battleApi = BattleApi(eventBus, playerApi)
 
-    // The CPU battle units out of the battle rest when a round finishes, rather than wandering.
-    private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(0.0))
+    private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom.cpuBattleUnitsAlwaysResting())
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, partyApi, eventBus)
 
@@ -58,8 +56,6 @@ class SummonsAtBattleEndAcceptanceTest {
     private val cpuPlayerId = "cpu"
     private val winners = mutableListOf<String>().also { winners -> eventBus.subscribe<BattleEvent.PlayerVictory> { winners += it.playerId } }
 
-    // The knights start in a line at (6,1) and (7,1). The leader walks to (5,1), 5 tiles away from the rat-1, at (0,1),
-    // which engages the party and plays first. The rat-2, at (2,6), stays out of the battle.
     private suspend fun setUp() {
         terrainApi.init()
         effectApi.init()
@@ -82,7 +78,6 @@ class SummonsAtBattleEndAcceptanceTest {
         eventBus.dispatch()
     }
 
-    // The leader summons a bee next to it, in the human turn, and returns it.
     private fun summonBee(): String {
         val castGroup = battleUnitApi.whereCanCast("knight-1", "bee").first()
         battleUnitApi.castAbility(battleUnitId = "knight-1", abilityId = "bee", castGroup = castGroup)
@@ -91,7 +86,6 @@ class SummonsAtBattleEndAcceptanceTest {
         return battlefieldApi.searchOccupant(row = tile.row, column = tile.column).shouldNotBeNull()
     }
 
-    // The battle unit receives a low physical damage, of 10, until it is defeated.
     private fun defeat(battleUnitId: String) {
         while (battleUnitApi.searchBattleUnitById(battleUnitId)!!.remainingHealth > 0) {
             battleUnitApi.applyEffect(
@@ -112,7 +106,7 @@ class SummonsAtBattleEndAcceptanceTest {
             // Given
             val beeId = summonBee()
             val beeTile = battlefieldApi.searchPosition(beeId)!!
-            // When: the rat-1 is the only CPU battle unit in the battle, so the battle ends without finishing the turn.
+            // When
             defeat("rat-1")
             // Then
             battleApi.searchBattle()!!.isFinished.shouldBeTrue()
@@ -130,7 +124,7 @@ class SummonsAtBattleEndAcceptanceTest {
             defeat("knight-1")
             defeat("knight-2")
             require(winners.isEmpty())
-            // When: the rat-1 is the only CPU battle unit in the battle, so the battle ends without finishing the turn.
+            // When
             defeat("rat-1")
             // Then
             winners.shouldContainExactly(cpuPlayerId)

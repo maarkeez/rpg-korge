@@ -26,16 +26,8 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeSource
 
-// Shared helpers for the end-to-end tests.
-
 private val WAIT_TIMEOUT = 10.seconds
 
-/**
- * Waits until the condition is met, or the timeout is reached.
- *
- * The game loads its resources asynchronously in real time, while the frames are simulated much faster than that.
- * Hence, waiting is bounded by real time instead of frames. Each check waits for the next frame, so the game runs in between.
- */
 suspend fun ViewsForTesting.waitUntil(condition: () -> Boolean) {
     val start = TimeSource.Monotonic.markNow()
     while (!condition() && start.elapsedNow() < WAIT_TIMEOUT) {
@@ -43,13 +35,8 @@ suspend fun ViewsForTesting.waitUntil(condition: () -> Boolean) {
     }
 }
 
-/**
- * Starts the game as the player does, and plays a new game from the menu. By default, the CPU battle units always rest
- * instead of wandering, so they stand where the game setup deploys them. The games are saved in the [storage], in
- * memory, so no test reads the games saved by another one. It waits for the announcement announcing the main quest, which fades by itself.
- */
 suspend fun ViewsForTesting.startNewGame(
-    random: Random = FixedDoublesRandom(0.0),
+    random: Random = FixedDoublesRandom.cpuBattleUnitsAlwaysResting(),
     storage: IStorage = InmemoryStorage(),
 ) {
     stage.startApp(random = random, storage = storage)
@@ -58,22 +45,15 @@ suspend fun ViewsForTesting.startNewGame(
     waitUntil { stage.questAnnouncementView()?.isAnnouncementShown() == true }
 }
 
-/** A leader step of the route to the battle: the arrow pressed, and the tile the leader walks to. */
 private data class RouteStep(
     val direction: Direction,
     val row: Int,
     val column: Int,
 )
 
-/** The game setup deploys the knight, alone in the party, on the west side of the start room (rows 1 to 4). */
 const val KNIGHT_START_ROW = 2
 const val KNIGHT_START_COLUMN = 1
 
-/**
- * Walking east six times leaves the knight at (2,7), where the CPU bat on the gate at (2,12), the only way out of the
- * start room, has it within reach: 5 tiles. No tile walked before is within reach of a CPU battle unit. The bat engages
- * and plays first, alone: it walks to (2,8), next to the knight, and the other CPU battle units stay out of the battle.
- */
 private val ROUTE_TO_BATTLE =
     listOf(
         RouteStep(Direction.EAST, row = 2, column = 2),
@@ -84,18 +64,12 @@ private val ROUTE_TO_BATTLE =
         RouteStep(Direction.EAST, row = 2, column = 7),
     )
 
-/** Where the knight is once [startNewBattle] has walked it to the battle. */
 const val LEADER_ROW_IN_BATTLE = 2
 const val LEADER_COLUMN_IN_BATTLE = 7
 
-/** Where the CPU bat stands once it has engaged the knight, next to it, on the side of the gate. */
 const val BAT_ROW_IN_BATTLE = 2
 const val BAT_COLUMN_IN_BATTLE = 8
 
-/**
- * Plays a new game and walks the party with the virtual pad until the CPU engages, as the player does. Returns once
- * the human player can act on their first turn, after the CPU one.
- */
 suspend fun ViewsForTesting.startNewBattle() {
     startNewGame()
     waitUntil { stage.virtualPadView()?.isPadShown() == true && stage.battlefieldView()?.hasBattleUnitAt(KNIGHT_START_ROW, KNIGHT_START_COLUMN) == true }
@@ -103,11 +77,6 @@ suspend fun ViewsForTesting.startNewBattle() {
     waitUntil { stage.canHumanPlayerAct() }
 }
 
-/**
- * Clicks the arrow once, and waits until the leader is displayed on the tile. A click made while the scene plays the
- * previous steps is kept until it is idle, and the leader glides off the tiles meanwhile, so clicking again would walk
- * it further.
- */
 private suspend fun ViewsForTesting.walkLeader(step: RouteStep) {
     val virtualPadView = requireNotNull(stage.virtualPadView()) { "The virtual pad is not displayed" }
     val battlefieldView = requireNotNull(stage.battlefieldView()) { "The battlefield is not displayed" }
@@ -116,7 +85,6 @@ private suspend fun ViewsForTesting.walkLeader(step: RouteStep) {
     require(battlefieldView.hasBattleUnitAt(step.row, step.column)) { "The leader did not walk to (${step.row},${step.column})" }
 }
 
-/** Starts the game as the player does, opens the world builder from the menu and waits until the world is displayed. */
 suspend fun ViewsForTesting.startWorldBuilder() {
     stage.startApp(storage = InmemoryStorage())
     waitUntil { stage.menuView() != null }
@@ -124,7 +92,6 @@ suspend fun ViewsForTesting.startWorldBuilder() {
     waitUntil { stage.battlefieldView()?.isBattlefieldDisplayed() == true && stage.worldBuilderHudView()?.paletteTerrainIds()?.isNotEmpty() == true }
 }
 
-/** Lets the game run for the given game time, frame by frame. */
 suspend fun ViewsForTesting.waitFor(duration: Duration) {
     repeat((duration / frameTime).toInt()) { delay(frameTime) }
 }

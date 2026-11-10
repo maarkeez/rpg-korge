@@ -125,7 +125,6 @@ class WorldBuilderEndToEndTest : ViewsForTesting() {
             battlefieldView() shouldNotBe null
         }
 
-    // KorGE opens no file picker without a window, so the file can never be read in the tests.
     @Test
     fun `should tell the file can not be read when importing without a file picker`() =
         sharedViewsTest {

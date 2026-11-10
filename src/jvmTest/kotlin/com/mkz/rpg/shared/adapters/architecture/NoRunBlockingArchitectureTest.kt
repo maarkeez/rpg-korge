@@ -10,15 +10,14 @@ import java.io.File
 import kotlin.test.Test
 
 class NoRunBlockingArchitectureTest {
+    private val blockingBuildersMissingOnJs = "kotlinx.coroutines.BuildersKt"
+
     private val productionClasses: JavaClasses =
         run {
             val codeSourceLocation = Ability::class.java.protectionDomain.codeSource.location
             ClassFileImporter().importPath(File(codeSourceLocation.toURI()).toPath())
         }
 
-    // kotlinx.coroutines.BuildersKt is the file facade that contains the blocking
-    // builders (runBlocking, runInterruptible) and is not available on every
-    // Kotlin Multiplatform target (e.g.: JS).
     @Test
     fun `should not use runBlocking when the project is multiplatform`() {
         // Given
@@ -26,7 +25,7 @@ class NoRunBlockingArchitectureTest {
             noClasses()
                 .should()
                 .dependOnClassesThat()
-                .haveFullyQualifiedName("kotlinx.coroutines.BuildersKt")
+                .haveFullyQualifiedName(blockingBuildersMissingOnJs)
         // When
         rule.check(productionClasses)
         // Then

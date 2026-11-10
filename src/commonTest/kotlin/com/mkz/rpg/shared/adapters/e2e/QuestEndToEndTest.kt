@@ -77,7 +77,6 @@ private const val ELDER_COLUMN = 8
 private const val BLACKSMITH_ROW = 21
 private const val BLACKSMITH_COLUMN = 5
 
-// The tile north of the village entrance, whose tiles start the main quest.
 private const val NORTH_OF_THE_ENTRANCE_ROW = 13
 private const val ENTRANCE_COLUMN = 10
 
@@ -95,20 +94,17 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
 
     private val storage = InmemoryStorage()
 
-    // A new game, once the scene shows the party.
     private suspend fun ViewsForTesting.startExploring() {
         startNewGame(storage = storage)
         waitUntil { stage.virtualPadView()?.isPadShown() == true && stage.battlefieldView()?.hasBattleUnitAt(KNIGHT_START_ROW, KNIGHT_START_COLUMN) == true }
     }
 
-    // Saves the game in slot 1, overwriting it, and quits to the menu.
     private suspend fun ViewsForTesting.saveAndQuit() {
         clickStart(requireNotNull(stage.virtualPadView()))
         waitUntil { stage.pauseView()?.isShown() == true }
         clickSave(requireNotNull(stage.pauseView()))
         waitUntil { stage.saveSlotsView()?.isShown() == true }
         clickSlot(requireNotNull(stage.saveSlotsView()), 1)
-        // A slot already holding a game asks before overwriting it.
         waitUntil { stage.pauseView()?.isSavedShown() == true || stage.confirmDialogView()?.isShown() == true }
         if (stage.confirmDialogView()?.isShown() == true) clickConfirmation(requireNotNull(stage.callToActionView()))
         waitUntil { stage.pauseView()?.isSavedShown() == true }
@@ -118,7 +114,6 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         waitUntil { stage.menuView()?.isShown() == true }
     }
 
-    // Waits for the tracker too, unless no quest is active, as it is hidden then.
     private suspend fun ViewsForTesting.loadSlot(isAQuestActive: Boolean = true) {
         clickLoadGame(requireNotNull(stage.menuView()))
         waitUntil { stage.saveSlotsView()?.isShown() == true }
@@ -126,21 +121,18 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         waitUntil { stage.virtualPadView()?.isPadShown() == true && (!isAQuestActive || stage.questTrackerView()?.displayedTask() != null) }
     }
 
-    // The village entrance is a battle and a walk away, so the knight is saved north of it.
     private fun moveTheKnightNorthOfTheEntranceInTheSave() {
         val save = requireNotNull(storage.getOrNull(saveSlotKey)) { "Nothing is saved in the slot" }
         save shouldContain knightOnTheBattlefieldInTheSave
         storage[saveSlotKey] = save.replace(knightOnTheBattlefieldInTheSave, """"occupantId":"hero","row":$NORTH_OF_THE_ENTRANCE_ROW,"column":$ENTRANCE_COLUMN""")
     }
 
-    // The main quest starts at the village entrance, so the save starts it, on its task.
     private fun startTheMainQuestInTheSave(taskIndex: Int = 0) {
         val save = requireNotNull(storage.getOrNull(saveSlotKey)) { "Nothing is saved in the slot" }
         save shouldContain mainQuestNotStarted
         storage[saveSlotKey] = save.replace(mainQuestNotStarted, """"questId":"defeat-the-goat-wizard","status":"ACTIVE","currentTaskIndex":$taskIndex""")
     }
 
-    // A new game whose main quest is under way, on its task.
     private suspend fun ViewsForTesting.startWithTheMainQuestStarted(taskIndex: Int = 0) {
         startExploring()
         saveAndQuit()
@@ -148,7 +140,6 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         loadSlot()
     }
 
-    // The farmer is a battle away from where the party starts, so it is saved next to the knight.
     private fun moveTheFarmerNextToTheKnightInTheSave() {
         val save = requireNotNull(storage.getOrNull(saveSlotKey)) { "Nothing is saved in the slot" }
         save shouldContain farmerInTheSave
@@ -159,14 +150,12 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
                 .replace(farmerOnTheBattlefieldInTheSave, """"occupantId":"farmer","row":$FARMER_ROW,"column":$FARMER_COLUMN""")
     }
 
-    // Two bats are a long way off, so the save counts them as defeated, leaving the bat on the gate as the third.
     private fun countTwoBatsInTheSave() {
         val save = requireNotNull(storage.getOrNull(saveSlotKey)) { "Nothing is saved in the slot" }
         save shouldContain batsQuestStarted
         storage[saveSlotKey] = save.replace(batsQuestStarted, batsQuestStarted.replace(""""currentTaskDefeats":0""", """"currentTaskDefeats":2"""))
     }
 
-    // A new game with the farmer next to the knight.
     private suspend fun ViewsForTesting.startWithTheFarmerNextToTheKnight() {
         startExploring()
         saveAndQuit()
@@ -174,7 +163,6 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         loadSlot(isAQuestActive = false)
     }
 
-    // Talks to the npc next to the leader and finishes the talk, waiting until the pad is back.
     private suspend fun ViewsForTesting.talkToTheNpcNextToTheLeader() {
         clickA(requireNotNull(stage.virtualPadView()))
         val talkView = requireNotNull(stage.talkView())
@@ -183,7 +171,6 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         waitUntil { stage.virtualPadView()?.isPadShown() == true }
     }
 
-    // The party walks to the battle, where the bat on the gate engages it, and the knight defeats it with the sword.
     private suspend fun ViewsForTesting.defeatTheGateBat() {
         repeat(LEADER_COLUMN_IN_BATTLE - KNIGHT_START_COLUMN) { step ->
             clickArrow(requireNotNull(stage.virtualPadView()), Direction.EAST)
@@ -200,8 +187,6 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         clickConfirm(callToActionView)
     }
 
-    // The goat wizard is a whole game away, so the bat on the gate, the first CPU battle unit to engage the party, is saved
-    // as the goat wizard. It keeps the stats of the bat, as a save holds them, so the sword of the knight defeats it.
     private fun makeTheGateBatTheGoatWizardInTheSave() {
         val save = requireNotNull(storage.getOrNull(saveSlotKey)) { "Nothing is saved in the slot" }
         save shouldContain gateBat
@@ -263,14 +248,14 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     @Test
     fun `should announce the reward and tick the tracker when the goat wizard is defeated`() =
         sharedViewsTest {
-            // Given: a game on the main quest's defeat task, whose first CPU battle unit to engage the party is the goat wizard.
+            // Given
             startExploring()
             saveAndQuit()
             makeTheGateBatTheGoatWizardInTheSave()
             startTheMainQuestInTheSave(taskIndex = 1)
             loadSlot()
             val trackerView = requireNotNull(questTrackerView())
-            // When: the party walks to the battle, and the knight defeats it with the sword.
+            // When
             defeatTheGateBat()
             val announcementView = requireNotNull(questAnnouncementView())
             waitUntil { announcementView.isAnnouncementShown() }
@@ -280,9 +265,9 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             announcementView.displayedGold().shouldContainExactly("150 G")
             trackerView.displayedTask() shouldBe "Quest completed"
             withClue("Expected a ticked tracker") { trackerView.isTickShown().shouldBeTrue() }
-            // When: the battle ends.
+            // When
             waitUntil { virtualPadView()?.isPadShown() == true && bannerView()?.roundText() == "Exploring" }
-            // Then: the ticked tracker opens the completed detail.
+            // Then
             withClue("Expected the chevron back once exploring") { trackerView.isChevronShown().shouldBeTrue() }
             clickCapsule(trackerView)
             waitUntil { questDetailView()?.isDetailShown() == true }
@@ -308,9 +293,9 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             // Given
             startWithTheFarmerNextToTheKnight()
             withClue("Expected the gold marker over the farmer") { battlefieldView()?.questMarkerColorAt(FARMER_ROW, FARMER_COLUMN) shouldBe HudStyle.SELECTION }
-            // When: the talk ends.
+            // When
             talkToTheNpcNextToTheLeader()
-            // Then: an announcement announces the quest, and the marker goes.
+            // Then
             val announcementView = requireNotNull(questAnnouncementView())
             waitUntil { announcementView.isAnnouncementShown() }
             announcementView.displayedTitle() shouldBe "NEW QUEST"
@@ -319,23 +304,22 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             withClue("Expected no marker over the farmer") { battlefieldView()?.hasQuestMarkerAt(FARMER_ROW, FARMER_COLUMN)?.shouldBeFalse() }
             val trackerView = requireNotNull(questTrackerView())
             withClue("Expected the empty tracker, as the quest does not take it") { trackerView.displayedTask() shouldBe "No quest pinned" }
-            // When: the tracker opens the journal.
+            // When
             clickCapsule(trackerView)
             val journalView = requireNotNull(questJournalView())
             waitUntil { journalView.isShown() }
             // Then
             journalView.displayedRows().shouldContainExactly(batsQuest)
-            // When: the quest is pinned.
+            // When
             clickPin(journalView, batsQuest)
             waitUntil { trackerView.displayedTask() == "Defeat 3 Bats" }
             // Then
             trackerView.displayedCount() shouldBe "0/3"
             withClue("Expected the pin on the tracker") { trackerView.isPinShown().shouldBeTrue() }
             withClue("Expected the pin of the row in gold") { journalView.isPinnedRow(batsQuest).shouldBeTrue() }
-            // When: Back steps out.
+            // When
             clickAction(requireNotNull(stage.callToActionView()), "Back")
             waitUntil { virtualPadView()?.isPadShown() == true }
-            // And the third bat is defeated.
             saveAndQuit()
             countTwoBatsInTheSave()
             loadSlot()
@@ -346,13 +330,13 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             waitUntil { virtualPadView()?.isPadShown() == true && bannerView()?.roundText() == "Exploring" }
             // Then
             withClue("Expected the green marker over the farmer") { battlefieldView()?.questMarkerColorAt(FARMER_ROW, FARMER_COLUMN) shouldBe HudStyle.ALLY }
-            // When: the party walks back to the farmer, and talks to it.
+            // When
             repeat(LEADER_COLUMN_IN_BATTLE - KNIGHT_START_COLUMN) { step ->
                 clickArrow(requireNotNull(virtualPadView()), Direction.WEST)
                 waitUntil { battlefieldView()?.hasBattleUnitAt(KNIGHT_START_ROW, LEADER_COLUMN_IN_BATTLE - step - 1) == true }
             }
             talkToTheNpcNextToTheLeader()
-            // Then: an announcement announces the reward, the marker goes, and the tracker is hidden, as no quest is active.
+            // Then
             val loadedAnnouncementView = requireNotNull(questAnnouncementView())
             waitUntil { loadedAnnouncementView.isAnnouncementShown() && loadedAnnouncementView.displayedTitle() == "QUEST COMPLETED" }
             loadedAnnouncementView.displayedName() shouldBe "Bats in the Meadow"
@@ -374,18 +358,17 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             clickRow(journalView, batsQuest)
             val detailView = requireNotNull(questDetailView())
             waitUntil { detailView.isDetailShown() }
-            // When: Abandon asks first, and Back returns to the detail view.
+            // When
             clickAction(requireNotNull(stage.callToActionView()), "Abandon")
             val confirmDialogView = requireNotNull(confirmDialogView())
             waitUntil { confirmDialogView.isShown() }
             clickCancelConfirmation(requireNotNull(stage.callToActionView()))
             waitUntil { detailView.isDetailShown() }
-            // And it is abandoned.
             clickAction(requireNotNull(stage.callToActionView()), "Abandon")
             waitUntil { confirmDialogView.isShown() }
             clickConfirmation(requireNotNull(stage.callToActionView()))
             waitUntil { virtualPadView()?.isPadShown() == true }
-            // Then: no side quest is listed, so the pad is back, and its quest giver can start it again.
+            // Then
             withClue("Expected the gold marker back over the farmer") { battlefieldView()?.questMarkerColorAt(FARMER_ROW, FARMER_COLUMN) shouldBe HudStyle.SELECTION }
             withClue("Expected no tracker, as no quest is active") { questTrackerView()?.displayedTask() shouldBe null }
         }

@@ -17,11 +17,6 @@ import korlibs.math.geom.degrees
 import kotlin.math.max
 import kotlin.math.min
 
-/**
- * A rounded bar of the value a change would leave, e.g.: the health a cast would leave. The part lost is drawn in a
- * lighter [previewColor], and a part gained in [gainColor]. The value before and after it follows the bar, e.g.:
- * `30 → 18`, the arrow drawn as a vector, as the default font has no arrow.
- */
 open class PreviewBarView(
     size: Size,
     private val filledColor: RGBA,
@@ -36,7 +31,6 @@ open class PreviewBarView(
         private const val ARROW_LENGTH = 8.0
         private const val ARROW_HEAD = 4.5
 
-        // A value gained, as a heal.
         val GAIN = RGBA(0x5A, 0xD2, 0x5A)
     }
 
@@ -47,10 +41,8 @@ open class PreviewBarView(
     internal var beforeText: Text? = null
     internal var afterText: Text? = null
 
-    /** The width of the bar, without its value. */
     val barWidth: Double get() = track?.width ?: width
 
-    // The shares of the bar filled and previewed, e.g.: 0.6 for 18 out of 30.
     internal var filledRatio: Double = 1.0
     internal var previewRatio: Double = 1.0
 
@@ -71,7 +63,6 @@ open class PreviewBarView(
 
         fun ratio(value: Int) = if (maximum > 0) value.coerceIn(0, maximum).toDouble() / maximum else 0.0
         track = roundRect(Size(barWidth, barHeight), RectCorners(radius), fill = BarView.TRACK, stroke = BarView.TRACK_STROKE, strokeThickness = 1.0) { xy(0.0, barY) }
-        // A loss previews the part lost under the part kept, a gain the part gained after the part kept.
         filledRatio = ratio(min(remainingBefore, remainingAfter))
         previewRatio = ratio(max(remainingBefore, remainingAfter))
         val previewWidth = barWidth * previewRatio
@@ -95,7 +86,6 @@ open class PreviewBarView(
         visible = false
     }
 
-    // The value before and after the change, e.g.: 30 -> 18, the arrow drawn as a vector.
     private fun displayValue(
         before: Int,
         after: Int,

@@ -64,7 +64,6 @@ import kotlin.random.Random
 import kotlin.test.Test
 
 class QuestAcceptanceTest {
-    // The game as it ships, read from the resources: the hero, carrying 30 gold, leads the party, and the goat wizard, with 150 health points, is the only goat deployed.
     private val eventBus = InMemoryEventBus()
     private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
     private val unitApi = UnitApi(eventBus, ResourcesUnitLoader())
@@ -100,7 +99,6 @@ class QuestAcceptanceTest {
         eventBus.dispatch()
     }
 
-    // The goat wizard is hit 15 times for 10 damage, which defeats it.
     private fun defeatTheGoatWizard() =
         repeat(15) {
             battleUnitApi.applyEffect(
@@ -113,7 +111,6 @@ class QuestAcceptanceTest {
             )
         }
 
-    // The hero teleports onto the tile, which counts as a walk onto it for the quests.
     private fun teleportTheHero(
         row: Int,
         column: Int,
@@ -129,7 +126,6 @@ class QuestAcceptanceTest {
         eventBus.dispatch()
     }
 
-    // The hero steps onto the village entrance, then next to the Elder at (16,8), and talks to the Elder.
     private fun talkToTheElder() {
         teleportTheHero(row = 14, column = 10)
         teleportTheHero(row = 16, column = 9)
@@ -189,7 +185,6 @@ class QuestAcceptanceTest {
             inventoryApi.searchInventoryByBattleUnitId("hero")!!.gold shouldBe 180
         }
 
-    // A small game: a knight explores from (1,0), next to a farmer at (0,0), on a 3x6 field of sand, with a rat at (1,5).
     private fun smallGame(vararg quests: Quest.Dto): SubdomainApis =
         SubdomainApis(
             terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
@@ -240,7 +235,6 @@ class QuestAcceptanceTest {
         eventBus.dispatch()
     }
 
-    // One more than an inventory stores.
     private val thirteenPotions = reward(gold = 0, lootableItemIds = List(13) { "health-potion" })
 
     @Test
@@ -252,7 +246,7 @@ class QuestAcceptanceTest {
         // Then
         apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")!!.storedItems shouldBe List(12) { "health-potion" }
         apis.lootDropApi.searchDroppedItems() shouldBe mapOf(LootDrop.Dto.PositionDto(row = 1, column = 0) to listOf("health-potion"))
-        // When: it makes room, walks away and walks back
+        // When
         apis.inventoryApi.discardItem(battleUnitId = "knight-1", lootableItemId = "health-potion")
         apis.eventBus.dispatch()
         apis.walk(DirectionDto.EAST)
@@ -294,23 +288,23 @@ class QuestAcceptanceTest {
 
         fun knight() = apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")!!
         val startingGold = knight().gold
-        // When: the talk starts it, on its first task
+        // When
         apis.talkToTheFarmer()
         // Then
         progress().status shouldBe StatusDto.ACTIVE
         progress().currentTaskIndex shouldBe 0
-        // When: the knight walks onto the tile of its first task, then back next to the farmer
+        // When
         apis.walk(DirectionDto.SOUTH)
         apis.walk(DirectionDto.NORTH)
         // Then
         progress().currentTaskIndex shouldBe 1
-        // When: the knight talks to the farmer for its second task
+        // When
         apis.talkToTheFarmer()
         // Then
         progress().status shouldBe StatusDto.COMPLETED
         knight().gold shouldBe startingGold + 20
         knight().storedItems shouldBe listOf("health-potion")
-        // When: a later talk runs it again
+        // When
         apis.talkToTheFarmer()
         // Then
         progress().status shouldBe StatusDto.ACTIVE

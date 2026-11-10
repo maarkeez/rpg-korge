@@ -6,17 +6,10 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import kotlin.test.Test
 
-/**
- * Saving the game snapshots every subdomain holding runtime state (see docs/adr/0010-per-subdomain-save-snapshots.md):
- * each subdomain with a repository has its `<subdomain>.adapters.save.<Subdomain>Snapshottable`, implementing
- * `Snapshottable`, unless it is listed below with why it is not saved. A new subdomain has to choose, so a save never
- * misses its state.
- */
 class SnapshotCoverageArchitectureTest {
     private val rootPackage = "com.mkz.rpg"
 
-    // The subdomains with a repository that are not saved, and why.
-    private val notSaved: Map<String, String> =
+    private val whyNotSaved: Map<String, String> =
         mapOf(
             "ability" to "read from the resources",
             "building" to "read from the resources",
@@ -36,7 +29,6 @@ class SnapshotCoverageArchitectureTest {
 
     private val scope = Konsist.scopeFromProduction()
 
-    // The subdomains with a repository, e.g.: `battleUnit`, as their package under the root package.
     private val subdomainsWithRepository: List<String> =
         scope
             .interfaces()
@@ -54,7 +46,7 @@ class SnapshotCoverageArchitectureTest {
         // When
         val missing =
             subdomainsWithRepository
-                .filterNot { subdomain -> subdomain in notSaved }
+                .filterNot { subdomain -> subdomain in whyNotSaved }
                 .filterNot { subdomain ->
                     val name = subdomain.substringAfterLast(".").replaceFirstChar(Char::uppercase) + "Snapshottable"
                     scope.classes().any { declaration ->
@@ -73,7 +65,7 @@ class SnapshotCoverageArchitectureTest {
     @Test
     fun `should hold a repository when it is listed as not saved`() {
         // When
-        val unknown = notSaved.keys.filterNot { subdomain -> subdomain in subdomainsWithRepository }
+        val unknown = whyNotSaved.keys.filterNot { subdomain -> subdomain in subdomainsWithRepository }
         // Then
         withClue("Subdomains listed as not saved that hold no repository: $unknown. Remove them from the list.") {
             unknown.shouldBeEmpty()

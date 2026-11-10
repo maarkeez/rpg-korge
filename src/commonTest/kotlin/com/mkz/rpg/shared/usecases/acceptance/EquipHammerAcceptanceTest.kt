@@ -60,7 +60,6 @@ class EquipHammerAcceptanceTest {
     private val playerOneId = "player-one"
     private val playerOneKnightBattleUnitId = "hero"
 
-    // The knight of the human player starts the battle with 100 health points and 30 mana points, and has looted the hammer.
     private suspend fun setUp() {
         terrainApi.init()
         effectApi.init()
@@ -74,7 +73,6 @@ class EquipHammerAcceptanceTest {
         battleUnitApi.init()
         gameSetupApi.setUpGame()
         eventBus.dispatch()
-        // The setup starts exploring: the battle starts as if the players engaged each other.
         battleApi.startBattleWithEveryBattleUnit(battleUnitApi, "player-one", "player-two")
         eventBus.dispatch()
         lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "hammer", row = 6, column = 7)

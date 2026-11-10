@@ -56,7 +56,6 @@ class ConsumeManaPotionAcceptanceTest {
     private val playerOneId = "player-one"
     private val playerOneKnightBattleUnitId = "hero"
 
-    // The knight of the human player starts the battle with 30 mana points, and spends 10 casting heal on itself.
     private suspend fun setUp() {
         terrainApi.init()
         effectApi.init()
@@ -70,7 +69,6 @@ class ConsumeManaPotionAcceptanceTest {
         battleUnitApi.init()
         gameSetupApi.setUpGame()
         eventBus.dispatch()
-        // The setup starts exploring: the battle starts as if the players engaged each other.
         battleApi.startBattleWithEveryBattleUnit(battleUnitApi, "player-one", "player-two")
         eventBus.dispatch()
         val castGroup = battleUnitApi.whereCanCast(playerOneKnightBattleUnitId, "heal").single()

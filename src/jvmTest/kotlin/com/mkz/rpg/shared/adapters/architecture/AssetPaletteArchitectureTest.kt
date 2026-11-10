@@ -90,7 +90,6 @@ class AssetPaletteArchitectureTest {
 
     private fun Int.hex(): String = "#%06x".format(this)
 
-    // Compares colours in the CIELAB colour space, where distances match how different two colours look.
     private fun nearestPaletteColour(colour: Int): Int {
         val lab = colour.toLab()
         return palette.minBy { paletteColour ->

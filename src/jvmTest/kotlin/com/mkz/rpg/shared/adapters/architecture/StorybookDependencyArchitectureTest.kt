@@ -6,11 +6,6 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import kotlin.test.Test
 
-/**
- * The stories feed the views plain data, never domain objects nor use cases, so the Storybook only depends on the
- * presentation of the other subdomains, besides `shared` and `localization`. Nothing depends on the Storybook, but the
- * entry point (Main.kt), which starts it. See docs/adr/0008-in-game-storybook.md.
- */
 class StorybookDependencyArchitectureTest {
     private val rootPackage = "com.mkz.rpg"
     private val storybookPackage = "$rootPackage.storybook"
@@ -49,9 +44,6 @@ class StorybookDependencyArchitectureTest {
         }
     }
 
-    // Out of the subdomains (e.g.: `korlibs`), the root package (e.g.: `GAME_WINDOW_SIZE`), `shared` and `localization`,
-    // or a declaration of the presentation package of another subdomain, but none of a package nested in it (e.g.:
-    // `screen.adapters.presentation.selection.domain`).
     private fun isAllowedForStorybook(import: String): Boolean {
         val relativeName = import.removePrefix("$rootPackage.").takeIf { it != import && it.contains(".") } ?: return true
         val subdomain = relativeName.substringBefore(".")

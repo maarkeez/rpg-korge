@@ -32,7 +32,6 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// Uses the units defined in the resources: three human knights exploring a corridor, one tile high, whose ends are dead ends.
 class PartyMemberSwapAcceptanceTest {
     private val eventBus = InMemoryEventBus()
     private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
@@ -43,11 +42,10 @@ class PartyMemberSwapAcceptanceTest {
     private val abilityApi = AbilityApi(effectApi, eventBus, ResourcesAbilityLoader())
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
     private val battleApi = BattleApi(eventBus, playerApi)
-    private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(0.0))
+    private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom.cpuBattleUnitsAlwaysResting())
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, partyApi, eventBus)
 
-    // The corridor "M L K . .", K leading, then L and M.
     private suspend fun setUp() {
         terrainApi.init()
         effectApi.init()
@@ -90,12 +88,12 @@ class PartyMemberSwapAcceptanceTest {
     @Test
     fun `should never leave the party stuck when it turns around at the end of a dead-end corridor`() =
         scenarioTest(::setUp) {
-            // Given the leader at the east end: ". . M L K"
+            // Given
             repeat(2) { walk(DirectionDto.EAST) }
             columns() shouldBe listOf(4, 3, 2)
-            // When it turns around and walks back to the west end
+            // When
             repeat(6) { walk(DirectionDto.WEST) }
-            // Then the leader leads the way back, the others following it in the line rebuilt by the swaps: "K M L . ."
+            // Then
             columns() shouldBe listOf(0, 2, 1)
             partyApi.searchParty()!!.walkingOrderBattleUnitIds.shouldContainExactly("knight-1", "knight-3", "knight-2")
             partyApi.searchParty()!!.battleUnitIds.shouldContainExactly("knight-1", "knight-2", "knight-3")

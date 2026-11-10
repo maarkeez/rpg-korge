@@ -30,7 +30,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
 import kotlin.test.Test
 
-// Uses the units and terrains defined in the resources: two human knights exploring on sand.
 class BuildingAcceptanceTest {
     private val eventBus = InMemoryEventBus()
     private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
@@ -42,12 +41,9 @@ class BuildingAcceptanceTest {
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
 
-    // A fortress of 2x2 tiles, from (0,2) to (1,3), east of the party.
     private var fortress = Building.Dto(id = "fortress", row = 0, column = 2, rows = 2, columns = 2)
     private val buildingApi by lazy { BuildingApi(battlefieldApi, eventBus, FakeBuildingLoader(listOf(fortress))) }
 
-    // The buildings are placed before the battle units are deployed, as when the game is set up. The knight-1 leads
-    // from (0,1), west of the fortress, and the knight-2 follows it from (1,1).
     private suspend fun setUp() {
         terrainApi.init()
         effectApi.init()
@@ -106,7 +102,6 @@ class BuildingAcceptanceTest {
             battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 2, column = 3)
         }
 
-    // The fortress already occupies its tiles here, so the deployment itself refuses the tile.
     @Test
     fun `should fail to deploy a battle unit on a tile of the building`() =
         scenarioTest({ fortress = fortress.copy(column = 1) }) {

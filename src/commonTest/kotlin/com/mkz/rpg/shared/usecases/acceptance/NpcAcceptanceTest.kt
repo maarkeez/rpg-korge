@@ -40,8 +40,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
 import kotlin.test.Test
 
-// Uses the units, terrains and lootable items defined in the resources: two human knights with 100 health points, whose
-// poisoned sword hits an adjacent enemy, a CPU rat, the lava, which damages 5 health points, and the potions and the hammer.
 class NpcAcceptanceTest {
     private val eventBus = InMemoryEventBus()
     private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
@@ -54,21 +52,16 @@ class NpcAcceptanceTest {
     private val lootableItemApi = LootableItemApi(effectApi, eventBus, ResourcesLootableItemLoader())
     private val theGuy = Npc.Dto(id = "the-guy", row = 0, column = 0, unitId = null, stock = emptyList())
 
-    // Recruitable, as the viking of the resources: 150 health points.
     private val viking = Npc.Dto(id = "viking", row = 0, column = 3, unitId = "viking", stock = emptyList())
 
-    // A merchant, selling the lootable items of the resources. The leader walks east to (0,2) to stand next to it.
     private val merchant = Npc.Dto(id = "merchant", row = 1, column = 2, unitId = null, stock = listOf("health-potion", "mana-potion", "hammer"))
 
-    // The npcs placed by the set up, The Guy unless a test says otherwise.
     private var npcs = listOf(theGuy)
     private val partyApi by lazy { PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus) }
     private val npcApi by lazy { NpcApi(battlefieldApi, lootableItemApi, partyApi, eventBus, FakeNpcLoader(npcs)) }
     private val secondsStarted =
         mutableListOf<PartyEvent.ExplorationSecondStarted>().also { seconds -> eventBus.subscribe<PartyEvent.ExplorationSecondStarted> { seconds += it } }
 
-    // The Guy stands on the lava at (0,0). The knight-1 leads from (0,1), east of it, and the knight-2 follows it from
-    // (1,1). The rat stands at (7,7), far from the party, so it does not engage.
     private suspend fun setUp() {
         terrainApi.init()
         effectApi.init()
@@ -96,7 +89,6 @@ class NpcAcceptanceTest {
         eventBus.dispatch()
     }
 
-    // A second passes while exploring.
     private fun waitASecond() {
         partyApi.applyStandingTerrainEffects()
         eventBus.dispatch()
@@ -112,7 +104,6 @@ class NpcAcceptanceTest {
         eventBus.dispatch()
     }
 
-    // The leader walks east to (0,2), next to the viking at (0,3), and the knight-2 follows it to (0,1).
     private fun recruitTheViking() {
         walk(DirectionDto.EAST)
         talk()

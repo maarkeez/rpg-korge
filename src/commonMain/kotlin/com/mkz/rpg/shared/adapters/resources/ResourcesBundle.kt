@@ -9,13 +9,6 @@ import korlibs.io.stream.openAsync
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 
-/**
- * The game resources, read from the single bundle the build makes of the `resources` folder, so they are loaded with
- * one request instead of one per file. See docs/adr/0003-single-resources-bundle.md.
- *
- * [root] reads the files as `resourcesVfs` would, e.g.: `root["unit/knight.toml"]`. The bundle is downloaded once,
- * when a file is first read or when [prefetch] starts it earlier.
- */
 object ResourcesBundle {
     const val FILE_NAME = "resources.zip"
 
@@ -24,7 +17,6 @@ object ResourcesBundle {
     private var opening: Deferred<VfsFile>? = null
     private var opened: VfsFile? = null
 
-    /** Starts downloading the bundle in the background, e.g.: while the menu is displayed. */
     fun prefetch(scope: CoroutineScope) {
         if (opening == null && opened == null) opening = scope.asyncImmediately { open() }
     }

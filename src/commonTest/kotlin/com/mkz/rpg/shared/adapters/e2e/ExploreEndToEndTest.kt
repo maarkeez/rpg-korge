@@ -33,8 +33,6 @@ import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 
 class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
-    // The game setup deploys the knight at (2,1), alone in the party, out of reach of the CPU battle units, even while
-    // they wander. (2,2) is the next sand tile east, across the start room.
     private val knightRow = KNIGHT_START_ROW
     private val knightColumn = KNIGHT_START_COLUMN
     private val nextTileColumn = KNIGHT_START_COLUMN + 1
@@ -87,7 +85,6 @@ class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     fun `should keep the inventory of the knight open while the cpu battle units wander when the human player opens its inventory while exploring`() =
         sharedViewsTest {
             // Given
-            // The CPU battle units always step instead of resting, so a tile is occupied every second.
             startNewGame(random = FixedDoublesRandom(0.99))
             waitUntil { virtualPadView()?.isPadShown() == true && battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true }
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
@@ -131,7 +128,6 @@ class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             withClue("Expected the virtual pad to be hidden while battling") { virtualPadView()?.isPadShown()?.shouldBeFalse() }
             withClue("Expected the HUD to be displayed while battling") { isHudShown().shouldBeTrue() }
             withClue("Expected the finish turn to be displayed while battling") { callToActionView()?.isDisplayingFinishPlayerTurn()?.shouldBeTrue() }
-            // The CPU played first, as it engaged.
             bannerView()?.roundText() shouldBe "Round 1"
             bannerView()?.playerTurnText() shouldBe "Human turn"
         }

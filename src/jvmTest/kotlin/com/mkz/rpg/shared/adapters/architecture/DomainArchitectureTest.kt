@@ -61,7 +61,6 @@ class DomainArchitectureTest {
             aggregateRoots().forEach { aggregateRoot ->
                 val aggregateName = aggregateRoot.name
 
-                // Aggregate root must have a private primary constructor.
                 withClue("Aggregate root '$aggregateName' must declare a primary constructor.") {
                     aggregateRoot.primaryConstructor.shouldNotBeNull()
                 }
@@ -70,14 +69,12 @@ class DomainArchitectureTest {
                     aggregateRoot.primaryConstructor?.hasPrivateModifier shouldBe true
                 }
 
-                // Aggregate root must be annotated with @ConsistentCopyVisibility.
                 withClue("Aggregate root '$aggregateName' must be annotated with @ConsistentCopyVisibility.") {
                     aggregateRoot.hasAnnotationOf(ConsistentCopyVisibility::class).shouldBeTrue()
                 }
 
                 val nestedClasses = aggregateRoot.classes(includeNested = false, includeLocal = false)
 
-                // Aggregate root must declare exactly one Dto nested class.
                 val dtoClasses =
                     nestedClasses.filter { it.name == "Dto" }
 
@@ -85,16 +82,14 @@ class DomainArchitectureTest {
                     dtoClasses.shouldHaveSize(1)
                 }
 
-                // Dto must be public.
                 dtoClasses.singleOrNull()?.let { dto ->
                     withClue("Aggregate root '$aggregateName.Dto' must be public.") {
                         dto.hasPublicOrDefaultModifier.shouldBeTrue()
                     }
 
-                    // Dto and the declarations nested in it are plain data: companion object methods are their factories.
                     dataDeclarations(dto).forEach { declaration ->
                         val declarationName = declaration.fullyQualifiedName.substringAfter("${aggregateRoot.packagee?.fullyQualifiedName}.")
-                        withClue("Aggregate root '$declarationName' must not declare methods.") {
+                        withClue("Aggregate root '$declarationName' must not declare methods: the methods of its companion object are its factories.") {
                             declaration.functionNames.shouldBeEmpty()
                         }
                         withClue("Aggregate root '$declarationName' must not declare properties with a getter.") {
@@ -102,10 +97,10 @@ class DomainArchitectureTest {
                         }
                     }
 
-                    // Dto and the declarations nested in it are data classes or enum classes: a choice between shapes is an
-                    // enum type with optional fields, never a sealed class or interface.
                     val packagePrefix = "${aggregateRoot.packagee?.fullyQualifiedName}."
-                    withClue("Aggregate root '$aggregateName.Dto' must only declare data classes and enum classes.") {
+                    withClue(
+                        "Aggregate root '$aggregateName.Dto' must only declare data classes and enum classes: a choice between shapes is an enum with optional fields, never a sealed class or interface.",
+                    ) {
                         (listOf(dto) + dto.classes(includeNested = true, includeLocal = false))
                             .filterNot { it.hasDataModifier || it.hasEnumModifier }
                             .map { it.fullyQualifiedName.removePrefix(packagePrefix) }
@@ -122,10 +117,9 @@ class DomainArchitectureTest {
                             .shouldBeEmpty()
                     }
 
-                    // Dto and the classes nested in it are built with every field: the defaults belong to their factories.
                     (listOf(dto) + dto.classes(includeNested = true, includeLocal = false)).forEach { declaration ->
                         val declarationName = declaration.fullyQualifiedName.removePrefix(packagePrefix)
-                        withClue("Aggregate root '$declarationName' must not declare default values.") {
+                        withClue("Aggregate root '$declarationName' must not declare default values: they belong to its factories.") {
                             declaration.primaryConstructor
                                 ?.parameters
                                 .orEmpty()
@@ -135,9 +129,7 @@ class DomainArchitectureTest {
                         }
                     }
                 }
-                // TODO: Assert it contains a public method called `toDto()` with return type `<subdomain>.Dto`
 
-                // All other nested classes must be private.
                 nestedClasses
                     .filterNot { it.name == "Dto" }
                     .forEach { nestedClass ->
@@ -189,8 +181,6 @@ class DomainArchitectureTest {
             declaration.takeIf { it.name == expectedAggregateRootName }
         }
 
-    // The Dto, with the classes and interfaces nested in it at any depth. Companion objects are left out: their methods
-    // are the factories of the Dto.
     private fun dataDeclarations(dto: KoClassDeclaration): List<DataDeclaration> =
         (listOf(dto) + dto.classes(includeNested = true, includeLocal = false)).map { declaration ->
             DataDeclaration(
@@ -218,8 +208,6 @@ class DomainArchitectureTest {
         val receiver: String,
         val file: KoFileDeclaration,
     ) {
-        // Konsist does not resolve a nested receiver type (`Npc.Dto` stays `Npc.Dto`), so its first segment is resolved
-        // with the imports of the file, or else with its package.
         fun receiverFullyQualifiedName(): String {
             val type = receiver.substringBefore("<").removeSuffix("?")
             val firstSegment = type.substringBefore(".")

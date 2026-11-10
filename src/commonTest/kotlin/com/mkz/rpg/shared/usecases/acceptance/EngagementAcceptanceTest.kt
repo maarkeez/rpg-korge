@@ -39,7 +39,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlin.test.Test
 
-// Uses the units defined in the resources: two human knights, which walk 3 tiles in a battle, and two CPU rats.
 class EngagementAcceptanceTest {
     private val eventBus = InMemoryEventBus()
     private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
@@ -51,8 +50,7 @@ class EngagementAcceptanceTest {
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
     private val battleApi = BattleApi(eventBus, playerApi)
 
-    // The CPU battle units out of the battle rest when a round finishes, rather than wandering.
-    private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(0.0))
+    private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom.cpuBattleUnitsAlwaysResting())
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, partyApi, eventBus)
 
@@ -60,8 +58,6 @@ class EngagementAcceptanceTest {
     private val cpuPlayerId = "cpu"
     private val playerTurns = mutableListOf<String>().also { turns -> eventBus.subscribe<BattleEvent.PlayerTurnStarted> { turns += it.playerId } }
 
-    // The knights start in a line at (6,1) and (7,1). The rat-1, at (0,1), is 6 tiles away from the leader, and the rat-2,
-    // at (2,6), 9 tiles away.
     private suspend fun setUp() {
         terrainApi.init()
         effectApi.init()
@@ -82,7 +78,6 @@ class EngagementAcceptanceTest {
         eventBus.dispatch()
     }
 
-    // The leader walks to (5,1), 5 tiles away from the rat-1, which engages the party.
     private fun engageRat() {
         partyApi.stepParty(DirectionDto.NORTH)
         eventBus.dispatch()
@@ -113,7 +108,6 @@ class EngagementAcceptanceTest {
         scenarioTest(::setUp) {
             // Given
             engageRat()
-            // The leader walks to (5,4), 5 tiles away from the rat-2.
             battleUnitApi.walkBattleUnitInBattle(battleUnitId = "knight-1", walkToRow = 5, walkToColumn = 4)
             eventBus.dispatch()
             // When
@@ -125,7 +119,6 @@ class EngagementAcceptanceTest {
             battlefieldApi.searchPosition("rat-2") shouldNotBe PositionDto(row = 2, column = 6)
         }
 
-    // The rat receives a low physical damage twice, losing its 20 health points, during the human turn.
     private fun defeatRat(ratId: String = "rat-1") {
         repeat(2) {
             battleUnitApi.applyEffect(
@@ -159,7 +152,6 @@ class EngagementAcceptanceTest {
         scenarioTest(::setUp) {
             // Given
             engageRat()
-            // The leader walks to (5,4), 5 tiles away from the rat-2.
             battleUnitApi.walkBattleUnitInBattle(battleUnitId = "knight-1", walkToRow = 5, walkToColumn = 4)
             eventBus.dispatch()
             // When
@@ -170,7 +162,6 @@ class EngagementAcceptanceTest {
             battle.battleUnitIds shouldBe setOf("rat-2", "knight-1", "knight-2")
             battle.currentRound shouldBe 1
             partyApi.searchParty()!!.isExploring.shouldBeFalse()
-            // The rat-2 plays from the next round.
             battlefieldApi.searchPosition("rat-2") shouldBe PositionDto(row = 2, column = 6)
             playerTurns shouldBe listOf(cpuPlayerId, humanPlayerId)
         }
@@ -182,7 +173,6 @@ class EngagementAcceptanceTest {
             val winners = mutableListOf<String>().also { winners -> eventBus.subscribe<BattleEvent.PlayerVictory> { winners += it.playerId } }
             val finishedBattles = mutableListOf<BattleEvent.BattleFinishedWithoutWinner>().also { finished -> eventBus.subscribe<BattleEvent.BattleFinishedWithoutWinner> { finished += it } }
             engageRat()
-            // The rat-2, out of the battle, is defeated first, which leaves the battle engaged.
             defeatRat("rat-2")
             battleApi.searchBattle()!!.isFinished.shouldBeFalse()
             // When
@@ -200,7 +190,6 @@ class EngagementAcceptanceTest {
             engageRat()
             defeatRat()
             // When
-            // The leader walks from (5,1) to (5,4), 5 tiles away from the rat-2.
             repeat(3) {
                 partyApi.stepParty(DirectionDto.EAST)
                 eventBus.dispatch()

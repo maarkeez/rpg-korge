@@ -34,7 +34,6 @@ class CommentArchitectureTest {
             "quest",
             "save",
             "screen",
-            "shared",
             "storybook",
             "terrain",
             "unit",

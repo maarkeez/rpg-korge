@@ -38,13 +38,10 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// Uses the units and terrains defined in the resources: two human knights, and a CPU rat, on sand.
 class WanderingAcceptanceTest {
     private val humanPlayerId = "human"
     private val cpuPlayerId = "cpu"
 
-    // A roll below 0.5 makes the rat rest. Otherwise, a roll of 0.9 picks the last steps it scores (north, east, south
-    // and west), weighted by their utility.
     private inner class Game(
         vararg rolls: Double,
     ) {
@@ -61,8 +58,6 @@ class WanderingAcceptanceTest {
         val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
         val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, partyApi, eventBus)
 
-        // The knights explore from the left side of an 8x8 battlefield of sand, one above the other, unless told otherwise,
-        // and the rat is deployed at the given tile, as the other rats.
         suspend fun start(
             ratRow: Int,
             ratColumn: Int,
@@ -90,7 +85,6 @@ class WanderingAcceptanceTest {
             eventBus.dispatch()
         }
 
-        // A second passes while exploring.
         fun waitASecond() {
             partyApi.applyStandingTerrainEffects()
             eventBus.dispatch()
@@ -100,7 +94,6 @@ class WanderingAcceptanceTest {
 
         fun ratHealth() = battleUnitApi.searchBattleUnitById("rat-1")!!.remainingHealth
 
-        // The sword hits the rat: 10 damage.
         fun hitRat() {
             battleUnitApi.applyEffect(
                 EffectApplicationDto(
@@ -116,7 +109,7 @@ class WanderingAcceptanceTest {
 
     @Test
     fun `should wander around its home, up to the edge of its territory, every second while exploring`() {
-        // Given: the rat is deployed in the top right corner, at (0,7).
+        // Given
         val game = Game(0.9)
         scenarioTest({ game.start(ratRow = 0, ratColumn = 7, knightRow = 6) }) {
             // When
@@ -125,7 +118,7 @@ class WanderingAcceptanceTest {
                     game.waitASecond()
                     game.ratPosition()
                 }
-            // Then: it walks away from home three tiles, then back and forth along the edge of its territory.
+            // Then
             positions.shouldContainExactly(
                 PositionDto(0, 6),
                 PositionDto(0, 5),
@@ -151,7 +144,7 @@ class WanderingAcceptanceTest {
 
     @Test
     fun `should engage the party when it wanders within its reach`() {
-        // Given: the rat at (0,6) is 6 tiles away from the leader at (0,0), one more than its reach, and steps west.
+        // Given
         val game = Game(0.9)
         scenarioTest({ game.start(ratRow = 0, ratColumn = 6, knightRow = 0) }) {
             game.battleApi.searchBattle().shouldBeNull()
@@ -170,7 +163,7 @@ class WanderingAcceptanceTest {
 
     @Test
     fun `should walk all the way back home without resting when it is left outside its territory`() {
-        // Given: the rat is deployed at (0,7), and left 5 tiles away from home, at (5,7), e.g.: after chasing the party.
+        // Given
         val game = Game(0.0)
         scenarioTest({ game.start(ratRow = 0, ratColumn = 7, knightRow = 6) }) {
             game.battleUnitApi.walkBattleUnitOutOfBattle(battleUnitId = "rat-1", walkToRow = 5, walkToColumn = 7)
@@ -181,7 +174,7 @@ class WanderingAcceptanceTest {
                     game.waitASecond()
                     game.ratPosition()
                 }
-            // Then: it heads home, through its territory, until it is back at home, where it rests again.
+            // Then
             positions.shouldContainExactly(
                 PositionDto(4, 7),
                 PositionDto(3, 7),
@@ -195,8 +188,7 @@ class WanderingAcceptanceTest {
 
     @Test
     fun `should walk around the lava on its way back home`() {
-        // Given: the rat is deployed at (0,2), above a strip of lava, and left 5 tiles away from home below it, at (5,2).
-        // The way back home goes around the lava, along the left side of the battlefield.
+        // Given
         val tiles = List(8) { row -> List(8) { column -> if (row == 3 && column in 1..3) "lava" else "sand" } }
         val game = Game(0.9)
         scenarioTest({ game.start(ratRow = 0, ratColumn = 2, knightRow = 6, knightColumn = 7, tiles = tiles) }) {
@@ -208,7 +200,7 @@ class WanderingAcceptanceTest {
                     game.waitASecond()
                     game.ratPosition()
                 }
-            // Then: it walks around the lava, rather than stopping in front of it, all the way back home.
+            // Then
             positions.shouldContainExactly(
                 PositionDto(5, 1),
                 PositionDto(5, 0),
@@ -225,8 +217,7 @@ class WanderingAcceptanceTest {
 
     @Test
     fun `should join the battle when it wanders within reach of the party once a round finishes`() {
-        // Given: rat-2 engages the knight-2 at (1,0) and battles. The rat at (0,6) stays out of the battle, 6 tiles away
-        // from the leader at (0,0), one more than its reach, and steps west when the round finishes.
+        // Given
         val game = Game(0.9)
         scenarioTest({ game.start(ratRow = 0, ratColumn = 6, knightRow = 0, otherRats = mapOf("rat-2" to (3 to 0))) }) {
             game.battleApi.searchBattle()!!.battleUnitIds shouldNotContain "rat-1"
@@ -235,7 +226,7 @@ class WanderingAcceptanceTest {
             // When
             game.battleApi.finishPlayerTurn()
             game.eventBus.dispatch()
-            // Then: it joins the battle, so it approaches the party once the next round starts.
+            // Then
             ratMoves.first() shouldBe PositionDto(0, 5)
             game.battleApi.searchBattle()!!.battleUnitIds shouldContain "rat-1"
         }
@@ -243,7 +234,7 @@ class WanderingAcceptanceTest {
 
     @Test
     fun `should recover a tenth of its health every second while it wanders`() {
-        // Given: the rat has 20 health points, and is hit down to 10.
+        // Given
         val game = Game(0.0)
         scenarioTest({ game.start(ratRow = 0, ratColumn = 7, knightRow = 6) }) {
             game.hitRat()
@@ -274,7 +265,7 @@ class WanderingAcceptanceTest {
 
     @Test
     fun `should recover a tenth of its health once per round while it is out of the battle`() {
-        // Given: rat-2 engages the knight-2 at (1,0) and battles, while the rat stays out of the battle, hit down to 10.
+        // Given
         val game = Game(0.0)
         scenarioTest({ game.start(ratRow = 0, ratColumn = 7, knightRow = 0, otherRats = mapOf("rat-2" to (3 to 0))) }) {
             game.hitRat()

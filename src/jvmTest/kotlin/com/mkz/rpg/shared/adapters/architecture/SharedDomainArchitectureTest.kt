@@ -5,15 +5,9 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import kotlin.test.Test
 
-/**
- * Every subdomain may depend on `shared`, so its domain holds only the plumbing of the event bus and the save, never a
- * game rule: a rule belongs to the subdomain owning its concept (e.g.: the gold cap to the inventory), which hands it to
- * the others through a query. See docs/adr/0001-layered-subdomain-packages.md.
- */
 class SharedDomainArchitectureTest {
     private val sharedDomainPackage = "com.mkz.rpg.shared.domain"
 
-    // subscribe: the reified extension of EventBus.
     private val plumbing = listOf("DomainEvent", "EventBus", "subscribe", "Subscription", "Snapshottable")
 
     @Test

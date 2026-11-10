@@ -36,7 +36,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** Both players are human, so the test plays every turn. */
 class SummonVanishingAcceptanceTest {
     private val eventBus = InMemoryEventBus()
     private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
@@ -47,7 +46,7 @@ class SummonVanishingAcceptanceTest {
     private val abilityApi = AbilityApi(effectApi, eventBus, ResourcesAbilityLoader())
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
     private val battleApi = BattleApi(eventBus, playerApi)
-    private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(0.0))
+    private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom.cpuBattleUnitsAlwaysResting())
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, partyApi, eventBus)
 
@@ -56,8 +55,6 @@ class SummonVanishingAcceptanceTest {
     private val summonerId = "summoner-1"
     private val enemyId = "enemy-1"
 
-    // The summoner summons a battle unit lasting 2 turns, next to it. The enemy stands next to the summoner, and can
-    // defeat it at once.
     private suspend fun setUp() {
         playerApi.requestPlayerCreation(summonerPlayerId, HUMAN)
         playerApi.requestPlayerCreation(opponentId, HUMAN)
@@ -98,7 +95,6 @@ class SummonVanishingAcceptanceTest {
         eventBus.dispatch()
     }
 
-    // Summons a battle unit next to the summoner, in the summoner player turn, and returns the tile it stands on.
     private fun summon(): PositionDto {
         val castGroup = battleUnitApi.whereCanCast(summonerId, "summon").first()
         battleUnitApi.castAbility(battleUnitId = summonerId, abilityId = "summon", castGroup = castGroup)

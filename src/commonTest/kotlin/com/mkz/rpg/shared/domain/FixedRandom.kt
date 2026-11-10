@@ -2,7 +2,6 @@ package com.mkz.rpg.shared.domain
 
 import kotlin.random.Random
 
-// Rolls the given number, instead of a random one, so tests can choose the outcome of a roll.
 class FixedRandom(
     private val roll: Int,
 ) : Random() {

@@ -7,12 +7,8 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import kotlin.test.Test
 
 class TestFrameworkArchitectureTest {
-    // Tests are declared with kotlin.test only (e.g.: `@Test`, `@BeforeTest`), which runs on every target, so the tests can be shared
-    // through `commonTest`. JUnit features such as `@Nested` classes are not available on every target.
     private val forbiddenPackage = "org" + ".junit."
 
-    // KorGE's `viewsTest` skips the test on JS by default, so a view test in `commonTest` would pass on JS without asserting anything.
-    // `sharedViewsTest` runs it on every target instead.
     private val viewsTestCall = Regex("""\bviewsTest\s*[({]""")
 
     @Test

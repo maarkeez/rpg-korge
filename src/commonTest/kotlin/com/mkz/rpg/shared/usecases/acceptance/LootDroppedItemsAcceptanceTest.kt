@@ -59,7 +59,6 @@ class LootDroppedItemsAcceptanceTest {
     private val playerOneId = "player-one"
     private val playerOneKnightBattleUnitId = "hero"
 
-    // The knight of the human player starts the battle at row 2 and column 1, with the sand tiles at its east free.
     private suspend fun setUp() {
         terrainApi.init()
         effectApi.init()
@@ -73,7 +72,6 @@ class LootDroppedItemsAcceptanceTest {
         battleUnitApi.init()
         gameSetupApi.setUpGame()
         eventBus.dispatch()
-        // The setup starts exploring: the battle starts as if the players engaged each other.
         battleApi.startBattleWithEveryBattleUnit(battleUnitApi, "player-one", "player-two")
         eventBus.dispatch()
     }

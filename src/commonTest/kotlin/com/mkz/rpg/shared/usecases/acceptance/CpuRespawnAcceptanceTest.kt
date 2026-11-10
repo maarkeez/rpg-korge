@@ -34,7 +34,6 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// Uses the units and terrains defined in the resources: a human knight, and two CPU rats, on sand.
 class CpuRespawnAcceptanceTest {
     private val eventBus = InMemoryEventBus()
     private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
@@ -45,15 +44,12 @@ class CpuRespawnAcceptanceTest {
     private val abilityApi = AbilityApi(effectApi, eventBus, ResourcesAbilityLoader())
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
     private val battleApi = BattleApi(eventBus, playerApi)
-    private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(0.0))
+    private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom.cpuBattleUnitsAlwaysResting())
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, partyApi, eventBus)
 
     private val ratHome = PositionDto(row = 1, column = 4)
 
-    // The knight explores from (1,0), on a 3x12 battlefield of sand. The rat-1, at home on (1,4), is defeated before the
-    // party explores. The rat-2 stands behind a wall of void, so it never engages the knight, and the CPU player is not
-    // defeated with the rat-1.
     private suspend fun setUp() {
         terrainApi.init()
         effectApi.init()
@@ -78,7 +74,6 @@ class CpuRespawnAcceptanceTest {
 
     private fun ratHealth() = battleUnitApi.searchBattleUnitById("rat-1")!!.remainingHealth
 
-    // The sword hits the rat: 10 damage.
     private fun hitRat() {
         battleUnitApi.applyEffect(
             EffectApplicationDto(
@@ -96,7 +91,6 @@ class CpuRespawnAcceptanceTest {
         eventBus.dispatch()
     }
 
-    // The knight walks back and forth between (1,0) and (1,1).
     private fun walkBackAndForth(steps: Int) = repeat(steps) { step -> walk(if (step % 2 == 0) DirectionDto.EAST else DirectionDto.WEST) }
 
     @Test
@@ -123,7 +117,7 @@ class CpuRespawnAcceptanceTest {
     @Test
     fun `should wait while a battle unit of the party stands on its home`() =
         scenarioTest(::setUp) {
-            // Given: the knight walks onto the home of the rat, on its 4th step, and onto it again on the last step.
+            // Given
             repeat(4) { walk(DirectionDto.EAST) }
             repeat(RESPAWN_STEPS - 4) { step -> walk(if (step % 2 == 0) DirectionDto.WEST else DirectionDto.EAST) }
             require(battlefieldApi.searchPosition("knight-1") == ratHome)

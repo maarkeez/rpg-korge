@@ -34,8 +34,6 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// Uses the units and lootable items defined in the resources: the knight starts with 20 G and the viking with 100 G, the
-// potions are worth 10 G, and the hammer 50 G.
 class TradeAcceptanceTest {
     private val eventBus = InMemoryEventBus()
     private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
@@ -48,13 +46,11 @@ class TradeAcceptanceTest {
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
     private val battleApi = BattleApi(eventBus, playerApi)
 
-    // West of the knight, selling the potions and the hammer.
     private val merchant = Npc.Dto(id = "merchant", row = 0, column = 0, unitId = null, stock = listOf("health-potion", "mana-potion", "hammer"))
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val npcApi = NpcApi(battlefieldApi, lootableItemApi, partyApi, eventBus, FakeNpcLoader(listOf(merchant)))
     private val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
 
-    // The knight leads from (0,1), next to the merchant, and the viking follows it from (1,1).
     private suspend fun setUp() {
         terrainApi.init()
         effectApi.init()

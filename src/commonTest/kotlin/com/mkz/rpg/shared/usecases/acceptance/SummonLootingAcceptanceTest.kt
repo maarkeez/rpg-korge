@@ -48,7 +48,6 @@ import io.kotest.matchers.shouldBe
 import kotlin.random.Random
 import kotlin.test.Test
 
-/** Both players are human, so the test plays every turn. */
 class SummonLootingAcceptanceTest {
     private val eventBus = InMemoryEventBus()
     private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
@@ -71,7 +70,6 @@ class SummonLootingAcceptanceTest {
     private val knightId = "knight-1"
     private val potionTile = LootDrop.Dto.PositionDto(row = 1, column = 4)
 
-    // The knight, at (2,2), explores and summons a bee at (1,2), and a health potion lies at (1,4). The enemy stands far away, at (7,7).
     private suspend fun setUp() {
         playerApi.requestPlayerCreation(humanPlayerId, HUMAN)
         playerApi.requestPlayerCreation(opponentId, HUMAN)
@@ -112,7 +110,6 @@ class SummonLootingAcceptanceTest {
         eventBus.dispatch()
     }
 
-    // Summons the bee at (1,2), and returns its battle unit.
     private fun summonBee(): String {
         val castGroup = battleUnitApi.whereCanCast(knightId, "summon").first { castGroup -> castGroup.positions.any { tile -> tile.row == 1 && tile.column == 2 } }
         battleUnitApi.castAbility(battleUnitId = knightId, abilityId = "summon", castGroup = castGroup)
@@ -120,7 +117,6 @@ class SummonLootingAcceptanceTest {
         return battlefieldApi.searchOccupant(row = 1, column = 2).shouldNotBeNull()
     }
 
-    // The bee walks from (1,2) to (1,5), over the potion.
     private fun walkBeeOverThePotion(beeId: String) {
         battleUnitApi.walkBattleUnitInBattle(battleUnitId = beeId, walkToRow = 1, walkToColumn = 5)
         eventBus.dispatch()

@@ -6,10 +6,6 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import kotlin.test.Test
 
-/**
- * The use cases of a subdomain (its commands, queries and services) must only be instantiated in its presentation Api,
- * `<subdomain>.adapters.presentation.<Subdomain>Api`, which injects them where they are needed.
- */
 class UseCaseInstantiationArchitectureTest {
     private val useCasePackages = listOf("..usecases.commands..", "..usecases.queries..", "..usecases.services..")
 
@@ -28,12 +24,10 @@ class UseCaseInstantiationArchitectureTest {
                 val subdomainPackage = useCasePackage.substringBeforeLast(".usecases.")
                 val apiName = subdomainPackage.substringAfterLast(".").replaceFirstChar(Char::uppercase) + "Api"
                 val apiPackage = "$subdomainPackage.adapters.presentation"
-                // A constructor call, not a declaration nor a call on another receiver, e.g.: `BattlefieldCreation(`.
                 val call = Regex("""(?<![\w.]|class |fun )${useCase.name}\(""")
 
                 val instantiations =
                     scope.files
-                        // Only the files that see the use case, so a homonym declared elsewhere does not count.
                         .filter { file -> file.packagee?.fullyQualifiedName == useCasePackage || file.imports.any { it.name == useCase.fullyQualifiedName } }
                         .filterNot { file -> file.packagee?.fullyQualifiedName == apiPackage && file.name == apiName }
                         .flatMap { file -> call.findAll(file.text).map { match -> "${file.name}.kt:${file.text.lineNumberAt(match.range.first)}" } }

@@ -61,14 +61,9 @@ import com.mkz.rpg.unit.usecases.queries.SearchMaximumAbilities
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 import kotlin.random.Random
 
-/**
- * The in-memory repositories of every subdomain, where tests store their data with the object mothers, and the real queries
- * reading them, wired as the subdomain APIs do. Tests use these queries instead of stubbing them.
- */
 class InMemoryQueries(
     random: Random = Random.Default,
 ) {
-    // Storage
     val abilityRepository = InMemoryAbilityRepository()
     val battleRepository = InMemoryBattleRepository()
     val battlefieldRepository = InMemoryBattlefieldRepository()
@@ -82,7 +77,6 @@ class InMemoryQueries(
     val terrainRepository = InMemoryTerrainRepository()
     val unitRepository = InMemoryUnitRepository()
 
-    // Effect, unit, player and terrain
     val searchEffectById = SearchEffectById(effectRepository)
     val searchUnitById = SearchUnitById(unitRepository)
     val searchMaximumAbilities = SearchMaximumAbilities()
@@ -92,25 +86,19 @@ class InMemoryQueries(
     val searchTerrainById = SearchTerrainById(terrainRepository)
     val hasTerrainTransition = HasTerrainTransition(terrainRepository)
 
-    // Lootable item
     val searchLootableItemById = SearchLootableItemById(lootableItemRepository)
     val searchSellPrice = SearchSellPrice(lootableItemRepository)
 
-    // Npc
     val searchNpcById = SearchNpcById(npcRepository)
     val searchAdjacentNpc = SearchAdjacentNpc(npcRepository)
     val searchIsMerchant = SearchIsMerchant(npcRepository)
 
-    // Party
     val searchParty = SearchParty(partyRepository)
 
-    // Ability
     val searchAbilityById = SearchAbilityById(abilityRepository)
 
-    // Battle
     val searchBattle = SearchBattle(battleRepository)
 
-    // Battlefield
     val searchBattlefield = SearchBattlefield(battlefieldRepository)
     val searchBattlefieldSize = SearchBattlefieldSize(battlefieldRepository)
     val searchTerrainId = SearchTerrainId(battlefieldRepository)
@@ -122,7 +110,6 @@ class InMemoryQueries(
     val searchShortestPath = SearchShortestPath(isTileVacant)
     val searchWalkingDistance = SearchWalkingDistance(isTileVacant)
 
-    // Battle unit
     val adjacencyService = AdjacencyService()
     val searchBattleUnitById = SearchBattleUnitById(battleUnitRepository)
     val searchBattleUnitsByPlayerId = SearchBattleUnitsByPlayerId(battleUnitRepository)
@@ -145,7 +132,6 @@ class InMemoryQueries(
         )
     val castResolution = CastResolution(battleUnitRepository, searchPosition, searchOccupant, searchEffectById, adjacencyService)
 
-    // CPU battle brain
     val healingNeed = HealingNeed(searchBattleUnitById)
     val searchTerrainHealthEffect = SearchTerrainHealthEffect(searchTerrainId, searchTerrainById, searchEffectById)
     val searchDistancesFromHome = SearchDistancesFromHome(isTileOccupiable, searchTerrainHealthEffect)
@@ -185,6 +171,5 @@ class InMemoryQueries(
             random,
         )
 
-    // CPU wander brain
     val isInSight = IsInSight(searchParty, searchPosition, searchBattlefieldSize)
 }

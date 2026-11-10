@@ -47,10 +47,6 @@ import com.mkz.rpg.unit.domain.Unit
 import com.mkz.rpg.unit.usecases.services.FakeUnitLoader
 import kotlin.random.Random
 
-/**
- * The real subdomain APIs sharing one event bus, wired as the game does, which load the given data instead of the resources.
- * Presentation tests use them instead of stubbing the APIs. Call [initialise] to store the data.
- */
 class SubdomainApis(
     val eventBus: InMemoryEventBus = InMemoryEventBus(),
     terrains: List<Terrain.Dto> = emptyList(),
@@ -67,7 +63,6 @@ class SubdomainApis(
     npcs: List<Npc.Dto> = emptyList(),
     private val quests: List<Quest.Dto> = emptyList(),
     private val playerOrder: List<String> = emptyList(),
-    // Whether the human player explores with their battle units before the battle starts, as when the game is set up, so they get their inventories.
     private val explore: Boolean = false,
 ) {
     val terrainApi = TerrainApi(eventBus, FakeTerrainLoader(terrains))
@@ -87,7 +82,6 @@ class SubdomainApis(
     val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
     val questApi = QuestApi(battlefieldApi, partyApi, eventBus, FakeQuestLoader(quests))
 
-    /** Stores the given data, places the buildings, deploys the battle units, places the npcs, explores and starts the battle, dispatching the events it publishes. */
     fun initialise() {
         terrainApi.initialiseTerrains()
         effectApi.initialiseEffects()
@@ -101,7 +95,6 @@ class SubdomainApis(
         eventBus.dispatch()
         buildingApi.placeBuildings()
         eventBus.dispatch()
-        // Only with quests, as the game needs exactly one main quest once it has any.
         if (quests.isNotEmpty()) questApi.createQuests()
         battleUnitApi.initialiseBattleUnits()
         eventBus.dispatch()

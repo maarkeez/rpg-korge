@@ -8,7 +8,6 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-/** An event listener holds no business logic: it only calls command use cases, which publish the events. */
 class EventListenerArchitectureTest {
     private val productionClasses = Konsist.scopeFromProduction().classes()
 
@@ -19,7 +18,6 @@ class EventListenerArchitectureTest {
             .map { it.name }
             .toSet()
 
-    // The event listeners, e.g.: `OnBattleUnitDefeated`, but not the event bus (`InMemoryEventBus`).
     private val listeners =
         productionClasses
             .filter { it.resideInPackage("..adapters.events..") }

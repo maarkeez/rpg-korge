@@ -12,11 +12,6 @@ import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
 import kotlin.math.min
 
-/**
- * A rounded bar of a value out of its maximum, with the value after it, e.g.: `18/30`. The bar is drawn as vectors, at
- * most [BAR_HEIGHT] high, centered in the height of the view, and takes the width the value leaves. A bar without
- * [showValue] takes the whole width, e.g.: a slim mana bar.
- */
 open class BarView(
     size: Size,
     private val color: RGBA,
@@ -27,7 +22,6 @@ open class BarView(
         const val TEXT_SIZE = 12.0
         private const val VALUE_SPACING = 6.0
 
-        // The empty part of the bar, and its border.
         val TRACK = RGBA(0x0E, 0x0E, 0x18)
         val TRACK_STROKE = RGBA(0x36, 0x36, 0x50)
     }
@@ -36,7 +30,6 @@ open class BarView(
     internal var fill: RoundRect? = null
     internal val label: Text = text(text = "", textSize = TEXT_SIZE, color = Colors.WHITE)
 
-    // The value of the bar, as the share of its maximum, e.g.: 0.6 for 18 out of 30.
     internal var ratio: Double = 1.0
 
     init {
@@ -52,9 +45,8 @@ open class BarView(
         fill?.removeFromParent()
         label.text = "$remaining/$maximum"
         label.visible = showValue
-        // The width of the value is the one of its maximum, so the bars of the same maximum keep the same width.
-        val valueWidth = if (showValue) Text("$maximum/$maximum", textSize = TEXT_SIZE).width + VALUE_SPACING else 0.0
-        val barWidth = width - valueWidth
+        val widestValueWidth = if (showValue) Text("$maximum/$maximum", textSize = TEXT_SIZE).width + VALUE_SPACING else 0.0
+        val barWidth = width - widestValueWidth
         val barHeight = min(height, BAR_HEIGHT)
         val barY = (height - barHeight) / 2
         val radius = barHeight / 2

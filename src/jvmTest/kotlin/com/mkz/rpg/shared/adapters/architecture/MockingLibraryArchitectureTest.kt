@@ -7,7 +7,6 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import kotlin.test.Test
 
 class MockingLibraryArchitectureTest {
-    // Tests use real collaborators, in-memory repositories and hand-written fakes instead of mocks, so they can be shared through `commonTest`.
     private val forbiddenPackages = listOf("org" + ".mockito.", "io" + ".mockk.", "dev" + ".mokkery.")
 
     @Test

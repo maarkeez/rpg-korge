@@ -17,7 +17,6 @@ class FakeEventBus : EventBus {
     }
 
     override fun dispatch() {
-        // The fake only records published events.
     }
 
     override fun <T : DomainEvent> subscribe(

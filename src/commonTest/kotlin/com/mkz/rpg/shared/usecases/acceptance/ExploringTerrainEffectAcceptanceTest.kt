@@ -32,8 +32,6 @@ import io.kotest.matchers.shouldBe
 import kotlin.random.Random
 import kotlin.test.Test
 
-// Uses the units and terrains defined in the resources: two human knights with 100 health points, a CPU rat with 20, and
-// the lava, which damages 5 health points.
 class ExploringTerrainEffectAcceptanceTest {
     private val eventBus = InMemoryEventBus()
     private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
@@ -51,8 +49,6 @@ class ExploringTerrainEffectAcceptanceTest {
     private val cpuPlayerId = "cpu"
     private val victories = mutableListOf<String>().also { winners -> eventBus.subscribe<BattleEvent.PlayerVictory> { winners += it.playerId } }
 
-    // The knight-1 leads from the lava at (6,1), and the knight-2 follows it from the sand at (7,1). The rat stands on the
-    // lava at (0,6), 10 tiles away from the leader, so it does not engage.
     private suspend fun setUp() {
         terrainApi.init()
         effectApi.init()
@@ -73,7 +69,6 @@ class ExploringTerrainEffectAcceptanceTest {
         eventBus.dispatch()
     }
 
-    // A second passes while exploring.
     private fun waitASecond() {
         partyApi.applyStandingTerrainEffects()
         eventBus.dispatch()
@@ -97,7 +92,6 @@ class ExploringTerrainEffectAcceptanceTest {
     fun `should not hurt the battle units that walked during the second, until they stand on the lava for a second`() =
         scenarioTest(::setUp) {
             // Given
-            // The leader walks off the lava to (5,1), and the knight-2 onto it.
             partyApi.stepParty(DirectionDto.NORTH)
             eventBus.dispatch()
             // When

@@ -5,18 +5,9 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import kotlin.test.Test
 
-/**
- * Subdomains must not depend on each other, even indirectly (e.g.: `a` → `b` → `c` → `a`): the upstream one declares
- * `Request…` events, which the downstream one publishes, instead of the upstream one depending on it. The subdomains
- * and their cycles are read as in the dependency report (docs/architecture/dependencies.html).
- *
- * The restricted subdomains must only depend on the subdomains allowed for them, so their dependencies do not grow
- * (see docs/adr/0002-acyclic-shrink-only-subdomain-dependencies.md).
- */
 class SubdomainDependencyArchitectureTest {
     private val rootPackage = "com.mkz.rpg"
 
-    // The subdomains each restricted subdomain is allowed to depend on: exactly the ones it depends on, so the list can only shrink.
     private val allowedDependencies: Map<String, Set<String>> =
         mapOf(
             "shared" to emptySet(),
@@ -50,7 +41,6 @@ class SubdomainDependencyArchitectureTest {
 
     private val subdomains: Set<String> = dependencies.flatMap { (subdomain, importedSubdomain) -> listOf(subdomain, importedSubdomain) }.toSet()
 
-    // The groups of subdomains that can reach each other, even indirectly (strongly connected components), with more than one subdomain.
     private val cycles: Set<Set<String>> =
         subdomains
             .associateWith(::reachableFrom)
@@ -95,7 +85,6 @@ class SubdomainDependencyArchitectureTest {
         val fileName: String,
     )
 
-    // The subdomains the given one depends on, directly or not.
     private fun reachableFrom(subdomain: String): Set<String> {
         val reached = mutableSetOf<String>()
         val pending = ArrayDeque(listOf(subdomain))
@@ -110,8 +99,6 @@ class SubdomainDependencyArchitectureTest {
         return reached
     }
 
-    // The first package segment after the root package, e.g.: `screen` for `com.mkz.rpg.screen.adapters.presentation`.
-    // Null out of the root package (e.g.: `korlibs`), and for the root package itself (e.g.: `Main.kt`).
     private fun subdomainOf(name: String): String? =
         name
             .removePrefix("$rootPackage.")

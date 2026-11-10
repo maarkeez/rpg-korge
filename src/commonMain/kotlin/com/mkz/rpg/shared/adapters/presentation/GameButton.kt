@@ -8,11 +8,6 @@ import korlibs.korge.view.addTo
 import korlibs.math.geom.Point
 import korlibs.math.geom.Size
 
-/**
- * The button of the game: grey by default, with a light border and a white label. A disabled button is still displayed,
- * but faded, its background dark, its label grey and its border dim, so the player tells at a glance that it can not be
- * tapped: KorGE's own disabled grey is too close to the grey of the game to tell apart.
- */
 class GameButton(
     size: Size,
     label: String,
@@ -36,7 +31,6 @@ class GameButton(
         background.borderColor = BORDER
     }
 
-    // KorGE only changes the background of a disabled button: the label and the border fade with it.
     override fun updatedUIButton(
         down: Boolean?,
         over: Boolean?,

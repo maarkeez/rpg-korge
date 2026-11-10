@@ -7,7 +7,6 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import kotlin.test.Test
 
 class AssertionLibraryArchitectureTest {
-    // Tests are asserted with Kotest assertions only, which run on every target, so the tests can be shared through `commonTest`.
     private val forbiddenPackage = "org" + ".assertj."
 
     @Test

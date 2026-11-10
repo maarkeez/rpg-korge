@@ -28,20 +28,16 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
-    // The party walks to the battle with the knight at (2,7), which can walk 3 tiles. (2,6) is an adjacent sand tile.
     private val knightRow = LEADER_ROW_IN_BATTLE
     private val knightColumn = LEADER_COLUMN_IN_BATTLE
     private val tileInWalkingRangeRow = LEADER_ROW_IN_BATTLE
     private val tileInWalkingRangeColumn = LEADER_COLUMN_IN_BATTLE - 1
 
-    // (2,3) is 4 tiles away across the start room, out of the knight walking range.
     private val tileOutOfRangeColumn = LEADER_COLUMN_IN_BATTLE - 4
 
-    // The bat engaging the knight, alone, stands next to it. The bat has 10 health points, and the knight sword deals 10.
     private val batRow = BAT_ROW_IN_BATTLE
     private val batColumn = BAT_COLUMN_IN_BATTLE
 
-    // The knight abilities are sword, which is cast on an adjacent enemy, and heal, which is cast on the knight.
     private val swordAbilityIndex = 0
     private val healAbilityIndex = 1
 
@@ -83,7 +79,7 @@ class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             waitUntil { callToActionView.isDisplayingCancelAndConfirm() }
             // When
             clickConfirm(callToActionView)
-            // Then: the battle finishes straight away, without finishing the turn.
+            // Then
             waitUntil { virtualPadView()?.isPadShown() == true && bannerView()?.roundText() == "Exploring" }
             withClue("Expected the bat to be defeated and gone from ($batRow,$batColumn)") { battlefieldView.hasBattleUnitAt(batRow, batColumn).shouldBeFalse() }
             withClue("Expected the virtual pad to be displayed once the battle is over") { virtualPadView()?.isPadShown()?.shouldBeTrue() }

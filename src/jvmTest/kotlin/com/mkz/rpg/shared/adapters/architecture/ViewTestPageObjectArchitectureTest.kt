@@ -8,8 +8,6 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import kotlin.test.Test
 
 class ViewTestPageObjectArchitectureTest {
-    // Tests running views (view tests and end-to-end tests) must only access view internals through the
-    // view page objects (`<View>Extension.kt` files), which are the only test files allowed to use them.
     private val forbiddenImportPrefixes = listOf("korlibs.korge.view.", "korlibs.korge.ui.", "korlibs.korge.input.")
     private val forbiddenCalls = listOf("findViewByName(", ".children", "simulateClick(", "mouseMoveAndClickTo(")
 

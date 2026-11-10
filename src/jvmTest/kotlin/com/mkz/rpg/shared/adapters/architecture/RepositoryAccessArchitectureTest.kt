@@ -6,18 +6,11 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import kotlin.test.Test
 
-/**
- * The domain declares a repository, its storage adapter implements it, and only its use cases call it: the Api of its
- * subdomain only builds it and hands it to them. So no adapter reads or writes an aggregate around the use cases (e.g.:
- * a snapshottable loading a save). The tests are not checked: they arrange their state through the repositories. See
- * docs/adr/0001-layered-subdomain-packages.md.
- */
 class RepositoryAccessArchitectureTest {
     private val rootPackage = "com.mkz.rpg"
 
     private val files = Konsist.scopeFromProduction().files
 
-    // A repository is a `…Repository` declared in a domain package, e.g.: `party.domain.PartyRepository`.
     private val repositoryImports: List<RepositoryImport> =
         files.flatMap { file ->
             val packageName = file.packagee?.fullyQualifiedName ?: return@flatMap emptyList()
@@ -69,7 +62,6 @@ class RepositoryAccessArchitectureTest {
         val fileName: String,
     )
 
-    // A call on a repository, e.g.: `partyRepository.search()` or `InMemoryPartyRepository().apply { … }`.
     private val repositoryCall = Regex("""Repository(\(\))?\??\.\w""")
 
     private fun isAllowed(import: RepositoryImport): Boolean {

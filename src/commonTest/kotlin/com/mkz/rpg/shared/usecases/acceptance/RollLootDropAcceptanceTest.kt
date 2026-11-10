@@ -60,8 +60,6 @@ class RollLootDropAcceptanceTest {
     private val playerOneKnightBattleUnitId = "hero"
     private val playerTwoGoatWizardBattleUnitId = "goat-wizard-1"
 
-    // A goat wizard of the CPU player is deployed next to the knight, at row 2 and column 2, with 150 health points. It
-    // always drops a bee essence.
     private suspend fun setUp() {
         terrainApi.init()
         effectApi.init()
@@ -85,7 +83,6 @@ class RollLootDropAcceptanceTest {
         eventBus.dispatch()
     }
 
-    // The goat wizard is hit 15 times for 10 damage, which defeats it.
     private fun defeatTheGoatWizard() =
         repeat(15) {
             battleUnitApi.applyEffect(

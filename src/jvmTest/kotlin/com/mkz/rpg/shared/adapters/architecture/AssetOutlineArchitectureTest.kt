@@ -17,7 +17,6 @@ class AssetOutlineArchitectureTest {
     private val outlinedFolders = listOf("unit/", "npc/", "lootableItem/", "building/")
     private val outlinedFiles = setOf("battlefield/chest.png")
 
-    // Drawn without a single outline colour: its hair, black and dark green all reach its silhouette.
     private val notOutlinedFiles = setOf("unit/rat_portrait.png")
 
     private val assets: Map<String, Bitmap> =
@@ -58,7 +57,6 @@ class AssetOutlineArchitectureTest {
 
     private fun VfsFile.isImage(): Boolean = path.substringAfterLast("/").let { name -> !name.startsWith(".") && name.endsWith(".png") }
 
-    // The opaque pixels next to a transparent pixel or to the edge of the image, diagonals included.
     private fun Bitmap.silhouette(): List<Pixel> =
         (0 until height).flatMap { y ->
             (0 until width)

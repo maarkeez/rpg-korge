@@ -9,10 +9,6 @@ import korlibs.time.milliseconds
 
 private val BLINK_PAUSE = 200.milliseconds
 
-/**
- * Fades the view to [firstAlpha] and then to [secondAlpha], in a loop, e.g.: to highlight what an action would change.
- * Keeps blinking until the returned animator is cancelled.
- */
 fun View.blink(
     firstAlpha: Double,
     secondAlpha: Double,
