@@ -1,6 +1,6 @@
 # Plan: A distance consideration that can't tell the options apart is worth 0
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** When every option of a CPU battle unit is the same tiles apart from the nearest enemy, or from the
 > nearest ally, `WhereShouldWalk` divides 0 by 0. Every utility becomes NaN, and the battle unit walks to the first
