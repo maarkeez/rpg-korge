@@ -310,4 +310,30 @@ class QuestAcceptanceTest {
         progress().status shouldBe StatusDto.ACTIVE
         progress().currentTaskIndex shouldBe 0
     }
+
+    @Test
+    fun `An npc should do its talk task in one talk and start the side quest it gives in the next`() {
+        // Given
+        val apis =
+            smallGame(
+                mainQuest(id = "main", tasks = listOf(talk(npcId = "farmer"), defeat(unitId = "rat"))).toDto(),
+                sideQuest(id = "help-the-farmer", questGiverNpcId = "farmer", tasks = listOf(visit(2 to 0))).toDto(),
+            )
+
+        fun progress(questId: String) =
+            apis.questApi
+                .searchQuests()
+                .single { quest -> quest.id == questId }
+                .progress
+        // When
+        apis.talkToTheFarmer()
+        // Then
+        progress("main").currentTaskIndex shouldBe 1
+        progress("help-the-farmer").status shouldBe StatusDto.NOT_STARTED
+        // When
+        apis.talkToTheFarmer()
+        // Then
+        progress("main").currentTaskIndex shouldBe 1
+        progress("help-the-farmer").status shouldBe StatusDto.ACTIVE
+    }
 }

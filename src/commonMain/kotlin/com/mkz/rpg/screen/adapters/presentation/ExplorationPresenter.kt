@@ -18,6 +18,7 @@ import com.mkz.rpg.party.domain.PartyEvent.PauseClosed
 import com.mkz.rpg.party.domain.PartyEvent.PauseOpened
 import com.mkz.rpg.party.domain.PartyEvent.QuestClosed
 import com.mkz.rpg.party.domain.PartyEvent.QuestOpened
+import com.mkz.rpg.quest.adapters.presentation.QuestApi
 import com.mkz.rpg.save.domain.SaveEvent.GameLoaded
 import com.mkz.rpg.screen.adapters.presentation.ShopView.Mode
 import com.mkz.rpg.screen.adapters.presentation.selection.domain.SelectionEvent
@@ -34,6 +35,7 @@ class ExplorationPresenter(
     private val callToActionView: CallToActionView,
     private val partyApi: PartyApi,
     private val npcApi: NpcApi,
+    private val questApi: QuestApi,
     private val shopPresenter: ShopPresenter,
     private val formationPresenter: FormationPresenter,
     private val pausePresenter: PausePresenter,
@@ -90,7 +92,7 @@ class ExplorationPresenter(
             },
             eventBus.subscribe<NpcTalkStarted> { event ->
                 val npc = npcApi.searchNpcById(event.npcId) ?: return@subscribe
-                timeline.play { displayNpcDialog(npc) }
+                timeline.play { displayTalkPanel(npc) }
             },
             eventBus.subscribe<NpcTalkFinished> {
                 timeline.play { displayVirtualPad(isDisplayed = true) }
@@ -243,7 +245,7 @@ class ExplorationPresenter(
         val merchant = talkingNpc() ?: return
         timeline.play {
             shopPresenter.close()
-            displayNpcDialog(merchant)
+            displayTalkPanel(merchant)
         }
     }
 
@@ -263,8 +265,9 @@ class ExplorationPresenter(
         callToActionView.visible = !isDisplayed
     }
 
-    private fun displayNpcDialog(npc: Npc.Dto) {
-        talkView.display(TalkInfo(npcId = npc.id, unitId = npc.unitId, name = messages.npcName(npc.id), line = messages.npcLine(npc.id)))
+    private fun displayTalkPanel(npc: Npc.Dto) {
+        val line = questApi.searchQuestLine(npc.id)?.let { questLine -> QuestMapper.lineOf(questLine, messages) } ?: messages.npcOwnLine(npc.id)
+        talkView.display(TalkInfo(npcId = npc.id, unitId = npc.unitId, name = messages.npcName(npc.id), line = line))
         virtualPadView.visible = false
         talkView.visible = true
         if (npcApi.searchIsMerchant(npc.id)) {

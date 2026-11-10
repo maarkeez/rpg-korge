@@ -27,7 +27,7 @@ class Messages(
 
     fun npcName(npcId: String): String = localizationApi.translate("npc.$npcId.name")
 
-    fun npcLine(npcId: String): String = localizationApi.translate("npc.$npcId.line")
+    fun npcOwnLine(npcId: String): String = localizationApi.translate("npc.$npcId.line")
 
     fun playerName(playerId: String): String = localizationApi.translate("player.$playerId.name")
 
@@ -41,6 +41,11 @@ class Messages(
         questId: String,
         taskIndex: Int,
     ): String = localizationApi.translate("quest.$questId.task.$taskIndex")
+
+    fun questLine(
+        questId: String,
+        line: String,
+    ): String = localizationApi.translate("quest.$questId.line.$line")
 
     fun languages(): List<LanguageDto> = localizationApi.searchLanguages()
 

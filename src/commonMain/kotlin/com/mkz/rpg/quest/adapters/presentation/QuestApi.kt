@@ -19,6 +19,7 @@ import com.mkz.rpg.quest.usecases.commands.ProgressVisitTasks
 import com.mkz.rpg.quest.usecases.commands.RequestQuestReward
 import com.mkz.rpg.quest.usecases.commands.ResolveNpcTalk
 import com.mkz.rpg.quest.usecases.commands.StartMainQuest
+import com.mkz.rpg.quest.usecases.queries.SearchQuestLine
 import com.mkz.rpg.quest.usecases.queries.SearchQuestMarkers
 import com.mkz.rpg.quest.usecases.queries.SearchQuests
 import com.mkz.rpg.quest.usecases.queries.SearchQuestsSnapshot
@@ -41,17 +42,18 @@ class QuestApi(
 
     private val publishQuestProgress = PublishQuestProgress(questRepository, eventBus)
 
+    val searchQuests = SearchQuests(questRepository)
+    val searchQuestMarkers = SearchQuestMarkers(questRepository)
+    val searchQuestLine = SearchQuestLine(questRepository)
+
     val createQuests = CreateQuests(questLoader, questRepository, battlefieldApi.isTileVacant)
     val startMainQuest = StartMainQuest(questRepository, partyApi.searchParty, publishQuestProgress)
     val progressDefeatTasks = ProgressDefeatTasks(questRepository, partyApi.searchParty, publishQuestProgress)
     val progressVisitTasks = ProgressVisitTasks(questRepository, partyApi.searchParty, publishQuestProgress)
-    val resolveNpcTalk = ResolveNpcTalk(questRepository, publishQuestProgress)
+    val resolveNpcTalk = ResolveNpcTalk(searchQuestLine, questRepository, publishQuestProgress)
     val abandonQuest = AbandonQuest(questRepository, publishQuestProgress)
     val pinQuest = PinQuest(questRepository, publishQuestProgress, eventBus)
     val requestQuestReward = RequestQuestReward(questRepository, partyApi.searchParty, battlefieldApi.searchPosition, eventBus)
-
-    val searchQuests = SearchQuests(questRepository)
-    val searchQuestMarkers = SearchQuestMarkers(questRepository)
 
     private val onRequestCreateQuests = OnRequestCreateQuests(createQuests, eventBus)
     private val onBattleUnitDefeated = OnBattleUnitDefeated(progressDefeatTasks, eventBus)

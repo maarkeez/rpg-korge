@@ -15,7 +15,10 @@ import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.quest.domain.Quest
+import com.mkz.rpg.quest.domain.QuestMother.defeat
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
+import com.mkz.rpg.quest.domain.QuestMother.sideQuest
+import com.mkz.rpg.quest.domain.QuestMother.talk
 import com.mkz.rpg.save.adapters.presentation.SaveApi
 import com.mkz.rpg.save.domain.SaveEvent
 import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.gameSceneTimeline
@@ -60,7 +63,11 @@ class ExplorationPresenterTest {
                     npc(id = "elder", row = 1, column = 0).toDto(),
                     npc(id = "merchant", row = 2, column = 2, stock = listOf("health-potion", "mana-potion")).toDto(),
                 ),
-            quests = listOf(mainQuest(id = "defeat-the-goat-wizard").toDto()),
+            quests =
+                listOf(
+                    mainQuest(id = "defeat-the-goat-wizard", tasks = listOf(talk("elder"), defeat())).toDto(),
+                    sideQuest(id = "the-blacksmiths-errand", questGiverNpcId = "merchant", tasks = listOf(defeat(), talk("merchant"))).toDto(),
+                ),
         ).also(SubdomainApis::initialise)
     private val eventBus = apis.eventBus
     private val virtualPadView = VirtualPadView()
@@ -130,6 +137,7 @@ class ExplorationPresenterTest {
             callToActionView,
             apis.partyApi,
             apis.npcApi,
+            apis.questApi,
             shopPresenter,
             formationPresenter,
             pausePresenter,
@@ -405,6 +413,7 @@ class ExplorationPresenterTest {
             callToActionView,
             apis.partyApi,
             apis.npcApi,
+            apis.questApi,
             shopPresenter,
             formationPresenter,
             pausePresenter,
@@ -555,11 +564,34 @@ class ExplorationPresenterTest {
         // Then
         talkView.visible.shouldBeTrue()
         talkView.displayedName() shouldBe "Elder"
-        talkView.displayedLine() shouldBe
-            "Long ago a goat chewed up a wizard's spellbook and swallowed its magic. The Goat Wizard now rules the lair down south. Beat it, and its bees may answer your call."
+        talkView.displayedLine() shouldBe "The lair lies down south. Tread carefully, travellers: a goat never forgets."
         virtualPadView.visible.shouldBeFalse()
         hudView.visible.shouldBeFalse()
         callToActionView.visible.shouldBeFalse()
+    }
+
+    @Test
+    fun `TalkToAdjacentNpc should display the talk task line when the current task is to talk to the npc`() {
+        // Given
+        createPresenter()
+        startExploring()
+        startTheMainQuest()
+        // When
+        talk()
+        // Then
+        talkView.displayedLine() shouldBe
+            "Long ago a goat chewed up a wizard's spellbook and swallowed its magic. The Goat Wizard now rules the lair down south. Beat it, and its bees may answer your call."
+    }
+
+    @Test
+    fun `TalkToAdjacentNpc should display the start line of the quest the npc gives`() {
+        // Given
+        createPresenter()
+        startExploring()
+        // When
+        talkToTheMerchant()
+        // Then
+        talkView.displayedLine() shouldBe errandStartLine
     }
 
     @Test
@@ -654,6 +686,9 @@ class ExplorationPresenterTest {
         talkView.visible.shouldBeFalse()
         hudView.visible.shouldBeTrue()
     }
+
+    private val errandStartLine =
+        "Fresh from the forge! Before you buy: my iron comes up through the southern fields. Go and see whether the path is still open, and I will make it worth your while."
 
     private fun talkToTheMerchant() {
         virtualPadView.holdArrow(Direction.EAST)
@@ -800,6 +835,19 @@ class ExplorationPresenterTest {
         virtualPadView.visible.shouldBeFalse()
         callToActionView.visible.shouldBeTrue()
         apis.partyApi.searchParty()!!.talkingNpcId shouldBe "merchant"
+    }
+
+    @Test
+    fun `ShopBackSelected should display the quest line of the merchant again when the shop is closed`() {
+        // Given
+        createPresenter()
+        startExploring()
+        openTheShop()
+        // When
+        callToActionView.chooseAction("Back")
+        eventBus.dispatch()
+        // Then
+        talkView.displayedLine() shouldBe errandStartLine
     }
 
     @Test

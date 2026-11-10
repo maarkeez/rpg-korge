@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.quest.domain.Quest
+import com.mkz.rpg.quest.domain.Quest.Dto.QuestLineDto
 import com.mkz.rpg.quest.domain.Quest.Dto.QuestMarkerDto
 import com.mkz.rpg.quest.domain.Quest.Dto.QuestTypeDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
@@ -60,6 +61,21 @@ internal object QuestMapper {
             QuestMarkerDto.SignDto.QUEST_TO_START -> QuestMarkerView.Sign.QUEST_TO_START
             QuestMarkerDto.SignDto.TALK_TASK -> QuestMarkerView.Sign.TALK_TASK
         }
+
+    fun lineOf(
+        line: QuestLineDto,
+        messages: Messages,
+    ): String =
+        messages.questLine(
+            line.questId,
+            when (line.kind) {
+                QuestLineDto.KindDto.START -> "start"
+                QuestLineDto.KindDto.REMINDER -> "reminder"
+                QuestLineDto.KindDto.TALK_TASK -> "task.${line.taskIndex}"
+                QuestLineDto.KindDto.COMPLETED -> "completed"
+                QuestLineDto.KindDto.START_AGAIN -> "startAgain"
+            },
+        )
 
     private fun kindOf(task: TaskDto): QuestInfo.Kind =
         when (task.type) {

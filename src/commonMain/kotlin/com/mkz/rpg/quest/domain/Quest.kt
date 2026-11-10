@@ -2,6 +2,7 @@ package com.mkz.rpg.quest.domain
 
 import com.mkz.rpg.quest.domain.Quest.Dto.PositionDto
 import com.mkz.rpg.quest.domain.Quest.Dto.ProgressDto
+import com.mkz.rpg.quest.domain.Quest.Dto.QuestLineDto
 import com.mkz.rpg.quest.domain.Quest.Dto.QuestMarkerDto
 import com.mkz.rpg.quest.domain.Quest.Dto.QuestTypeDto
 import com.mkz.rpg.quest.domain.Quest.Dto.RewardDto
@@ -73,6 +74,21 @@ data class Quest private constructor(
             canBeStartedBy(npcId) -> QuestMarkerDto(npcId = npcId, sign = QuestMarkerDto.SignDto.QUEST_TO_START)
             else -> null
         }
+
+    fun lineFor(npcId: String): QuestLineDto? =
+        when {
+            progress.status == StatusDto.ACTIVE && (currentTask() as? Task.Talk)?.npcId == npcId -> questLine(QuestLineDto.KindDto.TALK_TASK, progress.currentTaskIndex)
+            questGiverNpcId?.value != npcId -> null
+            progress.status == StatusDto.NOT_STARTED -> questLine(QuestLineDto.KindDto.START)
+            progress.status == StatusDto.ACTIVE -> questLine(QuestLineDto.KindDto.REMINDER)
+            repeatable -> questLine(QuestLineDto.KindDto.START_AGAIN)
+            else -> questLine(QuestLineDto.KindDto.COMPLETED)
+        }
+
+    private fun questLine(
+        kind: QuestLineDto.KindDto,
+        taskIndex: Int? = null,
+    ) = QuestLineDto(questId = id.value, kind = kind, taskIndex = taskIndex)
 
     fun start(): Quest =
         copy(
@@ -250,6 +266,20 @@ data class Quest private constructor(
             enum class SignDto {
                 QUEST_TO_START,
                 TALK_TASK,
+            }
+        }
+
+        data class QuestLineDto(
+            val questId: String,
+            val kind: KindDto,
+            val taskIndex: Int?,
+        ) {
+            enum class KindDto {
+                START,
+                REMINDER,
+                TALK_TASK,
+                COMPLETED,
+                START_AGAIN,
             }
         }
 

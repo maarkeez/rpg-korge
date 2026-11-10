@@ -2,6 +2,8 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.quest.domain.Quest
 import com.mkz.rpg.quest.domain.Quest.Dto.ProgressDto
+import com.mkz.rpg.quest.domain.Quest.Dto.QuestLineDto
+import com.mkz.rpg.quest.domain.Quest.Dto.QuestLineDto.KindDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
 import com.mkz.rpg.quest.domain.QuestMother.defeat
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
@@ -158,5 +160,35 @@ class QuestMapperTest {
             )
         // Then
         infos.map { info -> info.isPinned }.shouldContainExactly(false, true)
+    }
+
+    @Test
+    fun `lineOf should translate the start, reminder, completed and start again lines of a quest`() {
+        // Given
+        val messages = MessagesMother.messages()
+        // When
+        val lines =
+            listOf(
+                QuestLineDto(questId = "bats-in-the-meadow", kind = KindDto.START, taskIndex = null),
+                QuestLineDto(questId = "bats-in-the-meadow", kind = KindDto.REMINDER, taskIndex = null),
+                QuestLineDto(questId = "bats-in-the-meadow", kind = KindDto.COMPLETED, taskIndex = null),
+                QuestLineDto(questId = "rats-in-the-fields", kind = KindDto.START_AGAIN, taskIndex = null),
+            ).map { line -> QuestMapper.lineOf(line, messages) }
+        // Then
+        lines.shouldContainExactly(
+            "Thank you for dealing with that bat! More of them nest in my meadow, off the path. Defeat three of them and I will pay you well. My village is just south.",
+            "The bats still nest in my meadow, off the path. Three less of them, and I can sleep again.",
+            "No bat has bothered me since. My village is just south, past this meadow: tell them the Farmer sent you.",
+            "Well done, travellers. But the rats are back in the southern fields, as always. Thin them out again: same task, same gold.",
+        )
+    }
+
+    @Test
+    fun `lineOf should translate the line of a talk task by the place of its task`() {
+        // When
+        val line = QuestMapper.lineOf(QuestLineDto(questId = goatWizardQuestId, kind = KindDto.TALK_TASK, taskIndex = 0), MessagesMother.messages("es"))
+        // Then
+        line shouldBe
+            "Hace mucho, una cabra se comió el libro de hechizos de un mago y se tragó su magia. El Mago Cabra gobierna ahora la guarida del sur. Derrótalo, y puede que sus abejas acudan a tu llamada."
     }
 }

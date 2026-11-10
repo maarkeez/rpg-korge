@@ -648,7 +648,7 @@ msgctxt "ui.questAnnouncement.completed"
 msgid "QUEST COMPLETED"
 msgstr "MISIÓN COMPLETADA"
 
-# Game data: the names of resources/ability/<id>.toml, lootableItem, npc, player, terrain and unit, and the npc lines.
+# Game data: the names of resources/ability/<id>.toml, lootableItem, npc, player, terrain and unit, and the own lines of the npcs.
 
 msgctxt "ability.bat.name"
 msgid "Bat"
@@ -734,7 +734,7 @@ msgctxt "npc.alchemist.name"
 msgid "Alchemist"
 msgstr "Alquimista"
 
-#. What the npc says when the party talks to it.
+#. What the npc says when no quest has a line for it.
 msgctxt "npc.alchemist.line"
 msgid "Potions, elixirs, and an essence that bends space. What will it be?"
 msgstr "Pociones, elixires y una esencia que dobla el espacio. ¿Qué va a ser?"
@@ -743,43 +743,28 @@ msgctxt "npc.blacksmith.name"
 msgid "Blacksmith"
 msgstr "Herrera"
 
-#. What the npc says when the party talks to it.
-msgctxt "npc.blacksmith.line"
-msgid "Fresh from the forge! A sturdy hammer keeps you standing for longer."
-msgstr "¡Recién salido de la forja! Un buen martillo te mantiene en pie más tiempo."
-
 msgctxt "npc.elder.name"
 msgid "Elder"
 msgstr "Anciano"
 
-#. What the npc says when the party talks to it.
+#. What the npc says when no quest has a line for it.
 msgctxt "npc.elder.line"
-msgid "Long ago a goat chewed up a wizard's spellbook and swallowed its magic. The Goat Wizard now rules the lair down south. Beat it, and its bees may answer your call."
-msgstr "Hace mucho, una cabra se comió el libro de hechizos de un mago y se tragó su magia. El Mago Cabra gobierna ahora la guarida del sur. Derrótalo, y puede que sus abejas acudan a tu llamada."
+msgid "The lair lies down south. Tread carefully, travellers: a goat never forgets."
+msgstr "La guarida queda al sur. Andad con cuidado, viajeros: una cabra nunca olvida."
 
 msgctxt "npc.elf.name"
 msgid "Elf"
 msgstr "Elfa"
 
-#. What the npc says when the party talks to it.
-msgctxt "npc.elf.line"
-msgid "The forest whispers of strangers who outwit goats and bats alike. Walk softly, travellers: my arrows watch over this village."
-msgstr "El bosque habla de forasteros que burlan a cabras y murciélagos por igual. Caminad con cuidado, viajeros: mis flechas vigilan esta aldea."
-
 msgctxt "npc.farmer.name"
 msgid "Farmer"
 msgstr "Granjero"
-
-#. What the npc says when the party talks to it.
-msgctxt "npc.farmer.line"
-msgid "Thank you for dealing with that bat! My village is just south, past this meadow. Mind the bats nesting off the path."
-msgstr "¡Gracias por libraros de ese murciélago! Mi aldea está justo al sur, pasado este prado. Cuidado con los murciélagos que anidan fuera del camino."
 
 msgctxt "npc.herbalist.name"
 msgid "Herbalist"
 msgstr "Herbolaria"
 
-#. What the npc says when the party talks to it.
+#. What the npc says when no quest has a line for it.
 msgctxt "npc.herbalist.line"
 msgid "Herbs to heal, venom to kill: I know them both. Take me with you, and let's face that goat together!"
 msgstr "Hierbas para curar, veneno para matar: conozco ambos. ¡Llevadme con vosotros y enfrentémonos juntos a esa cabra!"
@@ -788,7 +773,7 @@ msgctxt "npc.princess.name"
 msgid "Princess"
 msgstr "Princesa"
 
-#. What the npc says when the party talks to it.
+#. What the npc says when no quest has a line for it.
 msgctxt "npc.princess.line"
 msgid "You defeated the Goat Wizard! The realm thanks you, brave travellers. This was only the first of many paths: keep exploring this world."
 msgstr "¡Habéis derrotado al Mago Cabra! El reino os lo agradece, valientes viajeros. Este era solo el primero de muchos caminos: seguid explorando este mundo."
@@ -797,7 +782,7 @@ msgctxt "npc.viking.name"
 msgid "Viking"
 msgstr "Vikingo"
 
-#. What the npc says when the party talks to it.
+#. What the npc says when no quest has a line for it.
 msgctxt "npc.viking.line"
 msgid "Those beasts kept me pinned here for days! For Valhalla, I fight at your side."
 msgstr "¡Esas bestias me tuvieron aquí atrapado durante días! Por el Valhalla, lucharé a vuestro lado."
@@ -822,15 +807,35 @@ msgctxt "quest.bats-in-the-meadow.description"
 msgid "Bats nest in the meadow near the farm, and the Farmer wants them gone."
 msgstr "Los murciélagos anidan en el prado cerca de la granja, y el Granjero quiere que se vayan."
 
-#. A task of a quest, by its place in the line of tasks, as a whole sentence.
+#. A task of a quest, by its place in the series of tasks, as a whole sentence.
 msgctxt "quest.bats-in-the-meadow.task.0"
 msgid "Defeat 3 Bats"
 msgstr "Derrota 3 Murciélagos"
 
-#. A task of a quest, by its place in the line of tasks, as a whole sentence.
+#. A task of a quest, by its place in the series of tasks, as a whole sentence.
 msgctxt "quest.bats-in-the-meadow.task.1"
 msgid "Talk to the Farmer"
 msgstr "Habla con el Granjero"
+
+#. What the quest giver says in the talk that starts the quest.
+msgctxt "quest.bats-in-the-meadow.line.start"
+msgid "Thank you for dealing with that bat! More of them nest in my meadow, off the path. Defeat three of them and I will pay you well. My village is just south."
+msgstr "¡Gracias por libraros de ese murciélago! Hay más anidando en mi prado, fuera del camino. Derrotad a tres y os pagaré bien. Mi aldea está justo al sur."
+
+#. What the quest giver says while the quest is active and the talk does none of its talk tasks.
+msgctxt "quest.bats-in-the-meadow.line.reminder"
+msgid "The bats still nest in my meadow, off the path. Three less of them, and I can sleep again."
+msgstr "Los murciélagos siguen anidando en mi prado, fuera del camino. Con tres menos, podré volver a dormir."
+
+#. What the npc of a talk task says in the talk that does it, by the place of the task in the series of tasks.
+msgctxt "quest.bats-in-the-meadow.line.task.1"
+msgid "Three bats gone! The meadow is quiet at last. Here, take this gold: you have earned it."
+msgstr "¡Tres murciélagos menos! Por fin el prado está en calma. Tomad este oro: os lo habéis ganado."
+
+#. What the quest giver says once the quest is completed.
+msgctxt "quest.bats-in-the-meadow.line.completed"
+msgid "No bat has bothered me since. My village is just south, past this meadow: tell them the Farmer sent you."
+msgstr "Ningún murciélago me ha molestado desde entonces. Mi aldea está justo al sur, pasado este prado: decid que os envía el Granjero."
 
 #. The name of a quest.
 msgctxt "quest.defeat-the-goat-wizard.name"
@@ -842,15 +847,20 @@ msgctxt "quest.defeat-the-goat-wizard.description"
 msgid "A goat swallowed a wizard's magic and now rules the lair down south."
 msgstr "Una cabra se tragó la magia de un mago y ahora gobierna la guarida del sur."
 
-#. A task of a quest, by its place in the line of tasks, as a whole sentence.
+#. A task of a quest, by its place in the series of tasks, as a whole sentence.
 msgctxt "quest.defeat-the-goat-wizard.task.0"
 msgid "Talk to the Elder"
 msgstr "Habla con el Anciano"
 
-#. A task of a quest, by its place in the line of tasks, as a whole sentence.
+#. A task of a quest, by its place in the series of tasks, as a whole sentence.
 msgctxt "quest.defeat-the-goat-wizard.task.1"
 msgid "Defeat the Goat Wizard"
 msgstr "Derrota al Mago Cabra"
+
+#. What the npc of a talk task says in the talk that does it, by the place of the task in the series of tasks.
+msgctxt "quest.defeat-the-goat-wizard.line.task.0"
+msgid "Long ago a goat chewed up a wizard's spellbook and swallowed its magic. The Goat Wizard now rules the lair down south. Beat it, and its bees may answer your call."
+msgstr "Hace mucho, una cabra se comió el libro de hechizos de un mago y se tragó su magia. El Mago Cabra gobierna ahora la guarida del sur. Derrótalo, y puede que sus abejas acudan a tu llamada."
 
 #. The name of a quest.
 msgctxt "quest.rats-in-the-fields.name"
@@ -862,10 +872,25 @@ msgctxt "quest.rats-in-the-fields.description"
 msgid "Rats keep coming back to the southern fields. The Elf pays to thin them out, as often as it takes."
 msgstr "Las ratas siempre vuelven a los campos del sur. La Elfa paga por ahuyentarlas, tantas veces como haga falta."
 
-#. A task of a quest, by its place in the line of tasks, as a whole sentence.
+#. A task of a quest, by its place in the series of tasks, as a whole sentence.
 msgctxt "quest.rats-in-the-fields.task.0"
 msgid "Defeat 2 Rats"
 msgstr "Derrota 2 Ratas"
+
+#. What the quest giver says in the talk that starts the quest.
+msgctxt "quest.rats-in-the-fields.line.start"
+msgid "The forest whispers of strangers who outwit goats and bats alike. Then rats will not trouble you: thin them out in the southern fields, and I pay in gold."
+msgstr "El bosque habla de forasteros que burlan a cabras y murciélagos por igual. Entonces las ratas no os darán problemas: ahuyentadlas de los campos del sur, y pago en oro."
+
+#. What the quest giver says while the quest is active and the talk does none of its talk tasks.
+msgctxt "quest.rats-in-the-fields.line.reminder"
+msgid "Two rats, travellers, in the southern fields. My arrows stay here, watching over this village."
+msgstr "Dos ratas, viajeros, en los campos del sur. Mis flechas se quedan aquí, vigilando esta aldea."
+
+#. What the quest giver says in the talk that starts the repeatable quest again.
+msgctxt "quest.rats-in-the-fields.line.startAgain"
+msgid "Well done, travellers. But the rats are back in the southern fields, as always. Thin them out again: same task, same gold."
+msgstr "Bien hecho, viajeros. Pero las ratas han vuelto a los campos del sur, como siempre. Ahuyentadlas otra vez: misma tarea, mismo oro."
 
 #. The name of a quest.
 msgctxt "quest.the-blacksmiths-errand.name"
@@ -877,15 +902,35 @@ msgctxt "quest.the-blacksmiths-errand.description"
 msgid "The Blacksmith wants to know whether the path to the southern fields is still open."
 msgstr "La Herrera quiere saber si el paso a los campos del sur sigue abierto."
 
-#. A task of a quest, by its place in the line of tasks, as a whole sentence.
+#. A task of a quest, by its place in the series of tasks, as a whole sentence.
 msgctxt "quest.the-blacksmiths-errand.task.0"
 msgid "Visit the southern fields"
 msgstr "Visita los campos del sur"
 
-#. A task of a quest, by its place in the line of tasks, as a whole sentence.
+#. A task of a quest, by its place in the series of tasks, as a whole sentence.
 msgctxt "quest.the-blacksmiths-errand.task.1"
 msgid "Talk to the Blacksmith"
 msgstr "Habla con la Herrera"
+
+#. What the quest giver says in the talk that starts the quest.
+msgctxt "quest.the-blacksmiths-errand.line.start"
+msgid "Fresh from the forge! Before you buy: my iron comes up through the southern fields. Go and see whether the path is still open, and I will make it worth your while."
+msgstr "¡Recién salido de la forja! Antes de comprar: mi hierro llega por los campos del sur. Id a ver si el paso sigue abierto, y os lo sabré agradecer."
+
+#. What the quest giver says while the quest is active and the talk does none of its talk tasks.
+msgctxt "quest.the-blacksmiths-errand.line.reminder"
+msgid "Have you been to the southern fields yet? I need to know whether that path is open. Meanwhile, a sturdy hammer keeps you standing for longer."
+msgstr "¿Habéis ido ya a los campos del sur? Necesito saber si ese paso sigue abierto. Mientras tanto, un buen martillo os mantiene en pie más tiempo."
+
+#. What the npc of a talk task says in the talk that does it, by the place of the task in the series of tasks.
+msgctxt "quest.the-blacksmiths-errand.line.task.1"
+msgid "The path is open? Good news for my forge! Take this gold, and a potion for the road."
+msgstr "¿El paso está abierto? ¡Buena noticia para mi forja! Tomad este oro, y una poción para el camino."
+
+#. What the quest giver says once the quest is completed.
+msgctxt "quest.the-blacksmiths-errand.line.completed"
+msgid "Fresh from the forge! A sturdy hammer keeps you standing for longer. And thank you again for walking to the fields."
+msgstr "¡Recién salido de la forja! Un buen martillo os mantiene en pie más tiempo. Y gracias de nuevo por acercaros a los campos."
 
 #. Displayed in the world builder, e.g.: "{terrain} can not be next to {adjacentTerrain}".
 msgctxt "terrain.grass.name"

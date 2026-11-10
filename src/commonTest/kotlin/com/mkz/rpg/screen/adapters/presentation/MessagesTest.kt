@@ -72,7 +72,15 @@ class MessagesTest {
         messages[UiMessage.SHOP_NOT_ENOUGH_GOLD] shouldBe "No hay suficiente oro"
         messages.plural(UiMessage.REMAINING_SUMMON_DURATION, 3, "turns" to 3) shouldBe "Desaparece en 3 turnos"
         messages.unitName("bat") shouldBe "Murciélago"
-        messages.npcLine("viking") shouldBe "¡Esas bestias me tuvieron aquí atrapado durante días! Por el Valhalla, lucharé a vuestro lado."
+        messages.npcOwnLine("viking") shouldBe "¡Esas bestias me tuvieron aquí atrapado durante días! Por el Valhalla, lucharé a vuestro lado."
+    }
+
+    @Test
+    fun `questLine should return the line of the quest`() {
+        // When
+        val line = messages.questLine("bats-in-the-meadow", "task.1")
+        // Then
+        line shouldBe "Three bats gone! The meadow is quiet at last. Here, take this gold: you have earned it."
     }
 
     @Test

@@ -7,6 +7,8 @@ import com.mkz.rpg.localization.adapters.resources.ResourcesLocalizationLoader.C
 import com.mkz.rpg.localization.adapters.resources.TestCatalogs
 import com.mkz.rpg.localization.domain.Localization
 import com.mkz.rpg.quest.adapters.resources.ResourcesQuestLoader
+import com.mkz.rpg.quest.domain.Quest
+import com.mkz.rpg.quest.domain.Quest.Dto.TaskDto
 import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -26,7 +28,7 @@ class LocalizationResourcesTest {
         mapOf(
             "ability" to listOf("name"),
             "lootableItem" to listOf("name"),
-            "npc" to listOf("name", "line"),
+            "npc" to listOf("name"),
             "player" to listOf("name"),
             "quest" to listOf("name", "description"),
             "terrain" to listOf("name"),
@@ -66,9 +68,23 @@ class LocalizationResourcesTest {
         }
 
     @Test
+    fun `should have every line of every quest in the source catalog`() =
+        runTest {
+            val missing = questLineKeys().filter { key -> key !in sourceEntries }
+            withClue("Quest lines missing from $SOURCE_FILE_NAME: $missing") { missing.shouldBeEmpty() }
+        }
+
+    @Test
+    fun `should have an own line in the source catalog for every npc that gives no side quest`() =
+        runTest {
+            val missing = npcOwnLineKeys().filter { key -> key !in sourceEntries }
+            withClue("Own lines of the npcs missing from $SOURCE_FILE_NAME: $missing") { missing.shouldBeEmpty() }
+        }
+
+    @Test
     fun `should only have the keys the screen translates in the source catalog`() =
         runTest {
-            val keys = UiMessage.entries.map(UiMessage::key).toSet() + Localization.LANGUAGE_NAME_KEY + gameDataKeys() + questTaskKeys()
+            val keys = UiMessage.entries.map(UiMessage::key).toSet() + Localization.LANGUAGE_NAME_KEY + gameDataKeys() + questTaskKeys() + questLineKeys() + npcOwnLineKeys()
             val orphans = sourceCatalog.entries.map { entry -> entry.context ?: entry.id }.filter { key -> key !in keys }
             withClue("Entries of $SOURCE_FILE_NAME the screen does not translate, or without msgctxt: $orphans") { orphans.shouldBeEmpty() }
         }
@@ -134,11 +150,38 @@ class LocalizationResourcesTest {
             }.toSet()
 
     private suspend fun questTaskKeys(): Set<String> =
-        ResourcesQuestLoader()
-            .also { loader -> loader.initResources() }
-            .loadQuests()
+        quests()
             .flatMap { quest -> quest.tasks.indices.map { taskIndex -> "quest.${quest.id}.task.$taskIndex" } }
             .toSet()
+
+    private suspend fun quests(): List<Quest.Dto> = ResourcesQuestLoader().also { loader -> loader.initResources() }.loadQuests()
+
+    private suspend fun questLineKeys(): Set<String> =
+        quests()
+            .flatMap { quest ->
+                val talkTaskLines =
+                    quest.tasks.indices
+                        .filter { taskIndex -> quest.tasks[taskIndex].type == TaskDto.TypeDto.TALK }
+                        .map { taskIndex -> "task.$taskIndex" }
+                val questGiverLines =
+                    quest.questGiverNpcId
+                        ?.let { questGiverNpcId ->
+                            val hasReminder = quest.tasks.any { task -> task.talk?.npcId != questGiverNpcId }
+                            listOfNotNull("start", "reminder".takeIf { hasReminder }, if (quest.repeatable) "startAgain" else "completed")
+                        }.orEmpty()
+                (talkTaskLines + questGiverLines).map { line -> "quest.${quest.id}.line.$line" }
+            }.toSet()
+
+    private suspend fun npcOwnLineKeys(): Set<String> {
+        val questGiverNpcIds = quests().mapNotNull { quest -> quest.questGiverNpcId }.toSet()
+        return ResourcesBundle.root["npc"]
+            .listNames()
+            .filter { fileName -> fileName.endsWith(".toml") }
+            .map { fileName -> fileName.removeSuffix(".toml") }
+            .filter { npcId -> npcId !in questGiverNpcIds }
+            .map { npcId -> "npc.$npcId.line" }
+            .toSet()
+    }
 
     private fun placeholders(text: String): Set<String> = placeholder.findAll(text).map { match -> match.groupValues[1] }.toSet()
 }

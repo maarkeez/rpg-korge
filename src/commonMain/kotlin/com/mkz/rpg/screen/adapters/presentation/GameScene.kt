@@ -285,6 +285,7 @@ class GameScene(
                         callToActionView,
                         partyApi,
                         npcApi,
+                        questApi,
                         shopPresenter,
                         formationPresenter,
                         pausePresenter,

@@ -2,6 +2,8 @@ package com.mkz.rpg.quest.domain
 
 import com.mkz.rpg.quest.domain.Quest.Dto.PositionDto
 import com.mkz.rpg.quest.domain.Quest.Dto.ProgressDto
+import com.mkz.rpg.quest.domain.Quest.Dto.QuestLineDto
+import com.mkz.rpg.quest.domain.Quest.Dto.QuestLineDto.KindDto
 import com.mkz.rpg.quest.domain.Quest.Dto.QuestMarkerDto
 import com.mkz.rpg.quest.domain.Quest.Dto.QuestTypeDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
@@ -471,5 +473,100 @@ class QuestTest {
         val result = completed.markerFor("farmer")
         // Then
         result?.sign shouldBe QuestMarkerDto.SignDto.QUEST_TO_START
+    }
+
+    @Test
+    fun `LineFor should be the start line when the npc is the quest giver of a quest not started`() {
+        // Given
+        val quest = sideQuest(id = "bats", questGiverNpcId = "farmer")
+        // When
+        val result = quest.lineFor("farmer")
+        // Then
+        result shouldBe QuestLineDto(questId = "bats", kind = KindDto.START, taskIndex = null)
+    }
+
+    @Test
+    fun `LineFor should be the reminder line when the quest is active and its current task is no talk with its quest giver`() {
+        // Given
+        val quest = sideQuest(id = "bats", questGiverNpcId = "farmer", tasks = listOf(defeat(unitId = "bat"), talk("farmer"))).start()
+        // When
+        val result = quest.lineFor("farmer")
+        // Then
+        result shouldBe QuestLineDto(questId = "bats", kind = KindDto.REMINDER, taskIndex = null)
+    }
+
+    @Test
+    fun `LineFor should be the talk task line, with the place of its task, when the current task is to talk to the npc`() {
+        // Given
+        val quest =
+            sideQuest(id = "bats", questGiverNpcId = "farmer", tasks = listOf(defeat(unitId = "bat"), talk("farmer")))
+                .start()
+                .defeated("bat")
+        // When
+        val result = quest.lineFor("farmer")
+        // Then
+        result shouldBe QuestLineDto(questId = "bats", kind = KindDto.TALK_TASK, taskIndex = 1)
+    }
+
+    @Test
+    fun `LineFor should be the talk task line when the npc of the current talk task is no quest giver`() {
+        // Given
+        val quest = mainQuest(id = "goat-wizard", tasks = listOf(talk("elder"), defeat())).start()
+        // When
+        val result = quest.lineFor("elder")
+        // Then
+        result shouldBe QuestLineDto(questId = "goat-wizard", kind = KindDto.TALK_TASK, taskIndex = 0)
+    }
+
+    @Test
+    fun `LineFor should be the completed line when the quest is completed and not repeatable`() {
+        // Given
+        val quest =
+            sideQuest(id = "bats", questGiverNpcId = "farmer", tasks = listOf(defeat(unitId = "bat")))
+                .start()
+                .defeated("bat")
+        // When
+        val result = quest.lineFor("farmer")
+        // Then
+        result shouldBe QuestLineDto(questId = "bats", kind = KindDto.COMPLETED, taskIndex = null)
+    }
+
+    @Test
+    fun `LineFor should be the start again line when a repeatable quest is completed`() {
+        // Given
+        val quest =
+            sideQuest(id = "rats", questGiverNpcId = "elf", repeatable = true, tasks = listOf(defeat(unitId = "rat")))
+                .start()
+                .defeated("rat")
+        // When
+        val result = quest.lineFor("elf")
+        // Then
+        result shouldBe QuestLineDto(questId = "rats", kind = KindDto.START_AGAIN, taskIndex = null)
+    }
+
+    @Test
+    fun `LineFor should be the start line again when a repeatable quest completed before is abandoned`() {
+        // Given
+        val quest =
+            sideQuest(id = "rats", questGiverNpcId = "elf", repeatable = true, tasks = listOf(defeat(unitId = "rat")))
+                .start()
+                .defeated("rat")
+                .start()
+                .abandon()
+        // When
+        val result = quest.lineFor("elf")
+        // Then
+        result shouldBe QuestLineDto(questId = "rats", kind = KindDto.START, taskIndex = null)
+    }
+
+    @Test
+    fun `LineFor should be nothing when the npc is neither the quest giver nor the npc of the current talk task`() {
+        // Given
+        val sideQuest = sideQuest(questGiverNpcId = "farmer", tasks = listOf(defeat(), talk("elder"))).start()
+        val mainQuest = mainQuest(tasks = listOf(defeat(), talk("elder"))).start()
+        // When
+        val results = listOf(sideQuest.lineFor("elder"), sideQuest.lineFor("viking"), mainQuest.lineFor("elder"))
+        // Then
+        results shouldBe listOf(null, null, null)
     }
 }

@@ -220,7 +220,7 @@ class QuestPresenterTest {
     }
 
     @Test
-    fun `QuestPresenter should play the announcements one after the other when a talk starts two quests`() {
+    fun `QuestPresenter should play the announcements one after the other when two quests start`() {
         // Given
         val apis = apis(mainQuest(id = questId), sideQuest(id = "side"), sideQuest(id = "other"))
         apis.presenter()
@@ -415,10 +415,10 @@ class QuestPresenterTest {
             .shouldBeTrue()
     }
 
-    private fun SubdomainApis.presenterWithASideQuestOpen(): QuestPresenter {
+    private fun SubdomainApis.presenterWithASideQuestOpen(talksToTheFarmer: Int = 1): QuestPresenter {
         val presenter = presenter()
         startQuest()
-        questApi.resolveNpcTalk("farmer")
+        repeat(talksToTheFarmer) { questApi.resolveNpcTalk("farmer") }
         partyApi.openQuest()
         eventBus.dispatch()
         presenter.openQuest()
@@ -501,6 +501,7 @@ class QuestPresenterTest {
         val apis = apis(completed, mainQuest(id = questId), active)
         val presenter = apis.presenter()
         apis.startQuest()
+        apis.questApi.resolveNpcTalk("farmer")
         apis.questApi.resolveNpcTalk("farmer")
         apis.eventBus.dispatch()
         apis.defeatRat()
@@ -585,7 +586,7 @@ class QuestPresenterTest {
     fun `QuestAbandon should return to the journal when a side quest is still listed`() {
         // Given
         val apis = apis(mainQuest(id = questId), sideQuest(id = "side"), sideQuest(id = "other"))
-        val presenter = apis.presenterWithASideQuestOpen()
+        val presenter = apis.presenterWithASideQuestOpen(talksToTheFarmer = 2)
         presenter.questJournalSelected("side")
         callToActionView.chooseAction("Abandon")
         // When

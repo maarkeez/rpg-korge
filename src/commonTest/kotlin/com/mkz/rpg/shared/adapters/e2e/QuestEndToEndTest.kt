@@ -29,6 +29,7 @@ import com.mkz.rpg.screen.adapters.presentation.confirmDialogView
 import com.mkz.rpg.screen.adapters.presentation.displayedCaption
 import com.mkz.rpg.screen.adapters.presentation.displayedCount
 import com.mkz.rpg.screen.adapters.presentation.displayedGold
+import com.mkz.rpg.screen.adapters.presentation.displayedLine
 import com.mkz.rpg.screen.adapters.presentation.displayedName
 import com.mkz.rpg.screen.adapters.presentation.displayedRows
 import com.mkz.rpg.screen.adapters.presentation.displayedTask
@@ -163,12 +164,14 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         loadSlot(isAQuestActive = false)
     }
 
-    private suspend fun ViewsForTesting.talkToTheNpcNextToTheLeader() {
+    private suspend fun ViewsForTesting.talkToTheNpcNextToTheLeader(): String {
         clickA(requireNotNull(stage.virtualPadView()))
         val talkView = requireNotNull(stage.talkView())
         waitUntil { talkView.isDialogShown() }
+        val line = talkView.displayedLine()
         clickDialog(talkView)
         waitUntil { stage.virtualPadView()?.isPadShown() == true }
+        return line
     }
 
     private suspend fun ViewsForTesting.defeatTheGateBat() {
@@ -335,8 +338,9 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
                 clickArrow(requireNotNull(virtualPadView()), Direction.WEST)
                 waitUntil { battlefieldView()?.hasBattleUnitAt(KNIGHT_START_ROW, LEADER_COLUMN_IN_BATTLE - step - 1) == true }
             }
-            talkToTheNpcNextToTheLeader()
+            val line = talkToTheNpcNextToTheLeader()
             // Then
+            line shouldBe "Three bats gone! The meadow is quiet at last. Here, take this gold: you have earned it."
             val loadedAnnouncementView = requireNotNull(questAnnouncementView())
             waitUntil { loadedAnnouncementView.isAnnouncementShown() && loadedAnnouncementView.displayedTitle() == "QUEST COMPLETED" }
             loadedAnnouncementView.displayedName() shouldBe "Bats in the Meadow"
@@ -344,6 +348,20 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             waitUntil { loadedTrackerView.displayedTask() == null }
             withClue("Expected no pin once no quest is active") { loadedTrackerView.isPinShown().shouldBeFalse() }
             withClue("Expected no marker over the farmer") { battlefieldView()?.hasQuestMarkerAt(FARMER_ROW, FARMER_COLUMN)?.shouldBeFalse() }
+        }
+
+    @Test
+    fun `should say the start line, then the reminder line, when the farmer is talked to twice`() =
+        sharedViewsTest {
+            // Given
+            startWithTheFarmerNextToTheKnight()
+            // When
+            val startLine = talkToTheNpcNextToTheLeader()
+            val reminderLine = talkToTheNpcNextToTheLeader()
+            // Then
+            startLine shouldBe
+                "Thank you for dealing with that bat! More of them nest in my meadow, off the path. Defeat three of them and I will pay you well. My village is just south."
+            reminderLine shouldBe "The bats still nest in my meadow, off the path. Three less of them, and I can sleep again."
         }
 
     @Test
