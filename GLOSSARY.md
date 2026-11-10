@@ -156,6 +156,11 @@ A battle unit being put on the battlefield for the first time.
 Said of a battle unit with no health left.
 _Avoid_: Dead, killed, KO
 
+**Defeat**:
+A battle unit becoming defeated: its health going from some left to none. It happens once until the battle unit
+respawns, as a defeated battle unit takes no more damage.
+_Avoid_: Death, kill
+
 **Respawn**:
 A defeated battle unit coming back on the battlefield.
 _Avoid_: Revive
@@ -273,6 +278,11 @@ A battle unit getting an effect.
 
 **Ongoing effect**:
 An effect a battle unit has received and that has not finished.
+
+**Stack**:
+An effect received again while it is already ongoing, becoming another ongoing effect with its own remaining duration,
+such as two venoms each dealing their damage each player turn.
+_Avoid_: Refresh
 
 **Equipped effect**:
 An effect that lasts while its item is equipped.
