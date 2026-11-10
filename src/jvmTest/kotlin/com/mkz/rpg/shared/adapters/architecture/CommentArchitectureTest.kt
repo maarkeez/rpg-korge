@@ -21,7 +21,6 @@ class CommentArchitectureTest {
             "building",
             "cpuBattleBrain",
             "cpuWanderBrain",
-            "effect",
             "gameSetup",
             "inventory",
             "localization",

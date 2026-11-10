@@ -31,10 +31,6 @@ data class Effect private constructor(
     private val events: Set<EffectEvent>,
 ) {
     companion object {
-        /**
-         * Fails when the outcome only makes sense while an item is equipped but the timing is not, or the other way round,
-         * and when learning an ability is not applied immediately.
-         */
         fun create(dto: Dto): Effect {
             val outcome = Outcome(dto.outcome)
             val timing = Timing(dto.timing)
@@ -83,10 +79,8 @@ data class Effect private constructor(
                 }
         }
 
-        /** Raising a maximum stat only lasts while the item granting it is equipped. */
         fun lastsWhileEquipped() = this is IncreaseMaximumHealth || this is IncreaseMaximumMana
 
-        /** Learning an ability happens once, as soon as it is applied. */
         fun learnsAbility() = this is LearnAbility
 
         fun toDto() =
@@ -156,7 +150,6 @@ data class Effect private constructor(
             val unitId: String,
         ) : Outcome
 
-        /** Teaches its battle unit the ability for good. */
         @JvmInline private value class LearnAbility(
             val abilityId: String,
         ) : Outcome
@@ -200,7 +193,6 @@ data class Effect private constructor(
 
         private object OnDefeated : Timing
 
-        /** Active from the moment its item is equipped until it is unequipped. */
         private object WhileEquipped : Timing
 
         private data class OnPlayerTurnStarted(
@@ -246,7 +238,6 @@ data class Effect private constructor(
                 val battleUnitId: String?,
                 val terrainId: String?,
                 val lootableItemId: String?,
-                // The ability a battle unit cast, when the effect is applied by a cast.
                 val abilityId: String?,
             ) {
                 enum class SourceTypeDto {
@@ -276,7 +267,6 @@ data class Effect private constructor(
                             abilityId = null,
                         )
 
-                    /** A consumed or equipped item. */
                     fun item(lootableItemId: String) =
                         SourceDto(
                             type = SourceTypeDto.ITEM,
@@ -289,7 +279,6 @@ data class Effect private constructor(
             }
         }
 
-        /** A battle unit, or a position of the battlefield. */
         data class RecipientDto(
             val type: TypeDto,
             val battleUnitId: String?,
@@ -348,7 +337,6 @@ data class Effect private constructor(
 
                 fun learnAbility(abilityId: String) = withoutDetails(TypeDto.LEARN_ABILITY).copy(learnAbility = LearnAbilityDto(abilityId = abilityId))
 
-                // The outcome of the type, before the factory sets its own details.
                 private fun withoutDetails(type: TypeDto) =
                     EffectOutcomeDto(
                         type = type,

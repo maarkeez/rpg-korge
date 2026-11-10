@@ -13,17 +13,13 @@ class EffectApi(
     eventBus: EventBus,
     private val effectLoader: EffectLoader,
 ) {
-    // Storage
     private val effectRepository = InMemoryEffectRepository()
 
-    // Commands
     val requestEffectCreation = RequestEffectCreation(effectRepository, eventBus)
     val initialiseEffects = InitialiseEffects(effectLoader, effectRepository, eventBus)
 
-    // Queries
     val searchEffectById = SearchEffectById(effectRepository)
 
-    // Events
     private val onRequestEffectCreation = OnRequestEffectCreation(requestEffectCreation, eventBus)
     private val onRequestInitialiseEffects = OnRequestInitialiseEffects(initialiseEffects, eventBus)
 

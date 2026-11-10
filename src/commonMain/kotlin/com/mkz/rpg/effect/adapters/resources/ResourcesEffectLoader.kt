@@ -16,7 +16,6 @@ import com.mkz.rpg.shared.adapters.toml.required
 import korlibs.io.file.VfsFile
 import kotlinx.serialization.Serializable
 
-/** Loads one effect per `effect/<effect id>.toml` resource. */
 class ResourcesEffectLoader(
     private val effectRoot: VfsFile = ResourcesBundle.root["effect"],
 ) : EffectLoader {
@@ -44,7 +43,6 @@ class ResourcesEffectLoader(
             )
     }
 
-    // Only the fields required by the outcome type are set, e.g.: `damage` for `DAMAGE`.
     @Serializable
     data class OutcomeDefinition(
         val type: String,
@@ -72,7 +70,6 @@ class ResourcesEffectLoader(
             }
     }
 
-    // Only the fields required by the timing type are set, e.g.: `duration` for `ON_PLAYER_TURN_STARTED`.
     @Serializable
     data class TimingDefinition(
         val type: String,
