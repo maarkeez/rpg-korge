@@ -1,6 +1,6 @@
 # Plan: One defeat when stacked venoms finish off a battle unit
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** A battle unit carrying two or more venoms can be defeated several times in one player turn. E.g.: the
 > knight hits the Goat Wizard twice with poisoned-sword, so it carries two `venom-damage` stacks. Its player turn starts
@@ -86,3 +86,15 @@ For example, the Goat Wizard has 3 health and two venoms (3 damage each):
 - A battle unit defeated by an immediate effect still receives the other effects of the same cast, such as the venom of
   venom-strike. It takes no damage from them, and `respawn` clears them.
 - Extra bee-essence already dropped in a save stays on its tile.
+
+## Changes while building
+
+- The events of a battle unit are a `Set`, so two stacks of the same effect publish their `OnPlayerTurnStartedEffectTriggered`
+  and `BattleUnitDamaged` once, not once per stack. The health still drops by every stack, so
+  `TriggerOnPlayerTurnStartedEffects should deal the damage of every stack when the battle unit has two of the same effect`
+  checks each event once.
+- `TriggerOnPlayerTurnStartedEffect should only update the matching on player turn started effect when the battle unit has
+  several effects` becomes `TriggerOnPlayerTurnStartedEffects should trigger every on player turn started effect when the
+  battle unit has several effects`, as every ongoing effect timed on player turn started now triggers in one call.
+- `applyDecreaseHealthEffect` on a defeated battle unit still takes the triggered immediate effect off its ongoing effects,
+  so it does not linger until the respawn.
