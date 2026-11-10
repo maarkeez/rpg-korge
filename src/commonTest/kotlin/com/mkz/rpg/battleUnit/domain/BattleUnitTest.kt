@@ -637,7 +637,7 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `TriggerOnPlayerTurnStartedEffect should reduce the health and remove the on player turn started effect when the effect damages`() {
+    fun `TriggerOnPlayerTurnStartedEffects should reduce the health and remove the on player turn started effect when the effect damages`() {
         // Given
         val unit = UnitMother.unit(baseMaximumHealth = 10).toDto()
         val onPlayerTurnStartedEffect = EffectMother.damageEffect(damage = 3, timingType = "ON_PLAYER_TURN_STARTED").toDto()
@@ -649,8 +649,8 @@ class BattleUnitTest {
                 .second
         // When
         val updatedBattleUnit =
-            battleUnit.triggerOnPlayerTurnStartedEffect(
-                effect = onPlayerTurnStartedEffect,
+            battleUnit.triggerOnPlayerTurnStartedEffects(
+                effects = listOf(onPlayerTurnStartedEffect),
                 currentRow = position().row,
                 currentColumn = position().column,
             )
@@ -668,7 +668,7 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `TriggerOnPlayerTurnStartedEffect should publish the triggered event before the defeat when the effect defeats the battle unit`() {
+    fun `TriggerOnPlayerTurnStartedEffects should publish the triggered event before the defeat when the effect defeats the battle unit`() {
         // Given
         val unit = UnitMother.unit(baseMaximumHealth = 3).toDto()
         val onPlayerTurnStartedEffect = EffectMother.damageEffect(damage = 3, timingType = "ON_PLAYER_TURN_STARTED").toDto()
@@ -680,8 +680,8 @@ class BattleUnitTest {
                 .second
         // When
         val updatedBattleUnit =
-            battleUnit.triggerOnPlayerTurnStartedEffect(
-                effect = onPlayerTurnStartedEffect,
+            battleUnit.triggerOnPlayerTurnStartedEffects(
+                effects = listOf(onPlayerTurnStartedEffect),
                 currentRow = position().row,
                 currentColumn = position().column,
             )
@@ -696,15 +696,15 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `TriggerOnPlayerTurnStartedEffect should keep the on player turn started effect with one less remaining duration when it has more than one left`() {
+    fun `TriggerOnPlayerTurnStartedEffects should keep the on player turn started effect with one less remaining duration when it has more than one left`() {
         // Given
         val unit = UnitMother.unit(baseMaximumHealth = 10).toDto()
         val onPlayerTurnStartedEffect = EffectMother.damageEffect(id = "effect-1", damage = 3, timingType = "ON_PLAYER_TURN_STARTED").toDto()
         val battleUnit = BattleUnitMother.battleUnit(unit = unit).receiveOnPlayerTurnStartedEffect(effectId = onPlayerTurnStartedEffect.id, remainingDuration = 2)
         // When
         val updatedBattleUnit =
-            battleUnit.triggerOnPlayerTurnStartedEffect(
-                effect = onPlayerTurnStartedEffect,
+            battleUnit.triggerOnPlayerTurnStartedEffects(
+                effects = listOf(onPlayerTurnStartedEffect),
                 currentRow = position().row,
                 currentColumn = position().column,
             )
@@ -717,7 +717,7 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `TriggerOnPlayerTurnStartedEffect should remove the on player turn started effect when it is triggered for its last player turn`() {
+    fun `TriggerOnPlayerTurnStartedEffects should remove the on player turn started effect when it is triggered for its last player turn`() {
         // Given
         val unit = UnitMother.unit(baseMaximumHealth = 10).toDto()
         val onPlayerTurnStartedEffect = EffectMother.damageEffect(id = "effect-1", damage = 3, timingType = "ON_PLAYER_TURN_STARTED").toDto()
@@ -725,12 +725,12 @@ class BattleUnitTest {
         // When
         val updatedBattleUnit =
             battleUnit
-                .triggerOnPlayerTurnStartedEffect(
-                    effect = onPlayerTurnStartedEffect,
+                .triggerOnPlayerTurnStartedEffects(
+                    effects = listOf(onPlayerTurnStartedEffect),
                     currentRow = position().row,
                     currentColumn = position().column,
-                ).triggerOnPlayerTurnStartedEffect(
-                    effect = onPlayerTurnStartedEffect,
+                ).triggerOnPlayerTurnStartedEffects(
+                    effects = listOf(onPlayerTurnStartedEffect),
                     currentRow = position().row,
                     currentColumn = position().column,
                 )
@@ -742,24 +742,25 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `TriggerOnPlayerTurnStartedEffect should only update the matching on player turn started effect when the battle unit has several effects`() {
+    fun `TriggerOnPlayerTurnStartedEffects should trigger every on player turn started effect when the battle unit has several effects`() {
         // Given
         val unit = UnitMother.unit(baseMaximumHealth = 10).toDto()
-        val appliedEffect = EffectMother.damageEffect(id = "effect-2", damage = 3, timingType = "ON_PLAYER_TURN_STARTED").toDto()
+        val firstEffect = EffectMother.damageEffect(id = "effect-1", damage = 2, timingType = "ON_PLAYER_TURN_STARTED").toDto()
+        val secondEffect = EffectMother.damageEffect(id = "effect-2", damage = 3, timingType = "ON_PLAYER_TURN_STARTED").toDto()
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = unit)
-                .receiveOnPlayerTurnStartedEffect(effectId = "effect-1", remainingDuration = 2)
-                .receiveOnPlayerTurnStartedEffect(effectId = appliedEffect.id, remainingDuration = 2)
+                .receiveOnPlayerTurnStartedEffect(effectId = firstEffect.id, remainingDuration = 2)
+                .receiveOnPlayerTurnStartedEffect(effectId = secondEffect.id, remainingDuration = 2)
         // When
         val updatedBattleUnit =
-            battleUnit.triggerOnPlayerTurnStartedEffect(
-                effect = appliedEffect,
+            battleUnit.triggerOnPlayerTurnStartedEffects(
+                effects = listOf(firstEffect, secondEffect),
                 currentRow = position().row,
                 currentColumn = position().column,
             )
         // Then
-        updatedBattleUnit.toDto().remainingHealth shouldBe 7
+        updatedBattleUnit.toDto().remainingHealth shouldBe 5
         updatedBattleUnit
             .toDto()
             .ongoingEffects.onPlayerTurnStarted
@@ -767,7 +768,128 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `TriggerOnPlayerTurnStartedEffect should keep the on player turn started effect when an immediate effect with the same id is applied`() {
+    fun `TriggerOnPlayerTurnStartedEffects should deal the damage of every stack when the battle unit has two of the same effect`() {
+        // Given
+        val unit = UnitMother.unit(baseMaximumHealth = 10).toDto()
+        val venom = EffectMother.damageEffect(id = "venom-damage", damage = 3, timingType = "ON_PLAYER_TURN_STARTED").toDto()
+        val battleUnit =
+            BattleUnitMother
+                .battleUnit(unit = unit)
+                .receiveOnPlayerTurnStartedEffect(effectId = venom.id, remainingDuration = 5)
+                .receiveOnPlayerTurnStartedEffect(effectId = venom.id, remainingDuration = 5)
+                .pullEvents()
+                .second
+        // When
+        val updatedBattleUnit =
+            battleUnit.triggerOnPlayerTurnStartedEffects(
+                effects = listOf(venom),
+                currentRow = position().row,
+                currentColumn = position().column,
+            )
+        // Then
+        updatedBattleUnit.toDto().remainingHealth shouldBe 4
+        updatedBattleUnit
+            .toSnapshot()
+            .ongoingEffects
+            .map { effect -> effect.remainingDuration }
+            .shouldContainExactly(4, 4)
+        // The events of a battle unit are a set, so the same events of both stacks are published once.
+        val (events, _) = updatedBattleUnit.pullEvents()
+        events.map { event -> event::class }.shouldContainExactly(
+            BattleUnitEvent.OnPlayerTurnStartedEffectTriggered::class,
+            BattleUnitEvent.BattleUnitDamaged::class,
+        )
+    }
+
+    @Test
+    fun `TriggerOnPlayerTurnStartedEffects should publish one defeated event and stop triggering when a stack defeats the battle unit`() {
+        // Given
+        val unit = UnitMother.unit(baseMaximumHealth = 3).toDto()
+        val venom = EffectMother.damageEffect(id = "venom-damage", damage = 3, timingType = "ON_PLAYER_TURN_STARTED").toDto()
+        val battleUnit =
+            BattleUnitMother
+                .battleUnit(unit = unit)
+                .receiveOnPlayerTurnStartedEffect(effectId = venom.id, remainingDuration = 5)
+                .receiveOnPlayerTurnStartedEffect(effectId = venom.id, remainingDuration = 5)
+                .pullEvents()
+                .second
+        // When
+        val updatedBattleUnit =
+            battleUnit.triggerOnPlayerTurnStartedEffects(
+                effects = listOf(venom),
+                currentRow = position().row,
+                currentColumn = position().column,
+            )
+        // Then
+        updatedBattleUnit.toDto().remainingHealth shouldBe 0
+        updatedBattleUnit
+            .toSnapshot()
+            .ongoingEffects
+            .map { effect -> effect.remainingDuration }
+            .shouldContainExactly(4, 5)
+        val (events, _) = updatedBattleUnit.pullEvents()
+        events.map { event -> event::class }.shouldContainExactly(
+            BattleUnitEvent.OnPlayerTurnStartedEffectTriggered::class,
+            BattleUnitEvent.BattleUnitDamaged::class,
+            BattleUnitEvent.BattleUnitDefeated::class,
+            BattlefieldEvent.RequestRemoveOccupant::class,
+        )
+    }
+
+    @Test
+    fun `TriggerOnPlayerTurnStartedEffects should lower the remaining duration of each stack on its own when the stacks were received on different player turns`() {
+        // Given
+        val unit = UnitMother.unit(baseMaximumHealth = 20).toDto()
+        val venom = EffectMother.damageEffect(id = "venom-damage", damage = 3, timingType = "ON_PLAYER_TURN_STARTED").toDto()
+        val battleUnit =
+            BattleUnitMother
+                .battleUnit(unit = unit)
+                .receiveOnPlayerTurnStartedEffect(effectId = venom.id, remainingDuration = 1)
+                .receiveOnPlayerTurnStartedEffect(effectId = venom.id, remainingDuration = 5)
+                .receiveOnPlayerTurnStartedEffect(effectId = venom.id, remainingDuration = 2)
+        // When
+        val updatedBattleUnit =
+            battleUnit.triggerOnPlayerTurnStartedEffects(
+                effects = listOf(venom),
+                currentRow = position().row,
+                currentColumn = position().column,
+            )
+        // Then
+        updatedBattleUnit.toDto().remainingHealth shouldBe 11
+        updatedBattleUnit
+            .toSnapshot()
+            .ongoingEffects
+            .map { effect -> effect.remainingDuration }
+            .shouldContainExactly(4, 1)
+    }
+
+    @Test
+    fun `TriggerImmediateEffect should neither damage nor publish the defeated event when the battle unit is already defeated`() {
+        // Given
+        val unit = UnitMother.unit(baseMaximumHealth = 10).toDto()
+        val damageEffect = EffectMother.damageEffect(id = "low-physical-damage", damage = 10, timingType = "IMMEDIATELY").toDto()
+        val battleUnit =
+            BattleUnitMother
+                .battleUnit(unit = unit, remainingHealth = 0)
+                .receiveImmediateEffect(effectId = damageEffect.id)
+                .pullEvents()
+                .second
+        // When
+        val updatedBattleUnit =
+            battleUnit.triggerImmediateEffect(
+                effect = damageEffect,
+                currentRow = position().row,
+                currentColumn = position().column,
+            )
+        // Then
+        updatedBattleUnit.toDto().remainingHealth shouldBe 0
+        updatedBattleUnit.toSnapshot().ongoingEffects.shouldBeEmpty()
+        val (events, _) = updatedBattleUnit.pullEvents()
+        events.shouldBeEmpty()
+    }
+
+    @Test
+    fun `TriggerOnPlayerTurnStartedEffects should keep the on player turn started effect when an immediate effect with the same id is applied`() {
         // Given
         val unit = UnitMother.unit(baseMaximumHealth = 10).toDto()
         val immediateEffect = EffectMother.damageEffect(id = "effect-1", damage = 3, timingType = "IMMEDIATELY").toDto()

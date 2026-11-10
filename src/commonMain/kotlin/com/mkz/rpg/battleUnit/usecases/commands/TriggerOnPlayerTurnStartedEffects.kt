@@ -25,20 +25,23 @@ class TriggerOnPlayerTurnStartedEffects(
         battleUnits
             .filter { battleUnit -> battleUnit.hasOnPlayerTurnStartedEffects() }
             .forEach { battleUnit ->
-                val onPlayerTurnStartedEffects = battleUnit.toDto().ongoingEffects.onPlayerTurnStarted
-                onPlayerTurnStartedEffects.forEach { onPlayerTurnStartedEffectId ->
-                    val effect = searchEffectById(onPlayerTurnStartedEffectId)!!
-                    val position = searchPosition(occupantId = battleUnit.toDto().id)!!
-                    val (events, updatedBattleUnit) =
-                        battleUnit
-                            .triggerOnPlayerTurnStartedEffect(
-                                effect = effect,
-                                currentRow = position.row,
-                                currentColumn = position.column,
-                            ).pullEvents()
-                    battleUnitRepository.update(updatedBattleUnit)
-                    eventBus.publish(events)
-                }
+                // Every stack of an effect shares its definition.
+                val effects =
+                    battleUnit
+                        .toDto()
+                        .ongoingEffects.onPlayerTurnStarted
+                        .distinct()
+                        .map { effectId -> searchEffectById(effectId)!! }
+                val position = searchPosition(occupantId = battleUnit.toDto().id)!!
+                val (events, updatedBattleUnit) =
+                    battleUnit
+                        .triggerOnPlayerTurnStartedEffects(
+                            effects = effects,
+                            currentRow = position.row,
+                            currentColumn = position.column,
+                        ).pullEvents()
+                battleUnitRepository.update(updatedBattleUnit)
+                eventBus.publish(events)
             }
     }
 }

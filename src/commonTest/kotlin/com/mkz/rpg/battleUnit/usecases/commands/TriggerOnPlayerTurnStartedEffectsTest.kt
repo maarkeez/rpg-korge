@@ -89,4 +89,41 @@ class TriggerOnPlayerTurnStartedEffectsTest {
         battleUnitRepository.searchById("knight-1")!!.toDto().remainingHealth shouldBe 10
         eventBus.publishedEvents.shouldBeEmpty()
     }
+
+    @Test
+    fun `should publish one defeated event when two venoms finish off a battle unit with 3 health`() {
+        // Given
+        queries.effectRepository.create(damageEffect(id = "venom-damage", damage = 3, timingType = "ON_PLAYER_TURN_STARTED"))
+        val battleUnit =
+            battleUnit(id = "goat-wizard-1", unit = unit(baseMaximumHealth = 3).toDto(), player = player(id = "player-2").toDto())
+                .receiveOnPlayerTurnStartedEffect(effectId = "venom-damage", remainingDuration = 5)
+                .receiveOnPlayerTurnStartedEffect(effectId = "venom-damage", remainingDuration = 5)
+                .pullEvents()
+                .second
+        battleUnitRepository.create(battleUnit)
+        queries.battlefieldRepository.create(battlefield("G .", occupants = mapOf('G' to "goat-wizard-1")))
+        // When
+        triggerOnPlayerTurnStartedEffects("player-2", setOf("goat-wizard-1"))
+        // Then
+        battleUnitRepository.searchById("goat-wizard-1")!!.toDto().remainingHealth shouldBe 0
+        eventBus.publishedEvents.filterIsInstance<BattleUnitEvent.BattleUnitDefeated>().size shouldBe 1
+    }
+
+    @Test
+    fun `should deal the damage of both venoms when the battle unit has two of them`() {
+        // Given
+        queries.effectRepository.create(damageEffect(id = "venom-damage", damage = 3, timingType = "ON_PLAYER_TURN_STARTED"))
+        val battleUnit =
+            battleUnit(id = "knight-1", unit = unit(baseMaximumHealth = 10).toDto(), player = player(id = "player-1").toDto())
+                .receiveOnPlayerTurnStartedEffect(effectId = "venom-damage", remainingDuration = 5)
+                .receiveOnPlayerTurnStartedEffect(effectId = "venom-damage", remainingDuration = 5)
+                .pullEvents()
+                .second
+        battleUnitRepository.create(battleUnit)
+        queries.battlefieldRepository.create(battlefield("K .", occupants = mapOf('K' to "knight-1")))
+        // When
+        triggerOnPlayerTurnStartedEffects("player-1", setOf("knight-1"))
+        // Then
+        battleUnitRepository.searchById("knight-1")!!.toDto().remainingHealth shouldBe 4
+    }
 }

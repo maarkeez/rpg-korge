@@ -523,12 +523,38 @@ data class BattleUnit private constructor(
 
     fun hasOnPlayerTurnStartedEffects(): Boolean = ongoingEffects.hasOnPlayerTurnStartedEffects()
 
-    fun triggerOnPlayerTurnStartedEffect(
-        effect: Effect.Dto,
+    /**
+     * Triggers each of its ongoing effects timed on player turn started, stacks included, in the order they were received, each on the
+     * battle unit as the previous one left it. Once one defeats it, the rest are not triggered. [effects] holds the definition of each of
+     * their effect ids.
+     */
+    fun triggerOnPlayerTurnStartedEffects(
+        effects: List<Effect.Dto>,
         currentRow: Int,
         currentColumn: Int,
     ): BattleUnit {
-        val ongoingEffects = ongoingEffects.triggerOnPlayerTurnStartedEffect(effect.id)
+        var battleUnit = this
+        var from = 0
+        while (!battleUnit.isDefeated()) {
+            val index = battleUnit.ongoingEffects.nextOnPlayerTurnStartedIndex(from) ?: break
+            val triggeredBattleUnit = battleUnit.triggerOnPlayerTurnStartedEffectAt(index, effects, currentRow, currentColumn)
+            // A stack triggered for its last player turn leaves the list, so the next one takes its place.
+            val stackFinished = triggeredBattleUnit.ongoingEffects.value.size < battleUnit.ongoingEffects.value.size
+            from = if (stackFinished) index else index + 1
+            battleUnit = triggeredBattleUnit
+        }
+        return battleUnit
+    }
+
+    private fun triggerOnPlayerTurnStartedEffectAt(
+        index: Int,
+        effects: List<Effect.Dto>,
+        currentRow: Int,
+        currentColumn: Int,
+    ): BattleUnit {
+        val effectId = ongoingEffects.effectIdAt(index)
+        val effect = effects.firstOrNull { effect -> effect.id == effectId } ?: throw EffectNotFound()
+        val ongoingEffects = ongoingEffects.triggerOnPlayerTurnStarted(index)
         val appliedEvent = OnPlayerTurnStartedEffectTriggered(battleUnitId = id.value, effectId = effect.id)
         return if (effect.outcome.type == DAMAGE) {
             copy(events = events + appliedEvent).applyDecreaseHealthEffect(effect, ongoingEffects, currentRow, currentColumn)
@@ -543,6 +569,8 @@ data class BattleUnit private constructor(
         currentRow: Int,
         currentColumn: Int,
     ): BattleUnit {
+        // A defeat happens once until the battle unit respawns: a defeated battle unit takes no more damage.
+        if (isDefeated()) return copy(ongoingEffects = ongoingEffects)
         val remainingHealth = RemainingHealth(max(0, remainingHealth.value - effect.outcome.damage!!.damage))
         val newEvents =
             buildList {
@@ -861,23 +889,24 @@ data class BattleUnit private constructor(
 
         fun triggerImmediateEffect(effectId: String): OngoingEffects = OngoingEffects(value.filterNot { it.isImmediate() && it.hasEffectId(effectId) })
 
-        fun triggerOnPlayerTurnStartedEffect(effectId: String): OngoingEffects {
-            val effect = value.firstOrNull { it.hasEffectId(effectId) } ?: throw EffectNotFound()
+        /** The place of the first ongoing effect timed on player turn started at or after [from], or `null` when there is none left. */
+        fun nextOnPlayerTurnStartedIndex(from: Int): Int? = (from until value.size).firstOrNull { index -> value[index].isOnPlayerTurnStarted() }
+
+        fun effectIdAt(index: Int): String = value.getOrNull(index)?.effectId() ?: throw EffectNotFound()
+
+        /**
+         * Triggers the stack at [index] on its own: it has one less remaining duration, and leaves once triggered for its last player turn.
+         * The other stacks of the same effect keep theirs.
+         */
+        fun triggerOnPlayerTurnStarted(index: Int): OngoingEffects {
+            val effect = value.getOrNull(index) ?: throw EffectNotFound()
             if (!effect.isOnPlayerTurnStarted()) throw NotOnPlayerTurnStarted()
             val effectAfterTrigger = effect.triggerOnPlayerTurnStarted()
             val ongoingEffects =
                 if (effectAfterTrigger != null) {
-                    buildList {
-                        value.forEach { ongoingEffect ->
-                            if (ongoingEffect.hasEffectId(effectId)) {
-                                add(effectAfterTrigger)
-                            } else {
-                                add(ongoingEffect)
-                            }
-                        }
-                    }
+                    value.mapIndexed { ongoingIndex, ongoingEffect -> if (ongoingIndex == index) effectAfterTrigger else ongoingEffect }
                 } else {
-                    value.filterNot { it.hasEffectId(effectId) }
+                    value.filterIndexed { ongoingIndex, _ -> ongoingIndex != index }
                 }
             return OngoingEffects(ongoingEffects)
         }
