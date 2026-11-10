@@ -1,15 +1,9 @@
 package com.mkz.rpg.localization.adapters.resources
 
-/**
- * A gettext PO file, or its POT template: its header and its entries, see
- * https://www.gnu.org/software/gettext/manual/html_node/PO-Files.html. Comments are skipped, but the flags (e.g.:
- * `#, fuzzy`), and so are obsolete entries (`#~`).
- */
 data class PoFile(
     val header: Map<String, String>,
     val entries: List<Entry>,
 ) {
-    /** An entry: its context (the key of the message), its English text, and its translation, one per plural form. */
     data class Entry(
         val context: String?,
         val id: String,
@@ -17,7 +11,6 @@ data class PoFile(
         val translations: List<String>,
         val flags: Set<String>,
     ) {
-        /** Whether it is translated: every form is, and it is not waiting for a review (fuzzy). */
         val isTranslated: Boolean
             get() = translations.isNotEmpty() && translations.all(String::isNotEmpty) && FUZZY !in flags
     }
@@ -26,7 +19,6 @@ data class PoFile(
         private const val FUZZY = "fuzzy"
         private val KEYWORD = Regex("""^(msgctxt|msgid_plural|msgid|msgstr(?:\[(\d+)\])?)\s+(".*)$""")
 
-        /** Parses the [content] of a PO file, failing with the line number when it is not valid. */
         fun parse(content: String): PoFile {
             val entries = mutableListOf<Entry>()
             var entry = EntryBuilder()
@@ -67,7 +59,6 @@ data class PoFile(
             return PoFile(header = header?.let(::parseHeader).orEmpty(), entries = entries - setOfNotNull(header))
         }
 
-        // A quoted string, with the escapes `\\`, `\"`, `\n`, `\t` and `\r`.
         private fun parseString(quoted: String): String {
             require(quoted.length >= 2 && quoted.startsWith("\"") && quoted.endsWith("\"")) { "Unterminated string $quoted" }
             val text = quoted.substring(1, quoted.length - 1)
@@ -97,7 +88,6 @@ data class PoFile(
             }
         }
 
-        // The header is the translation of the empty message: one `Name: value` field per line.
         private fun parseHeader(header: Entry): Map<String, String> =
             header.translations
                 .firstOrNull()
@@ -114,7 +104,6 @@ data class PoFile(
         private var idPlural: String? = null
         private val translations = mutableListOf<String>()
 
-        // Appends a continuation line to the last field set.
         private var append: ((String) -> Unit)? = null
 
         val hasStarted: Boolean get() = flags.isNotEmpty() || context != null || id != null
@@ -158,7 +147,6 @@ data class PoFile(
             (append ?: throw IllegalArgumentException("String without a keyword"))(value)
         }
 
-        // Adds the entry to the [entries], and starts the next one.
         fun finishInto(entries: MutableList<Entry>): EntryBuilder {
             val id = id ?: throw IllegalArgumentException("Entry without msgid")
             require(translations.isNotEmpty()) { "Entry '$id' without msgstr" }

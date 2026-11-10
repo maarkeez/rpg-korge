@@ -23,7 +23,6 @@ class CommentArchitectureTest {
             "cpuWanderBrain",
             "gameSetup",
             "inventory",
-            "localization",
             "lootableItem",
             "lootDrop",
             "lootTable",

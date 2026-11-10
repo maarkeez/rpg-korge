@@ -6,7 +6,6 @@ import com.mkz.rpg.localization.domain.Localization.Dto.MessageDto
 object LocalizationMother {
     const val ENGLISH_PLURAL_RULE = "nplurals=2; plural=(n != 1);"
 
-    // Polish has three plural forms: one, a few (2-4, 22-24, ...) and many.
     const val POLISH_PLURAL_RULE = "nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);"
 
     fun english() =

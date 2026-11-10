@@ -7,16 +7,6 @@ import com.mkz.rpg.localization.domain.LocalizationError.TooManyPluralForms
 import com.mkz.rpg.localization.domain.LocalizationEvent.LanguageSelected
 import com.mkz.rpg.localization.domain.LocalizationEvent.LocalizationInitialised
 
-/**
- * The text of the game in every language: the source catalog, in English, and the catalog of every other language,
- * each message keyed by its key (e.g.: `ui.shop.notEnoughGold`). A message is translated into the selected language,
- * falling back to its English text when it is untranslated there, and to its key when it is not in the source catalog
- * either.
- *
- * A message may have placeholders, e.g.: `Vanishes in {turns} turns`, replaced by the arguments of the same name. A
- * placeholder without an argument is left as it is. A plural message has one plural form per plural of its
- * language, chosen by the plural rule of its catalog, e.g.: `nplurals=2; plural=(n != 1);`.
- */
 @ConsistentCopyVisibility
 data class Localization private constructor(
     private val sourceCatalog: Catalog,
@@ -25,7 +15,6 @@ data class Localization private constructor(
     private val events: Set<LocalizationEvent>,
 ) {
     companion object {
-        /** The key of the message naming each catalog's language in that language, e.g.: `Español`. */
         const val LANGUAGE_NAME_KEY = "language.name"
 
         fun create(dto: Dto): Localization {
@@ -53,13 +42,11 @@ data class Localization private constructor(
             selectedLanguageCode = selectedLanguageCode,
         )
 
-    /** The message of the [key] in the selected language, e.g.: `No hay suficiente oro`. */
     fun translate(
         key: String,
         arguments: Map<String, String> = emptyMap(),
     ): String = format(message(key, count = null) ?: key, arguments)
 
-    /** The plural form of the message of the [key] for [count] in the selected language, e.g.: `Vanishes in 3 turns`. */
     fun translatePlural(
         key: String,
         count: Int,
@@ -71,7 +58,6 @@ data class Localization private constructor(
         return copy(selectedLanguageCode = languageCode, events = events + LanguageSelected(languageCode))
     }
 
-    /** The source language first, then the other languages by code, each named in its own language, e.g.: `Español`. */
     fun languages(): List<Dto.LanguageDto> =
         (listOf(sourceCatalog) + translationCatalogs).map { catalog ->
             val name = catalog.message(LANGUAGE_NAME_KEY, count = null) ?: sourceCatalog.message(LANGUAGE_NAME_KEY, count = null) ?: catalog.languageCode
@@ -95,14 +81,12 @@ data class Localization private constructor(
         val translationCatalogs: List<CatalogDto>,
         val selectedLanguageCode: String,
     ) {
-        /** A language's messages, e.g.: `es` from `es.po`. */
         data class CatalogDto(
             val languageCode: String,
             val pluralRule: String,
             val messages: List<MessageDto>,
         )
 
-        /** A message and its plural forms, if any: the singular first. */
         data class MessageDto(
             val key: String,
             val forms: List<String>,
@@ -134,7 +118,6 @@ data class Localization private constructor(
             }
         }
 
-        // The singular without a count. A form the message does not have (e.g.: a plural without its plural forms) is null.
         fun message(
             key: String,
             count: Int?,
@@ -151,10 +134,6 @@ data class Localization private constructor(
             )
     }
 
-    /**
-     * A catalog's plural rule, e.g.: `nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 ? 1 : 2);`: how many
-     * plural forms its messages have, and the C expression choosing one for a count `n`.
-     */
     private class PluralRule(
         val definition: String,
         val formCount: Int,
@@ -185,8 +164,6 @@ data class Localization private constructor(
 
         fun formIndex(count: Int): Int = formula(count.toLong()).toInt()
 
-        // A recursive descent parser of the C expressions gettext allows: `n`, integers, parentheses, `!`, `* / %`,
-        // `+ -`, `< <= > >=`, `== !=`, `&&`, `||` and `? :`, from the highest precedence to the lowest. Booleans are 0 or 1.
         private class Parser(
             private val expression: String,
         ) {
@@ -250,7 +227,6 @@ data class Localization private constructor(
                 return { _ -> value }
             }
 
-            // Left-associative operators of the same precedence.
             private fun binary(
                 operand: () -> (Long) -> Long,
                 vararg operators: String,

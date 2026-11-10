@@ -3,7 +3,6 @@ package com.mkz.rpg.localization.usecases.queries
 import com.mkz.rpg.localization.domain.LocalizationError.LocalizationNotFound
 import com.mkz.rpg.localization.domain.LocalizationRepository
 
-/** The plural form of the message of a key for a [count] in the selected language, e.g.: `Vanishes in 3 turns`. */
 class TranslatePlural(
     private val localizationRepository: LocalizationRepository,
 ) {

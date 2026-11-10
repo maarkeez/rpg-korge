@@ -6,11 +6,6 @@ import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import com.mkz.rpg.shared.adapters.toml.fromResource
 import korlibs.io.file.VfsFile
 
-/**
- * Loads the source catalog from `localization/messages.pot`, in English, and one catalog per
- * `localization/<language code>.po`, e.g.: `es.po`. Only the translated messages are kept: the untranslated ones are shown in
- * English.
- */
 class ResourcesLocalizationLoader(
     private val localizationRoot: VfsFile = ResourcesBundle.root[FOLDER],
 ) : LocalizationLoader {
@@ -22,7 +17,6 @@ class ResourcesLocalizationLoader(
         const val TRANSLATION_CATALOG_EXTENSION = ".po"
         private const val PLURAL_FORMS_HEADER = "Plural-Forms"
 
-        /** The localization of the catalog files, keyed by file name (e.g.: `messages.pot`, `es.po`), with English selected. */
         fun localizationOf(files: Map<String, String>): Localization.Dto {
             val sourceContent = files[SOURCE_FILE_NAME] ?: throw IllegalStateException("Resource '$FOLDER/$SOURCE_FILE_NAME' not found")
             val sourceCatalog = fromResource("$FOLDER/$SOURCE_FILE_NAME") { sourceCatalog(PoFile.parse(sourceContent)) }

@@ -3,7 +3,6 @@ package com.mkz.rpg.localization.usecases.queries
 import com.mkz.rpg.localization.domain.LocalizationError.LocalizationNotFound
 import com.mkz.rpg.localization.domain.LocalizationRepository
 
-/** The message of a key in the selected language, its placeholders replaced by the [arguments] of the same name. */
 class Translate(
     private val localizationRepository: LocalizationRepository,
 ) {
