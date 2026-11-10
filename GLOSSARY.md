@@ -779,8 +779,12 @@ A character standing on a tile of the battlefield, whom the party talks to, and 
 _Avoid_: NPC, villager, townsfolk
 
 **Line**:
-What an npc says when the party talks to it.
+What an npc says in one talk: its own line, or a quest line.
 _Avoid_: Dialog, text, quote
+
+**Own line**:
+The line an npc says when no quest has a line for it. A quest giver has none.
+_Avoid_: Default line, greeting
 
 **Place**:
 An npc being put on its tile when a game is set up.
@@ -893,7 +897,7 @@ A battle unit of the CPU player.
 ### Quest
 
 **Quest**:
-A line of tasks the party completes one after the other, the last one earning a reward.
+A series of tasks the party completes one after the other, the last one earning a reward.
 _Avoid_: Mission
 
 **Main quest**:
@@ -955,12 +959,38 @@ How many of its required defeats the current task has counted so far.
 _Avoid_: Progress, task progress
 
 **Talk task**:
-A task done once the party finishes talking to one npc.
+A task done once the party finishes the talk in which its npc says its talk task line.
 _Avoid_: Talk to npc
 
 **Visit task**:
 A task done once a party member walks or teleports onto one of its tiles.
 _Avoid_: Reach, touch
+
+#### Lines
+
+**Quest line**:
+A line a quest has for its quest giver, or for the npc of one of its talk tasks.
+_Avoid_: Dialog, questline
+
+**Start line**:
+The quest line a quest giver says in the talk that starts its side quest.
+_Avoid_: Offer line, intro
+
+**Reminder line**:
+The quest line a quest giver says while its side quest is active and the talk does none of its talk tasks.
+_Avoid_: In progress line, active line
+
+**Talk task line**:
+The quest line an npc says in the talk that does its talk task.
+_Avoid_: Turn-in line
+
+**Completed line**:
+The quest line a quest giver says once its side quest, when not repeatable, is completed.
+_Avoid_: Thanks line
+
+**Start again line**:
+The quest line a quest giver says in the talk that starts its completed repeatable quest again.
+_Avoid_: Repeat line
 
 #### Pins and markers
 
