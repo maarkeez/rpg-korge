@@ -12,7 +12,6 @@ import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
-/** Renders every story of the Storybook, as it is shown, so a story that fails is found before it is opened. */
 class StorySmokeTest : ViewsForTesting() {
     @Test
     fun `Render should render every story of every story binding when they are shown with their default args, the game resources and texts`() =

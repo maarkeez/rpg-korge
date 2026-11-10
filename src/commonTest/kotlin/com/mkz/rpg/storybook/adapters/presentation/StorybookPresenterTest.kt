@@ -28,7 +28,6 @@ class StorybookPresenterTest {
     private val phoneFrameView = FakePhoneFrameView()
     private val storybookPage = FakeStorybookPage()
 
-    // The health bar needs no image, so the resources are not loaded.
     private val storyContext = StoryContext(GameSceneResourcesLoader(), MessagesMother.messages())
 
     private fun startStorybook(storyLocation: FakeStoryLocation = FakeStoryLocation()): StorybookApi {

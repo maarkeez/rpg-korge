@@ -9,11 +9,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/**
- * The stories of [BattleUnitInfoView], built with its real children. Its battle unit has 30 health points and 20 mana
- * points at most, 3 steps and 1 cast each turn. Its abilities go round the ones of the game: the second is in cooldown,
- * the third costs more mana than the battle unit has, the fourth is ready again, and so on.
- */
 object BattleUnitInfoViewStories : StoryBinding {
     private const val DEFAULT_UNIT = "hero"
     private const val MAXIMUM_HEALTH = 30
@@ -25,7 +20,6 @@ object BattleUnitInfoViewStories : StoryBinding {
     private const val ABILITIES_LIMIT = 6
     private const val COOLDOWN_TURNS_LEFT = 2
 
-    // The mana cost of the abilities, told on those the battle unit has not enough mana for.
     private const val MANA_COST = 10
 
     private const val UNIT = "unit"
@@ -140,7 +134,6 @@ object BattleUnitInfoViewStories : StoryBinding {
                 maximumHealth = MAXIMUM_HEALTH,
                 remainingMana = args.int(MANA),
                 maximumMana = MAXIMUM_MANA,
-                // The effects with an icon, as many times as needed.
                 effectIds = List(args.int(EFFECTS)) { index -> effectIds[index % effectIds.size] },
                 isHumanPlayers = true,
             )
@@ -175,7 +168,6 @@ object BattleUnitInfoViewStories : StoryBinding {
             )
             abilities.getOrNull(args.int(SELECTED_ABILITY) - 1)?.let { ability ->
                 displayAbilitySelected(abilities.indexOf(ability))
-                // Its reason as the button tells it: in cooldown, or one mana short.
                 val manaCost = AbilityInfoViewStories.abilityInfo(ability.abilityId, remainingCooldown = 0, remainingMana = Int.MAX_VALUE).manaCost
                 val remainingMana = if (ability.hasEnoughMana) Int.MAX_VALUE else minOf(args.int(MANA), manaCost - 1)
                 displayAbilityInfo(AbilityInfoViewStories.abilityInfo(ability.abilityId, ability.remainingCooldown, remainingMana))

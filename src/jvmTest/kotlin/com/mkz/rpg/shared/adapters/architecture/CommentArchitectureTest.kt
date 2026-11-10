@@ -15,7 +15,6 @@ class CommentArchitectureTest {
     private val subdomainsWithComments: Set<String> =
         setOf(
             "screen",
-            "storybook",
         )
 
     private val sourceFiles: List<SourceFile> =

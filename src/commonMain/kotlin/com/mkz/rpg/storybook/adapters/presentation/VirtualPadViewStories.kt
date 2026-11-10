@@ -5,11 +5,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import korlibs.korge.view.View
 
-/**
- * The stories of [VirtualPadView], at the size the game displays it. Pressing an arrow records `onDirectionPressed`, and the
- * first frame it is held `onDirectionHeld`, which the game calls on every frame the arrow is held and would fill the
- * Actions.
- */
 object VirtualPadViewStories : StoryBinding {
     private val pad =
         StoryDto(

@@ -3,11 +3,6 @@ package com.mkz.rpg.storybook.adapters.location
 import com.mkz.rpg.storybook.domain.Storybook.Dto.LocationDto
 import korlibs.io.net.URL
 
-/**
- * What is shown, in the query of a page URL, as Storybook writes it: the story, the args changed from its own and the
- * globals changed from their defaults, each `<name>:<value>`, separated by `;`, with the values URL-encoded, e.g.:
- * `story=screen-health-bar--full&args=remaining:3;maximum:40&globals=language:es`.
- */
 object LocationQuery {
     const val STORY_PARAMETER = "story"
     const val ARGS_PARAMETER = "args"
@@ -18,7 +13,6 @@ object LocationQuery {
     private const val VALUE_SEPARATOR = ";"
     private const val NAME_SEPARATOR = ":"
 
-    /** What the query asks for, e.g.: `?story=screen-health-bar--full`. What can not be read is left out, never a failure. */
     fun decode(query: String): LocationDto {
         val parameters = parametersOf(query).toMap()
         return LocationDto(
@@ -28,7 +22,6 @@ object LocationQuery {
         )
     }
 
-    /** The [query] with the [location] in place of what it kept, keeping its other parameters, without the leading `?`. */
     fun encode(
         location: LocationDto,
         query: String,
@@ -43,7 +36,6 @@ object LocationQuery {
         return (parameters + otherParameters).joinToString(PARAMETER_SEPARATOR)
     }
 
-    // The name and raw value of each parameter, in their order.
     private fun parametersOf(query: String): List<Pair<String, String>> =
         query
             .removePrefix("?")
@@ -63,6 +55,5 @@ object LocationQuery {
                 decodeOrNull(value.substringAfter(NAME_SEPARATOR))?.let { decoded -> name to decoded }
             }.toMap()
 
-    // A browser may write a space as `+`. A malformed escape, e.g.: `%G1`, can not be read.
     private fun decodeOrNull(value: String): String? = runCatching { URL.decodeComponent(value, formUrlEncoded = true) }.getOrNull()
 }

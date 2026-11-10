@@ -7,12 +7,7 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/**
- * The stories of [WorldBuilderInfoView], with the texts of the language global. A message pops in the subtitle for a
- * couple of seconds and the size comes back: changing an arg shows it again.
- */
 object WorldBuilderInfoViewStories : StoryBinding {
-    // The sizes the world builder allows, which are in its domain.
     private const val SIZE_LIMIT = 128
 
     private const val ROWS = "rows"
@@ -20,7 +15,6 @@ object WorldBuilderInfoViewStories : StoryBinding {
     private const val MESSAGE_KIND = "messageKind"
     private const val MESSAGE = "message"
 
-    /** What the subtitle shows: the world size, or a message over it. */
     private enum class MessageKind { NONE, ERROR, INFO }
 
     private val size = StoryDto(id = "screen-world-builder-info--size", name = "Size", description = "The title and the world size in the subtitle.", args = emptyMap())

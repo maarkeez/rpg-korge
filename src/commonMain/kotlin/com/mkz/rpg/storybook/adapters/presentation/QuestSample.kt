@@ -11,7 +11,6 @@ private const val GOAT_WIZARD_PORTRAIT = "unit/goat-wizard_portrait.png"
 private const val RAT_PORTRAIT = "unit/rat_portrait.png"
 private const val ELDER_PORTRAIT = "npc/elder_portrait.png"
 
-// The quest the game ships, with the messages of the language global, which the other samples are built on.
 private fun goatWizard(messages: Messages) =
     QuestInfo(
         id = GOAT_WIZARD_QUEST,
@@ -64,7 +63,6 @@ private val fields =
         ),
     )
 
-// A journal of 12, in the order it lists them: the main quest, the active side quests, and the completed ones.
 private fun journal(messages: Messages) =
     listOf(
         goatWizard(messages),
@@ -107,7 +105,6 @@ private fun journal(messages: Messages) =
         ),
     )
 
-/** The quests the stories display: the one the game ships, and the others the backend allows. */
 enum class QuestSample(
     val title: String,
     val state: String,
@@ -203,7 +200,6 @@ enum class QuestSample(
         private const val LONG_NAME_PREFIX = "El encargo más largo de las montañas del sur:"
         private const val LONG_TASK_PREFIX = "Sin descanso hasta el final del camino:"
 
-        /** The quests of a journal listing [count] of them, as long as a translation may be when [isLong]. */
         fun journal(
             count: Int,
             isLong: Boolean,

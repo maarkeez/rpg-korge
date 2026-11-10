@@ -5,10 +5,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import korlibs.korge.view.View
 
-/**
- * The stories of [MenuView], built with its real buttons. As in the game, playing or building a world hides the options,
- * and picking a language translates the texts: both last until the story is shown again, e.g.: with Reset.
- */
 object MenuViewStories : StoryBinding {
     private val options =
         StoryDto(

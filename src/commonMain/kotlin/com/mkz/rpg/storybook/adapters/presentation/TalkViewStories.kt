@@ -9,13 +9,11 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
-/** The stories of [TalkView], at the size the game displays it. Tapping the talk panel records it. */
 object TalkViewStories : StoryBinding {
     private val SIZE = Size(390, 300)
     private const val DEFAULT_NPC = "elder"
     private const val RECRUITABLE_UNIT = "knight"
 
-    // The option of the portrait controls when no portrait is meant, which no npc nor unit is.
     private const val NONE = "none"
 
     private const val NAME = "name"
@@ -101,7 +99,6 @@ object TalkViewStories : StoryBinding {
         TalkView(SIZE, context.resourcesLoader).apply {
             setOnTapped { context.action("onTapped") }
             display(TalkInfo(npcId = args.text(NPC), unitId = args.text(UNIT).takeIf { unitId -> unitId != NONE }, name = args.text(NAME), line = args.text(LINE)))
-            // The presenter shows it when the party talks.
             visible = true
         }
 }

@@ -8,7 +8,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [QuestAnnouncementView], at the start and the end of a quest, held so it can be looked at. */
 object QuestAnnouncementViewStories : StoryBinding {
     private const val MOMENT = "moment"
     private const val QUEST = "quest"

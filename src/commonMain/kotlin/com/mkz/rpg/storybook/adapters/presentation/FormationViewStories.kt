@@ -8,16 +8,10 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/**
- * The stories of [FormationView], built with its real [com.mkz.rpg.screen.adapters.presentation.FormationRowView]s, with the
- * units that have a portrait, in alphabetical order, as many times as needed. Tapping a row selects it, as the formation
- * presenter does, and the hint tells what the next tap does.
- */
 object FormationViewStories : StoryBinding {
     private const val MAXIMUM_HEALTH = 20
     private const val MAXIMUM_MANA = 10
 
-    // The option of the selected row control when no row is selected, which no row index is.
     private const val NO_ROW = "none"
 
     private const val MEMBERS = "members"
@@ -73,7 +67,6 @@ object FormationViewStories : StoryBinding {
     ): View {
         val unitIds = context.unitIds()
         val members = args.int(MEMBERS)
-        // A selected row of no member selects none.
         val selectedRow = args.text(SELECTED_ROW).toIntOrNull()?.takeIf { index -> index < members }
         val isHurt = args.boolean(HURT)
         val rows =
@@ -92,7 +85,6 @@ object FormationViewStories : StoryBinding {
         return FormationView(context.resourcesLoader).apply {
             setDelegate(
                 object : FormationView.Delegate {
-                    // Tapping the selected row selects none.
                     override fun formationRowSelected(index: Int) {
                         val selected = index.takeIf { index != selectedRow }
                         context.action("formationRowSelected", index, setArg = SELECTED_ROW to ValueDto.text(selected?.toString() ?: NO_ROW))

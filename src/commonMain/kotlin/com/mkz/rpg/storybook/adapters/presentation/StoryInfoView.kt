@@ -13,10 +13,6 @@ import korlibs.korge.view.position
 import korlibs.korge.view.textBlock
 import korlibs.math.geom.Size
 
-/**
- * What the selected story is, for whoever browses the catalogue: its component, e.g.: `Screen / Health bar`, with its
- * description, and the story, e.g.: `Full`, with its description.
- */
 open class StoryInfoView : Container() {
     companion object {
         const val WIDTH = 480.0

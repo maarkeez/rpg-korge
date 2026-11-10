@@ -8,7 +8,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [GiveGoldRefusalView], at the width of the screen, with the messages of the language global. */
 object GiveGoldRefusalViewStories : StoryBinding {
     private const val REASON = "reason"
 

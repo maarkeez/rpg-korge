@@ -15,17 +15,12 @@ import korlibs.korge.view.solidRect
 import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
 
-/**
- * A phone, holding the view of the selected story at its real size, in the middle of a screen as large as the game
- * window (390x844). The screen has the background of the game, and crops what does not fit in it.
- */
 open class PhoneFrameView : Container() {
     companion object {
         const val BEZEL = 12.0
         val SIZE = Size(GAME_WINDOW_SIZE.width + 2 * BEZEL, GAME_WINDOW_SIZE.height + 2 * BEZEL)
         val BEZEL_COLOR = RGBA(0x0A, 0x0A, 0x0A)
 
-        // The background of the game window.
         val SCREEN_COLOR = Colors["#2b2b2b"]
 
         private const val CORNER_RADIUS = 36.0
@@ -42,7 +37,6 @@ open class PhoneFrameView : Container() {
         screenBackground = screen.solidRect(GAME_WINDOW_SIZE, SCREEN_COLOR)
     }
 
-    /** Shows the view in the middle of the screen, in place of the one shown. */
     open fun display(storyView: View) {
         this.storyView?.removeFromParent()
         screen.addChild(storyView)

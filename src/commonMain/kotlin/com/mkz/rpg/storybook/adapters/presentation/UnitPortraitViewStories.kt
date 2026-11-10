@@ -10,7 +10,6 @@ import korlibs.image.color.RGBA
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
-/** The stories of [UnitPortraitView], at the size the battle unit info displays it. */
 object UnitPortraitViewStories : StoryBinding {
     private val SIZE = Size(97.5, 97.5)
     private const val DEFAULT_UNIT = "hero"
@@ -19,7 +18,6 @@ object UnitPortraitViewStories : StoryBinding {
     private const val UNIT = "unit"
     private const val RING = "ring"
 
-    /** The rings a portrait is drawn with: none, or a team's colour. */
     private enum class Ring(
         val color: RGBA?,
     ) {

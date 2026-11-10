@@ -5,10 +5,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import com.mkz.rpg.storybook.domain.StorybookRepository
 import com.mkz.rpg.storybook.usecases.services.StoryLocation
 
-/**
- * Changes a global of every story, e.g.: `language` to `es`, and keeps it in the location, so a link opens the stories
- * with it. Nothing happens when the global has that value. Fails when its control does not accept it.
- */
 class ChangeGlobal(
     private val storybookRepository: StorybookRepository,
     private val storyLocation: StoryLocation,

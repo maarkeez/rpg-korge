@@ -11,11 +11,6 @@ import korlibs.korge.view.View
 import korlibs.korge.view.addUpdater
 import korlibs.math.geom.Size
 
-/**
- * The stories of [WorldBuilderMenuView], with the messages of the language global. As in the game, choosing an option closes
- * the menu, through its args. The menu is shown in the middle of the phone instead of its top right corner, so the
- * taps out of it, which close it in the game, do not reach the whole screen.
- */
 object WorldBuilderMenuViewStories : StoryBinding {
     private const val OPTIONS_LIMIT = 6
     private val BUTTON_SIZE = Size(WorldBuilderMenuView.BUTTON_WIDTH, WorldBuilderMenuView.BUTTON_HEIGHT)
@@ -57,7 +52,6 @@ object WorldBuilderMenuViewStories : StoryBinding {
         args: Args,
         context: StoryContext,
     ): View {
-        // The first option is the one of the world builder, the others are there to see a longer list.
         val labels = listOf(context.messages[UiMessage.WORLD_BUILDER_IMPORT]) + (2..args.int(OPTIONS)).map { number -> "Option $number" }
         val menuView =
             WorldBuilderMenuView().apply {
@@ -66,7 +60,6 @@ object WorldBuilderMenuViewStories : StoryBinding {
                         WorldBuilderMenuView.Option(label = label) { context.action("onSelected", label, setArg = OPEN to ValueDto.boolean(false)) }
                     },
                 )
-                // Opened once on the phone, as the menu measures where it is on the screen to catch the taps out of it.
                 if (args.boolean(OPEN)) {
                     var opened = false
                     addUpdater {
@@ -77,7 +70,6 @@ object WorldBuilderMenuViewStories : StoryBinding {
                     }
                 }
             }
-        // As big as the button, so the phone centers the button, and the options open around it.
         return FixedSizeContainer(BUTTON_SIZE).apply { addChild(menuView) }
     }
 }

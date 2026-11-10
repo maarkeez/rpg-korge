@@ -10,9 +10,7 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
-/** The stories of [BattlefieldHealthBarPreviewView], at the size the battlefield displays it over a tile. */
 object BattlefieldHealthBarPreviewViewStories : StoryBinding {
-    // A tile wide, and a fifth of a tile high.
     private val SIZE = Size(BattlefieldView.TILE_SIZE, BattlefieldView.TILE_SIZE / 5.0)
 
     private const val PREVIEW = "preview"

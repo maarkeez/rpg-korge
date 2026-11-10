@@ -8,12 +8,10 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [ConfirmDialogView], with the questions the game asks. */
 object ConfirmDialogViewStories : StoryBinding {
     private const val QUESTION = "question"
     private const val QUEST_NAME = "Bats in the Meadow"
 
-    // The questions the game asks.
     private enum class Question(
         val message: UiMessage,
     ) {

@@ -7,7 +7,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [DiscardQuestionView], with the texts of the language global. Tapping a button records itself. */
 object DiscardQuestionViewStories : StoryBinding {
     private const val ITEM_NAME = "itemName"
 

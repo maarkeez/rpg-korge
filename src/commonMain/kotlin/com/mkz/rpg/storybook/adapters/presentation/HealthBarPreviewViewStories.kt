@@ -8,7 +8,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
-/** The stories of [HealthBarPreviewView], at the size the cast preview and the recipient preview display it. */
 object HealthBarPreviewViewStories : StoryBinding {
     private val SIZE = Size(281.5, 16)
     private const val MAXIMUM_HEALTH = 30

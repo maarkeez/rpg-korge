@@ -6,23 +6,16 @@ import com.mkz.rpg.shared.adapters.presentation.nextFrame
 import korlibs.event.MouseEvent
 import korlibs.korge.tests.ViewsForTesting
 
-// Page object of [SidebarView].
-
 fun SidebarView.titleText(): String = title.text
 
-/** The groups listed, in their order, as displayed, e.g.: `SCREEN`. */
 fun SidebarView.groupNames(): List<String> = groupTexts.map { text -> text.text }
 
-/** The titles of the components listed, in their order, e.g.: `Health bar`. */
 fun SidebarView.componentTitles(): List<String> = componentTexts.map { text -> text.text }
 
-/** The names of the stories listed, in their order, e.g.: `Full`. */
 fun SidebarView.storyNames(): List<String> = storyRows.map { row -> row.label.text }
 
-/** The names of the stories highlighted as selected. */
 fun SidebarView.selectedStoryNames(): List<String> = storyRows.filter { row -> row.background.color == SidebarView.SELECTED_COLOR }.map { row -> row.label.text }
 
-/** Whether the title and the search are on top, and the groups, components and stories are listed top down under them, each in its order, all of them shown. */
 fun SidebarView.isListedTopDown(): Boolean {
     val lists = listOf(groupTexts, componentTexts, storyRows)
     return title.globalPos.y < searchInput.globalPos.y &&
@@ -30,23 +23,18 @@ fun SidebarView.isListedTopDown(): Boolean {
         lists.flatten().all { view -> view.isShown() && view.globalPos.y > searchInput.globalPos.y + searchInput.height }
 }
 
-/** The text typed in the search. */
 fun SidebarView.searchText(): String = searchInput.text
 
-/** The placeholder of the search, e.g.: `Search stories`, or `null` while it is not shown. */
 fun SidebarView.searchPlaceholderText(): String? = searchPlaceholder.takeIf { text -> text.isShown() }?.text
 
-/** Types the text in the search, replacing what was typed, as each key typed does. */
 fun SidebarView.typeSearch(text: String) {
     searchInput.text = text
 }
 
-/** Whether the `×` that empties the search is shown. */
 fun SidebarView.isClearSearchShown(): Boolean = clearSearchButton.isShown()
 
 suspend fun ViewsForTesting.clickClearSearch(sidebarView: SidebarView) = clickOn(sidebarView.clearSearchButton)
 
-/** The message listed when no story matches the search, e.g.: `No stories match`, or `null` while there is none. */
 fun SidebarView.noStoriesMessage(): String? = noStoriesText?.takeIf { text -> text.isShown() }?.text
 
 suspend fun ViewsForTesting.clickStory(
@@ -54,25 +42,18 @@ suspend fun ViewsForTesting.clickStory(
     storyName: String,
 ) = clickOn(sidebarView.storyRows.first { row -> row.label.text == storyName })
 
-/** Taps the story by its id, when several components have a story of the same name, e.g.: `Empty`. */
 suspend fun ViewsForTesting.clickStoryId(
     sidebarView: SidebarView,
     storyId: String,
 ) = clickOn(sidebarView.storyRows.first { row -> row.storyId == storyId })
 
-/** How far the list is scrolled: 0 at the top, and less than 0 once it is scrolled down. */
 fun SidebarView.scrollOffset(): Double = catalogue.y
 
-/** The names of the stories in sight, in their order: the ones inside the list, with none of them cut. */
 fun SidebarView.visibleStoryNames(): List<String> {
     val bounds = list.getGlobalBounds()
     return storyRows.filter { row -> row.getGlobalBounds().let { rowBounds -> rowBounds.top >= bounds.top && rowBounds.bottom <= bounds.bottom } }.map { row -> row.label.text }
 }
 
-/**
- * Turns the mouse wheel by [pixels] over the sidebar, positive to scroll down, holding Ctrl when [ctrl]. The sidebar must
- * be on the stage.
- */
 @Suppress("DEPRECATION")
 suspend fun ViewsForTesting.scrollSidebar(
     sidebarView: SidebarView,
@@ -95,7 +76,6 @@ suspend fun ViewsForTesting.scrollSidebar(
     nextFrame()
 }
 
-/** Drags the list from the center of the sidebar down by [pixels], negative to drag it up. The sidebar must be on the stage. */
 suspend fun ViewsForTesting.dragSidebar(
     sidebarView: SidebarView,
     pixels: Double,

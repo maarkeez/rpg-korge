@@ -8,7 +8,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
-/** The stories of [RemainingSummonDurationView], at the size the battle unit info displays it, in the language of the globals. */
 object RemainingSummonDurationViewStories : StoryBinding {
     private val SIZE = Size(244, 14)
     private const val TURNS_LIMIT = 99

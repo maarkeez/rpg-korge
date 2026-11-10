@@ -3,10 +3,6 @@ package com.mkz.rpg.storybook.usecases.commands
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.storybook.domain.StorybookRepository
 
-/**
- * Records a callback the view of the selected story made, e.g.: `shopSlotSelected` with `3`, as the newest action. A link does not keep
- * the actions.
- */
 class RecordAction(
     private val storybookRepository: StorybookRepository,
     private val eventBus: EventBus,

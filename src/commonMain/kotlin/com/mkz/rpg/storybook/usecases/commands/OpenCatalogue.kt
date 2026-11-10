@@ -8,11 +8,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import com.mkz.rpg.storybook.domain.StorybookRepository
 import com.mkz.rpg.storybook.usecases.services.StoryLocation
 
-/**
- * Opens the catalogue of the components on the story the location asks for, e.g.: the story of a link, with the args
- * and globals it asks for. Anything unknown or invalid is ignored, never a failure, as a link may outlive its story: the
- * first story is opened instead, and an invalid arg or global keeps its own value.
- */
 class OpenCatalogue(
     private val storybookRepository: StorybookRepository,
     private val storyLocation: StoryLocation,

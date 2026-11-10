@@ -7,7 +7,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [GiveItemView], at the width of the screen, with the texts of the language global. */
 object GiveItemViewStories : StoryBinding {
     private const val ITEM_NAME = "itemName"
 

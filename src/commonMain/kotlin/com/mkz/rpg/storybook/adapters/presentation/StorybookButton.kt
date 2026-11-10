@@ -14,10 +14,6 @@ import korlibs.korge.view.text
 import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
 
-/**
- * A button of the Storybook's own panels, e.g.: an option of an enum control, highlighted while it is selected or under
- * the mouse. It paints itself, as a `UIButton` tween would overwrite the color of its selection.
- */
 class StorybookButton(
     label: String,
     size: Size,
@@ -29,7 +25,6 @@ class StorybookButton(
         val COLOR = RGBA(0x33, 0x33, 0x33)
         val HOVER_COLOR = RGBA(0x44, 0x44, 0x44)
 
-        /** As wide as its [label] needs, at least [minimumWidth]. */
         fun sizeFor(
             label: String,
             minimumWidth: Double = HEIGHT,

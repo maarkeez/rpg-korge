@@ -8,7 +8,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
-/** The stories of [ManaBarView], at the size the battle unit info displays it. */
 object ManaBarViewStories : StoryBinding {
     private val SIZE = Size(281.5, 16)
     private const val MAXIMUM_MANA = 20

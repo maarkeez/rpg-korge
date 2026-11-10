@@ -8,7 +8,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [TileHighlightView], over a terrain tile as the battlefield draws it. */
 object TileHighlightViewStories : StoryBinding {
     private const val DEFAULT_TERRAIN = "sand"
     private const val TERRAIN = StoryTiles.TERRAIN

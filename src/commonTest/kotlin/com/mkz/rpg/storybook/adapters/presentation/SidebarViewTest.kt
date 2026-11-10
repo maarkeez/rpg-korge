@@ -107,7 +107,6 @@ class SidebarViewTest : ViewsForTesting() {
             selectedStoryIds.shouldContainExactly("screen-mana-bar--full")
         }
 
-    // Taller than the sidebar: 12 components of 3 stories each, `Story 1.1` to `Story 12.3`.
     private val manyComponents =
         (1..12).map { number ->
             component(
@@ -211,7 +210,7 @@ class SidebarViewTest : ViewsForTesting() {
             sidebarView.display(manyComponents)
             // When
             dragSidebar(sidebarView, -150.0)
-            // Then the list, drawn twice its size, moves half as many of its units as the finger.
+            // Then
             sidebarView.scrollOffset() shouldBe -75.0
         }
 

@@ -7,14 +7,9 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/**
- * The stories of [WorldBuilderCallToActionView], with the texts of the language global. As in the world builder, going back
- * asks to confirm leaving, and staying brings back the export, through its args.
- */
 object WorldBuilderCallToActionViewStories : StoryBinding {
     private const val CALL_TO_ACTION = "callToAction"
 
-    /** What the view asks the player. */
     private enum class CallToAction { EXPORT_AND_BACK, LEAVE_CONFIRMATION }
 
     private val exportAndBack =

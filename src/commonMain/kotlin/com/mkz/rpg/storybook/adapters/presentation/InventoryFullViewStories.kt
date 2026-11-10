@@ -7,7 +7,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [InventoryFullView], at the width of the screen, with the texts of the language global. */
 object InventoryFullViewStories : StoryBinding {
     private const val SELL_PRICE_LIMIT = 9999
     private const val DEFAULT_ITEM = "health-potion"

@@ -7,7 +7,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [ConfirmButton], the primary action of the dialogs and the menu, e.g.: Confirm. */
 object ConfirmButtonStories : StoryBinding {
     private const val MINIMUM_WIDTH = 60
     private const val MAXIMUM_WIDTH = 390

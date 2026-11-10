@@ -8,11 +8,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/**
- * The stories of [CastPreviewView], built with its real children. The caster has 20 of its 30 health points and all
- * its 20 mana points before the cast, and each recipient 30 of 30 health points and 10 mana points. Every row is in
- * sight, as the game shows them: at most the caster and its 4 adjacent tiles.
- */
 object CastPreviewViewStories : StoryBinding {
     private const val DEFAULT_ABILITY = "mushroom"
     private const val DEFAULT_CASTER = "hero"
@@ -110,7 +105,6 @@ object CastPreviewViewStories : StoryBinding {
         context: StoryContext,
     ): View {
         val effectIds = context.effectIds()
-        // The effects with an icon, as many times as needed.
         val effects = List(args.int(EFFECTS)) { index -> effectIds[index % effectIds.size] }
         val newEffects = List(args.int(NEW_EFFECTS)) { index -> effectIds[index % effectIds.size] }
         val caster =

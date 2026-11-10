@@ -9,10 +9,6 @@ import korlibs.korge.view.container
 import korlibs.korge.view.position
 import korlibs.korge.view.text
 
-/**
- * The callbacks the view of the selected story made, under the controls, e.g.: `shopSlotSelected(3)`, the newest on top, as many as
- * fit, and how many there are in the title. `Clear` asks to empty them. With none, a hint tells where they come from.
- */
 open class ActionsView : Container() {
     companion object {
         const val WIDTH = 480.0
@@ -35,7 +31,6 @@ open class ActionsView : Container() {
     internal val lines: Container
     internal val emptyHint: Text
 
-    // The newest first, only those that fit.
     internal var actionTexts: List<Text> = emptyList()
         private set
 
@@ -51,7 +46,6 @@ open class ActionsView : Container() {
         this.delegate = delegate
     }
 
-    /** Lists the newest actions that fit, the newest first, each as its name and its arguments, e.g.: `shopSlotSelected(3)`. */
     open fun display(actions: List<ActionDto>) {
         title.text = titleOf(actions.size)
         emptyHint.visible = actions.isEmpty()
@@ -62,6 +56,5 @@ open class ActionsView : Container() {
             }
     }
 
-    // e.g.: `Actions (3)`.
     private fun titleOf(count: Int): String = "Actions ($count)"
 }

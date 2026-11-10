@@ -7,12 +7,10 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [QuestTrackerView], with each kind of quest, and as the empty tracker. Its pop is an animation: the stories show how it settles. Tapping it records it. */
 object QuestTrackerViewStories : StoryBinding {
     private const val QUEST = "quest"
     private const val TAPPABLE = "tappable"
 
-    // The quest picked to draw the empty tracker instead of a quest.
     private const val EMPTY = "EMPTY"
 
     private fun story(

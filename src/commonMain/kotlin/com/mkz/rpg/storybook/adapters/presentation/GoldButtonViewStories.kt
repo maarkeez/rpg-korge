@@ -7,7 +7,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [GoldButtonView], with the texts of the language global. */
 object GoldButtonViewStories : StoryBinding {
     private const val GOLD_LIMIT = 99_999
 

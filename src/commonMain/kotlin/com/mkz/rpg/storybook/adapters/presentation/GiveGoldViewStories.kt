@@ -7,10 +7,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/**
- * The stories of [GiveGoldView], with the portraits of the game. As in the game, the amount stays within the gold of the giver and
- * the room of the receiver. Dragging the slider sets the amount once it is released, and the arrows switch the receiver.
- */
 object GiveGoldViewStories : StoryBinding {
     private const val MAXIMUM_GOLD = 99_999
     private const val RECEIVERS_LIMIT = 3
@@ -57,7 +53,6 @@ object GiveGoldViewStories : StoryBinding {
             controls =
                 listOf(
                     ControlDto.int(AMOUNT, minimum = 1, maximum = MAXIMUM_GOLD),
-                    // The panel only opens with gold to give and room for it.
                     ControlDto.int(GIVER_GOLD, minimum = 1, maximum = MAXIMUM_GOLD),
                     ControlDto.int(RECEIVER_GOLD, minimum = 0, maximum = MAXIMUM_GOLD - 1),
                     ControlDto.int(RECEIVERS, minimum = 1, maximum = RECEIVERS_LIMIT),
@@ -86,7 +81,6 @@ object GiveGoldViewStories : StoryBinding {
         val receiverGold = args.int(RECEIVER_GOLD)
         val maximum = minOf(giverGold, MAXIMUM_GOLD - receiverGold)
         val receivers = args.int(RECEIVERS)
-        // The receiver is one of the receivers, however few.
         val receiverIndex = args.int(RECEIVER_INDEX).coerceAtMost(receivers - 1)
         return GiveGoldView(context.resourcesLoader, context.messages).apply {
             setDelegate(

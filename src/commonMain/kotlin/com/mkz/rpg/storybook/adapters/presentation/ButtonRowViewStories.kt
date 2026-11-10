@@ -9,7 +9,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [ButtonRowView], from a lone button to three. Tapping a button records itself. */
 object ButtonRowViewStories : StoryBinding {
     private const val FIRST = "first"
     private const val SECOND = "second"

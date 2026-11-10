@@ -7,7 +7,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [FinishPlayerTurnView], at the width of the screen, with the text of the language global. */
 object FinishPlayerTurnViewStories : StoryBinding {
     private const val ENABLED = "enabled"
 

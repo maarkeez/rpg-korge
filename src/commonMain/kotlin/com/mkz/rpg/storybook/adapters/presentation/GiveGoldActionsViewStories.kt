@@ -7,7 +7,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [GiveGoldActionsView], at the width of the screen, with the texts of the language global. */
 object GiveGoldActionsViewStories : StoryBinding {
     private const val MAXIMUM_GOLD = 99_999
 

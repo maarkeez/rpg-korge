@@ -8,10 +8,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.image.color.RGBA
 import korlibs.korge.view.View
 
-/**
- * The stories of [BannerView], with the texts of the language global. The announcements that pop when a battle
- * starts or ends, and when a turn starts, are animations: the stories show the lines they leave.
- */
 object BannerViewStories : StoryBinding {
     private const val ROUND_LIMIT = 99
 
@@ -19,10 +15,8 @@ object BannerViewStories : StoryBinding {
     private const val PLAYER = "player"
     private const val ROUND = "round"
 
-    /** What the view displays: exploring, the turn of a player in a round, or the player who won the battle. */
     private enum class State { EXPLORING, TURN, WINNER }
 
-    /** The players of the game, whose turn is in the color of their kind. */
     private enum class Player(
         val id: String,
         val turnColor: RGBA,

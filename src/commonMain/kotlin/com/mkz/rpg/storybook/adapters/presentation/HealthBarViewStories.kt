@@ -8,7 +8,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
-/** The stories of [HealthBarView], at the size the battle unit info displays it. */
 object HealthBarViewStories : StoryBinding {
     private val SIZE = Size(281.5, 16)
     private const val MAXIMUM_HEALTH = 30

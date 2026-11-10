@@ -16,17 +16,11 @@ import korlibs.korge.view.solidRect
 import korlibs.korge.view.text
 import korlibs.math.geom.Size
 
-/**
- * The args of the selected story, under its info: one row per control of its component, with its name and its editor,
- * e.g.: `-` and `+` around an int. Editing an arg asks to change it, and `Reset` asks for the story's own args back.
- * An editor only asks for the values its control accepts, e.g.: an int within its minimum and maximum.
- */
 @OptIn(KorgeExperimental::class)
 open class ControlsView : Container() {
     companion object {
         const val WIDTH = 480.0
 
-        /** The most the title and the rows of a component may take, so the actions fit under them in the window. */
         const val MAXIMUM_HEIGHT = 384.0
         const val TITLE_HEIGHT = 44.0
         const val NAME_WIDTH = 150.0
@@ -54,7 +48,6 @@ open class ControlsView : Container() {
     internal val resetButton: StorybookButton
     internal val rows: Container
 
-    // In the order the controls are listed.
     internal var controlRows: List<ControlRow> = emptyList()
         private set
 
@@ -69,7 +62,6 @@ open class ControlsView : Container() {
         this.delegate = delegate
     }
 
-    /** Lists the controls, in their order, each with the value of its arg. */
     open fun display(
         controls: List<ControlDto>,
         args: Map<String, ValueDto>,
@@ -82,14 +74,12 @@ open class ControlsView : Container() {
             }
     }
 
-    /** The name of a control and the editor of its arg. */
     internal inner class ControlRow(
         val control: ControlDto,
         val arg: ValueDto,
     ) : Container() {
         internal val nameText: Text = text(control.name, textSize = 16.0, color = StoryInfoView.SECONDARY_COLOR).position(0.0, (StorybookButton.HEIGHT - 16.0) / 2)
 
-        // By what they do, e.g.: `increase`, or by their option, e.g.: `option:SELL`.
         internal val buttons = mutableMapOf<String, StorybookButton>()
         internal var valueText: Text? = null
             private set
@@ -111,7 +101,6 @@ open class ControlsView : Container() {
             }
         }
 
-        /** The value of the arg as displayed, e.g.: `15`, `true` or `SELL`. */
         fun displayedValue(): String =
             textInput?.text
                 ?: valueText?.text
@@ -123,13 +112,11 @@ open class ControlsView : Container() {
                     .single()
                     .label.text
 
-        // A switch, highlighted while it is on.
         private fun booleanEditor() {
             val value = requireNotNull(arg.boolean)
             button("toggle", value.toString(), x = 0.0, size = StorybookButton.sizeFor(false.toString())) { change(ValueDto.boolean(!value)) }.isSelected = value
         }
 
-        // `-` and `+` around the value, which stop at the minimum and the maximum, followed by them.
         private fun intEditor() {
             val value = requireNotNull(arg.int)
             val minimum = requireNotNull(control.minimum)
@@ -140,7 +127,6 @@ open class ControlsView : Container() {
             editor.text("$minimum – $maximum", textSize = 14.0, color = StoryInfoView.SECONDARY_COLOR).position(2 * StorybookButton.HEIGHT + INT_VALUE_WIDTH + BUTTON_GAP * 2, 6.0)
         }
 
-        // Every option, the value highlighted, on as many lines as they need.
         private fun enumEditor() {
             var x = 0.0
             var y = 0.0
@@ -155,7 +141,6 @@ open class ControlsView : Container() {
             }
         }
 
-        // `<` and `>` around the value, going round the options, as a pick may have many.
         private fun pickEditor() {
             val options = requireNotNull(control.options)
             val index = options.indexOf(arg.text)
@@ -164,12 +149,10 @@ open class ControlsView : Container() {
             button("next", ">", x = StorybookButton.HEIGHT + PICK_VALUE_WIDTH) { change(ValueDto.text(options[(index + 1) % options.size])) }
         }
 
-        // Changed once it is entered, or left.
         private fun textEditor() {
             input(requireNotNull(arg.text), x = 0.0, width = TEXT_INPUT_WIDTH) { text -> change(ValueDto.text(text)) }
         }
 
-        // A swatch of the color and its hex, changed once it is entered, or left. A hex that is no color is undone.
         private fun colorEditor() {
             val hex = requireNotNull(arg.text)
             colorSwatch = editor.solidRect(Size(StorybookButton.HEIGHT, StorybookButton.HEIGHT), Colors["#$hex"])

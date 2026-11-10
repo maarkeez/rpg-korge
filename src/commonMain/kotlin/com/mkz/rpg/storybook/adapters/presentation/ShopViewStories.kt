@@ -8,11 +8,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/**
- * The stories of [ShopView], displayed as the shop presenter does: the hint until an item is selected, then its name and
- * price. Every callback of the shop is recorded in the actions, and tapping a slot selects it, as the arrows switch the
- * buyer, through their args. Back and Buy or Sell are in the row of the call to action.
- */
 object ShopViewStories : StoryBinding {
     private const val INVENTORY_SIZE = 12
     private const val PARTY_SIZE = 3
@@ -20,7 +15,6 @@ object ShopViewStories : StoryBinding {
     private const val BUY_PRICE = 50
     private const val SELL_PRICE = 25
 
-    // The option of the selected slot control when no slot is selected, which no slot index is.
     private const val NO_SLOT = "none"
 
     private const val MODE = "mode"
@@ -32,7 +26,6 @@ object ShopViewStories : StoryBinding {
     private const val SELECTED_SLOT = "selectedSlot"
     private const val REFUSAL = "refusal"
 
-    /** Why the buyer can not trade the items, which are then dimmed. */
     private enum class Refusal { NONE, NOT_ENOUGH_GOLD, INVENTORY_FULL, EQUIPPED, GOLD_FULL }
 
     private val buy = StoryDto(id = "screen-shop--buy", name = "Buy", description = "The merchant's items, before one is tapped: the hint tells what tapping one does.", args = emptyMap())
@@ -120,21 +113,17 @@ object ShopViewStories : StoryBinding {
         val mode = ShopView.Mode.valueOf(args.text(MODE))
         val refusal = Refusal.valueOf(args.text(REFUSAL))
         val itemIds = context.lootableItemIds()
-        // The first lootable items, in alphabetical order, as many times as needed.
         val items = List(args.int(ITEMS)) { index -> itemIds[index % itemIds.size] }
-        // A selected slot with no item selects none.
         val selectedSlot = args.text(SELECTED_SLOT).toIntOrNull()?.takeIf { index -> index in items.indices }
         val buyerIndex = args.int(BUYER_INDEX)
         return ShopView(context.resourcesLoader, context.messages).apply {
             setDelegate(
                 object : ShopView.Delegate {
-                    // As in the game, tapping the selected item, or an empty slot, clears the selection.
                     override fun shopSlotSelected(index: Int) {
                         val selected = index.takeIf { index in items.indices && index != selectedSlot }
                         context.action("shopSlotSelected", index, setArg = SELECTED_SLOT to ValueDto.text(selected?.toString() ?: NO_SLOT))
                     }
 
-                    // The buyer stays at the ends of the party.
                     override fun shopBuyerStepped(step: Int) {
                         val stepped = (buyerIndex + step).takeIf { index -> index in 0 until PARTY_SIZE }
                         context.action("shopBuyerStepped", step, setArg = stepped?.let { index -> BUYER_INDEX to ValueDto.int(index) })
@@ -162,7 +151,6 @@ object ShopViewStories : StoryBinding {
         }
     }
 
-    // What tapping an item does, or that the buyer has nothing to sell.
     private fun hintOf(
         mode: ShopView.Mode,
         items: List<String>,

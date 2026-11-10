@@ -8,7 +8,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
-/** The stories of [AbilityButtonView], at the size the battle unit info displays it. Tapping it selects the ability, as the battle does. */
 object AbilityButtonViewStories : StoryBinding {
     private val SIZE = Size(54, 54)
     private const val COOLDOWN_LIMIT = 9

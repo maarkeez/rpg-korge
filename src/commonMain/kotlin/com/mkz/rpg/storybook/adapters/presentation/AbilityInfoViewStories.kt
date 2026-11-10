@@ -11,10 +11,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/**
- * The stories of [AbilityInfoView], at the width the battle unit info displays it. The abilities are plain data, as in
- * resources/ability and resources/effect, since the Storybook can not read the game data.
- */
 object AbilityInfoViewStories : StoryBinding {
     private const val COOLDOWN_LIMIT = 9
     private const val MANA_LIMIT = 20
@@ -93,10 +89,8 @@ object AbilityInfoViewStories : StoryBinding {
             display(abilityInfo(args))
         }
 
-    /** The ability of the args, with the reason it can not be cast now, if any. */
     private fun abilityInfo(args: Args): AbilityInfo = abilityInfo(args.text(ABILITY), remainingCooldown = args.int(COOLDOWN_TURNS_LEFT), remainingMana = args.int(REMAINING_MANA))
 
-    /** An ability of the game, with the reason it can not be cast now, if any, e.g.: for the battle unit info's stories. */
     internal fun abilityInfo(
         abilityId: String,
         remainingCooldown: Int,

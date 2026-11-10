@@ -8,7 +8,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
-/** The stories of [EffectView], at the size the effects of a battle unit are displayed. */
 object EffectViewStories : StoryBinding {
     private val SIZE = Size(20, 20)
 

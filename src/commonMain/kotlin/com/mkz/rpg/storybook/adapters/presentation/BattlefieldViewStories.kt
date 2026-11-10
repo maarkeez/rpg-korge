@@ -14,13 +14,7 @@ import korlibs.korge.view.View
 import korlibs.korge.view.addUpdater
 import kotlinx.coroutines.CoroutineScope
 
-/**
- * The stories of [BattlefieldView]: a tiny fixed map, as big as its viewport, with a few tiles of each terrain, a battle
- * unit and another, an npc, a building and dropped items. Tapping a tile records `tileSelected` and selects it. The health blink plays
- * once the battlefield is on the screen, and again whenever an arg changes, e.g.: `replay`.
- */
 object BattlefieldViewStories : StoryBinding {
-    // Each tile is a terrain: sand, grass, water, lava or void. The fortress stands over the sand on its right.
     private val MAP =
         listOf(
             "GGSSSS",
@@ -33,7 +27,6 @@ object BattlefieldViewStories : StoryBinding {
     private val TERRAINS = mapOf('S' to "sand", 'G' to "grass", 'W' to "water", 'L' to "lava", 'V' to "void")
     private const val TRANSITION_NAME_SEPARATOR = "_to_"
 
-    // The battlefield domain gives each transition the sides of the tile that touch the target terrain these weights.
     private const val NORTH_WEIGHT = 1
     private const val EAST_WEIGHT = 2
     private const val SOUTH_WEIGHT = 4
@@ -46,8 +39,6 @@ object BattlefieldViewStories : StoryBinding {
     private val DROPPED_ITEM_TILE = TilePosition(row = 3, column = 1)
     private val CHEST_TILE = TilePosition(row = 5, column = 3)
 
-    // The tiles the battle unit can walk to, and cast on, and the tiles of the cast previewed: the battlefield domain
-    // works them out in the game, which the Storybook can not import.
     private val WALKING_RANGE = listOf(TilePosition(4, 1), TilePosition(4, 3), TilePosition(5, 2), TilePosition(3, 1), TilePosition(5, 3))
     private val CAST_RANGE = listOf(TilePosition(4, 1), TilePosition(4, 3), TilePosition(4, 4), TilePosition(5, 2), TilePosition(5, 3), TilePosition(3, 1))
     private val CAST_GROUP = listOf(TilePosition(4, 3), OTHER_BATTLE_UNIT_TILE, TilePosition(5, 3))
@@ -59,7 +50,6 @@ object BattlefieldViewStories : StoryBinding {
     private const val BUILDING = "fortress"
     private const val CHEST_ITEMS = 2
 
-    // The option of the selected tile and of the picks when none is meant, which no tile nor npc is.
     private const val NONE = "none"
 
     private const val LAYER = "layer"
@@ -71,7 +61,6 @@ object BattlefieldViewStories : StoryBinding {
     private const val REPLAY = "replay"
     private const val REPLAY_MAXIMUM = 9
 
-    /** What is drawn over the tiles, as the battle does for the battle unit selected. */
     private enum class Layer {
         NONE,
         WALKING_RANGE,
@@ -206,8 +195,6 @@ object BattlefieldViewStories : StoryBinding {
             selected?.let { tile -> displayTileSelection(tile.row, tile.column) }
         }
 
-    // Blinks the battle unit with the health it has left, as exploring does, once the battlefield is on the screen, as
-    // its animations only play there.
     private fun BattlefieldView.blinkHealthOnScreen(
         unitId: String,
         previewOption: PreviewOption,
@@ -223,15 +210,12 @@ object BattlefieldViewStories : StoryBinding {
         }
     }
 
-    // The tile of `row,column`, or none when there is none, or it is not on the map.
     private fun selectedTile(selectedTile: String): TilePosition? {
         val (row, column) = selectedTile.split(",").map { value -> value.trim().toIntOrNull() }.takeIf { values -> values.size == 2 } ?: return null
         if (row == null || column == null || row !in MAP.indices || column !in MAP.first().indices) return null
         return TilePosition(row, column)
     }
 
-    // The terrain of the map, with the transitions the battlefield domain would give its tiles: a tile next to the target
-    // terrain of one of the strips of transitions of its terrain draws the strip tile of the sides touching it.
     private fun terrain(context: StoryContext): BattlefieldTerrain {
         val terrainIds = MAP.map { row -> row.map { letter -> TERRAINS.getValue(letter) } }
         val strips = context.terrainTransitionIds().map { transitionId -> transitionId.split(TRANSITION_NAME_SEPARATOR).let { (from, to) -> from to to } }

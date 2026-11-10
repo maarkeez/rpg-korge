@@ -7,7 +7,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [TileDimView], over a terrain tile and the battle unit standing on it, as the battlefield draws it. */
 object TileDimViewStories : StoryBinding {
     private const val DEFAULT_TERRAIN = "sand"
     private const val DEFAULT_UNIT = "knight"

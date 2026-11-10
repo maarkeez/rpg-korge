@@ -13,18 +13,11 @@ import korlibs.korge.view.addUpdater
 import korlibs.korge.view.position
 import korlibs.math.geom.Rectangle
 
-/**
- * The Storybook: the catalogue in a sidebar on the left, the selected story in a phone in the middle, and on the right
- * the globals, what the story is, its controls and its actions, all of them in a [ZoomView] that zooms and places them
- * on the screen. Localization: the messages of the views shown, in the language global.
- * Location: where what is shown is kept, e.g.: the page URL. Page: told when the selected story has rendered.
- */
 class StorybookScene(
     localizationApi: LocalizationApi,
     private val storyLocation: StoryLocation,
     private val storybookPage: StorybookPage,
 ) : Scene() {
-    // Like the battle scene, the scene coroutines run on the game window event loop, also in the headless tests.
     override val coroutineContext by lazy { super.coroutineContext + views.gameWindow.coroutineDispatcher }
 
     private val messages = Messages(localizationApi)
@@ -46,17 +39,13 @@ class StorybookScene(
         addUpdater { eventBus.dispatch() }
         val storybookApi = StorybookApi(eventBus, storyLocation, StorybookApi.STORY_BINDINGS)
 
-        // The phone is as far from the sidebar as from the top, so its frame fits the window height.
         val margin = (STORYBOOK_WINDOW_SIZE.height - PhoneFrameView.SIZE.height) / 2
         addChild(zoomView)
         val storybook = zoomView.storybook
         storybook.addChild(sidebarView)
         storybook.addChild(phoneFrameView.position(SidebarView.WIDTH + margin * 2, margin))
         zoomView.phoneArea = Rectangle(phoneFrameView.pos, PhoneFrameView.SIZE)
-        // The sidebar scrolls by dragging, and the view of the selected story handles its own taps and drags, e.g.: the battlefield.
         zoomView.dragOwners = listOf(sidebarView, phoneFrameView.screen)
-        // On the right of the phone: the globals on top, then what the story is, its controls, and its actions under the
-        // most the controls may take, which fit in the window.
         val panelsX = SidebarView.WIDTH + margin * 4 + PhoneFrameView.SIZE.width
         storybook.addChild(toolbarView.position(panelsX, margin * 2))
         storybook.addChild(storyInfoView.position(panelsX, toolbarView.y + ToolbarView.HEIGHT + margin * 2))

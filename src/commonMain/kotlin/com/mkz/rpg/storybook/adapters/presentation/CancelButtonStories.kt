@@ -7,7 +7,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [CancelButton], the secondary action of the dialogs and the menu, e.g.: Cancel. */
 object CancelButtonStories : StoryBinding {
     private const val MINIMUM_WIDTH = 60
     private const val MAXIMUM_WIDTH = 390

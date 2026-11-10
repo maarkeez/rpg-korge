@@ -9,11 +9,9 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [TerrainTileView], at the size the battlefield displays it: a tile of 64 pixels. */
 object TerrainTileViewStories : StoryBinding {
     private const val TRANSITION_NAME_SEPARATOR = "_to_"
 
-    // Each strip of transitions holds 16 tiles, the first one the pure terrain and the last one the pure target terrain.
     private const val MAXIMUM_WANG_INDEX = 15
 
     private const val DEFAULT_TERRAIN = "sand"

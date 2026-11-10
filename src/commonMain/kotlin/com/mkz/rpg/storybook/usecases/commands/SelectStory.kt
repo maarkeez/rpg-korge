@@ -4,7 +4,6 @@ import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.storybook.domain.StorybookRepository
 import com.mkz.rpg.storybook.usecases.services.StoryLocation
 
-/** Shows the story, with its own args, and keeps it in the location, so a link opens it. Nothing happens when it is already selected. */
 class SelectStory(
     private val storybookRepository: StorybookRepository,
     private val storyLocation: StoryLocation,

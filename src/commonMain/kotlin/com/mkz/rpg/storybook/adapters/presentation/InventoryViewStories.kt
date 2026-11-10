@@ -7,16 +7,10 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/**
- * The stories of [InventoryView], with the items of the game, in alphabetical order, as many times as needed. Tapping a
- * slot selects it, and the arrows switch the party member, as the inventory presenter does. While exploring its gold is a
- * button, faded with no gold or no one to give it to.
- */
 object InventoryViewStories : StoryBinding {
     private const val PARTY_LIMIT = 3
     private const val GOLD_LIMIT = 9999
 
-    // The option of the slot controls when no slot is meant, which no slot index is.
     private const val NO_SLOT = "none"
 
     private const val ITEMS = "items"
@@ -102,21 +96,17 @@ object InventoryViewStories : StoryBinding {
         val itemIds = context.lootableItemIds()
         val equippedSlot = args.text(EQUIPPED_SLOT).toIntOrNull()
         val items = args.int(ITEMS)
-        // A slot with no item is neither equipped nor selected.
         val selectedSlot = args.text(SELECTED_SLOT).toIntOrNull()?.takeIf { index -> index < items }
         val partySize = args.int(PARTY_SIZE)
-        // The party member is one of the party, however small.
         val partyIndex = args.int(PARTY_INDEX).coerceAtMost(partySize - 1)
         return InventoryView(context.resourcesLoader, context.messages).apply {
             setDelegate(
                 object : InventoryView.Delegate {
-                    // Tapping the selected item, or an empty slot, clears the selection.
                     override fun slotSelected(index: Int) {
                         val selected = index.takeIf { index < items && index != selectedSlot }
                         context.action("slotSelected", index, setArg = SELECTED_SLOT to ValueDto.text(selected?.toString() ?: NO_SLOT))
                     }
 
-                    // The party member stays at the ends of the party.
                     override fun inventoryOwnerStepped(step: Int) {
                         val stepped = (partyIndex + step).takeIf { index -> index in 0 until partySize }
                         context.action("inventoryOwnerStepped", step, setArg = stepped?.let { index -> PARTY_INDEX to ValueDto.int(index) })
@@ -128,7 +118,6 @@ object InventoryViewStories : StoryBinding {
                 },
             )
             display(
-                // The first lootable items, in alphabetical order, as many times as needed.
                 slots = List(items) { index -> InventoryView.Slot(itemIds[index % itemIds.size], isEquipped = index == equippedSlot) },
                 gold = args.int(GOLD),
                 owner = if (args.boolean(EXPLORING)) InventoryView.Owner(args.text(OWNER), partyIndex, partySize, canGiveGold = args.int(GOLD) > 0 && partySize > 1) else null,

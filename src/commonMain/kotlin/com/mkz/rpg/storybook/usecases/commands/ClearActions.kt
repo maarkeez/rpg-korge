@@ -3,7 +3,6 @@ package com.mkz.rpg.storybook.usecases.commands
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.storybook.domain.StorybookRepository
 
-/** Empties the actions recorded. Nothing happens when it is empty. */
 class ClearActions(
     private val storybookRepository: StorybookRepository,
     private val eventBus: EventBus,

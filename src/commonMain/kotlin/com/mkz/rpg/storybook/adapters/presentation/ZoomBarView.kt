@@ -13,10 +13,6 @@ import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
 import kotlin.math.roundToInt
 
-/**
- * The zoom of the Storybook, floating over it: `-`, the zoom (`100%` at Fit), `+`, `Fit` and `Phone`. Its buttons are
- * larger than the other buttons of the Storybook, to be tapped with a finger. Tapping one tells the delegate.
- */
 open class ZoomBarView : Container() {
     companion object {
         private const val BUTTON_HEIGHT = 40.0
@@ -67,7 +63,6 @@ open class ZoomBarView : Container() {
         this.delegate = delegate
     }
 
-    /** Shows the [zoom], 1 at Fit, as a percentage, e.g.: `150%`. */
     open fun display(zoom: Double) {
         zoomText.text = "${(zoom * 100).roundToInt()}%"
         zoomText.centerOn(zoomArea)

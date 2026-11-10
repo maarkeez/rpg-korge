@@ -9,10 +9,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/**
- * The stories of [ItemButtonsView], at the width of the screen, with the messages of the language global. The actions are
- * the ones the inventory gives each kind of item while exploring: Cancel, Discard, Give, and Consume or Equip.
- */
 object ItemButtonsViewStories : StoryBinding {
     private const val SELL_PRICE_LIMIT = 9999
 
@@ -20,10 +16,8 @@ object ItemButtonsViewStories : StoryBinding {
     private const val ITEM_SELL_PRICE = "itemSellPrice"
     private const val KIND = "kind"
 
-    // In blue, as in the inventory.
     private val PRIMARY_BUTTONS = setOf(UiMessage.ITEM_BUTTONS_CONSUME, UiMessage.ITEM_BUTTONS_EQUIP, UiMessage.ITEM_BUTTONS_UNEQUIP)
 
-    /** What the player can do with the item, as the inventory decides it. */
     private enum class Kind(
         val buttons: List<Pair<UiMessage, Boolean>>,
     ) {

@@ -8,12 +8,7 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/**
- * The stories of [WorldBuilderHudView], with the tile of each terrain the game has. As in the world builder, a step changes
- * the size and tapping a terrain selects it, through the args.
- */
 object WorldBuilderHudViewStories : StoryBinding {
-    // The sizes the world builder allows, which are in its domain.
     private const val MINIMUM_SIZE = 1
     private const val MAXIMUM_SIZE = 128
     private const val DEFAULT_TERRAIN = "grass"
@@ -67,7 +62,6 @@ object WorldBuilderHudViewStories : StoryBinding {
     ): View {
         val rows = args.int(ROWS)
         val columns = args.int(COLUMNS)
-        // The tiles come from the battlefield, as the presenter takes them.
         val battlefieldView = BattlefieldView(context.resourcesLoader)
         val terrains =
             context.terrainIds().map { terrainId ->
@@ -76,7 +70,6 @@ object WorldBuilderHudViewStories : StoryBinding {
         return WorldBuilderHudView(context.messages).apply {
             setDelegate(
                 object : WorldBuilderHudView.Delegate {
-                    // A step changes the rows or the columns, which the world builder allows within its sizes.
                     override fun sizeChanged(
                         rows: Int,
                         columns: Int,

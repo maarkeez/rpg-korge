@@ -7,10 +7,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/**
- * The stories of [PauseView], built with its real buttons. Tapping an option records it. Saved hides itself after
- * [PauseView.SAVED_DURATION], as in the game: Reset shows it again.
- */
 object PauseViewStories : StoryBinding {
     private const val SAVED = "saved"
 

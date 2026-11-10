@@ -7,7 +7,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [QuestDetailView], with each kind of quest. */
 object QuestDetailViewStories : StoryBinding {
     private const val QUEST = "quest"
 

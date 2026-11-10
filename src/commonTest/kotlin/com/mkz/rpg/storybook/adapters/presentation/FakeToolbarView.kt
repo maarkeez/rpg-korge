@@ -2,7 +2,6 @@ package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.localization.domain.Localization.Dto.LanguageDto
 
-// Records the languages the presenter asks the toolbar to display, instead of drawing them.
 class FakeToolbarView : ToolbarView() {
     val selectedLanguageCodes = mutableListOf<String>()
     var displayedLanguages: List<LanguageDto> = emptyList()

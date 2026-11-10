@@ -9,7 +9,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
-/** The stories of [FormationRowView], at the size the formation displays it. Tapping it selects it, as the formation does. */
 object FormationRowViewStories : StoryBinding {
     private val SIZE = Size(370, 44)
     private const val DEFAULT_UNIT = "hero"
@@ -88,7 +87,6 @@ object FormationRowViewStories : StoryBinding {
         context: StoryContext,
     ): View =
         FormationRowView(SIZE, context.resourcesLoader).apply {
-            // Tapping the selected row selects none.
             setOnSelected { context.action("onSelected", setArg = SELECTED to ValueDto.boolean(!isSelected)) }
             display(
                 FormationView.Row(

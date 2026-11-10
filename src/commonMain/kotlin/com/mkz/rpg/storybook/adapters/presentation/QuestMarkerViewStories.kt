@@ -8,7 +8,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [QuestMarkerView], over the npc of the tiny map of [BattlefieldViewStories]. */
 object QuestMarkerViewStories : StoryBinding {
     private const val SIGN = "sign"
     private const val NPC_ROW = 2

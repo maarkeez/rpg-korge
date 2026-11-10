@@ -4,7 +4,6 @@ import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.storybook.domain.StorybookRepository
 import com.mkz.rpg.storybook.usecases.services.StoryLocation
 
-/** Gives the selected story its own args back, also in the location. Nothing happens when none was changed. */
 class ResetArgs(
     private val storybookRepository: StorybookRepository,
     private val storyLocation: StoryLocation,

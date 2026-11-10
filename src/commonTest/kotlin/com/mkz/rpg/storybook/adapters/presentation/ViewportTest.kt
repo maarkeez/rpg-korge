@@ -12,13 +12,10 @@ import kotlin.test.Test
 class ViewportTest {
     private val storybook = Size(1280, 900)
 
-    // A 1280x900 window, as on a desktop: the Storybook fills it.
     private val window = Rectangle(0, 0, 1280, 900)
 
-    // A 390x844 portrait phone: KorGE fits the 1280 of the Storybook in its width, and the screen goes far above and below it.
     private val phoneScreen = Rectangle(0.0, -935.0, 1280.0, 2770.0)
 
-    // The phone frame of the Storybook, 414x868, as laid out by the scene.
     private val phoneFrame = Rectangle(332.0, 16.0, 414.0, 868.0)
 
     private fun Viewport.shouldBeAt(
@@ -187,11 +184,10 @@ class ViewportTest {
         val viewport = Viewport(storybook, phoneScreen)
         viewport.zoomOnto(phoneFrame)
         val zoom = viewport.zoom
-        // When the phone is turned to landscape, 844x390: KorGE fits the 900 of the Storybook in its height.
+        // When
         viewport.resize(Rectangle(-333.5, 0.0, 1947.0, 900.0))
         // Then
         viewport.zoom shouldBe zoom
-        // The middle of the phone is still in the middle of the screen.
         (viewport.position.x + 539.0 * zoom) shouldBe (640.0 plusOrMinus 0.001)
         (viewport.position.y + 450.0 * zoom) shouldBe (450.0 plusOrMinus 0.001)
     }

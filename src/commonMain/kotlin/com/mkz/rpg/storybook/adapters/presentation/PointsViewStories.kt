@@ -7,7 +7,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [PointsView], in the colors the battle unit info gives the steps and the casts. */
 object PointsViewStories : StoryBinding {
     private const val MAXIMUM_POINTS = 3
     private const val POINTS_LIMIT = 12
@@ -16,7 +15,6 @@ object PointsViewStories : StoryBinding {
     private const val MAXIMUM = "maximum"
     private const val COLOR = "color"
 
-    // The colors of the remaining steps and the remaining casts of the battle unit info.
     private const val MOVEMENT_COLOR = "FFFFFF"
     private const val CAST_COLOR = "FFBB31"
 

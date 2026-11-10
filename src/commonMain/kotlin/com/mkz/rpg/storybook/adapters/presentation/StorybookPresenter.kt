@@ -13,12 +13,6 @@ import com.mkz.rpg.storybook.domain.StorybookEvent.CatalogueOpened
 import com.mkz.rpg.storybook.domain.StorybookEvent.GlobalChanged
 import com.mkz.rpg.storybook.domain.StorybookEvent.StorySelected
 
-/**
- * Lists the catalogue in the sidebar, and shows the selected story with its args and globals, rebuilding its view from
- * scratch whenever any of them changes. The language global selects the language of the texts the views are built with.
- * The callbacks the view makes are recorded in the actions, and change the arg they are mapped to, if any. The page is told
- * once the story has rendered, so a script can wait for it.
- */
 class StorybookPresenter(
     private val sidebarView: SidebarView,
     private val toolbarView: ToolbarView,

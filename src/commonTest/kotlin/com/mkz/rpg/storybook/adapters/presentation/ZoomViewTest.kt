@@ -15,12 +15,10 @@ import kotlin.test.Test
 class ZoomViewTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE) {
     private val window = Rectangle(0, 0, 1280, 900)
 
-    // The phone frame of the Storybook, 414x868, as laid out by the scene.
     private val phoneArea = Rectangle(332.0, 16.0, 414.0, 868.0)
 
     private fun newZoomView() = ZoomView(STORYBOOK_WINDOW_SIZE).apply { phoneArea = this@ZoomViewTest.phoneArea }
 
-    // KorGE rounds the screen to whole units, so the Storybook in its middle may be a fraction of a unit off.
     private fun Rectangle.shouldBeAbout(expected: Rectangle) {
         left shouldBe (expected.left plusOrMinus 0.5)
         top shouldBe (expected.top plusOrMinus 0.5)
@@ -101,7 +99,6 @@ class ZoomViewTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE) {
             val phone = zoomView.areaOnStage(phoneArea)
             phone.height shouldBe (900.0 plusOrMinus 0.01)
             phone.center.y shouldBe (450.0 plusOrMinus 0.01)
-            // The phone is left of the middle of the Storybook, which can not be moved further right than the left of the window.
             zoomView.storybookArea().left shouldBe (0.0 plusOrMinus 0.01)
             zoomView.zoomBar().zoomText() shouldBe "104%"
         }
@@ -122,7 +119,6 @@ class ZoomViewTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE) {
             zoomView.zoom() shouldBe 1.0
             zoomView.storybookArea().shouldBeAbout(window)
             zoomView.isBarAtBottomRightOf(screen).shouldBeTrue()
-            // Drawn 390 / 1280 times smaller on the phone than on the window, it is as wide on both.
             (zoomView.zoomBar().getGlobalBounds().width * 390 / 1280) shouldBe (barWidthOnWindow plusOrMinus 0.5)
         }
 
@@ -236,7 +232,7 @@ class ZoomViewTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE) {
             addChild(zoomView)
             // When
             pinch(from = Point(540, 450) to Point(740, 450), to = Point(540, 450) to Point(940, 450))
-            // Then the middle of the Storybook, between the fingers, is still between them.
+            // Then
             zoomView.zoom() shouldBe (2.0 plusOrMinus 0.000001)
             zoomView.storybookArea().shouldBeAbout(Rectangle(-540.0, -450.0, 2560.0, 1800.0))
         }

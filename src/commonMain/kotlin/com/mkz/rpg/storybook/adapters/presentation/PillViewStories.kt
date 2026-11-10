@@ -7,14 +7,12 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [PillView], in the colours the HUD gives the mana, the cooldowns, the defeated and the gold. */
 object PillViewStories : StoryBinding {
     private const val TEXT = "text"
     private const val COLOR = "color"
     private const val GLYPH = "glyph"
     private const val SOLID = "solid"
 
-    // The mana blue, the cast orange, the health red and the selection gold of the HUD.
     private const val MANA_COLOR = "0091FF"
     private const val COOLDOWN_COLOR = "FFBB31"
     private const val DEFEATED_COLOR = "FF375F"

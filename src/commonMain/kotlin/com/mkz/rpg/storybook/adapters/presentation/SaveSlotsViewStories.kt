@@ -8,10 +8,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/**
- * The stories of [SaveSlotsView], built with its real buttons, with a control per slot for what it holds. A saved slot
- * shows the units that have a portrait, in alphabetical order, as its leader. Tapping a slot or Delete records it.
- */
 object SaveSlotsViewStories : StoryBinding {
     private const val EMPTY = "empty"
     private const val SAVED = "saved"

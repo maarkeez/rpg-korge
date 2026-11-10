@@ -8,7 +8,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [RecipientPreviewView], whose battle unit has 30 of its 30 health points and 10 of its 20 mana points before the cast. */
 object RecipientPreviewViewStories : StoryBinding {
     private const val DEFAULT_UNIT = "goat-wizard"
     private const val MAXIMUM_HEALTH = 30
@@ -74,7 +73,6 @@ object RecipientPreviewViewStories : StoryBinding {
         context: StoryContext,
     ): View {
         val effectIds = context.effectIds()
-        // The effects with an icon, as many times as needed.
         val effects = List(args.int(EFFECTS)) { index -> effectIds[index % effectIds.size] }
         val newEffects = List(args.int(NEW_EFFECTS)) { index -> effectIds[index % effectIds.size] }
         return RecipientPreviewView(context.resourcesLoader, context.messages).apply {

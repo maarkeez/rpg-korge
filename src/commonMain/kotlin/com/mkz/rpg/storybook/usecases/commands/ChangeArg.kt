@@ -5,10 +5,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import com.mkz.rpg.storybook.domain.StorybookRepository
 import com.mkz.rpg.storybook.usecases.services.StoryLocation
 
-/**
- * Changes an arg of the selected story, e.g.: `remaining` to `3`, and keeps it in the location, so a link opens the story
- * with it. Nothing happens when the arg has that value. Fails when its control does not accept it.
- */
 class ChangeArg(
     private val storybookRepository: StorybookRepository,
     private val storyLocation: StoryLocation,

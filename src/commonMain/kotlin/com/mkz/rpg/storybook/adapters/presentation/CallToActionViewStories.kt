@@ -11,10 +11,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/**
- * The stories of [CallToActionView], built with its real children. As in the game, choosing something dismisses
- * the call to action and displays the finish turn again, through its args.
- */
 object CallToActionViewStories : StoryBinding {
     private const val SELL_PRICE_LIMIT = 9999
     private const val DEFAULT_ITEM = "health-potion"
@@ -27,7 +23,6 @@ object CallToActionViewStories : StoryBinding {
     private const val ITEM_SELL_PRICE = "itemSellPrice"
     private const val ITEM = "item"
 
-    /** What the player is called to do. */
     private enum class CallToAction { FINISH_PLAYER_TURN, CANCEL_AND_CONFIRM, ITEM_BUTTONS, GIVE_ITEM, GIVE_GOLD, GIVE_GOLD_REFUSAL, INVENTORY_FULL, BUTTON_ROW, CONFIRMATION }
 
     private val finishPlayerTurn =
@@ -128,7 +123,6 @@ object CallToActionViewStories : StoryBinding {
         args: Args,
         context: StoryContext,
     ): View {
-        // Choosing dismisses the call to action, and the finish turn is displayed again.
         val dismissed = CALL_TO_ACTION to ValueDto.text(CallToAction.FINISH_PLAYER_TURN.name)
         val messages = context.messages
         return CallToActionView(messages, context.resourcesLoader).apply {

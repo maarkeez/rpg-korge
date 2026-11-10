@@ -7,7 +7,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [QuestJournalView], from two quests to more than fit, dragged to scroll. Tapping a row or a pin records itself. */
 object QuestJournalViewStories : StoryBinding {
     private const val COUNT = "count"
     private const val SCROLL = "scroll"

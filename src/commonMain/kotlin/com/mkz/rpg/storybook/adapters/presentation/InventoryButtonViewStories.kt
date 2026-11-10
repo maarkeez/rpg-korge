@@ -6,7 +6,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
-/** The stories of [InventoryButtonView], at the size the battle unit info displays it. */
 object InventoryButtonViewStories : StoryBinding {
     private val SIZE = Size(40, 40)
 

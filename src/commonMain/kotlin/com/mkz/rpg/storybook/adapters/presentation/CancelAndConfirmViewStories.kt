@@ -7,7 +7,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [CancelAndConfirmView], built with its real [com.mkz.rpg.screen.adapters.presentation.CancelButton] and [com.mkz.rpg.screen.adapters.presentation.ConfirmButton]. */
 object CancelAndConfirmViewStories : StoryBinding {
     private const val CANCEL_LABEL = "cancelLabel"
     private const val CONFIRM_LABEL = "confirmLabel"

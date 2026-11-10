@@ -8,10 +8,6 @@ import korlibs.korge.view.container
 import korlibs.korge.view.position
 import korlibs.korge.view.text
 
-/**
- * The globals, shared by every story, above the story info: the language of the views shown, each language named in
- * its own language, e.g.: `Español`, the one selected highlighted. Tapping another one asks to select it.
- */
 open class ToolbarView : Container() {
     companion object {
         const val HEIGHT = StorybookButton.HEIGHT
@@ -28,7 +24,6 @@ open class ToolbarView : Container() {
     internal val languageLabel: Text = text("Language", textSize = 16.0, color = StoryInfoView.SECONDARY_COLOR).position(0.0, (HEIGHT - 16.0) / 2)
     internal val languages: Container = container().position(LABEL_WIDTH, 0.0)
 
-    // By the code of their language, in the order they are listed.
     internal var languageButtons: Map<String, StorybookButton> = emptyMap()
         private set
 
@@ -36,7 +31,6 @@ open class ToolbarView : Container() {
         this.delegate = delegate
     }
 
-    /** Lists the languages, in their order, highlighting the selected one. */
     open fun display(
         languages: List<LanguageDto>,
         selectedLanguageCode: String,

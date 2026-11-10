@@ -2,7 +2,6 @@ package com.mkz.rpg.storybook.usecases.services
 
 import com.mkz.rpg.storybook.domain.Storybook.Dto.LocationDto
 
-// Asks for the given story, args and globals, and records what is kept, instead of reading and writing a page URL.
 class FakeStoryLocation(
     private val requestedStoryId: String? = null,
     private val requestedArgs: Map<String, String> = emptyMap(),

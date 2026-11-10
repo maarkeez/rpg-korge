@@ -8,11 +8,9 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
-/** The stories of [InventorySlotView], at the size the inventory and the shop display it. */
 object InventorySlotViewStories : StoryBinding {
     private val SIZE = Size(60, 60)
 
-    // The option of the item control for an empty slot, which no lootable item id is.
     private const val NO_ITEM = "none"
     private const val DEFAULT_ITEM = "health-potion"
 

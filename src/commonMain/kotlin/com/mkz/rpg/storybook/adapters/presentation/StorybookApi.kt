@@ -19,17 +19,12 @@ import com.mkz.rpg.storybook.usecases.queries.SearchGlobals
 import com.mkz.rpg.storybook.usecases.queries.SearchSelectedStory
 import com.mkz.rpg.storybook.usecases.services.StoryLocation
 
-/**
- * The Storybook: the views of the game shown in isolation, in each of their states. Location: where what is shown is
- * kept. Story bindings: the components of the catalogue, every story binding unless a test needs fewer.
- */
 class StorybookApi(
     eventBus: EventBus,
     storyLocation: StoryLocation,
     private val storyBindings: List<StoryBinding>,
 ) {
     companion object {
-        /** Every story binding, in the order the sidebar lists them. They are listed by hand, as JS has no reflection. */
         val STORY_BINDINGS: List<StoryBinding> =
             listOf(
                 BarViewStories,
@@ -97,14 +92,11 @@ class StorybookApi(
                 ShopViewStories,
             )
 
-        /** The global choosing the language of the views shown, by its code, e.g.: `es`. */
         const val LANGUAGE_GLOBAL = "language"
     }
 
-    // Storage
     private val storybookRepository: StorybookRepository = InMemoryStorybookRepository()
 
-    // Commands
     val openCatalogue = OpenCatalogue(storybookRepository, storyLocation, eventBus)
     val selectStory = SelectStory(storybookRepository, storyLocation, eventBus)
     val changeArg = ChangeArg(storybookRepository, storyLocation, eventBus)
@@ -113,20 +105,14 @@ class StorybookApi(
     val recordAction = RecordAction(storybookRepository, eventBus)
     val clearActions = ClearActions(storybookRepository, eventBus)
 
-    // Queries
     val searchCatalogue = SearchCatalogue(storybookRepository)
     val searchSelectedStory = SearchSelectedStory(storybookRepository)
     val searchArgs = SearchArgs(storybookRepository)
     val searchGlobals = SearchGlobals(storybookRepository)
     val searchActions = SearchActions(storybookRepository)
 
-    // The binding of each component, by its id, once the catalogue is open.
     private var bindingsByComponentId: Map<String, StoryBinding> = emptyMap()
 
-    /**
-     * Opens the catalogue of the story bindings, on what the location asks for. The language global lists the languages
-     * of the game, English first, which is its default.
-     */
     fun init(context: StoryContext) {
         val components = storyBindings.map { binding -> binding.component(context) }
         bindingsByComponentId = components.map { component -> component.id }.zip(storyBindings).toMap()
@@ -138,6 +124,5 @@ class StorybookApi(
         )
     }
 
-    /** The binding of the component, once the catalogue is open. */
     fun bindingOf(componentId: String): StoryBinding = bindingsByComponentId.getValue(componentId)
 }

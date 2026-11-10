@@ -14,10 +14,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
-/**
- * The stories of [HudView], built with its real children, which display a hero with its abilities, a cast on a
- * goat wizard, and four items. As in the game, tapping the inventory button opens the inventory, and closing it displays the info.
- */
 object HudViewStories : StoryBinding {
     private val SIZE = Size(390, 300)
     private const val UNIT = "hero"
@@ -34,7 +30,6 @@ object HudViewStories : StoryBinding {
 
     private const val DISPLAY = "display"
 
-    /** What the HUD displays. */
     private enum class Display { BATTLE_UNIT_INFO, ATTACK_PREVIEW, INVENTORY, GIVE_GOLD, HIDDEN }
 
     private val battleUnitInfo =
@@ -139,7 +134,6 @@ object HudViewStories : StoryBinding {
                         override fun goldSelected() = context.action("goldSelected")
                     },
                 )
-                // The first lootable items, in alphabetical order, as many times as needed.
                 display(slots = List(ITEMS) { index -> InventoryView.Slot(itemIds[index % itemIds.size], isEquipped = false) }, gold = GOLD)
             }
         val giveGoldView =

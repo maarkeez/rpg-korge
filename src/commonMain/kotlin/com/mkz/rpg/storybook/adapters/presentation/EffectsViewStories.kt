@@ -7,7 +7,6 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [EffectsView], which holds ten icons before it adds a plus sign. */
 object EffectsViewStories : StoryBinding {
     private const val EFFECTS_LIMIT = 15
 
@@ -47,7 +46,6 @@ object EffectsViewStories : StoryBinding {
         context: StoryContext,
     ): View {
         val effectIds = context.effectIds()
-        // The effects with an icon, as many times as needed.
         val effects = List(args.int(EFFECTS)) { index -> effectIds[index % effectIds.size] }
         val newEffects = List(args.int(NEW_EFFECTS)) { index -> effectIds[index % effectIds.size] }
         return EffectsView(context.resourcesLoader).apply { display(effectIds = effects, newEffectIds = newEffects) }

@@ -9,7 +9,6 @@ import korlibs.korge.input.onClick
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
-/** The stories of [GameButton], at the size of the buttons of the inventory, in any color. */
 object GameButtonStories : StoryBinding {
     private val SIZE = Size(120, 32)
 

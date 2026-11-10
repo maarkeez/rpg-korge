@@ -8,13 +8,11 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
-/** The stories of [PreviewBarView], at the size the cast preview displays its bars, in any colors. */
 object PreviewBarViewStories : StoryBinding {
     private val SIZE = Size(281.5, 16)
     private const val MAXIMUM_VALUE = 30
     private const val VALUE_LIMIT = 999
 
-    // The preview is drawn half transparent over the bar, as the bars of the game do.
     private const val PREVIEW_ALPHA = 0x80
 
     private const val BEFORE = "remainingBefore"
