@@ -19,7 +19,6 @@ class RequestQuestRewardTest {
     private val eventBus = FakeEventBus()
     private val requestQuestReward = RequestQuestReward(questRepository, queries.searchParty, queries.searchPosition, eventBus)
 
-    // The first knight stands at row 0 and column 0, and the second one at row 0 and column 1.
     @BeforeTest
     fun setUp() {
         queries.battlefieldRepository.create(battlefield("A B", occupants = mapOf('A' to "knight-1", 'B' to "knight-2")))

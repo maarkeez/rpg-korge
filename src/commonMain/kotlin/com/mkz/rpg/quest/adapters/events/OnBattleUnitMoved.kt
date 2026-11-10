@@ -14,7 +14,6 @@ class OnBattleUnitMoved(
 ) {
     val subscription =
         eventBus.subscribe<BattleUnitMoved> { event ->
-            // A teleport's path is only its destination.
             val path = event.path.map { position -> PositionDto(row = position.row, column = position.column) }
             startMainQuest(battleUnitId = event.battleUnitId, path = path)
             progressVisitTasks(battleUnitId = event.battleUnitId, path = path)

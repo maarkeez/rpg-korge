@@ -4,7 +4,6 @@ import com.mkz.rpg.party.usecases.queries.SearchParty
 import com.mkz.rpg.quest.domain.QuestRepository
 import com.mkz.rpg.quest.usecases.services.PublishQuestProgress
 
-/** Counts a defeated battle unit in the current task of every quest asking for its unit, unless it is of the human player. Without a party, nothing counts. */
 class ProgressDefeatTasks(
     private val questRepository: QuestRepository,
     private val searchParty: SearchParty,

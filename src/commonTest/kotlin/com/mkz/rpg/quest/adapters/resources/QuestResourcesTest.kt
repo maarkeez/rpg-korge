@@ -12,7 +12,6 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
-// The game does not check what a quest names when it starts, so that quest does not depend on those subdomains: this does.
 class QuestResourcesTest {
     private suspend fun quests(): List<Quest.Dto> = ResourcesQuestLoader().also { loader -> loader.initResources() }.loadQuests()
 

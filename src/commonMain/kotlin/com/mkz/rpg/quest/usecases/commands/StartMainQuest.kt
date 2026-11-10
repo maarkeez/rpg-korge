@@ -5,10 +5,6 @@ import com.mkz.rpg.quest.domain.Quest.Dto.PositionDto
 import com.mkz.rpg.quest.domain.QuestRepository
 import com.mkz.rpg.quest.usecases.services.PublishQuestProgress
 
-/**
- * Starts the main quest, when a party member walked or teleported onto one of its start tiles and it has not started. A summon is
- * no party member. Nothing happens once it has started.
- */
 class StartMainQuest(
     private val questRepository: QuestRepository,
     private val searchParty: SearchParty,

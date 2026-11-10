@@ -5,6 +5,5 @@ interface QuestRepository {
 
     fun searchById(id: String): Quest?
 
-    /** Every quest, in the order they were created. */
     fun searchAll(): List<Quest>
 }

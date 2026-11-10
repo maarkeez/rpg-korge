@@ -20,7 +20,6 @@ class CommentArchitectureTest {
             "lootDrop",
             "npc",
             "party",
-            "quest",
             "screen",
             "storybook",
             "worldBuilder",

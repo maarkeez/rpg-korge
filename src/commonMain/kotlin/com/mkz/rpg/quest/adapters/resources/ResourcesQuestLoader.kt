@@ -15,7 +15,6 @@ import com.mkz.rpg.shared.adapters.toml.required
 import korlibs.io.file.VfsFile
 import kotlinx.serialization.Serializable
 
-/** Loads one quest per `quest/<quest id>.toml` resource. */
 class ResourcesQuestLoader(
     private val questRoot: VfsFile = ResourcesBundle.root["quest"],
 ) : QuestLoader {

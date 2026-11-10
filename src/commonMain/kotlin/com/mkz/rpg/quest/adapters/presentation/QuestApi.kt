@@ -33,18 +33,14 @@ class QuestApi(
     eventBus: EventBus,
     private val questLoader: QuestLoader,
 ) {
-    // Storage
     private val questRepository: QuestRepository = InMemoryQuestRepository()
 
-    // Save
     private val searchQuestsSnapshot = SearchQuestsSnapshot(questRepository)
     private val loadQuestsSnapshot = LoadQuestsSnapshot(questRepository)
     val snapshottable: Snapshottable = QuestSnapshottable(searchQuestsSnapshot, loadQuestsSnapshot)
 
-    // Services
     private val publishQuestProgress = PublishQuestProgress(questRepository, eventBus)
 
-    // Commands
     val createQuests = CreateQuests(questLoader, questRepository, battlefieldApi.isTileVacant)
     val startMainQuest = StartMainQuest(questRepository, partyApi.searchParty, publishQuestProgress)
     val progressDefeatTasks = ProgressDefeatTasks(questRepository, partyApi.searchParty, publishQuestProgress)
@@ -54,11 +50,9 @@ class QuestApi(
     val pinQuest = PinQuest(questRepository, publishQuestProgress, eventBus)
     val requestQuestReward = RequestQuestReward(questRepository, partyApi.searchParty, battlefieldApi.searchPosition, eventBus)
 
-    // Queries
     val searchQuests = SearchQuests(questRepository)
     val searchQuestMarkers = SearchQuestMarkers(questRepository)
 
-    // Events
     private val onRequestCreateQuests = OnRequestCreateQuests(createQuests, eventBus)
     private val onBattleUnitDefeated = OnBattleUnitDefeated(progressDefeatTasks, eventBus)
     private val onBattleUnitMoved = OnBattleUnitMoved(startMainQuest, progressVisitTasks, eventBus)

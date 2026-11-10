@@ -10,7 +10,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
-/** How far each quest went, see [SearchQuestsSnapshot] and [LoadQuestsSnapshot]. */
 class QuestSnapshottable(
     private val searchQuestsSnapshot: SearchQuestsSnapshot,
     private val loadQuestsSnapshot: LoadQuestsSnapshot,

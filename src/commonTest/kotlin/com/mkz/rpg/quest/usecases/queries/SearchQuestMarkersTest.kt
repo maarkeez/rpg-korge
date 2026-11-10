@@ -20,7 +20,7 @@ class SearchQuestMarkersTest {
 
     @Test
     fun `SearchQuestMarkers should prefer a talk task when an npc has both`() {
-        // Given: the elder gives a quest, and the main quest asks to talk to it.
+        // Given
         questRepository.save(sideQuest(id = "errand", questGiverNpcId = "elder"))
         questRepository.save(mainQuest(id = "main", tasks = listOf(talk("elder"))).started())
         // When
@@ -42,7 +42,7 @@ class SearchQuestMarkersTest {
 
     @Test
     fun `SearchQuestMarkers should list no npc when nothing asks for it`() {
-        // Given: the farmer's quest is under way, and the talk to the elder is not the current task yet.
+        // Given
         questRepository.save(sideQuest(id = "bats", questGiverNpcId = "farmer").started())
         questRepository.save(mainQuest(id = "main", tasks = listOf(defeat(), talk("elder"))).started())
         // When

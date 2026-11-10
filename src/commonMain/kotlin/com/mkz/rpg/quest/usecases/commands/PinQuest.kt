@@ -9,11 +9,6 @@ import com.mkz.rpg.quest.domain.QuestRepository
 import com.mkz.rpg.quest.usecases.services.PublishQuestProgress
 import com.mkz.rpg.shared.domain.EventBus
 
-/**
- * Makes the quest the pinned quest, unpinning any other, so the tracker shows exactly one. The main quest is the pinned
- * quest when no side quest is pinned, once it has started, so it holds no pin: pinning it, or a quest already pinned, returns to the
- * main quest, or to the empty tracker before it starts.
- */
 class PinQuest(
     private val questRepository: QuestRepository,
     private val publishQuestProgress: PublishQuestProgress,

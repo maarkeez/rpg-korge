@@ -27,7 +27,6 @@ class ProgressVisitTasksTest {
 
     private fun progress() = questRepository.searchById("cross-the-bridge")!!.toDto().progress
 
-    // The first knight leads, the second one follows.
     @BeforeTest
     fun setUp() {
         queries.partyRepository.save(party(battleUnitIds = listOf("knight-1", "knight-2")))

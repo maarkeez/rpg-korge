@@ -4,7 +4,6 @@ import com.mkz.rpg.quest.domain.Quest.Dto.QuestMarkerDto
 import com.mkz.rpg.quest.domain.Quest.Dto.TaskDto
 import com.mkz.rpg.quest.domain.QuestRepository
 
-/** The sign each npc any quest names has right now: one per npc, the talk task winning, as the talk does both. */
 class SearchQuestMarkers(
     private val questRepository: QuestRepository,
 ) {

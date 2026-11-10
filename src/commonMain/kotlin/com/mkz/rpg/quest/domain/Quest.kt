@@ -28,10 +28,6 @@ import com.mkz.rpg.quest.domain.QuestEvent.QuestStarted
 import com.mkz.rpg.quest.domain.QuestEvent.TaskCompleted
 import kotlin.jvm.JvmInline
 
-/**
- * A line of tasks, completed one after the other, ending in a reward granted to the party leader. The game has one main quest, which runs once from when a
- * party member walks or teleports onto one of its start tiles, and any number of side quests, each started by talking to its quest giver.
- */
 @ConsistentCopyVisibility
 data class Quest private constructor(
     private val id: Id,
@@ -45,7 +41,6 @@ data class Quest private constructor(
     private val events: Set<QuestEvent>,
 ) {
     companion object {
-        /** Creates a quest that has not started, on its first task. Fails when it could never run: e.g.: it has no tasks, or grants nothing. */
         fun create(dto: Dto): Quest {
             if (dto.type == QuestTypeDto.MAIN && dto.questGiverNpcId != null) throw MainQuestWithQuestGiver()
             if (dto.type == QuestTypeDto.MAIN && dto.repeatable) throw MainQuestRepeatable()
@@ -68,13 +63,10 @@ data class Quest private constructor(
 
     fun pullEvents() = events to copy(events = emptySet())
 
-    /** Whether talking to the npc starts it: it is a side quest of that quest giver, not started, or completed and repeatable. */
     fun canBeStartedBy(npcId: String): Boolean = questGiverNpcId?.value == npcId && (progress.status == StatusDto.NOT_STARTED || (progress.status == StatusDto.COMPLETED && repeatable))
 
-    /** Whether a party member walking or teleporting onto the tiles starts it: it is the main quest, not started, and one of the tiles is a start tile. */
     fun canBeStartedOn(tiles: List<PositionDto>): Boolean = type == QuestTypeDto.MAIN && progress.status == StatusDto.NOT_STARTED && tiles.any(startTiles::contains)
 
-    /** The sign the npc has because of this quest: a talk task when its current task is to talk to it, a quest to start when it can start it, or none. */
     fun markerFor(npcId: String): QuestMarkerDto? =
         when {
             progress.status == StatusDto.ACTIVE && (currentTask() as? Task.Talk)?.npcId == npcId -> QuestMarkerDto(npcId = npcId, sign = QuestMarkerDto.SignDto.TALK_TASK)
@@ -82,14 +74,12 @@ data class Quest private constructor(
             else -> null
         }
 
-    /** Starts it from its first task. */
     fun start(): Quest =
         copy(
             progress = Progress(status = StatusDto.ACTIVE, currentTaskIndex = 0, currentTaskDefeats = 0, isPinned = false),
             events = events + QuestStarted(questId = id.value),
         )
 
-    /** Counts a defeated battle unit of the unit, when the current task asks for it. Only events from when a task became the current one count. */
     fun defeated(unitId: String): Quest {
         val task = currentTask() as? Task.Defeat
         if (progress.status != StatusDto.ACTIVE || task?.unitId != unitId) return this
@@ -102,21 +92,18 @@ data class Quest private constructor(
         return if (defeats >= task.requiredDefeats) progressedQuest.completeCurrentTask() else progressedQuest
     }
 
-    /** Completes the current task, when it is a visit task of any of the tiles. */
     fun visited(tiles: List<PositionDto>): Quest {
         val task = currentTask() as? Task.Visit
         if (progress.status != StatusDto.ACTIVE || task == null || tiles.none(task.tiles::contains)) return this
         return completeCurrentTask()
     }
 
-    /** Completes the current task, when it asks to talk to the npc. */
     fun talkedTo(npcId: String): Quest {
         val task = currentTask() as? Task.Talk
         if (progress.status != StatusDto.ACTIVE || task?.npcId != npcId) return this
         return completeCurrentTask()
     }
 
-    /** Goes back to not started, with its progress reset, so its quest giver can start it again even when it is not repeatable. Only an active side quest can be abandoned. */
     fun abandon(): Quest {
         if (type == QuestTypeDto.MAIN) throw MainQuestCanNotBeAbandoned()
         if (progress.status != StatusDto.ACTIVE) throw QuestNotActive()
@@ -126,16 +113,13 @@ data class Quest private constructor(
         )
     }
 
-    /** Makes it the pinned quest, the one the tracker shows. Only an active quest can be pinned. */
     fun pin(): Quest {
         if (progress.status != StatusDto.ACTIVE) throw QuestNotActive()
         return copy(progress = progress.copy(isPinned = true), events = events + QuestPinned(questId = id.value))
     }
 
-    /** It is no longer the pinned quest, e.g.: as another quest is pinned. */
     fun unpin(): Quest = copy(progress = progress.copy(isPinned = false))
 
-    /** Moves on to the next task, or completes the quest after the last one. */
     private fun completeCurrentTask(): Quest {
         val taskCompleted = TaskCompleted(questId = id.value, taskIndex = progress.currentTaskIndex)
         return if (progress.currentTaskIndex == tasks.value.lastIndex) {
@@ -147,7 +131,6 @@ data class Quest private constructor(
 
     private fun currentTask(): Task = tasks.value[progress.currentTaskIndex]
 
-    /** Puts back how far it went when the game was saved, publishing no events. */
     fun loadProgress(progress: ProgressDto): Quest {
         require(progress.currentTaskIndex in tasks.value.indices) { "Quest ${id.value} has no task ${progress.currentTaskIndex}" }
         return copy(progress = Progress(status = progress.status, currentTaskIndex = progress.currentTaskIndex, currentTaskDefeats = progress.currentTaskDefeats, isPinned = progress.isPinned))
@@ -245,7 +228,6 @@ data class Quest private constructor(
         val isPinned: Boolean,
     )
 
-    /** Progress: where it is in its life, which the save keeps. The rest is read from the resources. */
     data class Dto(
         val id: String,
         val type: QuestTypeDto,
@@ -261,7 +243,6 @@ data class Quest private constructor(
             SIDE,
         }
 
-        /** The sign over the npc's head. */
         data class QuestMarkerDto(
             val npcId: String,
             val sign: SignDto,
@@ -295,18 +276,15 @@ data class Quest private constructor(
                 VISIT,
             }
 
-            /** Defeat [requiredDefeats] battle units of the unit, of the CPU player. */
             data class DefeatDto(
                 val unitId: String,
                 val requiredDefeats: Int,
             )
 
-            /** Finish talking to the npc. */
             data class TalkDto(
                 val npcId: String,
             )
 
-            /** Walk or teleport onto any of the tiles with any party member. */
             data class VisitDto(
                 val tiles: List<PositionDto>,
             )
