@@ -14,21 +14,16 @@ class TerrainApi(
     eventBus: EventBus,
     terrainLoader: TerrainLoader,
 ) {
-    // Storage
     private val terrainRepository: TerrainRepository = InMemoryTerrainRepository()
 
-    // Services
     private val terrainLoader = terrainLoader
 
-    // Commands
     val initialiseTerrains = InitialiseTerrains(terrainLoader, terrainRepository, eventBus)
 
-    // Queries
     val searchTerrainById = SearchTerrainById(terrainRepository)
     val hasTerrainTransition = HasTerrainTransition(terrainRepository)
     val searchTerrains = SearchTerrains(terrainRepository)
 
-    // Events
     private val onRequestInitialiseTerrains = OnRequestInitialiseTerrains(initialiseTerrains, eventBus)
 
     suspend fun init() {

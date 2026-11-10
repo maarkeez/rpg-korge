@@ -31,7 +31,6 @@ class CommentArchitectureTest {
             "quest",
             "screen",
             "storybook",
-            "terrain",
             "unit",
             "worldBuilder",
         )
