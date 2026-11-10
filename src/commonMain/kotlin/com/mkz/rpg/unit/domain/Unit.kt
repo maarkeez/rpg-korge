@@ -18,7 +18,6 @@ data class Unit private constructor(
     companion object {
         private const val MAXIMUM_ABILITIES = 6
 
-        /** The most abilities a unit, and each of its battle units, knows: one per button of the ability bar. The same for every unit. */
         fun maximumAbilities(): Int = MAXIMUM_ABILITIES
 
         fun create(unitDto: Dto): Unit =
@@ -69,8 +68,6 @@ data class Unit private constructor(
         val value: Int,
     )
 
-    // The gold each battle unit of the unit carries once deployed. Its cap belongs to the inventory, checked against the unit resources by
-    // InventoryUnitResourcesTest.
     @JvmInline private value class StartingGold(
         val value: Int,
     ) {

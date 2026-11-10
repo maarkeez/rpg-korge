@@ -15,18 +15,14 @@ class UnitApi(
     eventBus: EventBus,
     private val unitLoader: UnitLoader,
 ) {
-    // Storage
     private val unitRepository: UnitRepository = InMemoryUnitRepository()
 
-    // Commands
     val requestUnitCreation = RequestUnitCreation(unitRepository, eventBus)
     val initialiseUnits = InitialiseUnits(unitLoader, unitRepository, eventBus)
 
-    // Queries
     val searchUnitById: SearchUnitById = SearchUnitById(unitRepository)
     val searchMaximumAbilities: SearchMaximumAbilities = SearchMaximumAbilities()
 
-    // Events
     private val onRequestUnitCreation = OnRequestUnitCreation(requestUnitCreation, eventBus)
     private val onRequestInitialiseUnits = OnRequestInitialiseUnits(initialiseUnits, eventBus)
 

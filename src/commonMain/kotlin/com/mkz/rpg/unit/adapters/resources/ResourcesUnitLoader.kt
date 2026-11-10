@@ -8,7 +8,6 @@ import com.mkz.rpg.unit.usecases.services.UnitLoader
 import korlibs.io.file.VfsFile
 import kotlinx.serialization.Serializable
 
-/** Loads one unit per `unit/<unit id>.toml` resource. Starting gold: 0 when it has none. */
 class ResourcesUnitLoader(
     private val unitRoot: VfsFile = ResourcesBundle.root["unit"],
 ) : UnitLoader {

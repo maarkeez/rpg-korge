@@ -6,7 +6,6 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
-// The units are only created when the game starts: this catches a unit resource it would refuse in CI, e.g.: one with more than 6 starting abilities.
 class UnitResourcesTest {
     @Test
     fun `should load every unit in the unit resources`() =
