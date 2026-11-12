@@ -85,6 +85,8 @@ class StorybookApi(
                 QuestAnnouncementViewStories,
                 QuestMarkerViewStories,
                 MenuViewStories,
+                ConsentViewStories,
+                PrivacyNoticeViewStories,
                 WorldBuilderInfoViewStories,
                 WorldBuilderHudViewStories,
                 WorldBuilderCallToActionViewStories,

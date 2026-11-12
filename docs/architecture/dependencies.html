@@ -226,9 +226,9 @@ const DATA = {
     {"name": "player", "files": 15, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 34, "importsOut": 12},
     {"name": "quest", "files": 28, "fanIn": 3, "fanOut": 5, "instability": 0.63, "importsIn": 22, "importsOut": 35},
     {"name": "save", "files": 11, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 12, "importsOut": 8},
-    {"name": "screen", "files": 108, "fanIn": 1, "fanOut": 24, "instability": 0.96, "importsIn": 115, "importsOut": 282},
-    {"name": "shared", "files": 14, "fanIn": 25, "fanOut": 0, "instability": 0.0, "importsIn": 530, "importsOut": 0},
-    {"name": "storybook", "files": 106, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 133},
+    {"name": "screen", "files": 110, "fanIn": 1, "fanOut": 24, "instability": 0.96, "importsIn": 117, "importsOut": 286},
+    {"name": "shared", "files": 14, "fanIn": 25, "fanOut": 0, "instability": 0.0, "importsIn": 534, "importsOut": 0},
+    {"name": "storybook", "files": 108, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 135},
     {"name": "telemetry", "files": 41, "fanIn": 2, "fanOut": 5, "instability": 0.71, "importsIn": 7, "importsOut": 41},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 15, "importsOut": 7},
     {"name": "unit", "files": 14, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 17, "importsOut": 11},
@@ -1374,7 +1374,7 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "save.domain.SaveEvent.GameLoaded"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/SaveSlotsMapper.kt", "layer": "adapters", "name": "save.domain.Save"}
     ]},
-    {"from": "screen", "to": "shared", "weight": 66, "files": 40, "imports": [
+    {"from": "screen", "to": "shared", "weight": 70, "files": 42, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BannerPresenter.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BannerPresenter.kt", "layer": "adapters", "name": "shared.domain.Subscription"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BannerPresenter.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
@@ -1385,6 +1385,8 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ButtonRowView.kt", "layer": "adapters", "name": "shared.adapters.presentation.GameButton"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ButtonRowView.kt", "layer": "adapters", "name": "shared.adapters.presentation.gameButton"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/ConsentView.kt", "layer": "adapters", "name": "shared.adapters.presentation.GameButton"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/ConsentView.kt", "layer": "adapters", "name": "shared.adapters.presentation.gameButton"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/EffectView.kt", "layer": "adapters", "name": "shared.adapters.presentation.blink"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt", "layer": "adapters", "name": "shared.domain.Subscription"},
@@ -1415,6 +1417,8 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/ManaBarView.kt", "layer": "adapters", "name": "shared.adapters.presentation.BarView"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/MenuScene.kt", "layer": "adapters", "name": "shared.adapters.events.InMemoryEventBus"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/PausePresenter.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/PrivacyNoticeView.kt", "layer": "adapters", "name": "shared.adapters.presentation.GameButton"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/PrivacyNoticeView.kt", "layer": "adapters", "name": "shared.adapters.presentation.gameButton"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "shared.domain.Subscription"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
@@ -1474,7 +1478,7 @@ const DATA = {
       {"file": "com/mkz/rpg/storybook/adapters/presentation/StorybookScene.kt", "layer": "adapters", "name": "localization.adapters.presentation.LocalizationApi"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/ToolbarView.kt", "layer": "adapters", "name": "localization.domain.Localization.Dto.LanguageDto"}
     ]},
-    {"from": "storybook", "to": "screen", "weight": 115, "files": 64, "imports": [
+    {"from": "storybook", "to": "screen", "weight": 117, "files": 66, "imports": [
       {"file": "com/mkz/rpg/storybook/adapters/presentation/AbilityButtonViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.AbilityButtonView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/AbilityInfoViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.AbilityInfoView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/AbilityInfoViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.AbilityInfoView.AbilityInfo"},
@@ -1508,6 +1512,7 @@ const DATA = {
       {"file": "com/mkz/rpg/storybook/adapters/presentation/ConfirmButtonStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.ConfirmButton"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/ConfirmDialogViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.ConfirmDialogView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/ConfirmDialogViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.UiMessage"},
+      {"file": "com/mkz/rpg/storybook/adapters/presentation/ConsentViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.ConsentView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/DiscardQuestionViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.DiscardQuestionView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/EffectViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.EffectView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/EffectsViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.EffectsView"},
@@ -1544,6 +1549,7 @@ const DATA = {
       {"file": "com/mkz/rpg/storybook/adapters/presentation/PauseViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.PauseView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/PillViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.PillView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/PointsViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.PointsView"},
+      {"file": "com/mkz/rpg/storybook/adapters/presentation/PrivacyNoticeViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.PrivacyNoticeView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/QuestAnnouncementViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.QuestAnnouncementView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/QuestAnnouncementViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.QuestAnnouncementView.Moment"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/QuestDetailViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.QuestDetailView"},
