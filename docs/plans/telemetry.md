@@ -60,7 +60,7 @@ Each milestone is a few commits straight on `main`, green on CI, except M1, whic
 |----|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|--------|----------|
 | M1 | Consent prototypes  | The three consent dialogs can be tapped through in the Storybook on `prototype/telemetry-consent`, and one is chosen.                               | ✅      | 9a43e6b2 |
 | M2 | Product events      | Every product event reaches the `Telemetry` aggregate and is dropped, as no consent can be given yet, with the architecture tests green.            | ✅      | 51728acd |
-| M3 | Game id             | A new game makes a game id, the saves keep it, and a loaded save without one gets a new one. `SAVE_VERSION` is 10.                                  | ⬜      |          |
+| M3 | Game id             | A new game makes a game id, the saves keep it, and a loaded save without one gets a new one. `SAVE_VERSION` is 10.                                  | ✅      | b745977b |
 | M4 | Consent and Privacy | The chosen dialog asks at the first launch, Privacy changes the choice, Read more shows the notice, and with consent product events reach `create`. | ⬜      |          |
 
 ### M1 commits
@@ -261,3 +261,8 @@ Each milestone is a few commits straight on `main`, green on CI, except M1, whic
 - M2: `telemetry` is listed as not saved in `SnapshotCoverageArchitectureTest` until `TelemetrySnapshottable` in M3.
 - M2: `WorldBuilderScene` does not listen, as nothing there is a product event: it only hands the `TelemetryApi` back to
   `MenuScene`.
+- M3: `TelemetrySnapshottable`, `SearchTelemetrySnapshot` and `LoadTelemetrySnapshot` come with the game id, in the first
+  commit; the second only adds the snapshottable to the `GameScene`'s `SaveApi`, with `SAVE_VERSION` 10.
+- M3: a game id is only made with consent: `startGame` and `gameLoaded` change nothing without it, so the save of a game
+  played without consent holds `{"gameId":null}`. A save's game id is loaded with `loadGameId`.
+- M3: `StartGame` and `RecordGameLoaded` take a `newGameId` from `TelemetryApi`, which makes every id.
