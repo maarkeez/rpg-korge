@@ -1,6 +1,7 @@
 package com.mkz.rpg.telemetry.adapters.presentation
 
 import com.mkz.rpg.shared.domain.EventBus
+import com.mkz.rpg.shared.domain.Snapshottable
 import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.telemetry.adapters.events.OnBattleFinished
 import com.mkz.rpg.telemetry.adapters.events.OnBattleStarted
@@ -15,10 +16,12 @@ import com.mkz.rpg.telemetry.adapters.events.OnRequestRecordGameLoaded
 import com.mkz.rpg.telemetry.adapters.events.OnRequestRecordGameSaved
 import com.mkz.rpg.telemetry.adapters.events.OnRequestRecordMainMenuOpened
 import com.mkz.rpg.telemetry.adapters.events.OnRequestStartGame
+import com.mkz.rpg.telemetry.adapters.save.TelemetrySnapshottable
 import com.mkz.rpg.telemetry.adapters.storage.FacadeTelemetryRepository
 import com.mkz.rpg.telemetry.adapters.storage.NativeStorageTelemetryRepository
 import com.mkz.rpg.telemetry.adapters.storage.RemoteTelemetryRepository
 import com.mkz.rpg.telemetry.domain.TelemetryRepository
+import com.mkz.rpg.telemetry.usecases.commands.LoadTelemetrySnapshot
 import com.mkz.rpg.telemetry.usecases.commands.RecordBattleFinished
 import com.mkz.rpg.telemetry.usecases.commands.RecordBattleStarted
 import com.mkz.rpg.telemetry.usecases.commands.RecordGameLoaded
@@ -33,6 +36,7 @@ import com.mkz.rpg.telemetry.usecases.commands.RecordQuestCompleted
 import com.mkz.rpg.telemetry.usecases.commands.RecordQuestStarted
 import com.mkz.rpg.telemetry.usecases.commands.StartGame
 import com.mkz.rpg.telemetry.usecases.commands.StartSession
+import com.mkz.rpg.telemetry.usecases.queries.SearchTelemetrySnapshot
 import com.mkz.rpg.telemetry.usecases.services.RecordProductEvent
 import korlibs.korge.service.storage.IStorage
 import kotlin.random.Random
@@ -54,8 +58,8 @@ class TelemetryApi(
 
     private val startSession = StartSession(telemetryRepository)
     private val recordMainMenuOpened = RecordMainMenuOpened(recordProductEvent)
-    private val startGame = StartGame(recordProductEvent)
-    private val recordGameLoaded = RecordGameLoaded(recordProductEvent)
+    private val startGame = StartGame(recordProductEvent, ::newId)
+    private val recordGameLoaded = RecordGameLoaded(recordProductEvent, ::newId)
     private val recordGameSaved = RecordGameSaved(recordProductEvent)
     private val recordQuestStarted = RecordQuestStarted(recordProductEvent)
     private val recordQuestCompleted = RecordQuestCompleted(recordProductEvent)
@@ -66,6 +70,8 @@ class TelemetryApi(
     private val recordItemBought = RecordItemBought(recordProductEvent)
     private val recordItemSold = RecordItemSold(recordProductEvent)
     private val recordMemberRecruited = RecordMemberRecruited(recordProductEvent)
+
+    val snapshottable: Snapshottable = TelemetrySnapshottable(SearchTelemetrySnapshot(telemetryRepository), LoadTelemetrySnapshot(telemetryRepository))
 
     init {
         startSession(newId())

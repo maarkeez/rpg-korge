@@ -9,6 +9,7 @@ data class Telemetry private constructor(
     private val consent: Consent,
     private val installId: InstallId?,
     private val sessionId: SessionId?,
+    private val gameId: GameId?,
     private val productEvents: List<ProductEvent>,
 ) {
     companion object {
@@ -23,6 +24,7 @@ data class Telemetry private constructor(
                 consent = Consent(status = ConsentStatusDto.NOT_ASKED, noticeVersion = null, decidedAt = null),
                 installId = null,
                 sessionId = null,
+                gameId = null,
                 productEvents = emptyList(),
             )
 
@@ -31,6 +33,7 @@ data class Telemetry private constructor(
                 consent = Consent(status = dto.consent.status, noticeVersion = dto.consent.noticeVersion, decidedAt = dto.consent.decidedAt),
                 installId = dto.installId?.let(::InstallId),
                 sessionId = dto.sessionId?.let(::SessionId),
+                gameId = dto.gameId?.let(::GameId),
                 productEvents = emptyList(),
             )
     }
@@ -40,6 +43,7 @@ data class Telemetry private constructor(
             consent = Dto.ConsentDto(status = consent.status, noticeVersion = consent.noticeVersion, decidedAt = consent.decidedAt),
             installId = installId?.value,
             sessionId = sessionId?.value,
+            gameId = gameId?.value,
         )
 
     fun startSession(sessionId: String): Telemetry = copy(sessionId = SessionId(sessionId))
@@ -57,6 +61,7 @@ data class Telemetry private constructor(
         copy(
             consent = Consent(status = ConsentStatusDto.DECLINED, noticeVersion = PRIVACY_NOTICE_VERSION, decidedAt = decidedAt),
             installId = null,
+            gameId = null,
         )
 
     fun isConsentAsked(now: Double): Boolean =
@@ -67,14 +72,26 @@ data class Telemetry private constructor(
             else -> false
         }
 
-    fun mainMenuOpened(occurredAt: Double): Telemetry = record(NameDto.MAIN_MENU_OPENED, occurredAt)
+    fun loadGameId(gameId: String?): Telemetry = copy(gameId = gameId?.let(::GameId))
 
-    fun startGame(occurredAt: Double): Telemetry = record(NameDto.GAME_STARTED, occurredAt)
+    fun mainMenuOpened(occurredAt: Double): Telemetry = copy(gameId = null).record(NameDto.MAIN_MENU_OPENED, occurredAt)
+
+    fun startGame(
+        gameId: String,
+        occurredAt: Double,
+    ): Telemetry {
+        if (!isConsentGiven()) return this
+        return copy(gameId = GameId(gameId)).record(NameDto.GAME_STARTED, occurredAt)
+    }
 
     fun gameLoaded(
         slot: Int,
+        newGameId: String,
         occurredAt: Double,
-    ): Telemetry = record(NameDto.GAME_LOADED, occurredAt, Details(slot = slot))
+    ): Telemetry {
+        if (!isConsentGiven()) return this
+        return copy(gameId = gameId ?: GameId(newGameId)).record(NameDto.GAME_LOADED, occurredAt, Details(slot = slot))
+    }
 
     fun gameSaved(
         slot: Int,
@@ -129,7 +146,7 @@ data class Telemetry private constructor(
         val installId = installId ?: return this
         val sessionId = sessionId ?: return this
         if (!isConsentGiven()) return this
-        return copy(productEvents = productEvents + ProductEvent(name, installId, sessionId, occurredAt, details))
+        return copy(productEvents = productEvents + ProductEvent(name, installId, sessionId, gameId, occurredAt, details))
     }
 
     private fun isConsentGiven() = consent.status == ConsentStatusDto.GIVEN && consent.noticeVersion == PRIVACY_NOTICE_VERSION
@@ -148,6 +165,10 @@ data class Telemetry private constructor(
         val value: String,
     )
 
+    @JvmInline private value class GameId(
+        val value: String,
+    )
+
     private data class Details(
         val questId: String? = null,
         val slot: Int? = null,
@@ -160,6 +181,7 @@ data class Telemetry private constructor(
         val name: NameDto,
         val installId: InstallId,
         val sessionId: SessionId,
+        val gameId: GameId?,
         val occurredAt: Double,
         val details: Details,
     ) {
@@ -168,6 +190,7 @@ data class Telemetry private constructor(
                 name = name,
                 installId = installId.value,
                 sessionId = sessionId.value,
+                gameId = gameId?.value,
                 occurredAt = occurredAt,
                 questId = details.questId,
                 slot = details.slot,
@@ -181,6 +204,7 @@ data class Telemetry private constructor(
         val consent: ConsentDto,
         val installId: String?,
         val sessionId: String?,
+        val gameId: String?,
     ) {
         data class ConsentDto(
             val status: ConsentStatusDto,
@@ -198,6 +222,7 @@ data class Telemetry private constructor(
             val name: NameDto,
             val installId: String,
             val sessionId: String,
+            val gameId: String?,
             val occurredAt: Double,
             val questId: String?,
             val slot: Int?,

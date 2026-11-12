@@ -16,13 +16,14 @@ class TelemetryTest {
     @Test
     fun `Telemetry should add a product event stamped with every id when consent is given`() {
         // When
-        val (productEvents, _) = consented().questCompleted(questId = "bats-in-the-meadow", occurredAt = 1_000.0).pullProductEvents()
+        val (productEvents, _) = consented().loadGameId("g1").questCompleted(questId = "bats-in-the-meadow", occurredAt = 1_000.0).pullProductEvents()
         // Then
         productEvents.shouldContainExactly(
             ProductEventDto(
                 name = NameDto.QUEST_COMPLETED,
                 installId = "i1",
                 sessionId = "s1",
+                gameId = "g1",
                 occurredAt = 1_000.0,
                 questId = "bats-in-the-meadow",
                 slot = null,
@@ -39,7 +40,7 @@ class TelemetryTest {
         val (productEvents, _) =
             consented()
                 .mainMenuOpened(occurredAt = 1.0)
-                .startGame(occurredAt = 2.0)
+                .startGame(gameId = "g1", occurredAt = 2.0)
                 .itemBought(lootableItemId = "health_potion", price = 10, occurredAt = 3.0)
                 .itemSold(lootableItemId = "dagger", sellPrice = 4, occurredAt = 4.0)
                 .gameSaved(slot = 1, occurredAt = 5.0)
@@ -155,5 +156,48 @@ class TelemetryTest {
         val telemetry = Telemetry.read(dto)
         // Then
         telemetry.toDto() shouldBe dto
+    }
+
+    @Test
+    fun `Telemetry should make the game id of a new game when consent is given`() {
+        // When
+        val (productEvents, telemetry) = consented().startGame(gameId = "g1", occurredAt = 1.0).pullProductEvents()
+        // Then
+        productEvents.single().gameId shouldBe "g1"
+        telemetry.toDto().gameId shouldBe "g1"
+    }
+
+    @Test
+    fun `Telemetry should make no game id when consent is not given`() {
+        // When
+        val telemetry = Telemetry.notAsked().startSession("s1").startGame(gameId = "g1", occurredAt = 1.0)
+        // Then
+        telemetry.toDto().gameId.shouldBeNull()
+    }
+
+    @Test
+    fun `Telemetry should keep the game id of the save when a game is loaded`() {
+        // When
+        val (productEvents, _) = consented().loadGameId("g1").gameLoaded(slot = 1, newGameId = "g2", occurredAt = 1.0).pullProductEvents()
+        // Then
+        productEvents.single().gameId shouldBe "g1"
+    }
+
+    @Test
+    fun `Telemetry should take the new game id when the loaded save has none`() {
+        // When
+        val (productEvents, telemetry) = consented().loadGameId(null).gameLoaded(slot = 1, newGameId = "g2", occurredAt = 1.0).pullProductEvents()
+        // Then
+        productEvents.single().gameId shouldBe "g2"
+        telemetry.toDto().gameId shouldBe "g2"
+    }
+
+    @Test
+    fun `Telemetry should forget the game id when the main menu is opened`() {
+        // When
+        val (productEvents, telemetry) = consented().startGame(gameId = "g1", occurredAt = 1.0).mainMenuOpened(occurredAt = 2.0).pullProductEvents()
+        // Then
+        productEvents.last().gameId.shouldBeNull()
+        telemetry.toDto().gameId.shouldBeNull()
     }
 }

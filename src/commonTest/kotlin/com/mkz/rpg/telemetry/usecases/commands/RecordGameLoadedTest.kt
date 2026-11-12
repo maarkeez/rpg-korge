@@ -14,11 +14,12 @@ class RecordGameLoadedTest {
         // Given
         val telemetryRepository = FakeTelemetryRepository(FakeTelemetryRepository.consented())
         // When
-        RecordGameLoaded(RecordProductEvent(telemetryRepository) { 1_000.0 })(slot = 2)
+        RecordGameLoaded(RecordProductEvent(telemetryRepository) { 1_000.0 }) { "g2" }(slot = 2)
         // Then
         val productEvent = telemetryRepository.created.shouldHaveSize(1).single()
         productEvent.name shouldBe NameDto.GAME_LOADED
         productEvent.occurredAt shouldBe 1_000.0
+        productEvent.gameId shouldBe "g2"
         productEvent.slot shouldBe 2
     }
 
@@ -27,7 +28,7 @@ class RecordGameLoadedTest {
         // Given
         val telemetryRepository = FakeTelemetryRepository(FakeTelemetryRepository.consented().declineConsent(decidedAt = 0.0))
         // When
-        RecordGameLoaded(RecordProductEvent(telemetryRepository) { 1_000.0 })(slot = 2)
+        RecordGameLoaded(RecordProductEvent(telemetryRepository) { 1_000.0 }) { "g2" }(slot = 2)
         // Then
         telemetryRepository.created.shouldBeEmpty()
     }

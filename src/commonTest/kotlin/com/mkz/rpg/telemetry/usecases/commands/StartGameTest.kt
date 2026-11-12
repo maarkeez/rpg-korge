@@ -10,15 +10,16 @@ import kotlin.test.Test
 
 class StartGameTest {
     @Test
-    fun `StartGame should create a game started product event when consent is given`() {
+    fun `StartGame should make a game id and create a game started product event when consent is given`() {
         // Given
         val telemetryRepository = FakeTelemetryRepository(FakeTelemetryRepository.consented())
         // When
-        StartGame(RecordProductEvent(telemetryRepository) { 1_000.0 })()
+        StartGame(RecordProductEvent(telemetryRepository) { 1_000.0 }) { "g2" }()
         // Then
         val productEvent = telemetryRepository.created.shouldHaveSize(1).single()
         productEvent.name shouldBe NameDto.GAME_STARTED
         productEvent.occurredAt shouldBe 1_000.0
+        productEvent.gameId shouldBe "g2"
     }
 
     @Test
@@ -26,7 +27,7 @@ class StartGameTest {
         // Given
         val telemetryRepository = FakeTelemetryRepository(FakeTelemetryRepository.consented().declineConsent(decidedAt = 0.0))
         // When
-        StartGame(RecordProductEvent(telemetryRepository) { 1_000.0 })()
+        StartGame(RecordProductEvent(telemetryRepository) { 1_000.0 }) { "g2" }()
         // Then
         telemetryRepository.created.shouldBeEmpty()
     }

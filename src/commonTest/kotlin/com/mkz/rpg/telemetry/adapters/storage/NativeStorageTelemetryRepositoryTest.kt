@@ -26,14 +26,15 @@ class NativeStorageTelemetryRepositoryTest {
     }
 
     @Test
-    fun `NativeStorageTelemetryRepository should keep the session id in memory only`() {
+    fun `NativeStorageTelemetryRepository should keep the session id and the game id in memory only`() {
         // Given
-        repository.save(Telemetry.notAsked().startSession("s1"))
+        repository.save(consented.startGame(gameId = "g1", occurredAt = 1.0))
         // When
         val found = repository.search()
         // Then
         found.shouldNotBeNull().toDto().sessionId shouldBe "s1"
-        storage.toMap().values.none { value -> value?.contains("s1") == true } shouldBe true
+        found.toDto().gameId shouldBe "g1"
+        storage.toMap().values.none { value -> value?.contains("s1") == true || value?.contains("g1") == true } shouldBe true
     }
 
     @Test

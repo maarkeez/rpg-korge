@@ -19,7 +19,18 @@ class FacadeTelemetryRepositoryTest {
     fun `FacadeTelemetryRepository should send product events to the remote repository`() {
         // Given
         val productEvent =
-            ProductEventDto(name = NameDto.GAME_OVER, installId = "i1", sessionId = "s1", occurredAt = 1.0, questId = null, slot = null, lootableItemId = null, price = null, unitId = null)
+            ProductEventDto(
+                name = NameDto.GAME_OVER,
+                installId = "i1",
+                sessionId = "s1",
+                gameId = "g1",
+                occurredAt = 1.0,
+                questId = null,
+                slot = null,
+                lootableItemId = null,
+                price = null,
+                unitId = null,
+            )
         // When
         repository.create(productEvent)
         // Then

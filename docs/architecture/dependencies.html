@@ -227,9 +227,9 @@ const DATA = {
     {"name": "quest", "files": 28, "fanIn": 3, "fanOut": 5, "instability": 0.63, "importsIn": 22, "importsOut": 35},
     {"name": "save", "files": 11, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 12, "importsOut": 8},
     {"name": "screen", "files": 108, "fanIn": 1, "fanOut": 24, "instability": 0.96, "importsIn": 115, "importsOut": 282},
-    {"name": "shared", "files": 14, "fanIn": 25, "fanOut": 0, "instability": 0.0, "importsIn": 527, "importsOut": 0},
+    {"name": "shared", "files": 14, "fanIn": 25, "fanOut": 0, "instability": 0.0, "importsIn": 530, "importsOut": 0},
     {"name": "storybook", "files": 106, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 133},
-    {"name": "telemetry", "files": 35, "fanIn": 2, "fanOut": 5, "instability": 0.71, "importsIn": 7, "importsOut": 38},
+    {"name": "telemetry", "files": 38, "fanIn": 2, "fanOut": 5, "instability": 0.71, "importsIn": 7, "importsOut": 41},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 15, "importsOut": 7},
     {"name": "unit", "files": 14, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 17, "importsOut": 11},
     {"name": "worldBuilder", "files": 13, "fanIn": 1, "fanOut": 3, "instability": 0.75, "importsIn": 5, "importsOut": 15}
@@ -1626,7 +1626,7 @@ const DATA = {
       {"file": "com/mkz/rpg/telemetry/adapters/events/OnQuestCompleted.kt", "layer": "adapters", "name": "quest.domain.QuestEvent.QuestCompleted"},
       {"file": "com/mkz/rpg/telemetry/adapters/events/OnQuestStarted.kt", "layer": "adapters", "name": "quest.domain.QuestEvent.QuestStarted"}
     ]},
-    {"from": "telemetry", "to": "shared", "weight": 29, "files": 15, "imports": [
+    {"from": "telemetry", "to": "shared", "weight": 32, "files": 16, "imports": [
       {"file": "com/mkz/rpg/telemetry/adapters/events/OnBattleFinished.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/telemetry/adapters/events/OnBattleFinished.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/telemetry/adapters/events/OnBattleStarted.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
@@ -1654,7 +1654,10 @@ const DATA = {
       {"file": "com/mkz/rpg/telemetry/adapters/events/OnRequestStartGame.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/telemetry/adapters/events/OnRequestStartGame.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/telemetry/adapters/presentation/TelemetryApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/telemetry/adapters/presentation/TelemetryApi.kt", "layer": "adapters", "name": "shared.domain.Snapshottable"},
       {"file": "com/mkz/rpg/telemetry/adapters/presentation/TelemetryApi.kt", "layer": "adapters", "name": "shared.domain.Subscription"},
+      {"file": "com/mkz/rpg/telemetry/adapters/save/TelemetrySnapshottable.kt", "layer": "adapters", "name": "shared.adapters.save.SnapshotJson"},
+      {"file": "com/mkz/rpg/telemetry/adapters/save/TelemetrySnapshottable.kt", "layer": "adapters", "name": "shared.domain.Snapshottable"},
       {"file": "com/mkz/rpg/telemetry/domain/TelemetryEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"}
     ]},
     {"from": "terrain", "to": "shared", "weight": 7, "files": 5, "imports": [
