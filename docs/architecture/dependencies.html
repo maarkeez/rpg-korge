@@ -227,8 +227,9 @@ const DATA = {
     {"name": "quest", "files": 28, "fanIn": 2, "fanOut": 5, "instability": 0.71, "importsIn": 19, "importsOut": 35},
     {"name": "save", "files": 11, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 12, "importsOut": 8},
     {"name": "screen", "files": 108, "fanIn": 1, "fanOut": 23, "instability": 0.96, "importsIn": 115, "importsOut": 275},
-    {"name": "shared", "files": 14, "fanIn": 24, "fanOut": 0, "instability": 0.0, "importsIn": 497, "importsOut": 0},
+    {"name": "shared", "files": 14, "fanIn": 25, "fanOut": 0, "instability": 0.0, "importsIn": 498, "importsOut": 0},
     {"name": "storybook", "files": 106, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 133},
+    {"name": "telemetry", "files": 3, "fanIn": 0, "fanOut": 1, "instability": 1.0, "importsIn": 0, "importsOut": 1},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 15, "importsOut": 7},
     {"name": "unit", "files": 14, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 17, "importsOut": 11},
     {"name": "worldBuilder", "files": 13, "fanIn": 1, "fanOut": 3, "instability": 0.75, "importsIn": 5, "importsOut": 15}
@@ -1595,6 +1596,9 @@ const DATA = {
       {"file": "com/mkz/rpg/storybook/usecases/commands/RecordAction.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/storybook/usecases/commands/ResetArgs.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/storybook/usecases/commands/SelectStory.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
+    ]},
+    {"from": "telemetry", "to": "shared", "weight": 1, "files": 1, "imports": [
+      {"file": "com/mkz/rpg/telemetry/domain/TelemetryEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"}
     ]},
     {"from": "terrain", "to": "shared", "weight": 7, "files": 5, "imports": [
       {"file": "com/mkz/rpg/terrain/adapters/events/OnRequestInitialiseTerrains.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
