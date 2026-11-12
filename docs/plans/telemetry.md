@@ -1,6 +1,6 @@
 # Plan: telemetry records product events, with the player's consent
 
-> **Status:** built on `main`, the screenshots of M4 still to be approved.
+> **Status:** done.
 >
 > **Summary:** Today the game knows nothing of how it is played: how many players start a new game, how many finish
 > Bats in the Meadow or abandon it, how many battles end in a game over. Nothing is recorded, so every change to the
