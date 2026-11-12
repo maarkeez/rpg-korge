@@ -13,7 +13,12 @@ class MenuViewTest : ViewsForTesting() {
     private val messages = MessagesMother.messages()
 
     private fun newMenuView() =
-        MenuView(messages, onNewGameSelected = { selections += "new game" }, onLoadGameSelected = { selections += "load game" }, onWorldBuilderSelected = { selections += "world builder" })
+        MenuView(messages, onNewGameSelected = {
+            selections += "new game"
+        }, onLoadGameSelected = { selections += "load game" }, onWorldBuilderSelected = { selections += "world builder" }, onPrivacySelected = {
+            selections +=
+                "privacy"
+        })
 
     @Test
     fun `MenuView should display playing a new game, building a world and the language when it is displayed`() =
@@ -25,6 +30,7 @@ class MenuViewTest : ViewsForTesting() {
             menuView.loadGameLabel() shouldBe "Load game"
             menuView.buildWorldLabel() shouldBe "Build a world"
             menuView.languageLabel() shouldBe "Language"
+            menuView.privacyLabel() shouldBe "Privacy"
             menuView.areLanguagesShown() shouldBe false
         }
 
@@ -56,6 +62,7 @@ class MenuViewTest : ViewsForTesting() {
             menuView.loadGameLabel() shouldBe "Cargar partida"
             menuView.buildWorldLabel() shouldBe "Construir un mundo"
             menuView.languageLabel() shouldBe "Idioma"
+            menuView.privacyLabel() shouldBe "Privacidad"
             menuView.areOptionsShown() shouldBe true
             menuView.areLanguagesShown() shouldBe false
             messages[UiMessage.BANNER_EXPLORING] shouldBe "Explorando"
@@ -173,5 +180,17 @@ class MenuViewTest : ViewsForTesting() {
             clickBuildWorld(menuView)
             // Then
             selections.shouldContainExactly("new game")
+        }
+
+    @Test
+    fun `MenuView should run onPrivacySelected when Privacy is tapped`() =
+        sharedViewsTest {
+            // Given
+            val menuView = newMenuView()
+            addChild(menuView)
+            // When
+            clickPrivacy(menuView)
+            // Then
+            selections.shouldContainExactly("privacy")
         }
 }

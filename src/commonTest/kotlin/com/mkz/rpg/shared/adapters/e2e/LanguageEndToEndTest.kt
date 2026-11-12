@@ -22,8 +22,7 @@ class LanguageEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         sharedViewsTest {
             // Given
             stage.startApp(random = FixedDoublesRandom.cpuBattleUnitsAlwaysResting(), storage = InmemoryStorage())
-            waitUntil { stage.menuView() != null }
-            val menuView = requireNotNull(stage.menuView()) { "The menu is not displayed" }
+            val menuView = openMenu()
             clickLanguage(menuView)
             pickLanguage(menuView, "Español")
             menuView.playNewGameLabel() shouldBe "Jugar partida nueva"

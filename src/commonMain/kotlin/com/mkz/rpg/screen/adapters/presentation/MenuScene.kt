@@ -46,12 +46,14 @@ class MenuScene(
                 now = { DateTime.nowUnixMillis() },
             )
         lateinit var loadGamePresenter: LoadGamePresenter
+        lateinit var consentPresenter: ConsentPresenter
         val menuView =
             MenuView(
                 messages = messages,
                 onNewGameSelected = { launchImmediately { sceneContainer.changeTo { GameScene(localizationApi, telemetryApi, storage, random) } } },
                 onLoadGameSelected = { loadGamePresenter.open() },
                 onWorldBuilderSelected = { launchImmediately { sceneContainer.changeTo { WorldBuilderScene(localizationApi, telemetryApi, storage) } } },
+                onPrivacySelected = { consentPresenter.open() },
             )
         val saveSlotsView = SaveSlotsView(messages)
         val confirmDialogView = ConfirmDialogView()
@@ -59,12 +61,15 @@ class MenuScene(
         menuView.y = (GAME_WINDOW_SIZE.height - menuView.height) / 2
         val callToActionView = CallToActionView(messages)
         callToActionView.y = ROW_Y
-        listOf(menuView, saveSlotsView, confirmDialogView, callToActionView).forEach(::addChild)
+        val consentView = ConsentView(messages)
+        val privacyNoticeView = PrivacyNoticeView(messages)
+        listOf(menuView, saveSlotsView, confirmDialogView, callToActionView, consentView, privacyNoticeView).forEach(::addChild)
         listOf(saveSlotsView, confirmDialogView).forEach { view -> view.y = (GAME_WINDOW_SIZE.height - PANEL_HEIGHT) / 2 }
         loadGamePresenter =
             LoadGamePresenter(menuView, saveSlotsView, confirmDialogView, callToActionView, saveApi, messages, incompatibleSlot) { slot ->
                 launchImmediately { sceneContainer.changeTo { GameScene(localizationApi, telemetryApi, storage, random, slot) } }
             }
+        consentPresenter = ConsentPresenter(consentView, privacyNoticeView, telemetryApi)
         eventBus.publish(TelemetryEvent.RequestRecordMainMenuOpened)
     }
 }

@@ -10,7 +10,7 @@ object MenuViewStories : StoryBinding {
         StoryDto(
             id = "screen-menu--options",
             name = "Options",
-            description = "Play new game, Load game, Build world and Language. Tapping Language lists the languages in place of the options.",
+            description = "Play new game, Load game, Build world, Language and Privacy. Tapping Language lists the languages in place of the options; Privacy opens the consent panel.",
             args = emptyMap(),
         )
 
@@ -19,7 +19,7 @@ object MenuViewStories : StoryBinding {
             id = "screen-menu",
             group = "Screen",
             title = "Menu",
-            description = "The first screen of the game: playing a new game, its primary action, loading a saved game, building a world, or picking the language.",
+            description = "The first screen of the game: playing a new game, its primary action, loading a saved game, building a world, picking the language, or the privacy choice.",
             controls = emptyList(),
             args = emptyMap(),
             stories = listOf(options),
@@ -34,5 +34,6 @@ object MenuViewStories : StoryBinding {
             onNewGameSelected = { context.action("onNewGameSelected") },
             onLoadGameSelected = { context.action("onLoadGameSelected") },
             onWorldBuilderSelected = { context.action("onWorldBuilderSelected") },
+            onPrivacySelected = { context.action("onPrivacySelected") },
         )
 }

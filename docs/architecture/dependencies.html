@@ -226,10 +226,10 @@ const DATA = {
     {"name": "player", "files": 15, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 34, "importsOut": 12},
     {"name": "quest", "files": 28, "fanIn": 3, "fanOut": 5, "instability": 0.63, "importsIn": 22, "importsOut": 35},
     {"name": "save", "files": 11, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 12, "importsOut": 8},
-    {"name": "screen", "files": 110, "fanIn": 1, "fanOut": 24, "instability": 0.96, "importsIn": 117, "importsOut": 286},
+    {"name": "screen", "files": 111, "fanIn": 1, "fanOut": 24, "instability": 0.96, "importsIn": 117, "importsOut": 287},
     {"name": "shared", "files": 14, "fanIn": 25, "fanOut": 0, "instability": 0.0, "importsIn": 534, "importsOut": 0},
     {"name": "storybook", "files": 108, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 135},
-    {"name": "telemetry", "files": 41, "fanIn": 2, "fanOut": 5, "instability": 0.71, "importsIn": 7, "importsOut": 41},
+    {"name": "telemetry", "files": 41, "fanIn": 2, "fanOut": 5, "instability": 0.71, "importsIn": 8, "importsOut": 41},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 15, "importsOut": 7},
     {"name": "unit", "files": 14, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 17, "importsOut": 11},
     {"name": "worldBuilder", "files": 13, "fanIn": 1, "fanOut": 3, "instability": 0.75, "importsIn": 5, "importsOut": 15}
@@ -1446,7 +1446,8 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/selection/usecases/commands/RefreshWalkingRange.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/selection/usecases/commands/SelectBattleUnit.kt", "layer": "adapters", "name": "shared.domain.EventBus"}
     ]},
-    {"from": "screen", "to": "telemetry", "weight": 6, "files": 4, "imports": [
+    {"from": "screen", "to": "telemetry", "weight": 7, "files": 5, "imports": [
+      {"file": "com/mkz/rpg/screen/adapters/presentation/ConsentPresenter.kt", "layer": "adapters", "name": "telemetry.adapters.presentation.TelemetryApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/GameScene.kt", "layer": "adapters", "name": "telemetry.adapters.presentation.TelemetryApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/GameScene.kt", "layer": "adapters", "name": "telemetry.domain.TelemetryEvent"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/MenuScene.kt", "layer": "adapters", "name": "telemetry.adapters.presentation.TelemetryApi"},

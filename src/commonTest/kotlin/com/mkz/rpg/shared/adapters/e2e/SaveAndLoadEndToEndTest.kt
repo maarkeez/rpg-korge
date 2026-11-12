@@ -74,8 +74,7 @@ class SaveAndLoadEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         sharedViewsTest {
             // Given
             stage.startApp(storage = storage)
-            waitUntil { menuView() != null }
-            clickLoadGame(requireNotNull(menuView()))
+            clickLoadGame(openMenu())
             waitUntil { saveSlotsView()?.isShown() == true }
             val callToAction = requireNotNull(stage.callToActionView())
             callToAction.y shouldBe 587.0

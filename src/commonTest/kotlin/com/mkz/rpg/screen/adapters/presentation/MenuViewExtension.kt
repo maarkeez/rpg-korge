@@ -34,3 +34,7 @@ suspend fun ViewsForTesting.pickLanguage(
     menuView: MenuView,
     languageName: String,
 ) = clickOn(menuView.languageButtons.first { button -> button.cancelButton.text == languageName }.cancelButton)
+
+fun MenuView.privacyLabel(): String = privacyButton.cancelButton.text
+
+suspend fun ViewsForTesting.clickPrivacy(menuView: MenuView) = clickOn(menuView.privacyButton.cancelButton)

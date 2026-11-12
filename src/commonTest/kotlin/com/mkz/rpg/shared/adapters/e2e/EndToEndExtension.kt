@@ -1,14 +1,18 @@
 package com.mkz.rpg.shared.adapters.e2e
 
+import com.mkz.rpg.screen.adapters.presentation.MenuView
 import com.mkz.rpg.screen.adapters.presentation.VirtualPadView.Direction
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
 import com.mkz.rpg.screen.adapters.presentation.canHumanPlayerAct
 import com.mkz.rpg.screen.adapters.presentation.clickArrow
 import com.mkz.rpg.screen.adapters.presentation.clickBuildWorld
+import com.mkz.rpg.screen.adapters.presentation.clickDecline
 import com.mkz.rpg.screen.adapters.presentation.clickPlayNewGame
+import com.mkz.rpg.screen.adapters.presentation.consentView
 import com.mkz.rpg.screen.adapters.presentation.hasBattleUnitAt
 import com.mkz.rpg.screen.adapters.presentation.isAnnouncementShown
 import com.mkz.rpg.screen.adapters.presentation.isBattlefieldDisplayed
+import com.mkz.rpg.screen.adapters.presentation.isConsentShown
 import com.mkz.rpg.screen.adapters.presentation.isPadShown
 import com.mkz.rpg.screen.adapters.presentation.menuView
 import com.mkz.rpg.screen.adapters.presentation.paletteTerrainIds
@@ -35,13 +39,18 @@ suspend fun ViewsForTesting.waitUntil(condition: () -> Boolean) {
     }
 }
 
+suspend fun ViewsForTesting.openMenu(): MenuView {
+    waitUntil { stage.menuView() != null }
+    stage.consentView()?.takeIf { consentView -> consentView.isConsentShown() }?.let { consentView -> clickDecline(consentView) }
+    return requireNotNull(stage.menuView()) { "The menu is not displayed" }
+}
+
 suspend fun ViewsForTesting.startNewGame(
     random: Random = FixedDoublesRandom.cpuBattleUnitsAlwaysResting(),
     storage: IStorage = InmemoryStorage(),
 ) {
     stage.startApp(random = random, storage = storage)
-    waitUntil { stage.menuView() != null }
-    clickPlayNewGame(requireNotNull(stage.menuView()) { "The menu is not displayed" })
+    clickPlayNewGame(openMenu())
     waitUntil { stage.questAnnouncementView()?.isAnnouncementShown() == true }
 }
 
@@ -87,8 +96,7 @@ private suspend fun ViewsForTesting.walkLeader(step: RouteStep) {
 
 suspend fun ViewsForTesting.startWorldBuilder() {
     stage.startApp(storage = InmemoryStorage())
-    waitUntil { stage.menuView() != null }
-    clickBuildWorld(requireNotNull(stage.menuView()) { "The menu is not displayed" })
+    clickBuildWorld(openMenu())
     waitUntil { stage.battlefieldView()?.isBattlefieldDisplayed() == true && stage.worldBuilderHudView()?.paletteTerrainIds()?.isNotEmpty() == true }
 }
 

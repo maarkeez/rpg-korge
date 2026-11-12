@@ -27,7 +27,7 @@ class LoadGamePresenterTest {
             partySize = { 0 },
             now = { DateTime.nowUnixMillis() },
         )
-    private val menuView = MenuView(texts, onNewGameSelected = {}, onLoadGameSelected = {}, onWorldBuilderSelected = {})
+    private val menuView = MenuView(texts, onNewGameSelected = {}, onLoadGameSelected = {}, onWorldBuilderSelected = {}, onPrivacySelected = {})
     private val saveSlotsView = SaveSlotsView(texts)
     private val confirmDialogView = ConfirmDialogView()
     private val callToActionView = FakeCallToActionView()
