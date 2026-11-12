@@ -1,6 +1,6 @@
 # Plan: the game has no victory, only a game over
 
-> **Status:** to do.
+> **Status:** built on `main` in 2777a984, its screenshots still to be approved.
 >
 > **Summary:** Today a player whose battle units are all defeated is defeated, and the other player gets the victory,
 > which ends the game: the banner says "Human wins!" or "CPU wins!" and the screen locks. The human player only wins
@@ -191,3 +191,16 @@ For example, the party of knight-1 and knight-2 fights rat-1, and knight-1 has s
 - The game over is final: the player loads a save from the main menu, with what was played since lost.
 - The CPU battle units within reach still join the disengaged battle of a game over, and find it finished, as they do
   today with the victory.
+
+## Changes while building
+
+- `BattleApi` no longer takes a `PlayerApi`: `DefeatPlayer` was the only use `battle` made of `player`, so
+  `SubdomainDependencyArchitectureTest` lets `battle` depend on `shared` only.
+- Quit to menu runs `PausePresenter.quit()`, which runs the `onQuit` `GameScene` already gives it, in place of
+  `GameScene` handing the same `onQuit` to `ExplorationPresenter` too, so quitting stays in one place.
+- `Party.stepParty` and `Party.swapLeader` still fail with `NotExploring` once the party is over, as they do in every
+  mode but exploring, in place of returning the party as it is. Nothing calls them then, as `canStep()` is false.
+- `ResolveDisengagedBattleTest`'s `should not finish the battle when the player who left it is defeated` goes, as no
+  player is defeated any more, and `BattleMother.finishedBattle` finishes the battle in place of defeating a player.
+- `ExploringTerrainEffectAcceptanceTest`'s new test checks that there is no battle at all, as a defeat while exploring
+  no longer creates one.
