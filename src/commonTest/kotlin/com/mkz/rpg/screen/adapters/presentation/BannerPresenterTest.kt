@@ -2,7 +2,6 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
-import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.domain.Player
@@ -134,7 +133,7 @@ class BannerPresenterTest {
     fun `AnnounceBattleEnd should announce the end of the battle when it finishes`() {
         // Given
         turnOf(Player.Dto.PlayerTypeDto.HUMAN)
-        apis.eventBus.publish(BattleEvent.BattleFinishedWithoutWinner)
+        apis.eventBus.publish(BattleEvent.BattleFinished)
         // When
         apis.eventBus.dispatch()
         // Then
@@ -153,23 +152,25 @@ class BannerPresenterTest {
     }
 
     @Test
-    fun `DisplayPlayerWin should display player name when player wins`() {
+    fun `DisplayGameOver should display the game over when the game is over`() {
         // Given
         turnOf(Player.Dto.PlayerTypeDto.HUMAN)
-        // When
-        bannerPresenter.displayVictory(playerId = "player-1")
-        // Then
-        bannerView.displayedPlayerWins.shouldContainExactly("player-1")
-    }
-
-    @Test
-    fun `DisplayPlayerWin should display player win when player victory is published`() {
-        // Given
-        turnOf(Player.Dto.PlayerTypeDto.HUMAN)
-        apis.eventBus.publish(PlayerVictory(playerId = "player-1"))
+        apis.eventBus.publish(PartyEvent.GameOver(playerId = "player-1"))
         // When
         apis.eventBus.dispatch()
         // Then
-        bannerView.displayedPlayerWins.shouldContainExactly("player-1")
+        bannerView.gameOverDisplays shouldBe 1
+    }
+
+    @Test
+    fun `AnnounceBattleEnd should not announce the end of the battle when it finishes after the game over`() {
+        // Given
+        turnOf(Player.Dto.PlayerTypeDto.HUMAN)
+        apis.eventBus.publish(PartyEvent.GameOver(playerId = "player-1"))
+        apis.eventBus.publish(BattleEvent.BattleFinished)
+        // When
+        apis.eventBus.dispatch()
+        // Then
+        bannerView.announcedBattleEnds shouldBe 0
     }
 }

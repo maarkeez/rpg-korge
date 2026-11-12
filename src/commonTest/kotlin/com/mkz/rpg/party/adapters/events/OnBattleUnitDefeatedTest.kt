@@ -11,7 +11,7 @@ import kotlin.test.Test
 class OnBattleUnitDefeatedTest {
     private val eventBus = InMemoryEventBus()
     private val partyRepository = InMemoryPartyRepository()
-    private val onBattleUnitDefeated = OnBattleUnitDefeated(LeaveParty(partyRepository), eventBus)
+    private val onBattleUnitDefeated = OnBattleUnitDefeated(LeaveParty(partyRepository, eventBus), eventBus)
 
     @Test
     fun `should remove the battle unit from the party when it is defeated`() {

@@ -5,12 +5,12 @@ import com.mkz.rpg.party.usecases.commands.ResumeExploration
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.subscribe
 
-class OnBattleFinishedWithoutWinner(
+class OnBattleFinished(
     resumeExploration: ResumeExploration,
     eventBus: EventBus,
 ) {
     val subscription =
-        eventBus.subscribe<BattleEvent.BattleFinishedWithoutWinner> {
+        eventBus.subscribe<BattleEvent.BattleFinished> {
             resumeExploration()
         }
 }

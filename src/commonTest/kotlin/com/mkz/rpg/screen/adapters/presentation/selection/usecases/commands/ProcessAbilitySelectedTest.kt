@@ -57,8 +57,7 @@ class ProcessAbilitySelectedTest {
             BattleState.FINISHED ->
                 queries.battleRepository.create(
                     battle
-                        .defeatPlayer("cpu")
-                        .finishWithWinner()
+                        .finish()
                         .pullEvents()
                         .second,
                 )

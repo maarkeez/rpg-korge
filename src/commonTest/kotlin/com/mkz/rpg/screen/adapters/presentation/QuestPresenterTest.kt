@@ -1,12 +1,12 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDefeated
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.npc.domain.Npc
 import com.mkz.rpg.npc.domain.NpcMother.npc
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationInterrupted
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationResumed
+import com.mkz.rpg.party.domain.PartyEvent.GameOver
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
@@ -342,25 +342,25 @@ class QuestPresenterTest {
     }
 
     @Test
-    fun `QuestPresenter should hide the tracker when a player wins`() {
+    fun `QuestPresenter should hide the tracker when the game is over`() {
         // Given
         val apis = apis(mainQuest(id = questId))
         apis.presenter()
         // When
-        apis.eventBus.publish(PlayerVictory(playerId = "human"))
+        apis.eventBus.publish(GameOver(playerId = "human"))
         apis.eventBus.dispatch()
         // Then
         trackerView.hides shouldBe 1
     }
 
     @Test
-    fun `QuestPresenter should close the detail view when a player wins`() {
+    fun `QuestPresenter should close the detail view when the game is over`() {
         // Given
         val apis = apis(mainQuest(id = questId))
         val presenter = apis.startedPresenter()
         presenter.openQuest()
         // When
-        apis.eventBus.publish(PlayerVictory(playerId = "human"))
+        apis.eventBus.publish(GameOver(playerId = "human"))
         apis.eventBus.dispatch()
         // Then
         presenter.isQuestOpen.shouldBeFalse()

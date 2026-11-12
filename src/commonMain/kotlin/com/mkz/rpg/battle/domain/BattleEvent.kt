@@ -29,9 +29,7 @@ sealed interface BattleEvent : DomainEvent {
         val battleUnitId: String,
     ) : BattleEvent
 
-    data class RequestDefeatPlayer(
-        val playerId: String,
-    ) : BattleEvent
+    object RequestFinishBattle : BattleEvent
 
     data class RequestResolveDisengagedBattle(
         val joiningPlayerId: String?,
@@ -42,7 +40,7 @@ sealed interface BattleEvent : DomainEvent {
         val battleUnitIds: Set<String>,
     ) : BattleEvent
 
-    object BattleFinishedWithoutWinner : BattleEvent
+    object BattleFinished : BattleEvent
 
     data class RoundStarted(
         val round: Int,
@@ -62,13 +60,5 @@ sealed interface BattleEvent : DomainEvent {
     data class PlayerTurnStarted(
         val playerId: String,
         val battleUnitIds: Set<String>,
-    ) : BattleEvent
-
-    data class PlayerVictory(
-        val playerId: String,
-    ) : BattleEvent
-
-    data class PlayerDefeated(
-        val playerId: String,
     ) : BattleEvent
 }

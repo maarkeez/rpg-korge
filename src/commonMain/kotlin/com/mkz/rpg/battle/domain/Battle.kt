@@ -2,12 +2,10 @@ package com.mkz.rpg.battle.domain
 
 import com.mkz.rpg.battle.domain.BattleError.MinimumTwoPlayersRequired
 import com.mkz.rpg.battle.domain.BattleEvent.BattleDisengaged
-import com.mkz.rpg.battle.domain.BattleEvent.BattleFinishedWithoutWinner
+import com.mkz.rpg.battle.domain.BattleEvent.BattleFinished
 import com.mkz.rpg.battle.domain.BattleEvent.BattleStarted
-import com.mkz.rpg.battle.domain.BattleEvent.PlayerDefeated
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnFinished
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
-import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.battle.domain.BattleEvent.RoundFinished
 import com.mkz.rpg.battle.domain.BattleEvent.RoundStarted
 import kotlin.jvm.JvmInline
@@ -37,19 +35,6 @@ data class Battle private constructor(
                 events = setOf(BattleStarted, PlayerTurnStarted(players.first(), battleUnitIds)),
             )
         }
-
-        fun defeatWhileExploring(
-            defeatedPlayerId: String,
-            winnerPlayerId: String,
-        ): Battle =
-            Battle(
-                turnOrder = TurnOrder(listOf(winnerPlayerId)),
-                battleUnits = BattleUnits(emptyMap()),
-                currentRound = CurrentRound(0),
-                currentPlayerId = CurrentPlayerId(winnerPlayerId),
-                isFinished = IsFinished(false),
-                events = setOf(PlayerDefeated(defeatedPlayerId)),
-            )
     }
 
     fun toDto() =
@@ -107,37 +92,16 @@ data class Battle private constructor(
         return if (disengages) leftBattle.copy(events = events + BattleDisengaged(leftBattle.battleUnits.value.keys)) else leftBattle
     }
 
-    fun hasWinner(): Boolean = turnOrder.value.size == 1
-
     fun isDisengaged(): Boolean {
         val playersInBattle = battleUnits.value.values.toSet()
         return turnOrder.value.count { playerId -> playerId in playersInBattle } < 2
     }
 
-    fun finishWithoutWinner(): Battle =
+    fun finish(): Battle =
         copy(
             isFinished = IsFinished(true),
-            events = events + BattleFinishedWithoutWinner,
+            events = events + BattleFinished,
         )
-
-    fun finishWithWinner(): Battle =
-        copy(
-            isFinished = IsFinished(true),
-            events = events + PlayerVictory(turnOrder.value.single()),
-        )
-
-    fun defeatPlayer(playerId: String): Battle {
-        val newTurnOrder =
-            buildList {
-                addAll(turnOrder.value)
-                remove(playerId)
-            }
-        val battleWithPlayerTurnUpdated: Battle = if (currentPlayerId.value == playerId) finishPlayerTurn() else this
-        return battleWithPlayerTurnUpdated.copy(
-            turnOrder = TurnOrder(newTurnOrder),
-            events = events + setOf(PlayerDefeated(playerId)),
-        )
-    }
 
     fun pullEvents() = events to copy(events = emptySet())
 

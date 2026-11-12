@@ -74,7 +74,7 @@ class StartNextRoundTest {
     }
 
     @Test
-    fun `should finish the battle without a winner when the last battle units of a player leave it`() {
+    fun `should finish the battle when the last battle units of a player leave it`() {
         // Given
         givenBattle()
         // When
@@ -84,11 +84,11 @@ class StartNextRoundTest {
         storedBattle.isFinished.shouldBeTrue()
         storedBattle.currentRound shouldBe 1
         storedBattle.battleUnitIds shouldBe setOf("knight-1")
-        eventBus.shouldHavePublishedEvents(BattleEvent.BattleFinishedWithoutWinner)
+        eventBus.shouldHavePublishedEvents(BattleEvent.BattleFinished)
     }
 
     @Test
-    fun `should finish the battle without a winner when only one player has battle units left in it`() {
+    fun `should finish the battle when only one player has battle units left in it`() {
         // Given
         givenBattle()
         battleRepository.create(battle(players, battleUnits = mapOf("knight-1" to "human")))
@@ -100,7 +100,7 @@ class StartNextRoundTest {
             .toDto()
             .isFinished
             .shouldBeTrue()
-        eventBus.shouldHavePublishedEvents(BattleEvent.BattleFinishedWithoutWinner)
+        eventBus.shouldHavePublishedEvents(BattleEvent.BattleFinished)
     }
 
     @Test
@@ -116,7 +116,7 @@ class StartNextRoundTest {
     @Test
     fun `should not start the next round when the battle is finished`() {
         // Given
-        val finishedBattle = battle(players, battleUnitIds).defeatPlayer("cpu").pullEvents().second
+        val finishedBattle = battle(players, battleUnitIds).finish().pullEvents().second
         battleRepository.create(finishedBattle)
         // When
         startNextRound(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList())

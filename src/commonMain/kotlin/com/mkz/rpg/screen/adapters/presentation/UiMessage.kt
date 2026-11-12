@@ -13,7 +13,7 @@ enum class UiMessage(
     BANNER_BATTLE_FINISHED("ui.banner.battleFinished"),
     BANNER_ROUND("ui.banner.round"),
     BANNER_PLAYER_TURN("ui.banner.playerTurn"),
-    BANNER_VICTORY("ui.banner.victory"),
+    BANNER_GAME_OVER("ui.banner.gameOver"),
     REMAINING_SUMMON_DURATION("ui.remainingSummonDuration.vanishes", isPlural = true),
     FINISH_PLAYER_TURN("ui.finishPlayerTurn.finishPlayerTurn"),
     CALL_TO_ACTION_CANCEL("ui.callToAction.cancel"),

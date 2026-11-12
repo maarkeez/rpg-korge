@@ -56,10 +56,10 @@ msgctxt "ui.banner.playerTurn"
 msgid "{player} turn"
 msgstr "Turno de {player}"
 
-#. {player}: the name of the winning player.
-msgctxt "ui.banner.victory"
-msgid "{player} wins!"
-msgstr "¡{player} gana!"
+#. The banner when the last party member leaves the party.
+msgctxt "ui.banner.gameOver"
+msgid "Game over!"
+msgstr "¡Fin de la partida!"
 
 #. How many turns a summon has left, the current one included. {turns}: the number of turns.
 msgctxt "ui.remainingSummonDuration.vanishes"

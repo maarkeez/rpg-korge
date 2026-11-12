@@ -155,7 +155,7 @@ class ConsumeItemTest {
     @Test
     fun `should consume the item out of the battles when the battle has finished`() {
         // Given
-        battleRepository.create(battle(players = listOf("cpu", "human")).finishWithoutWinner())
+        battleRepository.create(battle(players = listOf("cpu", "human")).finish())
         inventoryRepository.create(inventory(battleUnitId = "knight-1", storedItems = listOf("health-potion")))
         // When
         consumeItem(battleUnitId = "knight-1", lootableItemId = "health-potion")

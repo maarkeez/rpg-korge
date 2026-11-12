@@ -54,7 +54,7 @@ class SetUpGameAcceptanceTest {
     private val lootTableApi = LootTableApi(lootableItemApi, eventBus, ResourcesLootTableLoader())
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
     private val lootDropApi = LootDropApi(unitApi, lootTableApi, eventBus, ResourcesLootDropLoader(), Random.Default)
-    private val battleApi = BattleApi(eventBus, playerApi)
+    private val battleApi = BattleApi(eventBus)
 
     private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom.cpuBattleUnitsAlwaysResting())
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)

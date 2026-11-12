@@ -43,7 +43,7 @@ open class BannerView(
             this.styles.textSize = 15.0
             this.styles.textColor = HUMAN_TURN_COLOR
         }
-    internal var winner: UIText? = null
+    internal var gameOver: UIText? = null
     internal val layout =
         uiVerticalStack {
             addChild(round)
@@ -106,13 +106,13 @@ open class BannerView(
         popAnimator.awaitComplete()
     }
 
-    open fun displayVictory(playerId: String) {
+    open fun displayGameOver() {
         this.playerTurn.removeFromParent()
         this.round.removeFromParent()
 
-        winner =
+        gameOver =
             layout.uiText(
-                text = messages[UiMessage.BANNER_VICTORY, "player" to messages.playerName(playerId)],
+                text = messages[UiMessage.BANNER_GAME_OVER],
                 size = Size(width = width, height = 33),
             ) {
                 this.styles.textAlignment = TextAlignment.MIDDLE_CENTER

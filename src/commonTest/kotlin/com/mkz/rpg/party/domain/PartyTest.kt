@@ -33,6 +33,7 @@ class PartyTest {
                 isInFormation = false,
                 isPaused = false,
                 isReadingQuest = false,
+                isOver = false,
             )
         party.pullEvents().first.shouldContainExactly(
             PartyEvent.ExplorationStarted(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2"), unitIds = listOf("knight", "knight")),
@@ -300,12 +301,60 @@ class PartyTest {
     }
 
     @Test
-    fun `Leave should have no leader when the last battle unit leaves the party`() {
+    fun `Leave should switch the party over and publish the game over when the last member leaves the party`() {
         // When
-        val party = party(battleUnitIds = listOf("knight-1")).leave("knight-1")
+        val party =
+            party(playerId = "human", battleUnitIds = listOf("knight-1"))
+                .interrupt()
+                .pullEvents()
+                .second
+                .leave("knight-1")
         // Then
         party.toDto().leaderBattleUnitId.shouldBeNull()
         party.toDto().battleUnitIds.shouldBeEmpty()
+        party.toDto().isOver.shouldBeTrue()
+        party.toDto().isExploring.shouldBeFalse()
+        party.pullEvents().first.shouldContainExactly(PartyEvent.GameOver(playerId = "human"))
+    }
+
+    @Test
+    fun `Leave should keep exploring and publish no game over when a member is left`() {
+        // When
+        val party = party(battleUnitIds = listOf("knight-1", "knight-2")).leave("knight-1")
+        // Then
+        party.toDto().isOver.shouldBeFalse()
+        party.toDto().isExploring.shouldBeTrue()
+        party.pullEvents().first.shouldBeEmpty()
+    }
+
+    @Test
+    fun `Resume should keep the party over when the game is over`() {
+        // Given
+        val party = party(battleUnitIds = listOf("knight-1")).leave("knight-1").pullEvents().second
+        // When
+        val resumedParty = party.resume()
+        // Then
+        resumedParty shouldBe party
+    }
+
+    @Test
+    fun `OpenPause should not open the pause when the game is over`() {
+        // Given
+        val party = party(battleUnitIds = listOf("knight-1")).leave("knight-1").pullEvents().second
+        // When
+        val pausedParty = party.openPause()
+        // Then
+        pausedParty shouldBe party
+    }
+
+    @Test
+    fun `CanStep should be false when the game is over`() {
+        // Given
+        val party = party(battleUnitIds = listOf("knight-1")).leave("knight-1")
+        // When
+        val result = party.canStep()
+        // Then
+        result.shouldBeFalse()
     }
 
     @Test

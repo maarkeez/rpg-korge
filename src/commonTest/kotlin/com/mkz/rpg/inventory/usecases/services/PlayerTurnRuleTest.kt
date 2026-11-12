@@ -44,7 +44,7 @@ class PlayerTurnRuleTest {
     @Test
     fun `should allow the inventory while exploring once the battle has finished`() {
         // Given
-        queries.battleRepository.create(battle(players = listOf("cpu", "human")).finishWithoutWinner())
+        queries.battleRepository.create(battle(players = listOf("cpu", "human")).finish())
         // Then
         shouldNotThrowAny { playerTurnRule.requirePlayerTurn("knight-1") }
     }

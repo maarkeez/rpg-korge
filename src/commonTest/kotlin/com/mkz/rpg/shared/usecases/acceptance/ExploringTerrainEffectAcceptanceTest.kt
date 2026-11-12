@@ -3,7 +3,6 @@ package com.mkz.rpg.shared.usecases.acceptance
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.ability.adapters.resources.ResourcesAbilityLoader
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
-import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battleUnit.adapters.resources.ResourcesBattleUnitLoader
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
@@ -20,13 +19,11 @@ import com.mkz.rpg.player.adapters.resources.ResourcesPlayerLoader
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.HUMAN
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
-import com.mkz.rpg.shared.domain.subscribe
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.terrain.adapters.resources.ResourcesTerrainLoader
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import com.mkz.rpg.unit.adapters.resources.ResourcesUnitLoader
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.random.Random
@@ -41,13 +38,12 @@ class ExploringTerrainEffectAcceptanceTest {
     private val effectApi = EffectApi(eventBus, ResourcesEffectLoader())
     private val abilityApi = AbilityApi(effectApi, eventBus, ResourcesAbilityLoader())
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
-    private val battleApi = BattleApi(eventBus, playerApi)
+    private val battleApi = BattleApi(eventBus)
     private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, Random.Default)
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
 
     private val humanPlayerId = "human"
     private val cpuPlayerId = "cpu"
-    private val victories = mutableListOf<String>().also { winners -> eventBus.subscribe<BattleEvent.PlayerVictory> { winners += it.playerId } }
 
     private suspend fun setUp() {
         terrainApi.init()
@@ -107,13 +103,13 @@ class ExploringTerrainEffectAcceptanceTest {
         }
 
     @Test
-    fun `should have the human player win when the last cpu battle unit is defeated by the lava while exploring`() =
+    fun `should keep exploring when the last cpu battle unit is defeated by the lava while exploring`() =
         scenarioTest(::setUp) {
             // When
             repeat(4) { waitASecond() }
             // Then
             battlefieldApi.searchPosition("rat-1").shouldBeNull()
-            victories.shouldContainExactly(humanPlayerId)
-            battleApi.searchBattle()!!.isFinished.shouldBeTrue()
+            battleApi.searchBattle().shouldBeNull()
+            partyApi.searchParty()!!.isExploring.shouldBeTrue()
         }
 }

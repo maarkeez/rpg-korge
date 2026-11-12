@@ -13,7 +13,7 @@ class OnBattleUnitDefeated(
 ) {
     val subscription =
         eventBus.subscribe<BattleUnitEvent.BattleUnitDefeated> { event ->
-            requestLeaveBattle(playerId = event.playerId, battleUnitId = event.battleUnitId)
+            requestLeaveBattle(battleUnitId = event.battleUnitId)
             triggerOnDefeatedEffects(
                 battleUnitId = event.battleUnitId,
                 defeatedAtRow = event.defeatedAtRow,

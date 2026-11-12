@@ -76,7 +76,7 @@ class SubdomainApis(
     val lootTableApi = LootTableApi(lootableItemApi, eventBus, FakeLootTableLoader(lootTables))
     val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, FakeBattleUnitLoader(deployments))
     val lootDropApi = LootDropApi(unitApi, lootTableApi, eventBus, FakeLootDropLoader(lootDrops), Random.Default)
-    val battleApi = BattleApi(eventBus, playerApi)
+    val battleApi = BattleApi(eventBus)
     val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     val npcApi = NpcApi(battlefieldApi, lootableItemApi, partyApi, eventBus, FakeNpcLoader(npcs))
     val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)

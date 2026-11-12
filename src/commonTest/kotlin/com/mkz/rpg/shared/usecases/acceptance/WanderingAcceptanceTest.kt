@@ -53,7 +53,7 @@ class WanderingAcceptanceTest {
         val effectApi = EffectApi(eventBus, ResourcesEffectLoader())
         val abilityApi = AbilityApi(effectApi, eventBus, ResourcesAbilityLoader())
         val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
-        val battleApi = BattleApi(eventBus, playerApi)
+        val battleApi = BattleApi(eventBus)
         val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(*rolls))
         val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
         val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, partyApi, eventBus)

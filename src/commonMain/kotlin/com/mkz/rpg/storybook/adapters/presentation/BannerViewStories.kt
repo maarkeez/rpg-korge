@@ -15,7 +15,7 @@ object BannerViewStories : StoryBinding {
     private const val PLAYER = "player"
     private const val ROUND = "round"
 
-    private enum class State { EXPLORING, TURN, WINNER }
+    private enum class State { EXPLORING, TURN, GAME_OVER }
 
     private enum class Player(
         val id: String,
@@ -34,12 +34,12 @@ object BannerViewStories : StoryBinding {
             description = "The round, and the turn of the CPU player, in red.",
             args = mapOf(PLAYER to ValueDto.text(Player.CPU.name), ROUND to ValueDto.int(3)),
         )
-    private val winner =
+    private val gameOver =
         StoryDto(
-            id = "screen-banner--winner",
-            name = "Winner",
-            description = "The player who won the battle, in the middle of the line.",
-            args = mapOf(STATE to ValueDto.text(State.WINNER.name)),
+            id = "screen-banner--game-over",
+            name = "Game over",
+            description = "The game over, in the middle of the line.",
+            args = mapOf(STATE to ValueDto.text(State.GAME_OVER.name)),
         )
 
     override fun component(context: StoryContext) =
@@ -47,7 +47,7 @@ object BannerViewStories : StoryBinding {
             id = "screen-banner",
             group = "Screen",
             title = "Banner",
-            description = "On top of the screen: whether the player is exploring, the round and whose turn it is in a battle, or who won it.",
+            description = "On top of the screen: whether the player is exploring, the round and whose turn it is in a battle, or the game over.",
             controls =
                 listOf(
                     ControlDto.enum(STATE, State.entries.map { state -> state.name }),
@@ -55,7 +55,7 @@ object BannerViewStories : StoryBinding {
                     ControlDto.int(ROUND, minimum = 1, maximum = ROUND_LIMIT),
                 ),
             args = mapOf(STATE to ValueDto.text(State.TURN.name), PLAYER to ValueDto.text(Player.HUMAN.name), ROUND to ValueDto.int(1)),
-            stories = listOf(exploring, humanTurn, cpuTurn, winner),
+            stories = listOf(exploring, humanTurn, cpuTurn, gameOver),
         )
 
     override fun render(
@@ -67,7 +67,7 @@ object BannerViewStories : StoryBinding {
             when (State.valueOf(args.text(STATE))) {
                 State.EXPLORING -> displayExploring()
                 State.TURN -> displayBanner(playerId = player.id, round = args.int(ROUND), turnColor = player.turnColor)
-                State.WINNER -> displayVictory(player.id)
+                State.GAME_OVER -> displayGameOver()
             }
         }
     }

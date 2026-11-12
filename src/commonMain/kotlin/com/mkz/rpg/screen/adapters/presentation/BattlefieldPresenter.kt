@@ -130,7 +130,7 @@ class BattlefieldPresenter(
                 selectionApi.deselectBattleUnit()
                 selectPartyLeader(event)
             },
-            eventBus.subscribe<BattleEvent.BattleFinishedWithoutWinner> {
+            eventBus.subscribe<BattleEvent.BattleFinished> {
                 timeline.play { clearSelection() }
                 selectionApi.deselectBattleUnit()
             },

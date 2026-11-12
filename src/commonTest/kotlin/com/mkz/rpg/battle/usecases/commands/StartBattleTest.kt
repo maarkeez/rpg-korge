@@ -50,7 +50,7 @@ class StartBattleTest {
     @Test
     fun `should start a new battle in place of the finished one when the cpu engages again`() {
         // Given
-        battleRepository.create(battle(players = listOf("human", "cpu")).finishWithoutWinner().pullEvents().second)
+        battleRepository.create(battle(players = listOf("human", "cpu")).finish().pullEvents().second)
         // When
         startBattle(engagingPlayerId = "cpu", engagedPlayerId = "human", engagingBattleUnitIds = listOf("rat-2"), engagedBattleUnitIds = listOf("knight-1"))
         // Then

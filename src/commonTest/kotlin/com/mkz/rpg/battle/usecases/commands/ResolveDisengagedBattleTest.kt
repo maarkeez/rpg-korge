@@ -23,7 +23,7 @@ class ResolveDisengagedBattleTest {
     }
 
     @Test
-    fun `should finish the battle without a winner when nobody joins it`() {
+    fun `should finish the battle when nobody joins it`() {
         // Given
         givenDisengagedBattle()
         // When
@@ -34,7 +34,7 @@ class ResolveDisengagedBattleTest {
             .toDto()
             .isFinished
             .shouldBeTrue()
-        eventBus.shouldHavePublishedEvents(BattleEvent.BattleFinishedWithoutWinner)
+        eventBus.shouldHavePublishedEvents(BattleEvent.BattleFinished)
     }
 
     @Test
@@ -52,26 +52,9 @@ class ResolveDisengagedBattleTest {
     }
 
     @Test
-    fun `should not finish the battle when the player who left it is defeated`() {
-        // Given
-        val defeatedBattle =
-            battle(players, battleUnits = mapOf("rat-1" to "cpu", "knight-1" to "human"))
-                .leave("rat-1")
-                .defeatPlayer("cpu")
-                .pullEvents()
-                .second
-        battleRepository.create(defeatedBattle)
-        // When
-        resolveDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList())
-        // Then
-        battleRepository.search() shouldBe defeatedBattle
-        eventBus.shouldNotHavePublishedEvents()
-    }
-
-    @Test
     fun `should not finish the battle again when it is finished`() {
         // Given
-        val finishedBattle = battle(players, battleUnits = mapOf("knight-1" to "human")).finishWithoutWinner().pullEvents().second
+        val finishedBattle = battle(players, battleUnits = mapOf("knight-1" to "human")).finish().pullEvents().second
         battleRepository.create(finishedBattle)
         // When
         resolveDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList())

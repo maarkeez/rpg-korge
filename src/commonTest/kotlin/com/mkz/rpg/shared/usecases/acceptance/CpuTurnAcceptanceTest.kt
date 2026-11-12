@@ -39,7 +39,7 @@ class CpuTurnAcceptanceTest {
     private val effectApi = EffectApi(eventBus, ResourcesEffectLoader())
     private val abilityApi = AbilityApi(effectApi, eventBus, ResourcesAbilityLoader())
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
-    private val battleApi = BattleApi(eventBus, playerApi)
+    private val battleApi = BattleApi(eventBus)
 
     private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom.cpuBattleUnitsAlwaysResting())
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)

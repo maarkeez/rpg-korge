@@ -339,7 +339,7 @@ class ProcessTileSelectedTest {
 
     private fun givenExploring(map: String) {
         givenBattle(map)
-        queries.battleRepository.create(battle(players = listOf("player-2", "player-1")).finishWithoutWinner())
+        queries.battleRepository.create(battle(players = listOf("player-2", "player-1")).finish())
     }
 
     @Test

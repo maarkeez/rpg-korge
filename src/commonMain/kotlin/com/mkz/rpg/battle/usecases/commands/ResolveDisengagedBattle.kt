@@ -12,12 +12,12 @@ class ResolveDisengagedBattle(
         joiningBattleUnitIds: List<String>,
     ) {
         val storedBattle = battleRepository.search() ?: return
-        if (storedBattle.toDto().isFinished || storedBattle.hasWinner()) return
+        if (storedBattle.toDto().isFinished) return
         val joinedBattle =
             joiningPlayerId
                 ?.let { playerId -> joiningBattleUnitIds.fold(storedBattle) { battle, battleUnitId -> battle.join(battleUnitId, playerId) } }
                 ?: storedBattle
-        val nextBattle = if (joinedBattle.isDisengaged()) joinedBattle.finishWithoutWinner() else joinedBattle
+        val nextBattle = if (joinedBattle.isDisengaged()) joinedBattle.finish() else joinedBattle
         val (events, battle) = nextBattle.pullEvents()
         battleRepository.update(battle)
         eventBus.publish(events)

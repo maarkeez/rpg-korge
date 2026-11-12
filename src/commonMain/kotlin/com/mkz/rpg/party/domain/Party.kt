@@ -12,6 +12,7 @@ import com.mkz.rpg.party.domain.PartyEvent.ExplorationSecondStarted
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationStarted
 import com.mkz.rpg.party.domain.PartyEvent.FormationClosed
 import com.mkz.rpg.party.domain.PartyEvent.FormationOpened
+import com.mkz.rpg.party.domain.PartyEvent.GameOver
 import com.mkz.rpg.party.domain.PartyEvent.NpcTalkFinished
 import com.mkz.rpg.party.domain.PartyEvent.NpcTalkStarted
 import com.mkz.rpg.party.domain.PartyEvent.PartyJoined
@@ -83,6 +84,7 @@ data class Party private constructor(
             isInFormation = mode == Mode.FORMATION,
             isPaused = mode == Mode.PAUSED,
             isReadingQuest = mode == Mode.READING_QUEST,
+            isOver = mode == Mode.OVER,
         )
 
     fun toSnapshot() = Dto.SnapshotDto(playerId = playerId.value, battleUnitIds = members.value, walkingOrderBattleUnitIds = walkingOrder.value)
@@ -194,8 +196,9 @@ data class Party private constructor(
         return copy(mode = Mode.EXPLORING, events = events + QuestClosed(playerId = playerId.value))
     }
 
-    fun interrupt(): Party =
-        copy(
+    fun interrupt(): Party {
+        if (mode == Mode.OVER) return this
+        return copy(
             mode = Mode.BATTLING,
             pendingSteps = PendingSteps(emptyList()),
             awaitedStep = null,
@@ -203,13 +206,16 @@ data class Party private constructor(
             talkingNpcId = null,
             events = events + ExplorationInterrupted(playerId = playerId.value),
         )
+    }
 
-    fun resume(): Party =
-        copy(
+    fun resume(): Party {
+        if (mode == Mode.OVER) return this
+        return copy(
             mode = Mode.EXPLORING,
             walkingOrder = WalkingOrder(members.value),
             events = events + ExplorationResumed(playerId = playerId.value, battleUnitIds = members.value),
         )
+    }
 
     fun join(
         battleUnitId: String,
@@ -223,7 +229,17 @@ data class Party private constructor(
         )
     }
 
-    fun leave(battleUnitId: String): Party = copy(members = Members(members.value - battleUnitId), walkingOrder = WalkingOrder(walkingOrder.value - battleUnitId))
+    fun leave(battleUnitId: String): Party {
+        val leftParty = copy(members = Members(members.value - battleUnitId), walkingOrder = WalkingOrder(walkingOrder.value - battleUnitId))
+        if (leftParty.members.value.isNotEmpty() || mode == Mode.OVER) return leftParty
+        return leftParty.copy(
+            mode = Mode.OVER,
+            pendingSteps = PendingSteps(emptyList()),
+            awaitedStep = null,
+            talkingNpcId = null,
+            events = events + GameOver(playerId = playerId.value),
+        )
+    }
 
     fun markMoved(battleUnitId: String): Party {
         if (mode != Mode.EXPLORING) return this
@@ -259,6 +275,7 @@ data class Party private constructor(
         PAUSED,
         READING_QUEST,
         BATTLING,
+        OVER,
     }
 
     @JvmInline private value class PlayerId(
@@ -325,6 +342,7 @@ data class Party private constructor(
         val isInFormation: Boolean,
         val isPaused: Boolean,
         val isReadingQuest: Boolean,
+        val isOver: Boolean,
     ) {
         enum class DirectionDto(
             val rowOffset: Int,

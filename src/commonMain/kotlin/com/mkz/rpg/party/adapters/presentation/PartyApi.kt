@@ -2,7 +2,7 @@ package com.mkz.rpg.party.adapters.presentation
 
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
-import com.mkz.rpg.party.adapters.events.OnBattleFinishedWithoutWinner
+import com.mkz.rpg.party.adapters.events.OnBattleFinished
 import com.mkz.rpg.party.adapters.events.OnBattleStarted
 import com.mkz.rpg.party.adapters.events.OnBattleUnitDefeated
 import com.mkz.rpg.party.adapters.events.OnBattleUnitMoved
@@ -64,7 +64,7 @@ class PartyApi(
     val resolvePartyStep = ResolvePartyStep(partyRepository, partyStepping)
     val interruptExploration = InterruptExploration(partyRepository, eventBus)
     val resumeExploration = ResumeExploration(partyRepository, eventBus)
-    val leaveParty = LeaveParty(partyRepository)
+    val leaveParty = LeaveParty(partyRepository, eventBus)
     val joinParty = JoinParty(partyRepository, battleUnitApi.searchBattleUnitById, eventBus)
     val recruitMember = RecruitMember(partyRepository, eventBus)
     val markBattleUnitMoved = MarkBattleUnitMoved(partyRepository)
@@ -86,7 +86,7 @@ class PartyApi(
     private val onRequestStartExploration = OnRequestStartExploration(startExploration, eventBus)
     private val onTileOccupied = OnTileOccupied(resolvePartyStep, eventBus)
     private val onBattleStarted = OnBattleStarted(interruptExploration, eventBus)
-    private val onBattleFinishedWithoutWinner = OnBattleFinishedWithoutWinner(resumeExploration, eventBus)
+    private val onBattleFinished = OnBattleFinished(resumeExploration, eventBus)
     private val onBattleUnitDefeated = OnBattleUnitDefeated(leaveParty, eventBus)
     private val onBattleUnitMoved = OnBattleUnitMoved(markBattleUnitMoved, eventBus)
     private val onRequestRecruitMember = OnRequestRecruitMember(recruitMember, eventBus)

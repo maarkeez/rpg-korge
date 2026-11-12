@@ -296,7 +296,7 @@ class StorySmokeTest : ViewsForTesting() {
                     "screen-banner--exploring",
                     "screen-banner--human-turn",
                     "screen-banner--cpu-turn",
-                    "screen-banner--winner",
+                    "screen-banner--game-over",
                     "screen-quest-tracker",
                     "screen-quest-tracker--goat-wizard",
                     "screen-quest-tracker--defeats-counted",

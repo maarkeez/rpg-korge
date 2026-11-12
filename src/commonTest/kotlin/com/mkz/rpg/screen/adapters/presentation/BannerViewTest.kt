@@ -127,15 +127,14 @@ class BannerViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `DisplayPlayerWin should display player name when player wins`() =
+    fun `DisplayGameOver should display the game over without the round and the player turn`() =
         sharedViewsTest {
             // Given
             val bannerView = BannerView(MessagesMother.messages())
-            val playerId = "player-one"
             // When
-            bannerView.displayVictory(playerId)
+            bannerView.displayGameOver()
             // Then
-            bannerView.winnerText() shouldBe "Human wins!"
+            bannerView.gameOverText() shouldBe "Game over!"
             bannerView.roundText().shouldBeNull()
             bannerView.playerTurnText().shouldBeNull()
         }

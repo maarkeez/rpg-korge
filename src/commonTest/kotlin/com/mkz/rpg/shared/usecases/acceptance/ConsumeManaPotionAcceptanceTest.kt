@@ -47,7 +47,7 @@ class ConsumeManaPotionAcceptanceTest {
     private val lootTableApi = LootTableApi(lootableItemApi, eventBus, ResourcesLootTableLoader())
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
     private val lootDropApi = LootDropApi(unitApi, lootTableApi, eventBus, ResourcesLootDropLoader(), Random.Default)
-    private val battleApi = BattleApi(eventBus, playerApi)
+    private val battleApi = BattleApi(eventBus)
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val npcApi = NpcApi(battlefieldApi, lootableItemApi, partyApi, eventBus, ResourcesNpcLoader())
     private val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)

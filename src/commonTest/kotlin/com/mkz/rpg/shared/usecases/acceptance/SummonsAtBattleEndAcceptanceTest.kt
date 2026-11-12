@@ -3,7 +3,6 @@ package com.mkz.rpg.shared.usecases.acceptance
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.ability.adapters.resources.ResourcesAbilityLoader
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
-import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battleUnit.adapters.resources.ResourcesBattleUnitLoader
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
@@ -25,14 +24,11 @@ import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.HUMAN
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.domain.FixedDoublesRandom
-import com.mkz.rpg.shared.domain.subscribe
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.terrain.adapters.resources.ResourcesTerrainLoader
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import com.mkz.rpg.unit.adapters.resources.ResourcesUnitLoader
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import kotlin.test.Test
@@ -46,7 +42,7 @@ class SummonsAtBattleEndAcceptanceTest {
     private val effectApi = EffectApi(eventBus, ResourcesEffectLoader())
     private val abilityApi = AbilityApi(effectApi, eventBus, ResourcesAbilityLoader())
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
-    private val battleApi = BattleApi(eventBus, playerApi)
+    private val battleApi = BattleApi(eventBus)
 
     private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom.cpuBattleUnitsAlwaysResting())
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
@@ -54,7 +50,6 @@ class SummonsAtBattleEndAcceptanceTest {
 
     private val humanPlayerId = "human"
     private val cpuPlayerId = "cpu"
-    private val winners = mutableListOf<String>().also { winners -> eventBus.subscribe<BattleEvent.PlayerVictory> { winners += it.playerId } }
 
     private suspend fun setUp() {
         terrainApi.init()
@@ -113,20 +108,5 @@ class SummonsAtBattleEndAcceptanceTest {
             partyApi.searchParty()!!.isExploring.shouldBeTrue()
             battleUnitApi.searchBattleUnitById(beeId).shouldBeNull()
             battlefieldApi.searchOccupant(row = beeTile.row, column = beeTile.column).shouldBeNull()
-            winners.shouldBeEmpty()
-        }
-
-    @Test
-    fun `should lose the game when only summons are left when the battle ends`() =
-        scenarioTest(::setUp) {
-            // Given
-            summonBee()
-            defeat("knight-1")
-            defeat("knight-2")
-            require(winners.isEmpty())
-            // When
-            defeat("rat-1")
-            // Then
-            winners.shouldContainExactly(cpuPlayerId)
         }
 }

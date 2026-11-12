@@ -1,11 +1,11 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
 import com.mkz.rpg.npc.domain.NpcEvent.NpcRecruited
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationInterrupted
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationResumed
+import com.mkz.rpg.party.domain.PartyEvent.GameOver
 import com.mkz.rpg.quest.adapters.presentation.QuestApi
 import com.mkz.rpg.quest.domain.Quest.Dto.QuestTypeDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
@@ -95,7 +95,7 @@ class QuestPresenter(
                 timeline.play { questTrackerView.setTappable(true) }
                 displayMarkers()
             },
-            eventBus.subscribe<PlayerVictory> {
+            eventBus.subscribe<GameOver> {
                 timeline.play {
                     questTrackerView.hide()
                     closeQuest()

@@ -44,7 +44,7 @@ class TradeAcceptanceTest {
     private val abilityApi = AbilityApi(effectApi, eventBus, ResourcesAbilityLoader())
     private val lootableItemApi = LootableItemApi(effectApi, eventBus, ResourcesLootableItemLoader())
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
-    private val battleApi = BattleApi(eventBus, playerApi)
+    private val battleApi = BattleApi(eventBus)
 
     private val merchant = Npc.Dto(id = "merchant", row = 0, column = 0, unitId = null, stock = listOf("health-potion", "mana-potion", "hammer"))
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)

@@ -1,7 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battle.domain.BattleEvent.BattleStarted
-import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.inventory.domain.InventoryEvent.InventoryFull
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
 import com.mkz.rpg.npc.domain.Npc
@@ -12,6 +11,7 @@ import com.mkz.rpg.party.domain.PartyEvent.ExplorationResumed
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationStarted
 import com.mkz.rpg.party.domain.PartyEvent.FormationClosed
 import com.mkz.rpg.party.domain.PartyEvent.FormationOpened
+import com.mkz.rpg.party.domain.PartyEvent.GameOver
 import com.mkz.rpg.party.domain.PartyEvent.NpcTalkFinished
 import com.mkz.rpg.party.domain.PartyEvent.NpcTalkStarted
 import com.mkz.rpg.party.domain.PartyEvent.PauseClosed
@@ -124,16 +124,11 @@ class ExplorationPresenter(
             eventBus.subscribe<QuestClosed> {
                 timeline.play { displayVirtualPad(isDisplayed = true) }
             },
-            eventBus.subscribe<PlayerVictory> {
+            eventBus.subscribe<GameOver> {
                 isGameOver = true
                 timeline.play {
-                    virtualPadView.visible = false
-                    talkView.visible = false
-                    shopPresenter.close()
-                    formationPresenter.close()
-                    pausePresenter.close()
-                    questPresenter.closeQuest()
-                    callToActionView.hideButtons()
+                    displayVirtualPad(isDisplayed = false)
+                    callToActionView.displayButtons(listOf(ButtonRowView.Action(messages[UiMessage.PAUSE_QUIT], onSelected = pausePresenter::quit)))
                 }
             },
         )

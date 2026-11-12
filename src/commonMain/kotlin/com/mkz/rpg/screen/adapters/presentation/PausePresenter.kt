@@ -45,6 +45,8 @@ class PausePresenter(
 
     override fun pauseSaveSelected() = whenIdle { displaySaveSlots() }
 
+    fun quit() = onQuit()
+
     override fun pauseQuitSelected() =
         whenIdle {
             confirm(

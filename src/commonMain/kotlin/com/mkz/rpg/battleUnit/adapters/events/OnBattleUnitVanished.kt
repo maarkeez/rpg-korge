@@ -11,6 +11,6 @@ class OnBattleUnitVanished(
 ) {
     val subscription =
         eventBus.subscribe<BattleUnitEvent.BattleUnitVanished> { event ->
-            requestLeaveBattle(playerId = event.playerId, battleUnitId = event.battleUnitId)
+            requestLeaveBattle(battleUnitId = event.battleUnitId)
         }
 }

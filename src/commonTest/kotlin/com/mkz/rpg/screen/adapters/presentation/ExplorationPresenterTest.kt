@@ -1,7 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battle.domain.BattleEvent.BattleStarted
-import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
@@ -97,6 +96,7 @@ class ExplorationPresenterTest {
     private val pauseView = PauseView(MessagesMother.messages())
     private val saveSlotsView = SaveSlotsView(MessagesMother.messages())
     private val confirmDialogView = ConfirmDialogView()
+    private var quits = 0
     private val pausePresenter =
         PausePresenter(
             pauseView,
@@ -109,7 +109,7 @@ class ExplorationPresenterTest {
             }, { null }, { 0 }, { DateTime.nowUnixMillis() }),
             MessagesMother.messages(),
             timeline,
-        ) {}
+        ) { quits++ }
 
     private val questDetailView = QuestDetailView(GameSceneResourcesLoader(), MessagesMother.messages())
     private val questPresenter =
@@ -463,7 +463,7 @@ class ExplorationPresenterTest {
         val presenter = createPresenter()
         startExploring()
         val requests = requestedTerrainEffects()
-        eventBus.publish(PlayerVictory(playerId = "cpu"))
+        eventBus.publish(PartyEvent.GameOver(playerId = "human"))
         eventBus.dispatch()
         // When
         presenter.tick(1.seconds)
@@ -1126,17 +1126,32 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `ExplorationPresenter should hide the row when the player wins`() {
+    fun `ExplorationPresenter should display Quit to menu when the game is over`() {
         // Given
         createPresenter()
         startExploring()
         tapTracker()
         // When
-        eventBus.publish(PlayerVictory(playerId = "human"))
+        eventBus.publish(PartyEvent.GameOver(playerId = "human"))
         eventBus.dispatch()
         // Then
         questDetailView.visible.shouldBeFalse()
-        callToActionView.displayedActions shouldBe null
+        virtualPadView.visible.shouldBeFalse()
+        callToActionView.actionLabels() shouldBe listOf("Quit to menu")
+    }
+
+    @Test
+    fun `QuitToMenu should go back to the main menu, without confirming, when Quit to menu is tapped after the game over`() {
+        // Given
+        createPresenter()
+        startExploring()
+        eventBus.publish(PartyEvent.GameOver(playerId = "human"))
+        eventBus.dispatch()
+        // When
+        callToActionView.chooseAction("Quit to menu")
+        // Then
+        quits shouldBe 1
+        confirmDialogView.visible.shouldBeFalse()
     }
 
     @Test

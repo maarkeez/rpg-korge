@@ -35,7 +35,7 @@ class InMemoryBattleRepositoryTest {
     @Test
     fun `Create should replace the finished battle when a new battle is created`() {
         // Given
-        battleRepository.create(battle().finishWithoutWinner())
+        battleRepository.create(battle().finish())
         val newBattle = battle()
         // When
         battleRepository.create(newBattle)

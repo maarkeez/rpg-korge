@@ -2,7 +2,7 @@ package com.mkz.rpg.battleUnit.adapters.presentation
 
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.battleUnit.adapters.events.OnAbilityCasted
-import com.mkz.rpg.battleUnit.adapters.events.OnBattleFinishedWithoutWinner
+import com.mkz.rpg.battleUnit.adapters.events.OnBattleFinished
 import com.mkz.rpg.battleUnit.adapters.events.OnBattleUnitDefeated
 import com.mkz.rpg.battleUnit.adapters.events.OnBattleUnitDeployed
 import com.mkz.rpg.battleUnit.adapters.events.OnBattleUnitVanished
@@ -42,7 +42,6 @@ import com.mkz.rpg.battleUnit.usecases.commands.TriggerOnPlayerTurnStartedEffect
 import com.mkz.rpg.battleUnit.usecases.commands.VanishSummons
 import com.mkz.rpg.battleUnit.usecases.commands.WalkBattleUnitInBattle
 import com.mkz.rpg.battleUnit.usecases.commands.WalkBattleUnitOutOfBattle
-import com.mkz.rpg.battleUnit.usecases.queries.AreAllBattleUnitsDefeated
 import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
 import com.mkz.rpg.battleUnit.usecases.queries.CanLearnAbility
 import com.mkz.rpg.battleUnit.usecases.queries.CanWalkTo
@@ -207,7 +206,6 @@ class BattleUnitApi(
             castResolution,
             eventBus,
         )
-    val areAllBattleUnitsDefeated = AreAllBattleUnitsDefeated(battleUnitRepository)
     val searchBattleUnitsByPlayerId = SearchBattleUnitsByPlayerId(battleUnitRepository)
     val triggerOnPlayerTurnStartedEffects =
         TriggerOnPlayerTurnStartedEffects(
@@ -224,11 +222,11 @@ class BattleUnitApi(
     val reduceRemainingSummonDurations = ReduceRemainingSummonDurations(battleUnitRepository, battlefieldApi.searchPosition, eventBus)
     val vanishSummons = VanishSummons(battleUnitRepository, battlefieldApi.searchPosition, eventBus)
     val requestJoinBattle = RequestJoinBattle(eventBus)
-    val requestLeaveBattle = RequestLeaveBattle(areAllBattleUnitsDefeated, eventBus)
+    val requestLeaveBattle = RequestLeaveBattle(eventBus)
 
     private val onPlayerTurnStarted = OnPlayerTurnStarted(resetBattleUnitActionsAndReduceCooldowns, triggerOnPlayerTurnStartedEffects, replenishMana, eventBus)
     private val onPlayerTurnFinished = OnPlayerTurnFinished(reduceRemainingSummonDurations, eventBus)
-    private val onBattleFinishedWithoutWinner = OnBattleFinishedWithoutWinner(vanishSummons, eventBus)
+    private val onBattleFinished = OnBattleFinished(vanishSummons, eventBus)
     private val onAbilityCasted = OnAbilityCasted(requestEffectApplicationToCastTargets, eventBus)
     private val onBattleUnitDeployed = OnBattleUnitDeployed(requestJoinBattle, eventBus)
     private val onBattleUnitDefeated = OnBattleUnitDefeated(triggerOnDefeatedEffects, requestLeaveBattle, eventBus)

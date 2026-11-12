@@ -25,6 +25,10 @@ sealed interface PartyEvent : DomainEvent {
         val battleUnitIds: List<String>,
     ) : PartyEvent
 
+    data class GameOver(
+        val playerId: String,
+    ) : PartyEvent
+
     data class ExplorationSecondStarted(
         val playerId: String,
     ) : PartyEvent

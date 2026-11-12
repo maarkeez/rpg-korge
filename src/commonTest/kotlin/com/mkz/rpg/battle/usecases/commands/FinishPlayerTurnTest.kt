@@ -56,7 +56,7 @@ class FinishPlayerTurnTest {
         // Given
         val finishedBattle =
             battle(listOf("cpu", "human"), battleUnits = mapOf("knight-1" to "human"))
-                .finishWithoutWinner()
+                .finish()
                 .pullEvents()
                 .second
         battleRepository.create(finishedBattle)

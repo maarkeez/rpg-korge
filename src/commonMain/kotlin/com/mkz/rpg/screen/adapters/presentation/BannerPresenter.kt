@@ -1,12 +1,12 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
-import com.mkz.rpg.battle.domain.BattleEvent.BattleFinishedWithoutWinner
+import com.mkz.rpg.battle.domain.BattleEvent.BattleFinished
 import com.mkz.rpg.battle.domain.BattleEvent.BattleStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
-import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationResumed
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationStarted
+import com.mkz.rpg.party.domain.PartyEvent.GameOver
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto
 import com.mkz.rpg.save.domain.SaveEvent.GameLoaded
@@ -25,6 +25,8 @@ class BannerPresenter(
     private val timeline: GameSceneTimeline,
     eventBus: EventBus,
 ) {
+    private var isGameOver = false
+
     private val subscriptions =
         listOf(
             eventBus.subscribe<ExplorationStarted> {
@@ -36,8 +38,8 @@ class BannerPresenter(
             eventBus.subscribe<BattleStarted> {
                 timeline.play { bannerView.announceBattle() }
             },
-            eventBus.subscribe<BattleFinishedWithoutWinner> {
-                timeline.play { bannerView.announceBattleFinished() }
+            eventBus.subscribe<BattleFinished> {
+                if (!isGameOver) timeline.play { bannerView.announceBattleFinished() }
             },
             eventBus.subscribe<ExplorationResumed> {
                 timeline.play { bannerView.displayExploring() }
@@ -45,8 +47,9 @@ class BannerPresenter(
             eventBus.subscribe<PlayerTurnStarted> {
                 announcePlayerTurn()
             },
-            eventBus.subscribe<PlayerVictory> { event ->
-                displayVictory(event.playerId)
+            eventBus.subscribe<GameOver> {
+                isGameOver = true
+                timeline.play { bannerView.displayGameOver() }
             },
         )
 
@@ -63,10 +66,6 @@ class BannerPresenter(
             bannerView.announcePlayerTurn(playerId = player.id, round = battle.currentRound, turnColor = turnColor)
             tinting.join()
         }
-    }
-
-    fun displayVictory(playerId: String) {
-        timeline.play { bannerView.displayVictory(playerId) }
     }
 
     fun dispose() {

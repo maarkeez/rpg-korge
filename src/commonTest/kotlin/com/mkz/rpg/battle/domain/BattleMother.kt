@@ -9,7 +9,7 @@ object BattleMother {
         battleUnits: Map<String, String> = battleUnitsOfPlayersInTurns(battleUnitIds, players),
     ): Battle = Battle.startFirstRound(players, battleUnits).pullEvents().second
 
-    fun finishedBattle(players: List<String> = listOf(playerId(), playerId())): Battle = battle(players).defeatPlayer(players.first()).pullEvents().second
+    fun finishedBattle(players: List<String> = listOf(playerId(), playerId())): Battle = battle(players).finish().pullEvents().second
 
     fun playerId() = "player-${UUID.randomUUID()}"
 

@@ -6,37 +6,48 @@ import com.mkz.rpg.battle.domain.BattleMother.battle
 import com.mkz.rpg.battle.domain.BattleMother.finishedBattle
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import kotlin.test.Test
 
-class FinishBattleWithWinnerTest {
+class FinishBattleTest {
     private val battleRepository = InMemoryBattleRepository()
     private val eventBus = FakeEventBus()
-    private val finishBattleWithWinner =
-        FinishBattleWithWinner(
+    private val finishBattle =
+        FinishBattle(
             battleRepository = battleRepository,
             eventBus = eventBus,
         )
 
     @Test
-    fun `should finish battle when the battle is finished`() {
+    fun `should finish the battle in progress and publish that it finished`() {
         // Given
-        val players = listOf("player-1", "player-2")
-        val winner = players[1]
-        battleRepository.create(finishedBattle(players))
+        battleRepository.create(battle())
         // When
-        finishBattleWithWinner()
+        finishBattle()
         // Then
-        eventBus.shouldHavePublishedEvents(BattleEvent.PlayerVictory(winner))
+        battleRepository
+            .search()!!
+            .toDto()
+            .isFinished
+            .shouldBeTrue()
+        eventBus.shouldHavePublishedEvents(BattleEvent.BattleFinished)
     }
 
     @Test
-    fun `should not finish battle when the battle is not finished`() {
+    fun `should do nothing when the battle is already finished`() {
         // Given
-        val players = listOf("player-1", "player-2")
-        battleRepository.create(battle(players))
+        battleRepository.create(finishedBattle())
         // When
-        finishBattleWithWinner()
+        finishBattle()
+        // Then
+        eventBus.publishedEvents.shouldBeEmpty()
+    }
+
+    @Test
+    fun `should do nothing when there is no battle`() {
+        // When
+        finishBattle()
         // Then
         eventBus.publishedEvents.shouldBeEmpty()
     }

@@ -11,7 +11,8 @@ class FakeBannerView : BannerView(MessagesMother.messages()) {
 
     val displayedBanners = mutableListOf<Banner>()
     val announcedTurns = mutableListOf<Banner>()
-    val displayedPlayerWins = mutableListOf<String>()
+    var gameOverDisplays = 0
+        private set
     var explorationDisplays = 0
     var announcedBattles = 0
     var announcedBattleEnds = 0
@@ -44,7 +45,7 @@ class FakeBannerView : BannerView(MessagesMother.messages()) {
         announcedTurns += Banner(playerId, round, turnColor)
     }
 
-    override fun displayVictory(playerId: String) {
-        displayedPlayerWins += playerId
+    override fun displayGameOver() {
+        gameOverDisplays++
     }
 }

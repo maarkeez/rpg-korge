@@ -1,9 +1,8 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.battle.domain.BattleEvent.BattleFinishedWithoutWinner
+import com.mkz.rpg.battle.domain.BattleEvent.BattleFinished
 import com.mkz.rpg.battle.domain.BattleEvent.BattleStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
-import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
@@ -69,7 +68,7 @@ class FinishPlayerTurnPresenterTest {
         createPresenter()
         publish(BattleStarted)
         // When
-        publish(BattleFinishedWithoutWinner)
+        publish(BattleFinished)
         // Then
         callToActionView.onPlayerTurnFinished.shouldBeNull()
     }
@@ -81,7 +80,7 @@ class FinishPlayerTurnPresenterTest {
         publish(BattleStarted)
         startTurnOf("human")
         // When
-        publish(BattleFinishedWithoutWinner)
+        publish(BattleFinished)
         // Then
         callToActionView.isFinishPlayerTurnEnabled.shouldBeFalse()
     }
@@ -187,16 +186,5 @@ class FinishPlayerTurnPresenterTest {
         clickFinishPlayerTurn()
         // Then
         currentPlayerId() shouldBe "human"
-    }
-
-    @Test
-    fun `PlayerWins should hide the call to action when a player wins`() {
-        // Given
-        createPresenter()
-        eventBus.publish(PlayerVictory(playerId = "human"))
-        // When
-        eventBus.dispatch()
-        // Then
-        callToActionView.hideCount shouldBe 1
     }
 }

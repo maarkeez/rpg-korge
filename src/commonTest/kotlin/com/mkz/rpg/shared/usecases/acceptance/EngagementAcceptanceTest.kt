@@ -33,7 +33,6 @@ import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import com.mkz.rpg.unit.adapters.resources.ResourcesUnitLoader
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -48,7 +47,7 @@ class EngagementAcceptanceTest {
     private val effectApi = EffectApi(eventBus, ResourcesEffectLoader())
     private val abilityApi = AbilityApi(effectApi, eventBus, ResourcesAbilityLoader())
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
-    private val battleApi = BattleApi(eventBus, playerApi)
+    private val battleApi = BattleApi(eventBus)
 
     private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom.cpuBattleUnitsAlwaysResting())
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
@@ -167,20 +166,19 @@ class EngagementAcceptanceTest {
         }
 
     @Test
-    fun `should only have the human player win, without exploring again, when the last cpu battle unit is defeated`() =
+    fun `should explore again when the last cpu battle unit of the battlefield is defeated`() =
         scenarioTest(::setUp) {
             // Given
-            val winners = mutableListOf<String>().also { winners -> eventBus.subscribe<BattleEvent.PlayerVictory> { winners += it.playerId } }
-            val finishedBattles = mutableListOf<BattleEvent.BattleFinishedWithoutWinner>().also { finished -> eventBus.subscribe<BattleEvent.BattleFinishedWithoutWinner> { finished += it } }
+            val finishedBattles = mutableListOf<BattleEvent.BattleFinished>().also { finished -> eventBus.subscribe<BattleEvent.BattleFinished> { finished += it } }
             engageRat()
             defeatRat("rat-2")
             battleApi.searchBattle()!!.isFinished.shouldBeFalse()
             // When
             defeatRat()
             // Then
-            winners shouldBe listOf(humanPlayerId)
-            finishedBattles.shouldBeEmpty()
-            partyApi.searchParty()!!.isExploring.shouldBeFalse()
+            finishedBattles shouldBe listOf(BattleEvent.BattleFinished)
+            battleApi.searchBattle()!!.isFinished.shouldBeTrue()
+            partyApi.searchParty()!!.isExploring.shouldBeTrue()
         }
 
     @Test

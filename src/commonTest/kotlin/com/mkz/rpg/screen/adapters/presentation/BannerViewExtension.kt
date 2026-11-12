@@ -8,7 +8,7 @@ fun BannerView.roundText(): String? = round.takeIf { it.parent != null }?.text
 
 fun BannerView.playerTurnText(): String? = playerTurn.takeIf { it.parent != null }?.text
 
-fun BannerView.winnerText(): String? = winner?.text
+fun BannerView.gameOverText(): String? = gameOver?.text
 
 fun BannerView.playerTurnColor(): RGBA = playerTurn.styles.textColor
 

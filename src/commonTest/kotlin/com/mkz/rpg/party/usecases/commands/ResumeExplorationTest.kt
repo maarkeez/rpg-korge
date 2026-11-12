@@ -30,6 +30,27 @@ class ResumeExplorationTest {
     }
 
     @Test
+    fun `should not explore again when the game is over`() {
+        // Given
+        partyRepository.save(
+            party(battleUnitIds = listOf("knight-1"))
+                .interrupt()
+                .leave("knight-1")
+                .pullEvents()
+                .second,
+        )
+        // When
+        resumeExploration()
+        // Then
+        partyRepository
+            .search()!!
+            .toDto()
+            .isOver
+            .shouldBeTrue()
+        eventBus.shouldNotHavePublishedEvents()
+    }
+
+    @Test
     fun `should not resume again when the party is already exploring`() {
         // Given
         partyRepository.save(party())
