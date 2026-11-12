@@ -124,18 +124,7 @@ _Avoid_: Current player turn
 Said of a battle with fewer than two of its players left with battle units in it.
 
 **Finished battle**:
-A battle that is over, with or without a winner.
-
-**Player defeat**:
-A player losing all their battle units, which gives their opponent the victory.
-_Avoid_: Loss
-
-**Victory**:
-The end of the game, when only one player is left after the defeat of the other.
-_Avoid_: Win, game over
-
-**Winner**:
-The player who gets the victory.
+A battle that is over.
 
 ### Battle unit
 
@@ -539,7 +528,7 @@ How many player turns an effect timed on player turn started triggers for.
 ### Game setup
 
 **Game**:
-One whole play, from when it is started new to its victory, which can be saved and loaded again.
+One whole play, from when it is started new until its game over, which can be saved and loaded again.
 _Avoid_: Playthrough, run
 
 **Game setup**:
@@ -837,6 +826,10 @@ A battle unit becoming the last party member, such as a recruited npc.
 **Leave the party**:
 A party member going out of the party when it is defeated.
 
+**Game over**:
+The end of the game, when the last party member leaves the party.
+_Avoid_: Player defeat, loss
+
 #### Exploring
 
 **Exploring**:
@@ -1059,7 +1052,8 @@ A game played from its start, not loaded from a save.
 Where the player, with time stopped, resumes, saves the game or quits.
 
 **Quit**:
-The player going back to the main menu from the pause screen, losing what was played since the last save.
+The player going back to the main menu, from the pause screen, losing what was played since the last save, or after
+the game over.
 
 #### The battlefield on the screen
 
@@ -1075,7 +1069,7 @@ The part of a building's image drawn on one of its tiles.
 
 **Banner**:
 The line at the top of the game screen telling whether the party is exploring, or the round and player turn of a battle,
-and announcing a battle, its end and the victory.
+and announcing a battle, its end and the game over.
 _Avoid_: Header, battle info
 
 #### Selection
