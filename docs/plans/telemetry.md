@@ -1,6 +1,6 @@
 # Plan: telemetry records product events, with the player's consent
 
-> **Status:** to do.
+> **Status:** built on `main`, the screenshots of M4 still to be approved.
 >
 > **Summary:** Today the game knows nothing of how it is played: how many players start a new game, how many finish
 > Bats in the Meadow or abandon it, how many battles end in a game over. Nothing is recorded, so every change to the
@@ -61,7 +61,7 @@ Each milestone is a few commits straight on `main`, green on CI, except M1, whic
 | M1 | Consent prototypes  | The three consent dialogs can be tapped through in the Storybook on `prototype/telemetry-consent`, and one is chosen.                               | ✅      | 9a43e6b2 |
 | M2 | Product events      | Every product event reaches the `Telemetry` aggregate and is dropped, as no consent can be given yet, with the architecture tests green.            | ✅      | 51728acd |
 | M3 | Game id             | A new game makes a game id, the saves keep it, and a loaded save without one gets a new one. `SAVE_VERSION` is 10.                                  | ✅      | b745977b |
-| M4 | Consent and Privacy | The chosen dialog asks at the first launch, Privacy changes the choice, Read more shows the notice, and with consent product events reach `create`. | ⬜      |          |
+| M4 | Consent and Privacy | The chosen dialog asks at the first launch, Privacy changes the choice, Read more shows the notice, and with consent product events reach `create`. | ✅      | d7828945 |
 
 ### M1 commits
 
@@ -266,3 +266,9 @@ Each milestone is a few commits straight on `main`, green on CI, except M1, whic
 - M3: a game id is only made with consent: `startGame` and `gameLoaded` change nothing without it, so the save of a game
   played without consent holds `{"gameId":null}`. A save's game id is loaded with `loadGameId`.
 - M3: `StartGame` and `RecordGameLoaded` take a `newGameId` from `TelemetryApi`, which makes every id.
+- M4: the consent view is `ConsentView`. It and `PrivacyNoticeView` set their texts on `display()`, so a language picked
+  on the menu since shows when Privacy is tapped.
+- M4: giving consent again from Privacy keeps the install id already on the device instead of making a new one.
+- M4: Privacy opens the panel over the menu without hiding its options, which stay dimmed behind it.
+- M4: the end-to-end tests decline the consent with an `openMenu` helper before they play, and `PauseEndToEndTest` only
+  checks the keys of the save, as the consent is now on the device too.
