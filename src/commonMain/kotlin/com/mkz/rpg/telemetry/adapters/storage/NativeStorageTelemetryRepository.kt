@@ -35,7 +35,11 @@ class NativeStorageTelemetryRepository(
 
     fun save(telemetry: Telemetry) {
         val dto = telemetry.toDto()
-        storage[CONSENT_KEY] = json.encodeToString(ConsentFile(status = dto.consent.status.name, noticeVersion = dto.consent.noticeVersion, decidedAt = dto.consent.decidedAt))
+        if (dto.consent.status == ConsentStatusDto.NOT_ASKED) {
+            storage.remove(CONSENT_KEY)
+        } else {
+            storage[CONSENT_KEY] = json.encodeToString(ConsentFile(status = dto.consent.status.name, noticeVersion = dto.consent.noticeVersion, decidedAt = dto.consent.decidedAt))
+        }
         val installId = dto.installId
         if (installId == null) storage.remove(INSTALL_ID_KEY) else storage[INSTALL_ID_KEY] = installId
         sessionId = dto.sessionId

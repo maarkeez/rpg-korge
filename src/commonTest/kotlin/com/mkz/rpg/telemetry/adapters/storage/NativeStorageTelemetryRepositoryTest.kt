@@ -1,6 +1,7 @@
 package com.mkz.rpg.telemetry.adapters.storage
 
 import com.mkz.rpg.telemetry.domain.Telemetry
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -43,6 +44,14 @@ class NativeStorageTelemetryRepositoryTest {
         repository.save(consented.declineConsent(decidedAt = 2_000.0))
         // Then
         storage.keys().shouldContainExactlyInAnyOrder("telemetry.consent")
+    }
+
+    @Test
+    fun `NativeStorageTelemetryRepository should write nothing on the device when consent was never asked`() {
+        // When
+        repository.save(Telemetry.notAsked().startSession("s1"))
+        // Then
+        storage.keys().shouldBeEmpty()
     }
 
     @Test
