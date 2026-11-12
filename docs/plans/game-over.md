@@ -1,6 +1,6 @@
 # Plan: the game has no victory, only a game over
 
-> **Status:** built on `main` in 2777a984, its screenshots still to be approved.
+> **Status:** done, built on `main` in 2777a984.
 >
 > **Summary:** Today a player whose battle units are all defeated is defeated, and the other player gets the victory,
 > which ends the game: the banner says "Human wins!" or "CPU wins!" and the screen locks. The human player only wins
