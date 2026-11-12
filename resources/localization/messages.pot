@@ -31,6 +31,54 @@ msgctxt "ui.menu.language"
 msgid "Language"
 msgstr ""
 
+#. Opens the consent panel again, to change the choice to record how the game is played.
+msgctxt "ui.menu.privacy"
+msgid "Privacy"
+msgstr ""
+
+#. The title of the panel asking, at the first launch, to record how the game is played.
+msgctxt "ui.consent.title"
+msgid "Help improve the game"
+msgstr ""
+
+msgctxt "ui.consent.body"
+msgid "May we record how you play, such as the quests you complete and the battles you fight, to make the game better? Nothing is recorded unless you accept, and the game plays the same either way. You can change your mind at any time from Privacy on the main menu."
+msgstr ""
+
+#. Gives the consent to record how the game is played.
+msgctxt "ui.consent.accept"
+msgid "Accept"
+msgstr ""
+
+#. Refuses, or withdraws, the consent to record how the game is played.
+msgctxt "ui.consent.decline"
+msgid "Decline"
+msgstr ""
+
+#. Opens the privacy notice.
+msgctxt "ui.consent.readMore"
+msgid "Read more"
+msgstr ""
+
+msgctxt "ui.privacyNotice.title"
+msgid "Privacy notice"
+msgstr ""
+
+#. What the game records, why, who receives it and for how long.
+msgctxt "ui.privacyNotice.body"
+msgid ""
+"What is recorded: opening the main menu, starting, saving or loading a game, starting, completing or abandoning a quest, starting or finishing a battle, a game over, buying or selling an item and recruiting a member.\n\n"
+"With it: when it happened, and random ids of this copy of the game, of this launch and of this game. Never your name, nor anything else about you.\n\n"
+"Why: to learn how the game is played and make it better.\n\n"
+"Who receives it and for how long: not decided yet. Nothing leaves your device until it is, and you will be asked again.\n\n"
+"Changing your mind: Privacy on the main menu, at any time. Declining there stops recording and deletes the id of this copy of the game."
+msgstr ""
+
+#. Goes back to the consent panel.
+msgctxt "ui.privacyNotice.back"
+msgid "Back"
+msgstr ""
+
 #. The banner while the party explores, out of the battles.
 msgctxt "ui.banner.exploring"
 msgid "Exploring"

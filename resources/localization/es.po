@@ -31,6 +31,59 @@ msgctxt "ui.menu.language"
 msgid "Language"
 msgstr "Idioma"
 
+#. Opens the consent panel again, to change the choice to record how the game is played.
+msgctxt "ui.menu.privacy"
+msgid "Privacy"
+msgstr "Privacidad"
+
+#. The title of the panel asking, at the first launch, to record how the game is played.
+msgctxt "ui.consent.title"
+msgid "Help improve the game"
+msgstr "Ayuda a mejorar el juego"
+
+msgctxt "ui.consent.body"
+msgid "May we record how you play, such as the quests you complete and the battles you fight, to make the game better? Nothing is recorded unless you accept, and the game plays the same either way. You can change your mind at any time from Privacy on the main menu."
+msgstr "¿Podemos registrar cómo juegas, como las misiones que completas y las batallas que libras, para mejorar el juego? No se registra nada si no aceptas, y el juego es igual en ambos casos. Puedes cambiar de opinión en cualquier momento desde Privacidad en el menú principal."
+
+#. Gives the consent to record how the game is played.
+msgctxt "ui.consent.accept"
+msgid "Accept"
+msgstr "Aceptar"
+
+#. Refuses, or withdraws, the consent to record how the game is played.
+msgctxt "ui.consent.decline"
+msgid "Decline"
+msgstr "Rechazar"
+
+#. Opens the privacy notice.
+msgctxt "ui.consent.readMore"
+msgid "Read more"
+msgstr "Leer más"
+
+msgctxt "ui.privacyNotice.title"
+msgid "Privacy notice"
+msgstr "Aviso de privacidad"
+
+#. What the game records, why, who receives it and for how long.
+msgctxt "ui.privacyNotice.body"
+msgid ""
+"What is recorded: opening the main menu, starting, saving or loading a game, starting, completing or abandoning a quest, starting or finishing a battle, a game over, buying or selling an item and recruiting a member.\n\n"
+"With it: when it happened, and random ids of this copy of the game, of this launch and of this game. Never your name, nor anything else about you.\n\n"
+"Why: to learn how the game is played and make it better.\n\n"
+"Who receives it and for how long: not decided yet. Nothing leaves your device until it is, and you will be asked again.\n\n"
+"Changing your mind: Privacy on the main menu, at any time. Declining there stops recording and deletes the id of this copy of the game."
+msgstr ""
+"Qué se registra: abrir el menú principal, empezar, guardar o cargar una partida, empezar, completar o abandonar una misión, empezar o terminar una batalla, perder la partida, comprar o vender un objeto y reclutar a un miembro.\n\n"
+"Con ello: cuándo ocurrió, e identificadores aleatorios de esta copia del juego, de esta sesión y de esta partida. Nunca tu nombre ni nada más sobre ti.\n\n"
+"Para qué: para saber cómo se juega y mejorar el juego.\n\n"
+"Quién lo recibe y durante cuánto tiempo: aún no está decidido. Nada sale de tu dispositivo hasta entonces, y se te volverá a preguntar.\n\n"
+"Cambiar de opinión: Privacidad en el menú principal, en cualquier momento. Rechazar ahí deja de registrar y borra el identificador de esta copia del juego."
+
+#. Goes back to the consent panel.
+msgctxt "ui.privacyNotice.back"
+msgid "Back"
+msgstr "Volver"
+
 #. The banner while the party explores, out of the battles.
 msgctxt "ui.banner.exploring"
 msgid "Exploring"
