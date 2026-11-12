@@ -59,7 +59,7 @@ Each milestone is a few commits straight on `main`, green on CI, except M1, whic
 | #  | Milestone           | Done when                                                                                                                                           | Status | Done in  |
 |----|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|--------|----------|
 | M1 | Consent prototypes  | The three consent dialogs can be tapped through in the Storybook on `prototype/telemetry-consent`, and one is chosen.                               | ✅      | 9a43e6b2 |
-| M2 | Product events      | Every product event reaches the `Telemetry` aggregate and is dropped, as no consent can be given yet, with the architecture tests green.            | ⬜      |          |
+| M2 | Product events      | Every product event reaches the `Telemetry` aggregate and is dropped, as no consent can be given yet, with the architecture tests green.            | ✅      | 51728acd |
 | M3 | Game id             | A new game makes a game id, the saves keep it, and a loaded save without one gets a new one. `SAVE_VERSION` is 10.                                  | ⬜      |          |
 | M4 | Consent and Privacy | The chosen dialog asks at the first launch, Privacy changes the choice, Read more shows the notice, and with consent product events reach `create`. | ⬜      |          |
 
@@ -246,3 +246,18 @@ Each milestone is a few commits straight on `main`, green on CI, except M1, whic
 - Declines are never recorded, so the share of players who accept can't be worked out.
 - Withdrawing deletes the install id on the device only: erasing what was already sent waits for the storage.
 - The privacy notice says nothing yet of who receives the product events or for how long.
+
+## Changes while building
+
+- M2: `TelemetryApi` takes the `RemoteTelemetryRepository` from `startApp`, as `LocalizationApi` takes its loader, and
+  `RemoteTelemetryRepository` is open, so `TelemetryAcceptanceTest` and `FacadeTelemetryRepositoryTest` see what reaches
+  `create`.
+- M2: the `Record…` commands, `StartGame` included, share a `RecordProductEvent` service, which searches the telemetry,
+  creates the product events pulled and saves it.
+- M2: `giveConsent`, `declineConsent` and `isConsentAsked` are on `Telemetry` from M2, as its tests need a consent given;
+  their use cases still come in M4.
+- M2: `NativeStorageTelemetryRepository` writes nothing on the device while the consent is not asked, removing
+  `telemetry.consent` instead of keeping a not asked consent.
+- M2: `telemetry` is listed as not saved in `SnapshotCoverageArchitectureTest` until `TelemetrySnapshottable` in M3.
+- M2: `WorldBuilderScene` does not listen, as nothing there is a product event: it only hands the `TelemetryApi` back to
+  `MenuScene`.
