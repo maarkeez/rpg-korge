@@ -3,6 +3,8 @@ package com.mkz.rpg.screen.adapters.presentation
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.save.adapters.presentation.SaveApi
 import com.mkz.rpg.save.domain.Save
+import com.mkz.rpg.shared.domain.EventBus
+import com.mkz.rpg.telemetry.domain.TelemetryEvent
 
 class PausePresenter(
     private val pauseView: PauseView,
@@ -13,6 +15,7 @@ class PausePresenter(
     private val saveApi: SaveApi,
     private val messages: Messages,
     private val timeline: GameSceneTimeline,
+    private val eventBus: EventBus,
     private val onQuit: () -> Unit,
 ) : PauseView.Delegate,
     SaveSlotsView.Delegate {
@@ -76,6 +79,7 @@ class PausePresenter(
 
     private fun save(number: Int) {
         saveApi.saveGame(slot = number)
+        eventBus.publish(TelemetryEvent.RequestRecordGameSaved(slot = number))
         displayPause()
         pauseView.displaySaved(isDisplayed = true)
     }

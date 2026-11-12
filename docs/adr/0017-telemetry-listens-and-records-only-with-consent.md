@@ -1,7 +1,7 @@
 # Telemetry listens to the other subdomains and records only with consent
 
 Telemetry is a subdomain that listens to the domain events of the others and records product events through its
-repository, a facade over `NativeStorageTelemetryRepository`, keeping its consent and ids, and
+repository, `FacadeTelemetryRepository`, over `NativeStorageTelemetryRepository`, keeping its consent and ids, and
 `RemoteTelemetryRepository`, recording its product events, which is left empty until we choose how and where to store
 them. Only
 `screen` and `gameSetup` know it exists, publishing its request events for what no domain event says (the main menu

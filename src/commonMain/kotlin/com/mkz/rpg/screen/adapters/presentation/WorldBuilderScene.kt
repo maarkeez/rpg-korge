@@ -7,6 +7,7 @@ import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldDecoder
 import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldEncoder
 import com.mkz.rpg.localization.adapters.presentation.LocalizationApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
+import com.mkz.rpg.telemetry.adapters.presentation.TelemetryApi
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.terrain.adapters.resources.ResourcesTerrainLoader
 import com.mkz.rpg.worldBuilder.adapters.presentation.WorldBuilderApi
@@ -21,6 +22,7 @@ import korlibs.math.geom.Size
 
 class WorldBuilderScene(
     private val localizationApi: LocalizationApi,
+    private val telemetryApi: TelemetryApi,
     private val storage: IStorage? = null,
 ) : Scene() {
     private companion object {
@@ -66,7 +68,7 @@ class WorldBuilderScene(
             clipboard = GameWindowClipboard(views.gameWindow),
             worldFilePicker = GameWindowWorldFilePicker(views.gameWindow, messages),
             coroutineScope = this@WorldBuilderScene,
-            onLeft = { launchImmediately { sceneContainer.changeTo { MenuScene(localizationApi, storage) } } },
+            onLeft = { launchImmediately { sceneContainer.changeTo { MenuScene(localizationApi, telemetryApi, storage) } } },
             eventBus = eventBus,
         )
 

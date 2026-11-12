@@ -4,16 +4,20 @@ import com.mkz.rpg.GAME_WINDOW_SIZE
 import com.mkz.rpg.localization.adapters.presentation.LocalizationApi
 import com.mkz.rpg.save.adapters.presentation.SaveApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
+import com.mkz.rpg.telemetry.adapters.presentation.TelemetryApi
+import com.mkz.rpg.telemetry.domain.TelemetryEvent
 import korlibs.io.async.launchImmediately
 import korlibs.korge.scene.Scene
 import korlibs.korge.service.storage.IStorage
 import korlibs.korge.service.storage.storage
 import korlibs.korge.view.SContainer
+import korlibs.korge.view.addUpdater
 import korlibs.time.DateTime
 import kotlin.random.Random
 
 class MenuScene(
     private val localizationApi: LocalizationApi,
+    private val telemetryApi: TelemetryApi,
     private val storage: IStorage? = null,
     private val random: Random = Random.Default,
     private val incompatibleSlot: Int? = null,
@@ -28,10 +32,13 @@ class MenuScene(
 
     override suspend fun SContainer.sceneMain() {
         val messages = Messages(localizationApi)
+        val eventBus = InMemoryEventBus()
+        addUpdater { eventBus.dispatch() }
+        telemetryApi.listen(eventBus)
         val saveApi =
             SaveApi(
                 storage = storage ?: views.storage,
-                eventBus = InMemoryEventBus(),
+                eventBus = eventBus,
                 snapshottables = emptyList(),
                 canSave = { false },
                 leaderUnitId = { null },
@@ -42,9 +49,9 @@ class MenuScene(
         val menuView =
             MenuView(
                 messages = messages,
-                onNewGameSelected = { launchImmediately { sceneContainer.changeTo { GameScene(localizationApi, storage, random) } } },
+                onNewGameSelected = { launchImmediately { sceneContainer.changeTo { GameScene(localizationApi, telemetryApi, storage, random) } } },
                 onLoadGameSelected = { loadGamePresenter.open() },
-                onWorldBuilderSelected = { launchImmediately { sceneContainer.changeTo { WorldBuilderScene(localizationApi, storage) } } },
+                onWorldBuilderSelected = { launchImmediately { sceneContainer.changeTo { WorldBuilderScene(localizationApi, telemetryApi, storage) } } },
             )
         val saveSlotsView = SaveSlotsView(messages)
         val confirmDialogView = ConfirmDialogView()
@@ -56,7 +63,8 @@ class MenuScene(
         listOf(saveSlotsView, confirmDialogView).forEach { view -> view.y = (GAME_WINDOW_SIZE.height - PANEL_HEIGHT) / 2 }
         loadGamePresenter =
             LoadGamePresenter(menuView, saveSlotsView, confirmDialogView, callToActionView, saveApi, messages, incompatibleSlot) { slot ->
-                launchImmediately { sceneContainer.changeTo { GameScene(localizationApi, storage, random, slot) } }
+                launchImmediately { sceneContainer.changeTo { GameScene(localizationApi, telemetryApi, storage, random, slot) } }
             }
+        eventBus.publish(TelemetryEvent.RequestRecordMainMenuOpened)
     }
 }

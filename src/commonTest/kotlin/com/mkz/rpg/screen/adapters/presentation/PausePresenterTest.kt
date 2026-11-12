@@ -8,6 +8,8 @@ import com.mkz.rpg.save.domain.Save.Dto.SlotStateDto
 import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.gameSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.playLongStep
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
+import com.mkz.rpg.shared.domain.subscribe
+import com.mkz.rpg.telemetry.domain.TelemetryEvent
 import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanBeOccupied
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -44,7 +46,8 @@ class PausePresenterTest {
     private val confirmDialogView = ConfirmDialogView()
     private val callToActionView = FakeCallToActionView()
     private var quits = 0
-    private val presenter = PausePresenter(pauseView, saveSlotsView, confirmDialogView, callToActionView, apis.partyApi, saveApi, MessagesMother.messages(), gameSceneTimeline()) { quits++ }
+    private val presenter =
+        PausePresenter(pauseView, saveSlotsView, confirmDialogView, callToActionView, apis.partyApi, saveApi, MessagesMother.messages(), gameSceneTimeline(), apis.eventBus) { quits++ }
 
     private fun openPause() {
         apis.partyApi.openPause()
@@ -123,6 +126,20 @@ class PausePresenterTest {
     }
 
     @Test
+    fun `PausePresenter should ask to record the game saved into the slot when the game is saved`() {
+        // Given
+        val requests = mutableListOf<TelemetryEvent.RequestRecordGameSaved>()
+        apis.eventBus.subscribe<TelemetryEvent.RequestRecordGameSaved> { request -> requests += request }
+        openPause()
+        presenter.pauseSaveSelected()
+        // When
+        presenter.saveSlotSelected(2)
+        apis.eventBus.dispatch()
+        // Then
+        requests.shouldContainExactly(TelemetryEvent.RequestRecordGameSaved(slot = 2))
+    }
+
+    @Test
     fun `PausePresenter should save over the slot when overwriting it is confirmed`() {
         // Given
         openPause()
@@ -185,7 +202,7 @@ class PausePresenterTest {
     fun `PausePresenter should do nothing when a choice is tapped while the timeline is playing`() {
         // Given
         val timeline = gameSceneTimeline()
-        val presenter = PausePresenter(pauseView, saveSlotsView, confirmDialogView, callToActionView, apis.partyApi, saveApi, MessagesMother.messages(), timeline) { quits++ }
+        val presenter = PausePresenter(pauseView, saveSlotsView, confirmDialogView, callToActionView, apis.partyApi, saveApi, MessagesMother.messages(), timeline, apis.eventBus) { quits++ }
         apis.partyApi.openPause()
         apis.eventBus.dispatch()
         presenter.open()

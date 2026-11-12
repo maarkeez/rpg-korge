@@ -14,6 +14,7 @@ import com.mkz.rpg.player.domain.PlayerEvent
 import com.mkz.rpg.quest.domain.QuestEvent
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import com.mkz.rpg.telemetry.domain.TelemetryEvent
 import com.mkz.rpg.terrain.domain.TerrainEvent
 import com.mkz.rpg.unit.domain.UnitEvent
 import kotlin.test.Test
@@ -23,7 +24,7 @@ class SetUpGameTest {
     private val setUpGame = SetUpGame(eventBus)
 
     @Test
-    fun `should request each subdomain initialisation after the subdomains it refers to, then exploring, when the game is set up`() {
+    fun `should request each subdomain initialisation after the subdomains it refers to, then exploring and recording the game started, when the game is set up`() {
         // Given
         // When
         setUpGame()
@@ -43,6 +44,7 @@ class SetUpGameTest {
             BattleUnitEvent.RequestInitialiseBattleUnits,
             NpcEvent.RequestPlaceNpcs,
             PartyEvent.RequestStartExploration,
+            TelemetryEvent.RequestStartGame,
         )
     }
 

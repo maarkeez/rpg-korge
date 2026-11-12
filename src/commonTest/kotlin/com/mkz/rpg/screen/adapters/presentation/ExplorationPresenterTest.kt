@@ -109,6 +109,7 @@ class ExplorationPresenterTest {
             }, { null }, { 0 }, { DateTime.nowUnixMillis() }),
             MessagesMother.messages(),
             timeline,
+            eventBus,
         ) { quits++ }
 
     private val questDetailView = QuestDetailView(GameSceneResourcesLoader(), MessagesMother.messages())
@@ -405,6 +406,7 @@ class ExplorationPresenterTest {
                 }, { null }, { 0 }, { DateTime.nowUnixMillis() }),
                 MessagesMother.messages(),
                 timeline,
+                apis.eventBus,
             ) {}
         return ExplorationPresenter(
             virtualPadView,

@@ -26,6 +26,7 @@ class SubdomainDependencyArchitectureTest {
             "battlefield" to setOf("shared", "effect", "terrain", "battle"),
             "party" to setOf("shared", "effect", "player", "battle", "battlefield", "battleUnit"),
             "battleUnit" to setOf("shared", "effect", "player", "unit", "ability", "battle", "battlefield"),
+            "telemetry" to setOf("shared", "battle", "inventory", "party", "quest"),
         )
 
     private val imports: List<SubdomainImport> =

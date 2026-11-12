@@ -215,7 +215,7 @@ const DATA = {
     {"name": "cpuBattleBrain", "files": 35, "fanIn": 2, "fanOut": 10, "instability": 0.83, "importsIn": 7, "importsOut": 107},
     {"name": "cpuWanderBrain", "files": 26, "fanIn": 1, "fanOut": 7, "instability": 0.88, "importsIn": 1, "importsOut": 56},
     {"name": "effect", "files": 13, "fanIn": 9, "fanOut": 1, "instability": 0.1, "importsIn": 68, "importsOut": 13},
-    {"name": "gameSetup", "files": 2, "fanIn": 1, "fanOut": 15, "instability": 0.94, "importsIn": 1, "importsOut": 16},
+    {"name": "gameSetup", "files": 2, "fanIn": 1, "fanOut": 16, "instability": 0.94, "importsIn": 1, "importsOut": 17},
     {"name": "inventory", "files": 37, "fanIn": 3, "fanOut": 8, "instability": 0.73, "importsIn": 19, "importsOut": 62},
     {"name": "localization", "files": 14, "fanIn": 2, "fanOut": 1, "instability": 0.33, "importsIn": 7, "importsOut": 6},
     {"name": "lootDrop", "files": 23, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 8, "importsOut": 32},
@@ -226,10 +226,10 @@ const DATA = {
     {"name": "player", "files": 15, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 34, "importsOut": 12},
     {"name": "quest", "files": 28, "fanIn": 3, "fanOut": 5, "instability": 0.63, "importsIn": 22, "importsOut": 35},
     {"name": "save", "files": 11, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 12, "importsOut": 8},
-    {"name": "screen", "files": 108, "fanIn": 1, "fanOut": 23, "instability": 0.96, "importsIn": 115, "importsOut": 275},
-    {"name": "shared", "files": 14, "fanIn": 25, "fanOut": 0, "instability": 0.0, "importsIn": 526, "importsOut": 0},
+    {"name": "screen", "files": 108, "fanIn": 1, "fanOut": 24, "instability": 0.96, "importsIn": 115, "importsOut": 282},
+    {"name": "shared", "files": 14, "fanIn": 25, "fanOut": 0, "instability": 0.0, "importsIn": 527, "importsOut": 0},
     {"name": "storybook", "files": 106, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 133},
-    {"name": "telemetry", "files": 35, "fanIn": 0, "fanOut": 5, "instability": 1.0, "importsIn": 0, "importsOut": 38},
+    {"name": "telemetry", "files": 35, "fanIn": 2, "fanOut": 5, "instability": 0.71, "importsIn": 7, "importsOut": 38},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 15, "importsOut": 7},
     {"name": "unit", "files": 14, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 17, "importsOut": 11},
     {"name": "worldBuilder", "files": 13, "fanIn": 1, "fanOut": 3, "instability": 0.75, "importsIn": 5, "importsOut": 15}
@@ -775,6 +775,9 @@ const DATA = {
     {"from": "gameSetup", "to": "shared", "weight": 2, "files": 2, "imports": [
       {"file": "com/mkz/rpg/gameSetup/adapters/presentation/GameSetupApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/gameSetup/usecases/commands/SetUpGame.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
+    ]},
+    {"from": "gameSetup", "to": "telemetry", "weight": 1, "files": 1, "imports": [
+      {"file": "com/mkz/rpg/gameSetup/usecases/commands/SetUpGame.kt", "layer": "usecases", "name": "telemetry.domain.TelemetryEvent"}
     ]},
     {"from": "gameSetup", "to": "terrain", "weight": 1, "files": 1, "imports": [
       {"file": "com/mkz/rpg/gameSetup/usecases/commands/SetUpGame.kt", "layer": "usecases", "name": "terrain.domain.TerrainEvent"}
@@ -1371,7 +1374,7 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "save.domain.SaveEvent.GameLoaded"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/SaveSlotsMapper.kt", "layer": "adapters", "name": "save.domain.Save"}
     ]},
-    {"from": "screen", "to": "shared", "weight": 65, "files": 39, "imports": [
+    {"from": "screen", "to": "shared", "weight": 66, "files": 40, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BannerPresenter.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BannerPresenter.kt", "layer": "adapters", "name": "shared.domain.Subscription"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BannerPresenter.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
@@ -1411,6 +1414,7 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/ManaBarPreviewView.kt", "layer": "adapters", "name": "shared.adapters.presentation.PreviewBarView"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ManaBarView.kt", "layer": "adapters", "name": "shared.adapters.presentation.BarView"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/MenuScene.kt", "layer": "adapters", "name": "shared.adapters.events.InMemoryEventBus"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/PausePresenter.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "shared.domain.Subscription"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
@@ -1437,6 +1441,14 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/selection/usecases/commands/ProcessTileSelected.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/selection/usecases/commands/RefreshWalkingRange.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/selection/usecases/commands/SelectBattleUnit.kt", "layer": "adapters", "name": "shared.domain.EventBus"}
+    ]},
+    {"from": "screen", "to": "telemetry", "weight": 6, "files": 4, "imports": [
+      {"file": "com/mkz/rpg/screen/adapters/presentation/GameScene.kt", "layer": "adapters", "name": "telemetry.adapters.presentation.TelemetryApi"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/GameScene.kt", "layer": "adapters", "name": "telemetry.domain.TelemetryEvent"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/MenuScene.kt", "layer": "adapters", "name": "telemetry.adapters.presentation.TelemetryApi"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/MenuScene.kt", "layer": "adapters", "name": "telemetry.domain.TelemetryEvent"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/PausePresenter.kt", "layer": "adapters", "name": "telemetry.domain.TelemetryEvent"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/WorldBuilderScene.kt", "layer": "adapters", "name": "telemetry.adapters.presentation.TelemetryApi"}
     ]},
     {"from": "screen", "to": "terrain", "weight": 5, "files": 3, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/GameScene.kt", "layer": "adapters", "name": "terrain.adapters.presentation.TerrainApi"},

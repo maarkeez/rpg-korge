@@ -34,6 +34,8 @@ import com.mkz.rpg.quest.adapters.resources.ResourcesQuestLoader
 import com.mkz.rpg.save.adapters.presentation.SaveApi
 import com.mkz.rpg.save.domain.SaveError
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
+import com.mkz.rpg.telemetry.adapters.presentation.TelemetryApi
+import com.mkz.rpg.telemetry.domain.TelemetryEvent
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.terrain.adapters.resources.ResourcesTerrainLoader
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
@@ -54,6 +56,7 @@ import kotlin.random.Random
 
 class GameScene(
     private val localizationApi: LocalizationApi,
+    private val telemetryApi: TelemetryApi,
     private val storage: IStorage? = null,
     private val random: Random = Random.Default,
     private val slot: Int? = null,
@@ -101,6 +104,7 @@ class GameScene(
         addUpdater {
             eventBus.dispatch()
         }
+        telemetryApi.listen(eventBus)
 
         val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
         val unitApi = UnitApi(eventBus, ResourcesUnitLoader())
@@ -274,8 +278,8 @@ class GameScene(
                     )
                 val formationPresenter = FormationPresenter(formationView, battlefieldView, callToActionView, partyApi, battleUnitApi, battlefieldApi, messages, timeline)
                 val pausePresenter =
-                    PausePresenter(pauseView, saveSlotsView, confirmDialogView, callToActionView, partyApi, saveApi, messages, timeline) {
-                        launchImmediately { sceneContainer.changeTo { MenuScene(localizationApi, storage, random) } }
+                    PausePresenter(pauseView, saveSlotsView, confirmDialogView, callToActionView, partyApi, saveApi, messages, timeline, eventBus) {
+                        launchImmediately { sceneContainer.changeTo { MenuScene(localizationApi, telemetryApi, storage, random) } }
                     }
                 val explorationPresenter =
                     ExplorationPresenter(
@@ -307,8 +311,9 @@ class GameScene(
             eventBus.dispatch()
             try {
                 saveApi.loadGame(slot)
+                eventBus.publish(TelemetryEvent.RequestRecordGameLoaded(slot))
             } catch (_: SaveError) {
-                launchImmediately { sceneContainer.changeTo { MenuScene(localizationApi, storage, random, incompatibleSlot = slot) } }
+                launchImmediately { sceneContainer.changeTo { MenuScene(localizationApi, telemetryApi, storage, random, incompatibleSlot = slot) } }
             }
         }
     }

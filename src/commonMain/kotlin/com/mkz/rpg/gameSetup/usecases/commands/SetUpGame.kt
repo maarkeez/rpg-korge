@@ -13,6 +13,7 @@ import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.domain.PlayerEvent
 import com.mkz.rpg.quest.domain.QuestEvent
 import com.mkz.rpg.shared.domain.EventBus
+import com.mkz.rpg.telemetry.domain.TelemetryEvent
 import com.mkz.rpg.terrain.domain.TerrainEvent
 import com.mkz.rpg.unit.domain.UnitEvent
 
@@ -35,5 +36,6 @@ class SetUpGame(
         eventBus.publish(BattleUnitEvent.RequestInitialiseBattleUnits)
         eventBus.publish(NpcEvent.RequestPlaceNpcs)
         eventBus.publish(PartyEvent.RequestStartExploration)
+        eventBus.publish(TelemetryEvent.RequestStartGame)
     }
 }
