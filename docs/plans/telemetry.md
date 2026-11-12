@@ -56,12 +56,12 @@ quits to the main menu, and loads the save of slot 1, made before they ever acce
 
 Each milestone is a few commits straight on `main`, green on CI, except M1, which is never merged.
 
-| #  | Milestone                | Done when                                                                                                                                         | Status | Done in |
-|----|--------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
-| M1 | Consent prototypes       | The three consent dialogs can be tapped through in the Storybook on `prototype/telemetry-consent`, and one is chosen.                            | ⬜      |         |
-| M2 | Product events           | Every product event reaches the `Telemetry` aggregate and is dropped, as no consent can be given yet, with the architecture tests green.         | ⬜      |         |
-| M3 | Game id                  | A new game makes a game id, the saves keep it, and a loaded save without one gets a new one. `SAVE_VERSION` is 10.                               | ⬜      |         |
-| M4 | Consent and Privacy      | The chosen dialog asks at the first launch, Privacy changes the choice, Read more shows the notice, and with consent product events reach `create`. | ⬜      |         |
+| #  | Milestone           | Done when                                                                                                                                           | Status | Done in  |
+|----|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|--------|----------|
+| M1 | Consent prototypes  | The three consent dialogs can be tapped through in the Storybook on `prototype/telemetry-consent`, and one is chosen.                               | ✅      | 9a43e6b2 |
+| M2 | Product events      | Every product event reaches the `Telemetry` aggregate and is dropped, as no consent can be given yet, with the architecture tests green.            | ⬜      |          |
+| M3 | Game id             | A new game makes a game id, the saves keep it, and a loaded save without one gets a new one. `SAVE_VERSION` is 10.                                  | ⬜      |          |
+| M4 | Consent and Privacy | The chosen dialog asks at the first launch, Privacy changes the choice, Read more shows the notice, and with consent product events reach `create`. | ⬜      |          |
 
 ### M1 commits
 
