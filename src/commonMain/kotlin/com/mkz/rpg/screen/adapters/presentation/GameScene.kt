@@ -139,6 +139,7 @@ class GameScene(
                         partyApi.snapshottable,
                         cpuWanderBrainApi.snapshottable,
                         questApi.snapshottable,
+                        telemetryApi.snapshottable,
                     ),
                 canSave = { partyApi.searchParty()?.isPaused == true },
                 leaderUnitId = {

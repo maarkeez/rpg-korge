@@ -15,7 +15,7 @@ data class Save private constructor(
     private val events: Set<SaveEvent>,
 ) {
     companion object {
-        const val SAVE_VERSION = 9
+        const val SAVE_VERSION = 10
 
         const val SLOTS = 3
 

@@ -25,6 +25,10 @@ import com.mkz.rpg.save.domain.Save
 import com.mkz.rpg.save.domain.SaveError
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.shared.domain.FixedDoublesRandom
+import com.mkz.rpg.telemetry.adapters.presentation.TelemetryApi
+import com.mkz.rpg.telemetry.adapters.storage.RemoteTelemetryRepository
+import com.mkz.rpg.telemetry.domain.Telemetry
+import com.mkz.rpg.telemetry.domain.TelemetryEvent
 import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanBeOccupied
 import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanNotBeOccupied
 import com.mkz.rpg.unit.domain.UnitMother.unit
@@ -36,6 +40,7 @@ import korlibs.korge.service.storage.InmemoryStorage
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import java.io.File
+import kotlin.random.Random
 import kotlin.test.Test
 
 class SaveFixtureTest {
@@ -77,7 +82,12 @@ class SaveFixtureTest {
         private val cpuBattleBrainApi =
             CpuBattleBrainApi(apis.unitApi, apis.playerApi, apis.battleUnitApi, apis.battlefieldApi, apis.terrainApi, apis.effectApi, apis.abilityApi, apis.eventBus, FixedDoublesRandom(0.0))
         val cpuWanderBrainApi = CpuWanderBrainApi(apis.playerApi, apis.battleUnitApi, apis.battlefieldApi, cpuBattleBrainApi, apis.partyApi, apis.eventBus)
-        val storage = InmemoryStorage()
+        val storage =
+            InmemoryStorage().apply {
+                set("telemetry.consent", """{"status":"GIVEN","noticeVersion":${Telemetry.PRIVACY_NOTICE_VERSION},"decidedAt":0.0}""")
+                set("telemetry.installId", "i1")
+            }
+        val telemetryApi = TelemetryApi(storage, RemoteTelemetryRepository(), Random(if (isPlayed) 1 else 2)) { 1_793_385_720_000.0 }.also { telemetryApi -> telemetryApi.listen(apis.eventBus) }
         val saveApi =
             SaveApi(
                 storage = storage,
@@ -92,6 +102,7 @@ class SaveFixtureTest {
                         apis.partyApi.snapshottable,
                         cpuWanderBrainApi.snapshottable,
                         apis.questApi.snapshottable,
+                        telemetryApi.snapshottable,
                     ),
                 canSave = { apis.partyApi.searchParty()?.isPaused == true },
                 leaderUnitId = { "knight" },
@@ -109,6 +120,7 @@ class SaveFixtureTest {
         }
 
         fun playAndSave(): String {
+            apis.eventBus.publish(TelemetryEvent.RequestStartGame)
             apis.questApi.startMainQuest(battleUnitId = "knight-1", path = listOf(PositionDto(row = 0, column = 0)))
             apis.lootDropApi.snapshottable.load("""[{"unitId":"rat","droppedItems":[{"row":1,"column":1,"lootableItemIds":["health-potion"]}]}]""")
             apis.partyApi.stepParty(DirectionDto.EAST)
@@ -179,6 +191,11 @@ class SaveFixtureTest {
             .searchQuests()
             .single()
             .progress.status shouldBe StatusDto.ACTIVE
+        game.telemetryApi.snapshottable.snapshot() shouldBe
+            Game(isPlayed = true)
+                .apply { playAndSave() }
+                .telemetryApi.snapshottable
+                .snapshot()
     }
 
     @Test
