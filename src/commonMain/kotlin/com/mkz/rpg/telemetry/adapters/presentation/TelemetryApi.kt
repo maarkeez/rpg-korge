@@ -19,6 +19,7 @@ import com.mkz.rpg.telemetry.adapters.events.OnRequestStartGame
 import com.mkz.rpg.telemetry.adapters.save.TelemetrySnapshottable
 import com.mkz.rpg.telemetry.adapters.storage.FacadeTelemetryRepository
 import com.mkz.rpg.telemetry.adapters.storage.NativeStorageTelemetryRepository
+import com.mkz.rpg.telemetry.adapters.storage.ProductEventSender
 import com.mkz.rpg.telemetry.adapters.storage.RemoteTelemetryRepository
 import com.mkz.rpg.telemetry.domain.TelemetryRepository
 import com.mkz.rpg.telemetry.usecases.commands.DeclineConsent
@@ -42,11 +43,13 @@ import com.mkz.rpg.telemetry.usecases.queries.SearchConsent
 import com.mkz.rpg.telemetry.usecases.queries.SearchTelemetrySnapshot
 import com.mkz.rpg.telemetry.usecases.services.RecordProductEvent
 import korlibs.korge.service.storage.IStorage
+import kotlinx.coroutines.CoroutineScope
 import kotlin.random.Random
 
 class TelemetryApi(
     storage: IStorage,
     remoteTelemetryRepository: RemoteTelemetryRepository,
+    scope: CoroutineScope,
     private val random: Random,
     now: () -> Double,
 ) {
@@ -56,7 +59,9 @@ class TelemetryApi(
         const val BYTE_MASK = 0xff
     }
 
-    private val telemetryRepository: TelemetryRepository = FacadeTelemetryRepository(NativeStorageTelemetryRepository(storage), remoteTelemetryRepository)
+    private val nativeStorageTelemetryRepository = NativeStorageTelemetryRepository(storage)
+    private val telemetryRepository: TelemetryRepository =
+        FacadeTelemetryRepository(nativeStorageTelemetryRepository, ProductEventSender(nativeStorageTelemetryRepository, remoteTelemetryRepository, scope))
     private val recordProductEvent = RecordProductEvent(telemetryRepository, now)
 
     private val startSession = StartSession(telemetryRepository)

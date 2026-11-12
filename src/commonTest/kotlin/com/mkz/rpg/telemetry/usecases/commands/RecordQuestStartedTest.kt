@@ -1,7 +1,7 @@
 package com.mkz.rpg.telemetry.usecases.commands
 
 import com.mkz.rpg.telemetry.domain.FakeTelemetryRepository
-import com.mkz.rpg.telemetry.domain.Telemetry.Dto.NameDto
+import com.mkz.rpg.telemetry.domain.TelemetryEvent.ProductEventRecorded.Name
 import com.mkz.rpg.telemetry.usecases.services.RecordProductEvent
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
@@ -16,8 +16,8 @@ class RecordQuestStartedTest {
         // When
         RecordQuestStarted(RecordProductEvent(telemetryRepository) { 1_000.0 })(questId = "bats-in-the-meadow")
         // Then
-        val productEvent = telemetryRepository.created.shouldHaveSize(1).single()
-        productEvent.name shouldBe NameDto.QUEST_STARTED
+        val productEvent = telemetryRepository.recorded.shouldHaveSize(1).single()
+        productEvent.name shouldBe Name.QUEST_STARTED
         productEvent.occurredAt shouldBe 1_000.0
         productEvent.questId shouldBe "bats-in-the-meadow"
     }
@@ -29,6 +29,6 @@ class RecordQuestStartedTest {
         // When
         RecordQuestStarted(RecordProductEvent(telemetryRepository) { 1_000.0 })(questId = "bats-in-the-meadow")
         // Then
-        telemetryRepository.created.shouldBeEmpty()
+        telemetryRepository.recorded.shouldBeEmpty()
     }
 }

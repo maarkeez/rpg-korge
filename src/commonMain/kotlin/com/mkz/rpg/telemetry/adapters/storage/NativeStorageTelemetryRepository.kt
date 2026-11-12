@@ -3,6 +3,7 @@ package com.mkz.rpg.telemetry.adapters.storage
 import com.mkz.rpg.telemetry.domain.Telemetry
 import com.mkz.rpg.telemetry.domain.Telemetry.Dto.ConsentDto
 import com.mkz.rpg.telemetry.domain.Telemetry.Dto.ConsentStatusDto
+import com.mkz.rpg.telemetry.domain.TelemetryEvent.ProductEventRecorded
 import korlibs.korge.service.storage.IStorage
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
@@ -15,6 +16,7 @@ class NativeStorageTelemetryRepository(
     private companion object {
         const val CONSENT_KEY = "telemetry.consent"
         const val INSTALL_ID_KEY = "telemetry.installId"
+        const val PRODUCT_EVENTS_KEY = "telemetry.productEvents"
 
         val json = Json { ignoreUnknownKeys = false }
     }
@@ -48,6 +50,38 @@ class NativeStorageTelemetryRepository(
         gameId = dto.gameId
     }
 
+    fun queue(productEvents: List<ProductEventRecorded>) {
+        if (productEvents.isEmpty()) return
+        write(searchQueued() + productEvents)
+    }
+
+    fun searchQueued(): List<ProductEventRecorded> = storage.getOrNull(PRODUCT_EVENTS_KEY)?.let(::decodeProductEvents) ?: emptyList()
+
+    fun removeQueued(productEvents: List<ProductEventRecorded>) {
+        val queued = searchQueued().toMutableList()
+        productEvents.forEach(queued::remove)
+        write(queued)
+    }
+
+    fun deleteQueued() {
+        storage.remove(PRODUCT_EVENTS_KEY)
+    }
+
+    private fun write(productEvents: List<ProductEventRecorded>) {
+        if (productEvents.isEmpty()) {
+            storage.remove(PRODUCT_EVENTS_KEY)
+        } else {
+            storage[PRODUCT_EVENTS_KEY] = json.encodeToString(productEvents.map(ProductEventFile::of))
+        }
+    }
+
+    private fun decodeProductEvents(file: String): List<ProductEventRecorded>? =
+        try {
+            json.decodeFromString<List<ProductEventFile>>(file).mapNotNull(ProductEventFile::toProductEventRecorded)
+        } catch (_: IllegalArgumentException) {
+            null
+        }
+
     private fun decodeConsent(file: String): ConsentDto? =
         try {
             val consent = json.decodeFromString<ConsentFile>(file)
@@ -63,3 +97,49 @@ private data class ConsentFile(
     val noticeVersion: Int?,
     val decidedAt: Double?,
 )
+
+@Serializable
+private data class ProductEventFile(
+    val name: String,
+    val installId: String,
+    val sessionId: String,
+    val gameId: String?,
+    val occurredAt: Double,
+    val questId: String?,
+    val slot: Int?,
+    val lootableItemId: String?,
+    val price: Int?,
+    val unitId: String?,
+) {
+    companion object {
+        fun of(productEvent: ProductEventRecorded) =
+            ProductEventFile(
+                name = productEvent.name.name,
+                installId = productEvent.installId,
+                sessionId = productEvent.sessionId,
+                gameId = productEvent.gameId,
+                occurredAt = productEvent.occurredAt,
+                questId = productEvent.questId,
+                slot = productEvent.slot,
+                lootableItemId = productEvent.lootableItemId,
+                price = productEvent.price,
+                unitId = productEvent.unitId,
+            )
+    }
+
+    fun toProductEventRecorded(): ProductEventRecorded? {
+        val name = ProductEventRecorded.Name.entries.firstOrNull { entry -> entry.name == name } ?: return null
+        return ProductEventRecorded(
+            name = name,
+            installId = installId,
+            sessionId = sessionId,
+            gameId = gameId,
+            occurredAt = occurredAt,
+            questId = questId,
+            slot = slot,
+            lootableItemId = lootableItemId,
+            price = price,
+            unitId = unitId,
+        )
+    }
+}

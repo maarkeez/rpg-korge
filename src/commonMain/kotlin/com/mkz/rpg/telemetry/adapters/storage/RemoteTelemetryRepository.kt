@@ -1,7 +1,7 @@
 package com.mkz.rpg.telemetry.adapters.storage
 
-import com.mkz.rpg.telemetry.domain.Telemetry
+import com.mkz.rpg.telemetry.domain.TelemetryEvent.ProductEventRecorded
 
 open class RemoteTelemetryRepository {
-    open fun create(productEvent: Telemetry.Dto.ProductEventDto) = Unit
+    open suspend fun create(productEvents: List<ProductEventRecorded>) = Unit
 }

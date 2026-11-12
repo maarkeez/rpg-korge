@@ -7,19 +7,24 @@ import com.mkz.rpg.quest.domain.QuestEvent
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.telemetry.adapters.presentation.TelemetryApi
-import com.mkz.rpg.telemetry.adapters.storage.RemoteTelemetryRepository
+import com.mkz.rpg.telemetry.adapters.storage.RecordingRemoteTelemetryRepository
 import com.mkz.rpg.telemetry.domain.Telemetry
-import com.mkz.rpg.telemetry.domain.Telemetry.Dto.NameDto
-import com.mkz.rpg.telemetry.domain.Telemetry.Dto.ProductEventDto
 import com.mkz.rpg.telemetry.domain.TelemetryEvent
+import com.mkz.rpg.telemetry.domain.TelemetryEvent.ProductEventRecorded
+import com.mkz.rpg.telemetry.domain.TelemetryEvent.ProductEventRecorded.Name
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import korlibs.korge.service.storage.InmemoryStorage
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlin.random.Random
 import kotlin.test.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class TelemetryAcceptanceTest {
     private val storage = InmemoryStorage()
     private val remoteTelemetryRepository = RecordingRemoteTelemetryRepository()
@@ -46,7 +51,7 @@ class TelemetryAcceptanceTest {
         storage["telemetry.installId"] = "i1"
     }
 
-    private fun launch(seed: Int = 1) = TelemetryApi(storage, remoteTelemetryRepository, Random(seed)) { 1_000.0 }
+    private fun launch(seed: Int = 1) = TelemetryApi(storage, remoteTelemetryRepository, TestScope(UnconfinedTestDispatcher()), Random(seed)) { 1_000.0 }
 
     private fun TelemetryApi.publishOnASceneBus(vararg events: DomainEvent) {
         val eventBus = InMemoryEventBus()
@@ -87,7 +92,7 @@ class TelemetryAcceptanceTest {
         telemetryApi.publishOnASceneBus(QuestEvent.QuestCompleted(questId = "bats-in-the-meadow"))
         // Then
         val productEvent = remoteTelemetryRepository.created.shouldHaveSize(1).single()
-        productEvent.name shouldBe NameDto.QUEST_COMPLETED
+        productEvent.name shouldBe Name.QUEST_COMPLETED
         productEvent.questId shouldBe "bats-in-the-meadow"
         productEvent.installId shouldBe storage.getOrNull("telemetry.installId")
         productEvent.occurredAt shouldBe 1_000.0
@@ -101,20 +106,20 @@ class TelemetryAcceptanceTest {
         // When
         telemetryApi.publishOnASceneBus(*everyEvent.toTypedArray())
         // Then
-        remoteTelemetryRepository.created.map(ProductEventDto::name).shouldContainExactly(
-            NameDto.MAIN_MENU_OPENED,
-            NameDto.GAME_STARTED,
-            NameDto.QUEST_STARTED,
-            NameDto.MEMBER_RECRUITED,
-            NameDto.ITEM_BOUGHT,
-            NameDto.ITEM_SOLD,
-            NameDto.BATTLE_STARTED,
-            NameDto.BATTLE_FINISHED,
-            NameDto.QUEST_COMPLETED,
-            NameDto.QUEST_ABANDONED,
-            NameDto.GAME_SAVED,
-            NameDto.GAME_OVER,
-            NameDto.GAME_LOADED,
+        remoteTelemetryRepository.created.map(ProductEventRecorded::name).shouldContainExactly(
+            Name.MAIN_MENU_OPENED,
+            Name.GAME_STARTED,
+            Name.QUEST_STARTED,
+            Name.MEMBER_RECRUITED,
+            Name.ITEM_BOUGHT,
+            Name.ITEM_SOLD,
+            Name.BATTLE_STARTED,
+            Name.BATTLE_FINISHED,
+            Name.QUEST_COMPLETED,
+            Name.QUEST_ABANDONED,
+            Name.GAME_SAVED,
+            Name.GAME_OVER,
+            Name.GAME_LOADED,
         )
     }
 
@@ -128,18 +133,27 @@ class TelemetryAcceptanceTest {
         telemetryApi.publishOnASceneBus(TelemetryEvent.RequestStartGame, BattleEvent.BattleStarted)
         launch(seed = 2).publishOnASceneBus(TelemetryEvent.RequestRecordMainMenuOpened)
         // Then
-        val sessionIds = remoteTelemetryRepository.created.map(ProductEventDto::sessionId)
+        val sessionIds = remoteTelemetryRepository.created.map(ProductEventRecorded::sessionId)
         sessionIds.shouldHaveSize(4)
         sessionIds.take(3).distinct().shouldHaveSize(1)
         (sessionIds.first() == sessionIds.last()) shouldBe false
         sessionIds.first().length shouldBe 32
     }
 
-    private class RecordingRemoteTelemetryRepository : RemoteTelemetryRepository() {
-        val created = mutableListOf<ProductEventDto>()
-
-        override fun create(productEvent: ProductEventDto) {
-            created += productEvent
-        }
+    @Test
+    fun `Telemetry should send at the next launch what the remote did not accept`() {
+        // Given
+        consentGiven()
+        remoteTelemetryRepository.isAccepting = false
+        launch().publishOnASceneBus(QuestEvent.QuestCompleted(questId = "bats-in-the-meadow"))
+        remoteTelemetryRepository.isAccepting = true
+        // When
+        launch(seed = 2)
+        // Then
+        remoteTelemetryRepository.batches.map { batch -> batch.map(ProductEventRecorded::name) }.shouldContainExactly(
+            listOf(Name.QUEST_COMPLETED),
+            listOf(Name.QUEST_COMPLETED),
+        )
+        storage.getOrNull("telemetry.productEvents").shouldBeNull()
     }
 }

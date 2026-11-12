@@ -9,8 +9,6 @@ class RecordProductEvent(
 ) {
     operator fun invoke(record: (telemetry: Telemetry, occurredAt: Double) -> Telemetry) {
         val telemetry = telemetryRepository.search() ?: Telemetry.notAsked()
-        val (productEvents, recorded) = record(telemetry, now()).pullProductEvents()
-        productEvents.forEach(telemetryRepository::create)
-        telemetryRepository.save(recorded)
+        telemetryRepository.save(record(telemetry, now()))
     }
 }

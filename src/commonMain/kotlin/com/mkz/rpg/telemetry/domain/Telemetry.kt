@@ -1,7 +1,8 @@
 package com.mkz.rpg.telemetry.domain
 
 import com.mkz.rpg.telemetry.domain.Telemetry.Dto.ConsentStatusDto
-import com.mkz.rpg.telemetry.domain.Telemetry.Dto.NameDto
+import com.mkz.rpg.telemetry.domain.TelemetryEvent.ProductEventRecorded
+import com.mkz.rpg.telemetry.domain.TelemetryEvent.ProductEventRecorded.Name
 import kotlin.jvm.JvmInline
 
 @ConsistentCopyVisibility
@@ -10,7 +11,7 @@ data class Telemetry private constructor(
     private val installId: InstallId?,
     private val sessionId: SessionId?,
     private val gameId: GameId?,
-    private val productEvents: List<ProductEvent>,
+    private val events: Set<TelemetryEvent>,
 ) {
     companion object {
         const val PRIVACY_NOTICE_VERSION = 1
@@ -25,7 +26,7 @@ data class Telemetry private constructor(
                 installId = null,
                 sessionId = null,
                 gameId = null,
-                productEvents = emptyList(),
+                events = emptySet(),
             )
 
         fun read(dto: Dto): Telemetry =
@@ -34,7 +35,7 @@ data class Telemetry private constructor(
                 installId = dto.installId?.let(::InstallId),
                 sessionId = dto.sessionId?.let(::SessionId),
                 gameId = dto.gameId?.let(::GameId),
-                productEvents = emptyList(),
+                events = emptySet(),
             )
     }
 
@@ -74,14 +75,14 @@ data class Telemetry private constructor(
 
     fun loadGameId(gameId: String?): Telemetry = copy(gameId = gameId?.let(::GameId))
 
-    fun mainMenuOpened(occurredAt: Double): Telemetry = copy(gameId = null).record(NameDto.MAIN_MENU_OPENED, occurredAt)
+    fun mainMenuOpened(occurredAt: Double): Telemetry = copy(gameId = null).record(Name.MAIN_MENU_OPENED, occurredAt)
 
     fun startGame(
         gameId: String,
         occurredAt: Double,
     ): Telemetry {
         if (!isConsentGiven()) return this
-        return copy(gameId = GameId(gameId)).record(NameDto.GAME_STARTED, occurredAt)
+        return copy(gameId = GameId(gameId)).record(Name.GAME_STARTED, occurredAt)
     }
 
     fun gameLoaded(
@@ -90,63 +91,78 @@ data class Telemetry private constructor(
         occurredAt: Double,
     ): Telemetry {
         if (!isConsentGiven()) return this
-        return copy(gameId = gameId ?: GameId(newGameId)).record(NameDto.GAME_LOADED, occurredAt, Details(slot = slot))
+        return copy(gameId = gameId ?: GameId(newGameId)).record(Name.GAME_LOADED, occurredAt, Details(slot = slot))
     }
 
     fun gameSaved(
         slot: Int,
         occurredAt: Double,
-    ): Telemetry = record(NameDto.GAME_SAVED, occurredAt, Details(slot = slot))
+    ): Telemetry = record(Name.GAME_SAVED, occurredAt, Details(slot = slot))
 
     fun questStarted(
         questId: String,
         occurredAt: Double,
-    ): Telemetry = record(NameDto.QUEST_STARTED, occurredAt, Details(questId = questId))
+    ): Telemetry = record(Name.QUEST_STARTED, occurredAt, Details(questId = questId))
 
     fun questCompleted(
         questId: String,
         occurredAt: Double,
-    ): Telemetry = record(NameDto.QUEST_COMPLETED, occurredAt, Details(questId = questId))
+    ): Telemetry = record(Name.QUEST_COMPLETED, occurredAt, Details(questId = questId))
 
     fun questAbandoned(
         questId: String,
         occurredAt: Double,
-    ): Telemetry = record(NameDto.QUEST_ABANDONED, occurredAt, Details(questId = questId))
+    ): Telemetry = record(Name.QUEST_ABANDONED, occurredAt, Details(questId = questId))
 
-    fun battleStarted(occurredAt: Double): Telemetry = record(NameDto.BATTLE_STARTED, occurredAt)
+    fun battleStarted(occurredAt: Double): Telemetry = record(Name.BATTLE_STARTED, occurredAt)
 
-    fun battleFinished(occurredAt: Double): Telemetry = record(NameDto.BATTLE_FINISHED, occurredAt)
+    fun battleFinished(occurredAt: Double): Telemetry = record(Name.BATTLE_FINISHED, occurredAt)
 
-    fun gameOver(occurredAt: Double): Telemetry = record(NameDto.GAME_OVER, occurredAt)
+    fun gameOver(occurredAt: Double): Telemetry = record(Name.GAME_OVER, occurredAt)
 
     fun itemBought(
         lootableItemId: String,
         price: Int,
         occurredAt: Double,
-    ): Telemetry = record(NameDto.ITEM_BOUGHT, occurredAt, Details(lootableItemId = lootableItemId, price = price))
+    ): Telemetry = record(Name.ITEM_BOUGHT, occurredAt, Details(lootableItemId = lootableItemId, price = price))
 
     fun itemSold(
         lootableItemId: String,
         sellPrice: Int,
         occurredAt: Double,
-    ): Telemetry = record(NameDto.ITEM_SOLD, occurredAt, Details(lootableItemId = lootableItemId, price = sellPrice))
+    ): Telemetry = record(Name.ITEM_SOLD, occurredAt, Details(lootableItemId = lootableItemId, price = sellPrice))
 
     fun memberRecruited(
         unitId: String,
         occurredAt: Double,
-    ): Telemetry = record(NameDto.MEMBER_RECRUITED, occurredAt, Details(unitId = unitId))
+    ): Telemetry = record(Name.MEMBER_RECRUITED, occurredAt, Details(unitId = unitId))
 
-    fun pullProductEvents(): Pair<List<Dto.ProductEventDto>, Telemetry> = productEvents.map(ProductEvent::toDto) to copy(productEvents = emptyList())
+    fun pullEvents(): Pair<Set<TelemetryEvent>, Telemetry> = events to copy(events = emptySet())
 
     private fun record(
-        name: NameDto,
+        name: Name,
         occurredAt: Double,
         details: Details = Details(),
     ): Telemetry {
         val installId = installId ?: return this
         val sessionId = sessionId ?: return this
         if (!isConsentGiven()) return this
-        return copy(productEvents = productEvents + ProductEvent(name, installId, sessionId, gameId, occurredAt, details))
+        return copy(
+            events =
+                events +
+                    ProductEventRecorded(
+                        name = name,
+                        installId = installId.value,
+                        sessionId = sessionId.value,
+                        gameId = gameId?.value,
+                        occurredAt = occurredAt,
+                        questId = details.questId,
+                        slot = details.slot,
+                        lootableItemId = details.lootableItemId,
+                        price = details.price,
+                        unitId = details.unitId,
+                    ),
+        )
     }
 
     private fun isConsentGiven() = consent.status == ConsentStatusDto.GIVEN && consent.noticeVersion == PRIVACY_NOTICE_VERSION
@@ -177,29 +193,6 @@ data class Telemetry private constructor(
         val unitId: String? = null,
     )
 
-    private data class ProductEvent(
-        val name: NameDto,
-        val installId: InstallId,
-        val sessionId: SessionId,
-        val gameId: GameId?,
-        val occurredAt: Double,
-        val details: Details,
-    ) {
-        fun toDto() =
-            Dto.ProductEventDto(
-                name = name,
-                installId = installId.value,
-                sessionId = sessionId.value,
-                gameId = gameId?.value,
-                occurredAt = occurredAt,
-                questId = details.questId,
-                slot = details.slot,
-                lootableItemId = details.lootableItemId,
-                price = details.price,
-                unitId = details.unitId,
-            )
-    }
-
     data class Dto(
         val consent: ConsentDto,
         val installId: String?,
@@ -216,35 +209,6 @@ data class Telemetry private constructor(
             NOT_ASKED,
             GIVEN,
             DECLINED,
-        }
-
-        data class ProductEventDto(
-            val name: NameDto,
-            val installId: String,
-            val sessionId: String,
-            val gameId: String?,
-            val occurredAt: Double,
-            val questId: String?,
-            val slot: Int?,
-            val lootableItemId: String?,
-            val price: Int?,
-            val unitId: String?,
-        )
-
-        enum class NameDto {
-            MAIN_MENU_OPENED,
-            GAME_STARTED,
-            GAME_LOADED,
-            GAME_SAVED,
-            QUEST_STARTED,
-            QUEST_COMPLETED,
-            QUEST_ABANDONED,
-            BATTLE_STARTED,
-            BATTLE_FINISHED,
-            GAME_OVER,
-            ITEM_BOUGHT,
-            ITEM_SOLD,
-            MEMBER_RECRUITED,
         }
     }
 }

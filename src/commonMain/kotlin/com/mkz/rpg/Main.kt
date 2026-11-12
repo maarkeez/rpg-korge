@@ -23,6 +23,7 @@ import korlibs.korge.view.Stage
 import korlibs.korge.view.addUpdater
 import korlibs.math.geom.Size
 import korlibs.time.DateTime
+import kotlinx.coroutines.CoroutineScope
 import kotlin.random.Random
 
 val GAME_WINDOW_SIZE = Size(390, 844)
@@ -52,7 +53,7 @@ suspend fun Stage.startApp(
     addUpdater { eventBus.dispatch() }
     val localizationApi = LocalizationApi(eventBus, ResourcesLocalizationLoader())
     localizationApi.init()
-    val telemetryApi = TelemetryApi(storage ?: views.storage, RemoteTelemetryRepository(), random) { DateTime.nowUnixMillis() }
+    val telemetryApi = TelemetryApi(storage ?: views.storage, RemoteTelemetryRepository(), CoroutineScope(views.coroutineContext), random) { DateTime.nowUnixMillis() }
 
     sceneContainer.changeTo { MenuScene(localizationApi, telemetryApi, storage, random) }
 }

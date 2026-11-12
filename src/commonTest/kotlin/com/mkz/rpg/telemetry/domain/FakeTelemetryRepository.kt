@@ -7,15 +7,13 @@ class FakeTelemetryRepository(
         fun consented(): Telemetry = Telemetry.notAsked().startSession("s1").giveConsent(installId = "i1", decidedAt = 0.0)
     }
 
-    val created = mutableListOf<Telemetry.Dto.ProductEventDto>()
+    val recorded = mutableListOf<TelemetryEvent.ProductEventRecorded>()
 
     override fun search() = telemetry
 
     override fun save(telemetry: Telemetry) {
-        this.telemetry = telemetry
-    }
-
-    override fun create(productEvent: Telemetry.Dto.ProductEventDto) {
-        created += productEvent
+        val (events, pulled) = telemetry.pullEvents()
+        recorded += events.filterIsInstance<TelemetryEvent.ProductEventRecorded>()
+        this.telemetry = pulled
     }
 }

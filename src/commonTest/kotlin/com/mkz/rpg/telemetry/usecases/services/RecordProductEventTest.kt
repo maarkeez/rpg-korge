@@ -15,7 +15,7 @@ class RecordProductEventTest {
         // When
         RecordProductEvent(telemetryRepository, now = { 1_000.0 })({ telemetry, occurredAt -> telemetry.gameOver(occurredAt) })
         // Then
-        telemetryRepository.created.shouldBeEmpty()
+        telemetryRepository.recorded.shouldBeEmpty()
         telemetryRepository.search().shouldNotBeNull().toDto() shouldBe Telemetry.notAsked().toDto()
     }
 }

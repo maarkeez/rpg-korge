@@ -1,7 +1,10 @@
 package com.mkz.rpg.telemetry.adapters.storage
 
+import com.mkz.rpg.telemetry.adapters.storage.ProductEventMother.productEventRecorded
 import com.mkz.rpg.telemetry.domain.Telemetry
+import com.mkz.rpg.telemetry.domain.TelemetryEvent.ProductEventRecorded.Name
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -72,5 +75,30 @@ class NativeStorageTelemetryRepositoryTest {
         val found = repository.search()
         // Then
         found.shouldNotBeNull().toDto().consent shouldBe Telemetry.notAsked().toDto().consent
+    }
+
+    @Test
+    fun `NativeStorageTelemetryRepository should keep the queued product events on the device`() {
+        // Given
+        repository.queue(listOf(productEventRecorded(Name.QUEST_STARTED)))
+        repository.queue(listOf(productEventRecorded(Name.QUEST_COMPLETED)))
+        // When
+        val queued = NativeStorageTelemetryRepository(storage).searchQueued()
+        // Then
+        queued.shouldContainExactly(productEventRecorded(Name.QUEST_STARTED), productEventRecorded(Name.QUEST_COMPLETED))
+        storage.keys().shouldContainExactly("telemetry.productEvents")
+    }
+
+    @Test
+    fun `NativeStorageTelemetryRepository should remove only the product events it is given when some are sent`() {
+        // Given
+        repository.queue(listOf(productEventRecorded(Name.ITEM_BOUGHT)))
+        val batch = repository.searchQueued()
+        repository.deleteQueued()
+        repository.queue(listOf(productEventRecorded(Name.ITEM_SOLD)))
+        // When
+        repository.removeQueued(batch)
+        // Then
+        repository.searchQueued().shouldContainExactly(productEventRecorded(Name.ITEM_SOLD))
     }
 }

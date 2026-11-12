@@ -4,6 +4,4 @@ interface TelemetryRepository {
     fun search(): Telemetry?
 
     fun save(telemetry: Telemetry)
-
-    fun create(productEvent: Telemetry.Dto.ProductEventDto)
 }

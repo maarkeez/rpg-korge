@@ -37,12 +37,16 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
 import korlibs.korge.service.storage.InmemoryStorage
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import java.io.File
 import kotlin.random.Random
 import kotlin.test.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class SaveFixtureTest {
     private val fixtures = File("src/jvmTest/fixtures/save")
     private val currentFixture = File(fixtures, "v${Save.SAVE_VERSION}.json")
@@ -87,7 +91,10 @@ class SaveFixtureTest {
                 set("telemetry.consent", """{"status":"GIVEN","noticeVersion":${Telemetry.PRIVACY_NOTICE_VERSION},"decidedAt":0.0}""")
                 set("telemetry.installId", "i1")
             }
-        val telemetryApi = TelemetryApi(storage, RemoteTelemetryRepository(), Random(if (isPlayed) 1 else 2)) { 1_793_385_720_000.0 }.also { telemetryApi -> telemetryApi.listen(apis.eventBus) }
+        val telemetryApi =
+            TelemetryApi(storage, RemoteTelemetryRepository(), TestScope(UnconfinedTestDispatcher()), Random(if (isPlayed) 1 else 2)) { 1_793_385_720_000.0 }.also { telemetryApi ->
+                telemetryApi.listen(apis.eventBus)
+            }
         val saveApi =
             SaveApi(
                 storage = storage,
