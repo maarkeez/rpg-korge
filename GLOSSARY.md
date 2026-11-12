@@ -1262,6 +1262,32 @@ Where and at what size the screen draws the Storybook, zoomed from Fit to 4×.
 **Fit**:
 The zoom that shows the whole Storybook, as on its 1280x900 window.
 
+### Telemetry
+
+**Product event**:
+One fact about how the game is played, such as a quest completed, recorded as it happens.
+_Avoid_: Metric, analytics event, tracking event
+
+**Install id**:
+The random id a copy of the game keeps on its device, the same in every session.
+_Avoid_: Player id, user id, device id
+
+**Session**:
+One run of the game, from its launch until it is closed.
+_Avoid_: Play session
+
+**Game id**:
+The random id a game gets when it is started new, kept in its saves, so a loaded game keeps it.
+_Avoid_: Save id, playthrough id
+
+**Consent**:
+The player's choice to let the game record product events, made on a version of the privacy notice.
+_Avoid_: Opt-in, tracking permission
+
+**Privacy notice**:
+What the game tells the player about what it records, why, who receives it and for how long.
+_Avoid_: Privacy policy
+
 ### Terrain
 
 **Terrain**:
