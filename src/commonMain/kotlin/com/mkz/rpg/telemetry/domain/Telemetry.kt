@@ -54,7 +54,7 @@ data class Telemetry private constructor(
     ): Telemetry =
         copy(
             consent = Consent(status = ConsentStatusDto.GIVEN, noticeVersion = PRIVACY_NOTICE_VERSION, decidedAt = decidedAt),
-            installId = InstallId(installId),
+            installId = this.installId ?: InstallId(installId),
         )
 
     fun declineConsent(decidedAt: Double): Telemetry =

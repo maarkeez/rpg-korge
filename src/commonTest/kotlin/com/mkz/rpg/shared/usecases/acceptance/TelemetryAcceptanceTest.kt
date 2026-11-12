@@ -67,17 +67,29 @@ class TelemetryAcceptanceTest {
     }
 
     @Test
+    fun `Telemetry should record nothing when the player declined`() {
+        // Given
+        val telemetryApi = launch()
+        telemetryApi.declineConsent()
+        // When
+        telemetryApi.publishOnASceneBus(*everyEvent.toTypedArray())
+        // Then
+        remoteTelemetryRepository.created.shouldBeEmpty()
+        storage.keys().shouldContainExactly("telemetry.consent")
+    }
+
+    @Test
     fun `Telemetry should record a quest completed when Bats in the Meadow is completed with consent`() {
         // Given
-        consentGiven()
         val telemetryApi = launch()
+        telemetryApi.giveConsent()
         // When
         telemetryApi.publishOnASceneBus(QuestEvent.QuestCompleted(questId = "bats-in-the-meadow"))
         // Then
         val productEvent = remoteTelemetryRepository.created.shouldHaveSize(1).single()
         productEvent.name shouldBe NameDto.QUEST_COMPLETED
         productEvent.questId shouldBe "bats-in-the-meadow"
-        productEvent.installId shouldBe "i1"
+        productEvent.installId shouldBe storage.getOrNull("telemetry.installId")
         productEvent.occurredAt shouldBe 1_000.0
     }
 

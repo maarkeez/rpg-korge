@@ -21,6 +21,8 @@ import com.mkz.rpg.telemetry.adapters.storage.FacadeTelemetryRepository
 import com.mkz.rpg.telemetry.adapters.storage.NativeStorageTelemetryRepository
 import com.mkz.rpg.telemetry.adapters.storage.RemoteTelemetryRepository
 import com.mkz.rpg.telemetry.domain.TelemetryRepository
+import com.mkz.rpg.telemetry.usecases.commands.DeclineConsent
+import com.mkz.rpg.telemetry.usecases.commands.GiveConsent
 import com.mkz.rpg.telemetry.usecases.commands.LoadTelemetrySnapshot
 import com.mkz.rpg.telemetry.usecases.commands.RecordBattleFinished
 import com.mkz.rpg.telemetry.usecases.commands.RecordBattleStarted
@@ -36,6 +38,7 @@ import com.mkz.rpg.telemetry.usecases.commands.RecordQuestCompleted
 import com.mkz.rpg.telemetry.usecases.commands.RecordQuestStarted
 import com.mkz.rpg.telemetry.usecases.commands.StartGame
 import com.mkz.rpg.telemetry.usecases.commands.StartSession
+import com.mkz.rpg.telemetry.usecases.queries.SearchConsent
 import com.mkz.rpg.telemetry.usecases.queries.SearchTelemetrySnapshot
 import com.mkz.rpg.telemetry.usecases.services.RecordProductEvent
 import korlibs.korge.service.storage.IStorage
@@ -70,6 +73,10 @@ class TelemetryApi(
     private val recordItemBought = RecordItemBought(recordProductEvent)
     private val recordItemSold = RecordItemSold(recordProductEvent)
     private val recordMemberRecruited = RecordMemberRecruited(recordProductEvent)
+
+    val giveConsent = GiveConsent(telemetryRepository, now, ::newId)
+    val declineConsent = DeclineConsent(telemetryRepository, now)
+    val searchConsent = SearchConsent(telemetryRepository, now)
 
     val snapshottable: Snapshottable = TelemetrySnapshottable(SearchTelemetrySnapshot(telemetryRepository), LoadTelemetrySnapshot(telemetryRepository))
 

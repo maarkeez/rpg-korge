@@ -98,6 +98,14 @@ class TelemetryTest {
     }
 
     @Test
+    fun `Telemetry should keep its install id when consent is given again`() {
+        // When
+        val telemetry = consented().giveConsent(installId = "i2", decidedAt = 1.0)
+        // Then
+        telemetry.toDto().installId shouldBe "i1"
+    }
+
+    @Test
     fun `Telemetry should forget the install id when consent is withdrawn`() {
         // When
         val telemetry = consented().declineConsent(decidedAt = 1.0)
