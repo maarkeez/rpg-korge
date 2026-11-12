@@ -1,6 +1,6 @@
 # Plan: product events become telemetry events, and the architecture tests check every aggregate root's events and every repository
 
-> **Status:** to do.
+> **Status:** in progress: M1 built on `main`.
 >
 > **Summary:** Today `Telemetry` is the only aggregate root without `pullEvents()`: its `pullProductEvents()` returns
 > `Telemetry.Dto.ProductEventDto`, a Dto of state it never stores, and `RecordProductEvent` hands each one to
@@ -53,7 +53,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 
 | #  | Milestone               | Done when                                                                                                                                                              | Status | Done in |
 |----|-------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
-| M1 | Product events recorded | `Telemetry.pullEvents()` returns `ProductEventRecorded`, `TelemetryRepository` has only `search` and `save`, and product events are queued and sent in the background. | ⬜      |         |
+| M1 | Product events recorded | `Telemetry.pullEvents()` returns `ProductEventRecorded`, `TelemetryRepository` has only `search` and `save`, and product events are queued and sent in the background. | ✅      | d8bdd181|
 | M2 | Events rule             | `DomainArchitectureTest` checks that the 23 aggregate roots pull their own subdomain's events, with the return type written out in each.                               | ⬜      |         |
 | M3 | Repository rule         | `SaveRepository.searchSummary` is gone and `DomainArchitectureTest` checks the functions of every repository interface.                                                | ⬜      |         |
 
@@ -174,3 +174,15 @@ Each milestone is a few commits straight on `main`, green on CI.
 - A batch the remote does not accept is sent again only at the next `save`, at the latest the one of `StartSession` at
   the next launch, with no wait between retries.
 - Until the storage is chosen, the queue never holds more than the batch in flight, so it has no cap.
+
+## Changes while building
+
+- M1 is one commit, not two: the domain without `ProductEventDto` does not compile until `TelemetryRepository.create`,
+  `RecordProductEvent` and the storage classes change with it.
+- `FacadeTelemetryRepository` takes `NativeStorageTelemetryRepository` and `ProductEventSender`, not the remote, which
+  only the sender calls.
+- `ProductEventSender` launches with KorGE's `launchImmediately`, as `NoRunBlockingArchitectureTest` forbids
+  `kotlinx.coroutines.BuildersKt`, where `launch` lives.
+- The tests share a `RecordingRemoteTelemetryRepository`, recording each batch and able to throw or hold a batch in
+  flight, and a `ProductEventMother`, and run the sender in a `TestScope(UnconfinedTestDispatcher())`. `GiveConsentTest`
+  builds the sender too.
