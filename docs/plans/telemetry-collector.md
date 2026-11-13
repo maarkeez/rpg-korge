@@ -1,6 +1,6 @@
 # Plan: the telemetry collector keeps product events on Cloudflare for 3 months
 
-> **Status:** in progress: M1 built on `main`.
+> **Status:** in progress: M1 and M2 built on `main`.
 >
 > **Summary:** Today a player who accepts the consent records product events that go nowhere: e.g.: completing Bats in
 > the Meadow queues a Quest completed product event on the device, and `ProductEventSender` hands it to
@@ -57,7 +57,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 | #  | Milestone             | Done when                                                                                                                                                                                      | Status | Done in  |
 |----|-----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|----------|
 | M1 | Telemetry collector   | The Worker is deployed by `telemetry-collector.yml`, keeps the sample batch in the D1 database in the EU, rejects a malformed one, and deletes rows older than 90 days.                        | ✅      | 4ded700c |
-| M2 | Sending               | The game sends its queued product events in batches of 100 to a `rpg.telemetryCollectorUrl`, and the end-to-end test passes against `wrangler dev`. Nothing is deployed with the property yet. | ⬜      |          |
+| M2 | Sending               | The game sends its queued product events in batches of 100 to a `rpg.telemetryCollectorUrl`, and the end-to-end test passes against `wrangler dev`. Nothing is deployed with the property yet. | ✅      | 016f2715 |
 | M3 | Privacy notice and on | The privacy notice version 2 names the telemetry collector, its screenshots are approved, and `deploy-js.yml` passes the property, so the game on GitHub Pages sends.                          | ⬜      |          |
 
 ### M1 commits
@@ -222,3 +222,9 @@ Each milestone is a few commits straight on `main`, green on CI.
   tests and deploys it.
 - **M1**: the D1 database was created with Cloudflare's API instead of `wrangler d1 create`, which answered "Not logged
   in" when run without a terminal; it is the same database, in the EU jurisdiction.
+- **M1**: the telemetry collector's main module exports only its handlers, as the Workers runtime refuses to start a
+  Worker exporting anything else; `wrangler dev` showed it in M2, while the Vitest tests import the module directly.
+- **M2**: the end-to-end test is left out of `jvmTest` and picked by `jvmTelemetryCollectorTest` by its class name, not
+  by a `telemetry-collector` tag, as the architecture tests forbid JUnit in the tests.
+- **M2**: `ProductEventSender` sends batches until the queue is empty or one is not received, so it no longer needs to
+  remember that more was queued while a batch was in flight.
