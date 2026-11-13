@@ -1,7 +1,6 @@
 # Plan: the telemetry collector keeps product events on Cloudflare for 3 months
 
-> **Status:** in progress: M1 and M2 built on `main`; the privacy notice version 2 of M3 built, its screenshots still to
-> be approved before `deploy-js.yml` passes the property.
+> **Status:** done.
 >
 > **Summary:** Today a player who accepts the consent records product events that go nowhere: e.g.: completing Bats in
 > the Meadow queues a Quest completed product event on the device, and `ProductEventSender` hands it to
@@ -59,7 +58,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 |----|-----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|----------|
 | M1 | Telemetry collector   | The Worker is deployed by `telemetry-collector.yml`, keeps the sample batch in the D1 database in the EU, rejects a malformed one, and deletes rows older than 90 days.                        | ✅      | 4ded700c |
 | M2 | Sending               | The game sends its queued product events in batches of 100 to a `rpg.telemetryCollectorUrl`, and the end-to-end test passes against `wrangler dev`. Nothing is deployed with the property yet. | ✅      | 016f2715 |
-| M3 | Privacy notice and on | The privacy notice version 2 names the telemetry collector, its screenshots are approved, and `deploy-js.yml` passes the property, so the game on GitHub Pages sends.                          | ⬜      |          |
+| M3 | Privacy notice and on | The privacy notice version 2 names the telemetry collector, its screenshots are approved, and `deploy-js.yml` passes the property, so the game on GitHub Pages sends.                          | ✅      | 3d838d82 |
 
 ### M1 commits
 
