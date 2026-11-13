@@ -14,7 +14,7 @@ data class Telemetry private constructor(
     private val events: Set<TelemetryEvent>,
 ) {
     companion object {
-        const val PRIVACY_NOTICE_VERSION = 1
+        const val PRIVACY_NOTICE_VERSION = 2
 
         const val CONSENT_ASKED_AGAIN_AFTER_DAYS = 180
 

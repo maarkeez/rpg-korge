@@ -64,14 +64,15 @@ msgctxt "ui.privacyNotice.title"
 msgid "Privacy notice"
 msgstr ""
 
-#. What the game records, why, who receives it and for how long.
+#. What the game records, why, who receives it, for how long, and where to ask about it.
 msgctxt "ui.privacyNotice.body"
 msgid ""
 "What is recorded: opening the main menu, starting, saving or loading a game, starting, completing or abandoning a quest, starting or finishing a battle, a game over, buying or selling an item and recruiting a member.\n\n"
 "With it: when it happened, and random ids of this copy of the game, of this launch and of this game. Never your name, nor anything else about you.\n\n"
 "Why: to learn how the game is played and make it better.\n\n"
-"Who receives it and for how long: not decided yet. Nothing leaves your device until it is, and you will be asked again.\n\n"
-"Changing your mind: Privacy on the main menu, at any time. Declining there stops recording and deletes the id of this copy of the game."
+"Who receives it and for how long: the game's own server, run by Cloudflare in the European Union, which deletes it 3 months after receiving it. It never keeps your IP address.\n\n"
+"Changing your mind: Privacy on the main menu, at any time. Declining there stops recording, deletes the id of this copy of the game and what is still waiting to be sent. What was already sent is deleted after 3 months.\n\n"
+"Questions: open an issue at github.com/maarkeez/rpg-korge/issues."
 msgstr ""
 
 #. Goes back to the consent panel.

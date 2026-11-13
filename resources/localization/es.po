@@ -64,20 +64,22 @@ msgctxt "ui.privacyNotice.title"
 msgid "Privacy notice"
 msgstr "Aviso de privacidad"
 
-#. What the game records, why, who receives it and for how long.
+#. What the game records, why, who receives it, for how long, and where to ask about it.
 msgctxt "ui.privacyNotice.body"
 msgid ""
 "What is recorded: opening the main menu, starting, saving or loading a game, starting, completing or abandoning a quest, starting or finishing a battle, a game over, buying or selling an item and recruiting a member.\n\n"
 "With it: when it happened, and random ids of this copy of the game, of this launch and of this game. Never your name, nor anything else about you.\n\n"
 "Why: to learn how the game is played and make it better.\n\n"
-"Who receives it and for how long: not decided yet. Nothing leaves your device until it is, and you will be asked again.\n\n"
-"Changing your mind: Privacy on the main menu, at any time. Declining there stops recording and deletes the id of this copy of the game."
+"Who receives it and for how long: the game's own server, run by Cloudflare in the European Union, which deletes it 3 months after receiving it. It never keeps your IP address.\n\n"
+"Changing your mind: Privacy on the main menu, at any time. Declining there stops recording, deletes the id of this copy of the game and what is still waiting to be sent. What was already sent is deleted after 3 months.\n\n"
+"Questions: open an issue at github.com/maarkeez/rpg-korge/issues."
 msgstr ""
 "Qué se registra: abrir el menú principal, empezar, guardar o cargar una partida, empezar, completar o abandonar una misión, empezar o terminar una batalla, perder la partida, comprar o vender un objeto y reclutar a un miembro.\n\n"
 "Con ello: cuándo ocurrió, e identificadores aleatorios de esta copia del juego, de esta sesión y de esta partida. Nunca tu nombre ni nada más sobre ti.\n\n"
 "Para qué: para saber cómo se juega y mejorar el juego.\n\n"
-"Quién lo recibe y durante cuánto tiempo: aún no está decidido. Nada sale de tu dispositivo hasta entonces, y se te volverá a preguntar.\n\n"
-"Cambiar de opinión: Privacidad en el menú principal, en cualquier momento. Rechazar ahí deja de registrar y borra el identificador de esta copia del juego."
+"Quién lo recibe y durante cuánto tiempo: el propio servidor del juego, gestionado por Cloudflare en la Unión Europea, que lo borra 3 meses después de recibirlo. Nunca guarda tu dirección IP.\n\n"
+"Cambiar de opinión: Privacidad en el menú principal, en cualquier momento. Rechazar ahí deja de registrar y borra el identificador de esta copia del juego y lo que aún no se ha enviado. Lo que ya se envió se borra a los 3 meses.\n\n"
+"Preguntas: abre una incidencia en github.com/maarkeez/rpg-korge/issues."
 
 #. Goes back to the consent panel.
 msgctxt "ui.privacyNotice.back"

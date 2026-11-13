@@ -30,7 +30,7 @@ class PrivacyNoticeView(
         private const val SCREEN_WIDTH = 390.0
         private const val SCREEN_HEIGHT = 844.0
         private const val PANEL_WIDTH = 350.0
-        private const val PANEL_HEIGHT = 580.0
+        private const val PANEL_HEIGHT = 640.0
         private const val PANEL_RADIUS = 12.0
         private const val PADDING = 20.0
         private const val TITLE_SIZE = 20.0

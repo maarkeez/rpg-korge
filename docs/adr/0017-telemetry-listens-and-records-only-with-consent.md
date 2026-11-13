@@ -2,10 +2,10 @@
 
 Telemetry is a subdomain that listens to the domain events of the others and records product events through its
 repository, `FacadeTelemetryRepository`, over `NativeStorageTelemetryRepository`, keeping its consent and ids, and
-`RemoteTelemetryRepository`, recording its product events, which is left empty until we choose how and where to store
-them. Only
-`screen` and `gameSetup` know it exists, publishing its request events for what no domain event says (the main menu
-opened, a new game started). It records nothing without the player's consent: only once consent is given does it write
+`RemoteTelemetryRepository`, recording its product events, which was left empty until we chose how and where to store
+them: see [ADR 0018](0018-product-events-kept-by-our-own-telemetry-collector-on-cloudflare.md). Only `screen` and
+`gameSetup` know it exists, publishing its request events for what no domain event says (the main menu opened, a new
+game started). It records nothing without the player's consent: only once consent is given does it write
 the install id on the device and a game id in the saves, and withdrawing it deletes the install id. We chose listening
 over each subdomain recording its own product events so the rules of the game never change for telemetry, and consent
 first because EU law (ePrivacy and GDPR) forbids storing analytics ids on the player's device without it.
@@ -27,4 +27,5 @@ It is not event sourcing: no state is rebuilt from them.
 - Declining the consent, or a new version of the privacy notice, deletes the product events still queued, so each is
   only sent under the consent it was recorded with.
 - Until the storage is chosen, the empty `RemoteTelemetryRepository` accepts every product event, so none is kept on
-  the device; choosing it also makes the privacy notice say that declining deletes the ones still waiting.
+  the device; choosing it also makes the privacy notice say that declining deletes the ones still waiting. Both
+  happened with [ADR 0018](0018-product-events-kept-by-our-own-telemetry-collector-on-cloudflare.md).
