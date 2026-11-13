@@ -29,7 +29,7 @@ data class LootableItem private constructor(
             )
     }
 
-    fun pullEvents() = events to copy(events = emptySet())
+    fun pullEvents(): Pair<Set<LootableItemEvent>, LootableItem> = events to copy(events = emptySet())
 
     fun sellPrice(): Int = price.value / 2
 

@@ -32,7 +32,7 @@ data class Unit private constructor(
             )
     }
 
-    fun pullEvents() = events to copy(events = emptySet())
+    fun pullEvents(): Pair<Set<UnitEvent>, Unit> = events to copy(events = emptySet())
 
     fun toDto() =
         Dto(

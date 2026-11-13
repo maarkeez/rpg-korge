@@ -44,7 +44,7 @@ data class Npc private constructor(
             )
     }
 
-    fun pullEvents() = events to copy(events = emptySet())
+    fun pullEvents(): Pair<Set<DomainEvent>, Npc> = events to copy(events = emptySet())
 
     fun toDto() =
         Dto(

@@ -101,7 +101,7 @@ data class Battlefield private constructor(
         return copy(tiles = tiles.swapOccupants(position, otherPosition), events = events + swappedEvents)
     }
 
-    fun pullEvents() = events to copy(events = emptySet())
+    fun pullEvents(): Pair<Set<BattlefieldEvent>, Battlefield> = events to copy(events = emptySet())
 
     fun occupants(): List<Dto.OccupantDto> = tiles.occupants()
 

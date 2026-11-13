@@ -32,7 +32,7 @@ data class Terrain private constructor(
             effectId = effectId?.value,
         )
 
-    fun pullEvents() = events to copy(events = emptySet())
+    fun pullEvents(): Pair<Set<TerrainEvent>, Terrain> = events to copy(events = emptySet())
 
     @JvmInline private value class Id(
         val value: String,

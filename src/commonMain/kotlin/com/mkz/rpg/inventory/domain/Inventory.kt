@@ -70,7 +70,7 @@ data class Inventory private constructor(
             )
     }
 
-    fun pullEvents() = events to copy(events = emptySet())
+    fun pullEvents(): Pair<Set<DomainEvent>, Inventory> = events to copy(events = emptySet())
 
     fun canStore(): Boolean = storedItems.value.size < maximumStorageSpace.value
 

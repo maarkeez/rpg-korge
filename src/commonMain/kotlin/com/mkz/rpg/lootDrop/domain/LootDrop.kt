@@ -40,7 +40,7 @@ data class LootDrop private constructor(
             )
     }
 
-    fun pullEvents() = events to copy(events = emptySet())
+    fun pullEvents(): Pair<Set<LootDropEvent>, LootDrop> = events to copy(events = emptySet())
 
     fun roll(
         lootTables: List<LootTable.Dto>,

@@ -142,6 +142,46 @@ class DomainArchitectureTest {
     }
 
     @Test
+    fun `should pull the events of its own subdomain when it is an aggregate root`() {
+        val roots = aggregateRoots()
+
+        withClue("Expected the 23 aggregate roots of the game.") {
+            roots.shouldHaveSize(23)
+        }
+
+        assertSoftly {
+            roots.forEach { aggregateRoot ->
+                val aggregateName = aggregateRoot.name
+                val allowedReturnTypes =
+                    setOf(
+                        "Pair<Set<${aggregateName}Event>, $aggregateName>",
+                        "Pair<Set<DomainEvent>, $aggregateName>",
+                    )
+                val pullFunctions =
+                    aggregateRoot
+                        .functions(includeNested = false, includeLocal = false)
+                        .filter { it.name.startsWith("pull") && it.hasPublicOrDefaultModifier }
+
+                withClue("Aggregate root '$aggregateName' must declare pullEvents() and no other public function starting with pull, found ${pullFunctions.map { it.name }}.") {
+                    pullFunctions.map { it.name } shouldBe listOf("pullEvents")
+                }
+
+                pullFunctions.filter { it.name == "pullEvents" }.forEach { pullEvents ->
+                    withClue(
+                        "Aggregate root '$aggregateName' must write out the return type of pullEvents() as one of $allowedReturnTypes: " +
+                            "the events of its own subdomain, or DomainEvent when it also requests another subdomain to act.",
+                    ) {
+                        (pullEvents.returnType?.text in allowedReturnTypes).shouldBeTrue()
+                    }
+                    withClue("Aggregate root '$aggregateName' must declare pullEvents() without parameters.") {
+                        pullEvents.parameters.shouldBeEmpty()
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
     fun `should not declare extensions on the Dto of an aggregate root`() {
         val dtoNames =
             aggregateRoots()

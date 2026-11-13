@@ -62,7 +62,7 @@ data class Quest private constructor(
         }
     }
 
-    fun pullEvents() = events to copy(events = emptySet())
+    fun pullEvents(): Pair<Set<QuestEvent>, Quest> = events to copy(events = emptySet())
 
     fun canBeStartedBy(npcId: String): Boolean = questGiverNpcId?.value == npcId && (progress.status == StatusDto.NOT_STARTED || (progress.status == StatusDto.COMPLETED && repeatable))
 

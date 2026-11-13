@@ -103,7 +103,7 @@ data class Battle private constructor(
             events = events + BattleFinished,
         )
 
-    fun pullEvents() = events to copy(events = emptySet())
+    fun pullEvents(): Pair<Set<BattleEvent>, Battle> = events to copy(events = emptySet())
 
     @JvmInline private value class TurnOrder(
         val value: List<String>,

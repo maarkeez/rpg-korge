@@ -25,7 +25,7 @@ data class Building private constructor(
             )
     }
 
-    fun pullEvents() = events to copy(events = emptySet())
+    fun pullEvents(): Pair<Set<DomainEvent>, Building> = events to copy(events = emptySet())
 
     fun toDto() =
         Dto(

@@ -73,7 +73,7 @@ data class Storybook private constructor(
         }
     }
 
-    fun pullEvents() = events to copy(events = emptySet())
+    fun pullEvents(): Pair<Set<StorybookEvent>, Storybook> = events to copy(events = emptySet())
 
     fun toDto() =
         Dto(

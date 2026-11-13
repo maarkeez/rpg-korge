@@ -91,7 +91,7 @@ data class CpuBattleBrain private constructor(
             events = events + CpuPlayerTurnFinished(playerId.value),
         )
 
-    fun pullEvents() = events to copy(events = emptySet())
+    fun pullEvents(): Pair<Set<CpuBattleBrainEvent>, CpuBattleBrain> = events to copy(events = emptySet())
 
     private fun requestDecision(decision: AwaitedDecision): CpuBattleBrain {
         requireNextBattleUnit(decision.battleUnitId)

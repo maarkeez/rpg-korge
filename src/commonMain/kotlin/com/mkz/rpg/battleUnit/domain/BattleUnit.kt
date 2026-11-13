@@ -119,7 +119,7 @@ data class BattleUnit private constructor(
             )
     }
 
-    fun pullEvents() = events to copy(events = emptySet())
+    fun pullEvents(): Pair<Set<DomainEvent>, BattleUnit> = events to copy(events = emptySet())
 
     fun toDto() =
         Dto(

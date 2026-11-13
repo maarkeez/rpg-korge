@@ -33,7 +33,7 @@ data class Localization private constructor(
         private val PLACEHOLDER = Regex("""\{([A-Za-z][A-Za-z0-9]*)\}""")
     }
 
-    fun pullEvents() = events to copy(events = emptySet())
+    fun pullEvents(): Pair<Set<LocalizationEvent>, Localization> = events to copy(events = emptySet())
 
     fun toDto() =
         Dto(

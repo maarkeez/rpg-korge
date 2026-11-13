@@ -45,7 +45,7 @@ data class Ability private constructor(
             summonDuration = summonDuration?.value,
         )
 
-    fun pullEvents() = events to copy(events = emptySet())
+    fun pullEvents(): Pair<Set<AbilityEvent>, Ability> = events to copy(events = emptySet())
 
     @JvmInline private value class Id(
         val value: String,

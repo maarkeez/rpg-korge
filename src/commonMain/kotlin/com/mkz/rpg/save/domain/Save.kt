@@ -70,7 +70,7 @@ data class Save private constructor(
         return snapshots.value to copy(events = events + GameLoaded(slot = slot.value))
     }
 
-    fun pullEvents() = events to copy(events = emptySet())
+    fun pullEvents(): Pair<Set<SaveEvent>, Save> = events to copy(events = emptySet())
 
     @JvmInline private value class Slot(
         val value: Int,

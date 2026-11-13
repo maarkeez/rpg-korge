@@ -33,7 +33,7 @@ data class WorldBuilder private constructor(
         }
     }
 
-    fun pullEvents() = events to copy(events = emptySet())
+    fun pullEvents(): Pair<Set<WorldBuilderEvent>, WorldBuilder> = events to copy(events = emptySet())
 
     fun toDto() =
         Dto(

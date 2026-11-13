@@ -166,7 +166,7 @@ data class CpuWanderBrain private constructor(
         return copy(awaitedStep = null).finishWhenDone()
     }
 
-    fun pullEvents() = events to copy(events = emptySet())
+    fun pullEvents(): Pair<Set<DomainEvent>, CpuWanderBrain> = events to copy(events = emptySet())
 
     private fun isWandering(): Boolean = awaitedStep != null || pendingBattleUnits.value.isNotEmpty()
 

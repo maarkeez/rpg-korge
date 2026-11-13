@@ -25,7 +25,7 @@ data class LootTable private constructor(
             )
     }
 
-    fun pullEvents() = events to copy(events = emptySet())
+    fun pullEvents(): Pair<Set<LootTableEvent>, LootTable> = events to copy(events = emptySet())
 
     fun toDto() =
         Dto(

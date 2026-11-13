@@ -254,7 +254,7 @@ data class Party private constructor(
             events = events + ExplorationSecondStarted(playerId = playerId.value),
         )
 
-    fun pullEvents() = events to copy(events = emptySet())
+    fun pullEvents(): Pair<Set<PartyEvent>, Party> = events to copy(events = emptySet())
 
     private fun leaderFirstWalkingOrder(): List<String> {
         val leaderId = members.value.firstOrNull() ?: return emptyList()
