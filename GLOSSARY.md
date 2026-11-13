@@ -1288,6 +1288,20 @@ _Avoid_: Opt-in, tracking permission
 What the game tells the player about what it records, why, who receives it and for how long.
 _Avoid_: Privacy policy
 
+#### Sending
+
+**Telemetry collector**:
+The service the game sends its product events to, which keeps them for the retention period.
+_Avoid_: Collector, backend, telemetry server, endpoint, Worker
+
+**Queued product event**:
+A product event recorded on the device and not yet accepted by the telemetry collector.
+_Avoid_: Pending event, unsent event, buffered event
+
+**Retention period**:
+How long the telemetry collector keeps a product event before deleting it.
+_Avoid_: TTL, data retention, expiry
+
 ### Terrain
 
 **Terrain**:
