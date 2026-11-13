@@ -97,6 +97,27 @@ tasks.withType<Test>().configureEach {
     systemProperty("rpg.updateTelemetryFixtures", providers.systemProperty("rpg.updateTelemetryFixtures").getOrElse("false"))
 }
 
+// The end-to-end test of the game against the telemetry collector, run by `wrangler dev`, is left out of jvmTest, and run
+// by jvmTelemetryCollectorTest only, e.g.: ./gradlew jvmTelemetryCollectorTest -Prpg.telemetryCollectorUrl=http://localhost:8787.
+// See telemetry-collector/README.md.
+val telemetryCollectorEndToEndTest = "com.mkz.rpg.telemetry.adapters.storage.RemoteTelemetryRepositoryEndToEndTest"
+
+tasks.named<Test>("jvmTest") {
+    filter.excludeTestsMatching(telemetryCollectorEndToEndTest)
+}
+
+tasks.register<Test>("jvmTelemetryCollectorTest") {
+    group = "verification"
+    description = "Sends product events from the game to the telemetry collector at rpg.telemetryCollectorUrl."
+
+    val jvmTest = tasks.named<Test>("jvmTest")
+    testClassesDirs = files(jvmTest.map { it.testClassesDirs })
+    classpath = files(jvmTest.map { it.classpath })
+    filter.includeTestsMatching(telemetryCollectorEndToEndTest)
+    systemProperty("rpg.telemetryCollectorUrl", providers.gradleProperty("rpg.telemetryCollectorUrl").getOrElse(""))
+    outputs.upToDateWhen { false }
+}
+
 // The Storybook starts from the same `main` as the game, which reads this system property.
 tasks.matching { it.name in setOf("runJvmStorybook", "runJvmStorybookAutoreload") }.configureEach {
     (this as JavaExec).systemProperty("rpg.entry", "storybook")

@@ -9,11 +9,14 @@ on:
       - "telemetry-collector/**"
       - "src/commonMain/kotlin/com/mkz/rpg/telemetry/adapters/storage/**"
       - "src/jvmTest/fixtures/telemetry/**"
+      - "src/jvmTest/kotlin/com/mkz/rpg/telemetry/**"
       - ".github/workflows/telemetry-collector.yml"
   workflow_dispatch:
 
 env:
   NODE_VERSION: 22
+  JAVA_DISTRIBUTION: zulu
+  JAVA_VERSION: 21
 
 concurrency:
   group: "telemetry-collector"
@@ -33,6 +36,26 @@ jobs:
       - { name: Generate the binding types, run: npm run types }
       - { name: Typecheck, run: npm run typecheck }
       - { name: Test, run: npm test }
+      # The game sends the sample batch, a batch of 101 and the sample batch again to the telemetry collector run locally
+      - { name: Set up JDK, uses: actions/setup-java@v3, with: { distribution: "${{ env.JAVA_DISTRIBUTION }}", java-version: "${{ env.JAVA_VERSION }}" } }
+      - { name: Prepare Gradle, uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 } # v3.1.0
+      - { name: Apply the migrations to a local D1, run: npx wrangler d1 migrations apply rpg-telemetry --local }
+      - name: Start the telemetry collector locally
+        run: |
+          npx wrangler dev --port 8787 --var 'ALLOWED_ORIGIN:*' > wrangler-dev.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            curl -s -o /dev/null -X OPTIONS http://localhost:8787/product-events && exit 0
+            sleep 1
+          done
+          cat wrangler-dev.log
+          exit 1
+      - name: Send from the game to the telemetry collector
+        working-directory: .
+        run: ./gradlew jvmTelemetryCollectorTest -Prpg.telemetryCollectorUrl=http://localhost:8787
+      - name: Check the 13 product events of the sample batch were kept once
+        run: |
+          npx wrangler d1 execute rpg-telemetry --local --json --command "SELECT COUNT(*) AS kept, COUNT(DISTINCT name) AS names FROM product_events" > kept.json
+          node -e 'const [{ results: [row] }] = require("./kept.json"); console.log(row); if (row.kept !== 13 || row.names !== 13) process.exit(1)'
 
   deploy:
     needs: test
