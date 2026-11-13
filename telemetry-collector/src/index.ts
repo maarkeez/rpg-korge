@@ -2,9 +2,9 @@
 // the product events received more than 90 days ago. See README.md.
 import { parseBatch, type ProductEvent } from "./productEvents";
 
-export const MAX_REQUEST_BYTES = 64 * 1024;
+const MAX_REQUEST_BYTES = 64 * 1024;
 
-export const RETENTION_DAYS = 90;
+const RETENTION_DAYS = 90;
 
 const MILLISECONDS_PER_DAY = 86_400_000;
 
@@ -39,7 +39,7 @@ export default {
   },
 } satisfies ExportedHandler<Env>;
 
-export async function deleteExpired(db: D1Database, now: number): Promise<void> {
+async function deleteExpired(db: D1Database, now: number): Promise<void> {
   await db
     .prepare("DELETE FROM product_events WHERE received_at < ?")
     .bind(now - RETENTION_DAYS * MILLISECONDS_PER_DAY)
