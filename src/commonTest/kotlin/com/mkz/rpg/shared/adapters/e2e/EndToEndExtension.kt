@@ -30,9 +30,13 @@ import kotlin.time.TimeSource
 
 private val WAIT_TIMEOUT = 10.seconds
 
-suspend fun ViewsForTesting.waitUntil(condition: () -> Boolean) {
+suspend fun ViewsForTesting.waitUntil(
+    timeout: Duration = WAIT_TIMEOUT,
+    condition: () -> Boolean,
+) {
     val start = TimeSource.Monotonic.markNow()
-    while (!condition() && start.elapsedNow() < WAIT_TIMEOUT) {
+    while (!condition()) {
+        check(start.elapsedNow() < timeout) { "waitUntil timed out after $timeout" }
         delay(frameTime)
     }
 }
