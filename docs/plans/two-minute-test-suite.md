@@ -28,6 +28,27 @@ The last local runs on the 10-core Mac, read from `build/test-results`, with com
   gaps between suites. It is very likely the same stale wait.
 - jvmTest runs in a single fork, one class after another.
 
+### After M2
+
+`./gradlew jvmTest --rerun jsBrowserTest --rerun` takes 2m14s on the same Mac, with every test green:
+
+| Task      | Test execution | Before M1 | End-to-end tests |
+|-----------|----------------|-----------|------------------|
+| jvmTest   | 29s, 5 forks   | 347s      | ~19s of work     |
+| jsTest    | 124s           | 417s      | ~89s             |
+
+- Gradle already runs the two tasks at the same time: jvmTest ran from 18:29:14 to 18:29:43, inside the jsTest run from
+  18:29:22 to 18:31:26. jsTest alone keeps the total over 2 minutes.
+- The 5 slowest JVM tests left: `FinishPlayerTurnEndToEndTest` `should disable finish turn while the cpu turn is
+  displayed and enable it again when the human turn is announced` (4.0s), `PackageStructureArchitectureTest` `should
+  reside in a layer package of a subdomain when is a production file` (3.8s), `CastAbilityEndToEndTest` `should explore
+  again when the human player defeats the bat, the only cpu battle unit in the battle, with the sword` (3.8s),
+  `LocalizationArchitectureTest` `should only be imported by presentation packages when it is the localization
+  subdomain` (3.6s) and `PresentationResourcesArchitectureTest` `should not read resources when is a presentation file
+  other than the resources loader` (3.4s).
+- The 5 slowest JS suites left, read from the gaps between suites: `QuestEndToEndTest` (25s), `ExploreEndToEndTest`
+  (15s), `MoveKnightEndToEndTest` (11s), `BattlefieldViewTest` (9s) and `StorybookEndToEndTest` (7s).
+
 ## Decisions
 
 | Topic          | Decision                                                                                                                                                                                                                                                                                         |
