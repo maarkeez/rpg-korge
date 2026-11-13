@@ -3,13 +3,15 @@
 
 name: "🧪 Testing"
 
-# Skipped when a push only changes documentation; it can still be run by hand from the Actions tab
+# Skipped when a push only changes documentation or the telemetry collector, which has its own workflow; it can still be
+# run by hand from the Actions tab
 on:
   push:
     paths-ignore:
       - "docs/**"
       - "GLOSSARY.md"
       - "README.md"
+      - "telemetry-collector/**"
   workflow_dispatch:
 
 env:
