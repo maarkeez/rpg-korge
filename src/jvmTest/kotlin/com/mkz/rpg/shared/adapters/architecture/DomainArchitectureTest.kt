@@ -3,6 +3,7 @@ package com.mkz.rpg.shared.adapters.architecture
 import com.lemonappdev.konsist.api.Konsist
 import com.lemonappdev.konsist.api.declaration.KoClassDeclaration
 import com.lemonappdev.konsist.api.declaration.KoFileDeclaration
+import com.lemonappdev.konsist.api.provider.KoParentProvider
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.withClue
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -222,6 +223,70 @@ class DomainArchitectureTest {
     }
 
     @Test
+    fun `should be the event of its own domain package, a top-level sealed interface, when it extends DomainEvent`() {
+        val scope = Konsist.scopeFromProduction()
+        val events =
+            scope
+                .interfaces(includeNested = true)
+                .filter {
+                    it.extendsDomainEvent()
+                }.map { EventDeclaration(it.fullyQualifiedName, it.name, it.packagee?.fullyQualifiedName, it.isTopLevel, it.hasSealedModifier) } +
+                scope
+                    .classes(includeNested = true, includeLocal = true)
+                    .filter {
+                        it.extendsDomainEvent()
+                    }.map { EventDeclaration(it.fullyQualifiedName, it.name, it.packagee?.fullyQualifiedName, it.isTopLevel, false) } +
+                scope.objects(includeNested = true).filter { it.extendsDomainEvent() }.map { EventDeclaration(it.fullyQualifiedName, it.name, it.packagee?.fullyQualifiedName, it.isTopLevel, false) }
+
+        withClue("Expected the event of every domain package to extend DomainEvent.") {
+            events.isNotEmpty().shouldBeTrue()
+        }
+
+        assertSoftly {
+            events.forEach { event ->
+                val packageName = event.packageName.orEmpty()
+                val isSubdomainPackage = packageName.endsWith(".domain") && packageName != "com.mkz.rpg.shared.domain"
+                withClue("'${event.fullyQualifiedName}' extends DomainEvent, so it must be declared in the domain package of a subdomain.") {
+                    isSubdomainPackage.shouldBeTrue()
+                }
+                if (isSubdomainPackage) {
+                    withClue("'${event.fullyQualifiedName}' extends DomainEvent, so it must be named '${subdomainOf(packageName)}Event', after its domain package.") {
+                        event.name shouldBe "${subdomainOf(packageName)}Event"
+                    }
+                }
+                withClue("'${event.fullyQualifiedName}' extends DomainEvent, so it must be a top-level sealed interface.") {
+                    (event.isTopLevel && event.isSealedInterface).shouldBeTrue()
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `should extend DomainEvent when it is the event of a domain package`() {
+        val scope = Konsist.scopeFromProduction()
+        val declarations =
+            scope.interfaces().filter { it.isTopLevel }.map { it.fullyQualifiedName to it.extendsDomainEvent() } +
+                scope.classes().filter { it.isTopLevel }.map { it.fullyQualifiedName to it.extendsDomainEvent() } +
+                scope.objects().filter { it.isTopLevel }.map { it.fullyQualifiedName to it.extendsDomainEvent() }
+
+        val subdomainEvents =
+            declarations.filter { (fullyQualifiedName, _) ->
+                val packageName = fullyQualifiedName.substringBeforeLast(".")
+                packageName.endsWith(".domain") &&
+                    packageName != "com.mkz.rpg.shared.domain" &&
+                    fullyQualifiedName.substringAfterLast(".") == "${subdomainOf(packageName)}Event"
+            }
+
+        withClue("Expected the event of every domain package.") {
+            subdomainEvents.isNotEmpty().shouldBeTrue()
+        }
+
+        withClue("The event of every domain package must extend DomainEvent, so the event bus can publish it.") {
+            subdomainEvents.filterNot { (_, extendsDomainEvent) -> extendsDomainEvent }.map { (fullyQualifiedName, _) -> fullyQualifiedName }.shouldBeEmpty()
+        }
+    }
+
+    @Test
     fun `should not declare extensions on the Dto of an aggregate root`() {
         val dtoNames =
             aggregateRoots()
@@ -276,6 +341,18 @@ class DomainArchitectureTest {
                     getterNames = declaration.properties(includeNested = false, includeLocal = false).filter { it.hasGetter }.map { it.name },
                 )
             }
+
+    private fun KoParentProvider.extendsDomainEvent(): Boolean = parents.any { parent -> parent.name.substringAfterLast(".") == "DomainEvent" }
+
+    private fun subdomainOf(domainPackageName: String): String = domainPackageName.substringBeforeLast(".domain").substringAfterLast(".").replaceFirstChar { it.uppercase() }
+
+    private class EventDeclaration(
+        val fullyQualifiedName: String,
+        val name: String,
+        val packageName: String?,
+        val isTopLevel: Boolean,
+        val isSealedInterface: Boolean,
+    )
 
     private class DataDeclaration(
         val fullyQualifiedName: String,
