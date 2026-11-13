@@ -10,13 +10,11 @@ import com.mkz.rpg.screen.adapters.presentation.clickDecline
 import com.mkz.rpg.screen.adapters.presentation.clickPlayNewGame
 import com.mkz.rpg.screen.adapters.presentation.consentView
 import com.mkz.rpg.screen.adapters.presentation.hasBattleUnitAt
-import com.mkz.rpg.screen.adapters.presentation.isAnnouncementShown
 import com.mkz.rpg.screen.adapters.presentation.isBattlefieldDisplayed
 import com.mkz.rpg.screen.adapters.presentation.isConsentShown
 import com.mkz.rpg.screen.adapters.presentation.isPadShown
 import com.mkz.rpg.screen.adapters.presentation.menuView
 import com.mkz.rpg.screen.adapters.presentation.paletteTerrainIds
-import com.mkz.rpg.screen.adapters.presentation.questAnnouncementView
 import com.mkz.rpg.screen.adapters.presentation.virtualPadView
 import com.mkz.rpg.screen.adapters.presentation.worldBuilderHudView
 import com.mkz.rpg.shared.domain.FixedDoublesRandom
@@ -51,7 +49,7 @@ suspend fun ViewsForTesting.startNewGame(
 ) {
     stage.startApp(random = random, storage = storage)
     clickPlayNewGame(openMenu())
-    waitUntil { stage.questAnnouncementView()?.isAnnouncementShown() == true }
+    waitUntil { stage.virtualPadView()?.isPadShown() == true && stage.battlefieldView()?.hasBattleUnitAt(KNIGHT_START_ROW, KNIGHT_START_COLUMN) == true }
 }
 
 private data class RouteStep(
@@ -81,7 +79,6 @@ const val BAT_COLUMN_IN_BATTLE = 8
 
 suspend fun ViewsForTesting.startNewBattle() {
     startNewGame()
-    waitUntil { stage.virtualPadView()?.isPadShown() == true && stage.battlefieldView()?.hasBattleUnitAt(KNIGHT_START_ROW, KNIGHT_START_COLUMN) == true }
     ROUTE_TO_BATTLE.forEach { step -> walkLeader(step) }
     waitUntil { stage.canHumanPlayerAct() }
 }
