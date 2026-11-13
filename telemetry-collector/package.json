@@ -1,0 +1,21 @@
+{
+  "name": "rpg-telemetry-collector",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "wrangler dev",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "types": "wrangler types --strict-vars=false",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.4.11",
+    "typescript": "5.9.3",
+    "vitest": "4.1.12",
+    "wrangler": "4.156.0"
+  }
+}

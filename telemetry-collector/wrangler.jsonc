@@ -1,0 +1,33 @@
+// The telemetry collector: receives the product events of the game deployed to GitHub Pages and keeps them in D1, in the
+// EU, for 3 months. See docs/plans/telemetry-collector.md and docs/adr/0018.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "rpg-telemetry-collector",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-20",
+  "workers_dev": true,
+  "preview_urls": false,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "rpg-telemetry",
+      // Created by hand with --jurisdiction=eu: see README.md
+      "database_id": "5d5ebe53-733c-420e-8475-e750b04b3510",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // 60 requests a minute for each IP address, counted by each Cloudflare location
+  "ratelimits": [
+    {
+      "name": "RATE_LIMITER",
+      "namespace_id": "1001",
+      "simple": { "limit": 60, "period": 60 }
+    }
+  ],
+  // Every night, deletes the product events received more than 90 days ago
+  "triggers": { "crons": ["17 3 * * *"] },
+  "vars": {
+    // Local runs of the game on the JVM send no origin: `wrangler dev --var ALLOWED_ORIGIN:*` accepts them
+    "ALLOWED_ORIGIN": "https://maarkeez.github.io"
+  }
+}
