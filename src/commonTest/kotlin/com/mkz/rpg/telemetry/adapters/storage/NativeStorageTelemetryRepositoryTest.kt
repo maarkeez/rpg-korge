@@ -101,4 +101,17 @@ class NativeStorageTelemetryRepositoryTest {
         // Then
         repository.searchQueued().shouldContainExactly(productEventRecorded(Name.ITEM_SOLD))
     }
+
+    @Test
+    fun `NativeStorageTelemetryRepository should drop the oldest product event when 1,000 are queued`() {
+        // Given
+        repository.queue(List(NativeStorageTelemetryRepository.MAX_QUEUED_PRODUCT_EVENTS) { index -> productEventRecorded(occurredAt = index.toDouble()) })
+        // When
+        repository.queue(listOf(productEventRecorded(Name.BATTLE_STARTED, occurredAt = 1_000.0)))
+        // Then
+        val queued = repository.searchQueued()
+        queued.size shouldBe NativeStorageTelemetryRepository.MAX_QUEUED_PRODUCT_EVENTS
+        queued.first() shouldBe productEventRecorded(occurredAt = 1.0)
+        queued.last() shouldBe productEventRecorded(Name.BATTLE_STARTED, occurredAt = 1_000.0)
+    }
 }

@@ -13,12 +13,14 @@ import kotlinx.serialization.json.Json
 class NativeStorageTelemetryRepository(
     private val storage: IStorage,
 ) {
-    private companion object {
-        const val CONSENT_KEY = "telemetry.consent"
-        const val INSTALL_ID_KEY = "telemetry.installId"
-        const val PRODUCT_EVENTS_KEY = "telemetry.productEvents"
+    companion object {
+        const val MAX_QUEUED_PRODUCT_EVENTS = 1_000
 
-        val json = Json { ignoreUnknownKeys = false }
+        private const val CONSENT_KEY = "telemetry.consent"
+        private const val INSTALL_ID_KEY = "telemetry.installId"
+        private const val PRODUCT_EVENTS_KEY = "telemetry.productEvents"
+
+        private val json = Json { ignoreUnknownKeys = false }
     }
 
     private var sessionId: String? = null
@@ -52,7 +54,7 @@ class NativeStorageTelemetryRepository(
 
     fun queue(productEvents: List<ProductEventRecorded>) {
         if (productEvents.isEmpty()) return
-        write(searchQueued() + productEvents)
+        write((searchQueued() + productEvents).takeLast(MAX_QUEUED_PRODUCT_EVENTS))
     }
 
     fun searchQueued(): List<ProductEventRecorded> = storage.getOrNull(PRODUCT_EVENTS_KEY)?.let(ProductEventJson::decodeQueue) ?: emptyList()
