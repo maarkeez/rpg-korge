@@ -49,6 +49,30 @@ The last local runs on the 10-core Mac, read from `build/test-results`, with com
 - The 5 slowest JS suites left, read from the gaps between suites: `QuestEndToEndTest` (25s), `ExploreEndToEndTest`
   (15s), `MoveKnightEndToEndTest` (11s), `BattlefieldViewTest` (9s) and `StorybookEndToEndTest` (7s).
 
+### Why jsTest is slower
+
+Measured per simulated frame of `sharedViewsTest`, in `MoveKnightEndToEndTest` and `QuestEndToEndTest`:
+
+| Per simulated frame                 | JVM        | JS (headless Chrome) |
+|-------------------------------------|------------|----------------------|
+| Pause between frames (`delay(1ms)`) | ~1.7ms     | ~5.1–5.5ms           |
+| Game work and render                | ~0.8–3.6ms | ~3.2–3.7ms           |
+| Total                               | ~2.4–5.4ms | ~8.3–9.2ms           |
+
+- Chrome holds chained timers to at least 4ms, so the pause is about 60% of the JS end-to-end time. E.g.: the start of
+  a battle, about 500 frames, takes ~3.0s on JS and ~0.75s on the JVM.
+- In a battle test on JS, the boot takes ~0.6s, the walk of 5 tiles ~0.85s, and the last step and the start of the
+  battle ~3.0s. A save would only skip the walk, about 3–6s over the 7 battle tests, so M4 is replaced, see
+  [Changes while building](#changes-while-building).
+- Karma runs the JS suites one after another in a single browser, while jvmTest uses 5 forks.
+
+### After the frame loop
+
+`./gradlew jvmTest --rerun jsBrowserTest --rerun` takes 1m35s, with all 3145 JVM and 3091 JS tests green: jvmTest
+28s, from 18:43:52 to 18:44:20, and jsTest 84s, from 18:44:01 to 18:45:25. The slowest JS suites left are
+`QuestEndToEndTest` (18s), `ExploreEndToEndTest` (9s), `StorybookEndToEndTest` (7s), `BattlefieldViewTest` (7s) and
+`MoveKnightEndToEndTest` (5s).
+
 ## Decisions
 
 | Topic          | Decision                                                                                                                                                                                                                                                                                         |
@@ -76,7 +100,7 @@ Each milestone is a few commits straight on `main`, green on CI. Each is measure
 | M1 | No stale waits              | `waitUntil` fails on timeout, no end-to-end test hits it, and no end-to-end test that plays a new game takes 10s any more.     | ✅      | f573ed34 |
 | M2 | JVM forks and measurement   | jvmTest runs in `availableProcessors / 2` forks, and the time of `allTargetTests` is written in this plan.                     | ✅      | 36cca6ec |
 | M3 | jvmTest ∥ jsTest            | Only if M2 is over 2 minutes: `allTargetTests` runs jvmTest and jsTest at the same time, and its new time is written here.     | ✅      | 36cca6ec |
-| M4 | Battles from a save         | Only if M3 is over 2 minutes: the battle tests load a save one tile west of the bat, and the new time is written here.         | ⬜      |         |
+| M4 | Faster frame loop           | Only if M3 is over 2 minutes: `sharedViewsTest` lets the browser run once every 4 frames, and the new time is written here.    | ⬜      |         |
 
 ### M1 commits
 
@@ -162,3 +186,8 @@ Built in M4 only.
   checks the plan names, already waited for something the game shows.
 - M3: nothing to build. Gradle 8.8 already runs jvmTest and jsTest at the same time, as the measurement after M2 shows,
   so M3 is done by that measurement, `36cca6ec`, and `org.gradle.parallel` stays unset.
+- M4: built as a faster frame loop instead of battles from a save, as agreed once measured. A save would skip only the
+  ~0.85s walk of each battle test on JS, about 3–6s in all, while the pause after every simulated frame takes ~5ms in
+  Chrome. `sharedViewsTest` now pauses once every `FRAMES_BETWEEN_BROWSER_PAUSES` (4) frames, on both targets, and no
+  battle save or `writeBattleSave` is built. The frame loop leaves Out of scope; trimming the end-to-end tests stays
+  out.
