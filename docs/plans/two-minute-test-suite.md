@@ -52,7 +52,7 @@ Each milestone is a few commits straight on `main`, green on CI. Each is measure
 
 | #  | Milestone                   | Done when                                                                                                                    | Status | Done in |
 |----|-----------------------------|------------------------------------------------------------------------------------------------------------------------------|--------|---------|
-| M1 | No stale waits              | `waitUntil` fails on timeout, no end-to-end test hits it, and no end-to-end test that plays a new game takes 10s any more.     | ⬜      |         |
+| M1 | No stale waits              | `waitUntil` fails on timeout, no end-to-end test hits it, and no end-to-end test that plays a new game takes 10s any more.     | ✅      | f573ed34 |
 | M2 | JVM forks and measurement   | jvmTest runs in `availableProcessors / 2` forks, and the time of `allTargetTests` is written in this plan.                     | ⬜      |         |
 | M3 | jvmTest ∥ jsTest            | Only if M2 is over 2 minutes: `allTargetTests` runs jvmTest and jsTest at the same time, and its new time is written here.     | ⬜      |         |
 | M4 | Battles from a save         | Only if M3 is over 2 minutes: the battle tests load a save one tile west of the bat, and the new time is written here.         | ⬜      |         |
@@ -133,3 +133,9 @@ Built in M4 only.
 - CI is not held to 2 minutes: `ubuntu-latest` has 4 vCPUs, so jvmTest gets only 2 forks there.
 - The JS reports have no per-test times, so the slowest JS tests are read from the gaps between suites.
 - Compiling the main and test sources is not part of the budget.
+
+## Changes while building
+
+- M1: the `startNewGame` fix is committed before `waitUntil` starts failing on timeout, the other way round from the
+  plan, so each commit is green on its own. No other wait needed fixing: every end-to-end test, including the absence
+  checks the plan names, already waited for something the game shows.
