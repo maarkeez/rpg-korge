@@ -1,18 +1,19 @@
 package com.mkz.rpg.telemetry.adapters.storage
 
 import com.mkz.rpg.telemetry.domain.TelemetryEvent.ProductEventRecorded
+import korlibs.io.net.http.FakeHttpClient
 import kotlinx.coroutines.CompletableDeferred
 
-class RecordingRemoteTelemetryRepository : RemoteTelemetryRepository() {
+class RecordingRemoteTelemetryRepository : RemoteTelemetryRepository(collectorUrl = null, httpClient = FakeHttpClient()) {
     val batches = mutableListOf<List<ProductEventRecorded>>()
-    var isAccepting = true
+    var delivery = Delivery.ACCEPTED
     var answer: CompletableDeferred<Unit>? = null
 
     val created get() = batches.flatten()
 
-    override suspend fun create(productEvents: List<ProductEventRecorded>) {
+    override suspend fun create(productEvents: List<ProductEventRecorded>): Delivery {
         batches += productEvents
         answer?.await()
-        check(isAccepting) { "The remote does not accept the product events" }
+        return delivery
     }
 }

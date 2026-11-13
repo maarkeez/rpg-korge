@@ -36,6 +36,7 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
+import korlibs.io.net.http.FakeHttpClient
 import korlibs.korge.service.storage.InmemoryStorage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -92,7 +93,9 @@ class SaveFixtureTest {
                 set("telemetry.installId", "i1")
             }
         val telemetryApi =
-            TelemetryApi(storage, RemoteTelemetryRepository(), TestScope(UnconfinedTestDispatcher()), Random(if (isPlayed) 1 else 2)) { 1_793_385_720_000.0 }.also { telemetryApi ->
+            TelemetryApi(storage, RemoteTelemetryRepository(collectorUrl = null, httpClient = FakeHttpClient()), TestScope(UnconfinedTestDispatcher()), Random(if (isPlayed) 1 else 2)) {
+                1_793_385_720_000.0
+            }.also { telemetryApi ->
                 telemetryApi.listen(apis.eventBus)
             }
         val saveApi =

@@ -1,7 +1,7 @@
 package com.mkz.rpg.telemetry.adapters.storage
 
+import com.mkz.rpg.telemetry.adapters.storage.RemoteTelemetryRepository.Delivery
 import korlibs.io.async.launchImmediately
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 
 class ProductEventSender(
@@ -9,14 +9,14 @@ class ProductEventSender(
     private val remoteTelemetryRepository: RemoteTelemetryRepository,
     private val scope: CoroutineScope,
 ) {
+    companion object {
+        const val MAX_BATCH_SIZE = 100
+    }
+
     private var isSending = false
-    private var isMoreQueued = false
 
     fun send() {
-        if (isSending) {
-            isMoreQueued = true
-            return
-        }
+        if (isSending) return
         isSending = true
         scope.launchImmediately {
             try {
@@ -28,18 +28,11 @@ class ProductEventSender(
     }
 
     private suspend fun sendQueue() {
-        do {
-            isMoreQueued = false
-            val batch = nativeStorageTelemetryRepository.searchQueued()
+        while (true) {
+            val batch = nativeStorageTelemetryRepository.searchQueued().take(MAX_BATCH_SIZE)
             if (batch.isEmpty()) return
-            try {
-                remoteTelemetryRepository.create(batch)
-            } catch (exception: CancellationException) {
-                throw exception
-            } catch (_: Exception) {
-                return
-            }
+            if (remoteTelemetryRepository.create(batch) == Delivery.NOT_RECEIVED) return
             nativeStorageTelemetryRepository.removeQueued(batch)
-        } while (isMoreQueued)
+        }
     }
 }

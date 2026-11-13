@@ -14,6 +14,7 @@ import com.mkz.rpg.storybook.usecases.services.StoryLocation
 import com.mkz.rpg.telemetry.adapters.presentation.TelemetryApi
 import com.mkz.rpg.telemetry.adapters.storage.RemoteTelemetryRepository
 import korlibs.image.color.Colors
+import korlibs.io.net.http.createHttpClient
 import korlibs.korge.Korge
 import korlibs.korge.KorgeDisplayMode
 import korlibs.korge.scene.sceneContainer
@@ -53,7 +54,13 @@ suspend fun Stage.startApp(
     addUpdater { eventBus.dispatch() }
     val localizationApi = LocalizationApi(eventBus, ResourcesLocalizationLoader())
     localizationApi.init()
-    val telemetryApi = TelemetryApi(storage ?: views.storage, RemoteTelemetryRepository(), CoroutineScope(views.coroutineContext), random) { DateTime.nowUnixMillis() }
+    val telemetryApi =
+        TelemetryApi(
+            storage ?: views.storage,
+            RemoteTelemetryRepository(collectorUrl = null, httpClient = createHttpClient()),
+            CoroutineScope(views.coroutineContext),
+            random,
+        ) { DateTime.nowUnixMillis() }
 
     sceneContainer.changeTo { MenuScene(localizationApi, telemetryApi, storage, random) }
 }

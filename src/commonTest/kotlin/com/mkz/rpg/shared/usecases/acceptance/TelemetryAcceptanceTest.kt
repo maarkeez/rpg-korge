@@ -8,6 +8,7 @@ import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.telemetry.adapters.presentation.TelemetryApi
 import com.mkz.rpg.telemetry.adapters.storage.RecordingRemoteTelemetryRepository
+import com.mkz.rpg.telemetry.adapters.storage.RemoteTelemetryRepository.Delivery
 import com.mkz.rpg.telemetry.domain.Telemetry
 import com.mkz.rpg.telemetry.domain.TelemetryEvent
 import com.mkz.rpg.telemetry.domain.TelemetryEvent.ProductEventRecorded
@@ -144,9 +145,9 @@ class TelemetryAcceptanceTest {
     fun `Telemetry should send at the next launch what the remote did not accept`() {
         // Given
         consentGiven()
-        remoteTelemetryRepository.isAccepting = false
+        remoteTelemetryRepository.delivery = Delivery.NOT_RECEIVED
         launch().publishOnASceneBus(QuestEvent.QuestCompleted(questId = "bats-in-the-meadow"))
-        remoteTelemetryRepository.isAccepting = true
+        remoteTelemetryRepository.delivery = Delivery.ACCEPTED
         // When
         launch(seed = 2)
         // Then

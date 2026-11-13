@@ -7,6 +7,7 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.string.shouldContain
+import korlibs.io.net.http.FakeHttpClient
 import korlibs.korge.service.storage.InmemoryStorage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -21,7 +22,7 @@ class ConsentPresenterTest {
     private val consentView = ConsentView(messages)
     private val privacyNoticeView = PrivacyNoticeView(messages)
 
-    private fun telemetryApi() = TelemetryApi(storage, RemoteTelemetryRepository(), TestScope(UnconfinedTestDispatcher()), Random(1)) { 1_000.0 }
+    private fun telemetryApi() = TelemetryApi(storage, RemoteTelemetryRepository(collectorUrl = null, httpClient = FakeHttpClient()), TestScope(UnconfinedTestDispatcher()), Random(1)) { 1_000.0 }
 
     private fun presenter() = ConsentPresenter(consentView, privacyNoticeView, telemetryApi())
 

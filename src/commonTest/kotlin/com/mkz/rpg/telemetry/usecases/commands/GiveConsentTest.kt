@@ -7,6 +7,7 @@ import com.mkz.rpg.telemetry.adapters.storage.RemoteTelemetryRepository
 import com.mkz.rpg.telemetry.domain.Telemetry.Dto.ConsentStatusDto
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import korlibs.io.net.http.FakeHttpClient
 import korlibs.korge.service.storage.InmemoryStorage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -21,7 +22,10 @@ class GiveConsentTest {
         val storage = InmemoryStorage()
         val telemetryRepository =
             NativeStorageTelemetryRepository(storage).let { nativeStorageTelemetryRepository ->
-                FacadeTelemetryRepository(nativeStorageTelemetryRepository, ProductEventSender(nativeStorageTelemetryRepository, RemoteTelemetryRepository(), TestScope(UnconfinedTestDispatcher())))
+                FacadeTelemetryRepository(
+                    nativeStorageTelemetryRepository,
+                    ProductEventSender(nativeStorageTelemetryRepository, RemoteTelemetryRepository(collectorUrl = null, httpClient = FakeHttpClient()), TestScope(UnconfinedTestDispatcher())),
+                )
             }
         // When
         GiveConsent(telemetryRepository, now = { 1_000.0 }, newInstallId = { "i1" })()

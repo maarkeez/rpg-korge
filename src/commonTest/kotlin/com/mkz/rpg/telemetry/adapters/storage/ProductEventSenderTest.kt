@@ -1,6 +1,7 @@
 package com.mkz.rpg.telemetry.adapters.storage
 
 import com.mkz.rpg.telemetry.adapters.storage.ProductEventMother.productEventRecorded
+import com.mkz.rpg.telemetry.adapters.storage.RemoteTelemetryRepository.Delivery
 import com.mkz.rpg.telemetry.domain.TelemetryEvent.ProductEventRecorded.Name
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
@@ -31,15 +32,39 @@ class ProductEventSenderTest {
     }
 
     @Test
-    fun `ProductEventSender should keep the queue when the remote throws`() {
+    fun `ProductEventSender should keep the queue when the remote does not receive it`() {
         // Given
         nativeStorageTelemetryRepository.queue(listOf(productEventRecorded()))
-        remoteTelemetryRepository.isAccepting = false
+        remoteTelemetryRepository.delivery = Delivery.NOT_RECEIVED
         // When
         sender.send()
         // Then
         remoteTelemetryRepository.batches.shouldContainExactly(listOf(listOf(productEventRecorded())))
         nativeStorageTelemetryRepository.searchQueued().shouldContainExactly(productEventRecorded())
+    }
+
+    @Test
+    fun `ProductEventSender should send batches of 100 product events`() {
+        // Given
+        nativeStorageTelemetryRepository.queue(List(250) { index -> productEventRecorded(occurredAt = index.toDouble()) })
+        // When
+        sender.send()
+        // Then
+        remoteTelemetryRepository.batches.map(List<*>::size).shouldContainExactly(100, 100, 50)
+        remoteTelemetryRepository.created.shouldContainExactly(List(250) { index -> productEventRecorded(occurredAt = index.toDouble()) })
+        nativeStorageTelemetryRepository.searchQueued().shouldBeEmpty()
+    }
+
+    @Test
+    fun `ProductEventSender should drop a batch the remote rejects`() {
+        // Given
+        nativeStorageTelemetryRepository.queue(listOf(productEventRecorded(Name.ITEM_BOUGHT)))
+        remoteTelemetryRepository.delivery = Delivery.REJECTED
+        // When
+        sender.send()
+        // Then
+        remoteTelemetryRepository.batches.shouldContainExactly(listOf(listOf(productEventRecorded(Name.ITEM_BOUGHT))))
+        nativeStorageTelemetryRepository.searchQueued().shouldBeEmpty()
     }
 
     @Test
