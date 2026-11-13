@@ -1,6 +1,7 @@
 # Plan: the telemetry collector keeps product events on Cloudflare for 3 months
 
-> **Status:** in progress: M1 and M2 built on `main`.
+> **Status:** in progress: M1 and M2 built on `main`; the privacy notice version 2 of M3 built, its screenshots still to
+> be approved before `deploy-js.yml` passes the property.
 >
 > **Summary:** Today a player who accepts the consent records product events that go nowhere: e.g.: completing Bats in
 > the Meadow queues a Quest completed product event on the device, and `ProductEventSender` hands it to
@@ -228,3 +229,4 @@ Each milestone is a few commits straight on `main`, green on CI.
   by a `telemetry-collector` tag, as the architecture tests forbid JUnit in the tests.
 - **M2**: `ProductEventSender` sends batches until the queue is empty or one is not received, so it no longer needs to
   remember that more was queued while a batch was in flight.
+- **M3**: the privacy notice's panel is 640 tall instead of 580, as the Spanish version 2 was cut off at its last line.
