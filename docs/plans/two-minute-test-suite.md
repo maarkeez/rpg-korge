@@ -74,7 +74,7 @@ Each milestone is a few commits straight on `main`, green on CI. Each is measure
 | #  | Milestone                   | Done when                                                                                                                    | Status | Done in |
 |----|-----------------------------|------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | No stale waits              | `waitUntil` fails on timeout, no end-to-end test hits it, and no end-to-end test that plays a new game takes 10s any more.     | ✅      | f573ed34 |
-| M2 | JVM forks and measurement   | jvmTest runs in `availableProcessors / 2` forks, and the time of `allTargetTests` is written in this plan.                     | ⬜      |         |
+| M2 | JVM forks and measurement   | jvmTest runs in `availableProcessors / 2` forks, and the time of `allTargetTests` is written in this plan.                     | ✅      | 36cca6ec |
 | M3 | jvmTest ∥ jsTest            | Only if M2 is over 2 minutes: `allTargetTests` runs jvmTest and jsTest at the same time, and its new time is written here.     | ⬜      |         |
 | M4 | Battles from a save         | Only if M3 is over 2 minutes: the battle tests load a save one tile west of the bat, and the new time is written here.         | ⬜      |         |
 
