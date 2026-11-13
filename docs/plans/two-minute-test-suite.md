@@ -75,7 +75,7 @@ Each milestone is a few commits straight on `main`, green on CI. Each is measure
 |----|-----------------------------|------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | No stale waits              | `waitUntil` fails on timeout, no end-to-end test hits it, and no end-to-end test that plays a new game takes 10s any more.     | ✅      | f573ed34 |
 | M2 | JVM forks and measurement   | jvmTest runs in `availableProcessors / 2` forks, and the time of `allTargetTests` is written in this plan.                     | ✅      | 36cca6ec |
-| M3 | jvmTest ∥ jsTest            | Only if M2 is over 2 minutes: `allTargetTests` runs jvmTest and jsTest at the same time, and its new time is written here.     | ⬜      |         |
+| M3 | jvmTest ∥ jsTest            | Only if M2 is over 2 minutes: `allTargetTests` runs jvmTest and jsTest at the same time, and its new time is written here.     | ✅      | 36cca6ec |
 | M4 | Battles from a save         | Only if M3 is over 2 minutes: the battle tests load a save one tile west of the bat, and the new time is written here.         | ⬜      |         |
 
 ### M1 commits
@@ -160,3 +160,5 @@ Built in M4 only.
 - M1: the `startNewGame` fix is committed before `waitUntil` starts failing on timeout, the other way round from the
   plan, so each commit is green on its own. No other wait needed fixing: every end-to-end test, including the absence
   checks the plan names, already waited for something the game shows.
+- M3: nothing to build. Gradle 8.8 already runs jvmTest and jsTest at the same time, as the measurement after M2 shows,
+  so M3 is done by that measurement, `36cca6ec`, and `org.gradle.parallel` stays unset.
