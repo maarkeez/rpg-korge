@@ -9,6 +9,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
 import resourcesbundle.ResourcesBundleTask
+import telemetrycollector.TelemetryCollectorUrlTask
 import testcatalogs.TestCatalogsTask
 
 // The korge plugin bundles kotlin-gradle-plugin 2.0.20 on its classpath; declaring the
@@ -145,6 +146,23 @@ val testCatalogs =
 
 extensions.getByType<KotlinMultiplatformExtension>().sourceSets.named("commonTest") {
     kotlin.srcDir(testCatalogs.flatMap { it.outputDirectory })
+}
+
+// The address of the telemetry collector the game sends its product events to. Only the deploy to GitHub Pages passes
+// it, e.g.: ./gradlew browserReleaseWebpack -Prpg.telemetryCollectorUrl=https://rpg-telemetry-collector.rpg-korge.workers.dev,
+// so playing locally, on the JVM, in the tests or in the Storybook sends nothing. See docs/plans/telemetry-collector.md.
+val telemetryCollectorUrl =
+    tasks.register<TelemetryCollectorUrlTask>("telemetryCollectorUrl") {
+        group = "build"
+        description = "Generates the source holding the address of the telemetry collector, or null."
+
+        collectorUrl.set(providers.gradleProperty("rpg.telemetryCollectorUrl"))
+        packageName.set("com.mkz.rpg.telemetry.adapters.storage")
+        outputDirectory.set(layout.buildDirectory.dir("generated/telemetryCollector"))
+    }
+
+extensions.getByType<KotlinMultiplatformExtension>().sourceSets.named("commonMain") {
+    kotlin.srcDir(telemetryCollectorUrl.flatMap { it.outputDirectory })
 }
 
 // KorGE always packages the files under `resources`, with a `$catalog.json` listing each folder: both are left out.

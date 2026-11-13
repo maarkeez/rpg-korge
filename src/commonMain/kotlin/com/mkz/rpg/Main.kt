@@ -13,6 +13,7 @@ import com.mkz.rpg.storybook.adapters.presentation.StorybookScene
 import com.mkz.rpg.storybook.usecases.services.StoryLocation
 import com.mkz.rpg.telemetry.adapters.presentation.TelemetryApi
 import com.mkz.rpg.telemetry.adapters.storage.RemoteTelemetryRepository
+import com.mkz.rpg.telemetry.adapters.storage.TELEMETRY_COLLECTOR_URL
 import korlibs.image.color.Colors
 import korlibs.io.net.http.createHttpClient
 import korlibs.korge.Korge
@@ -57,7 +58,7 @@ suspend fun Stage.startApp(
     val telemetryApi =
         TelemetryApi(
             storage ?: views.storage,
-            RemoteTelemetryRepository(collectorUrl = null, httpClient = createHttpClient()),
+            RemoteTelemetryRepository(TELEMETRY_COLLECTOR_URL, createHttpClient()),
             CoroutineScope(views.coroutineContext),
             random,
         ) { DateTime.nowUnixMillis() }
