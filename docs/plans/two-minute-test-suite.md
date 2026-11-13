@@ -1,6 +1,6 @@
 # Plan: Run jvmTest and jsTest in 2 minutes or less
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** `./gradlew allTargetTests` takes about 12 minutes of test execution on a warm build: 5m47s for
 > jvmTest and 6m57s for jsTest. Almost all of it goes to the end-to-end tests, and most of that to one stale wait: since
@@ -100,7 +100,7 @@ Each milestone is a few commits straight on `main`, green on CI. Each is measure
 | M1 | No stale waits              | `waitUntil` fails on timeout, no end-to-end test hits it, and no end-to-end test that plays a new game takes 10s any more.     | ✅      | f573ed34 |
 | M2 | JVM forks and measurement   | jvmTest runs in `availableProcessors / 2` forks, and the time of `allTargetTests` is written in this plan.                     | ✅      | 36cca6ec |
 | M3 | jvmTest ∥ jsTest            | Only if M2 is over 2 minutes: `allTargetTests` runs jvmTest and jsTest at the same time, and its new time is written here.     | ✅      | 36cca6ec |
-| M4 | Faster frame loop           | Only if M3 is over 2 minutes: `sharedViewsTest` lets the browser run once every 4 frames, and the new time is written here.    | ⬜      |         |
+| M4 | Faster frame loop           | Only if M3 is over 2 minutes: `sharedViewsTest` lets the browser run once every 4 frames, and the new time is written here.    | ✅      | d6fafbe9 |
 
 ### M1 commits
 
