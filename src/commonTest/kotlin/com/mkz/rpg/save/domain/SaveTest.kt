@@ -46,12 +46,15 @@ class SaveTest {
     }
 
     @Test
-    fun `SlotOf should show the slot as incompatible when its summary is of another version`() {
+    fun `SlotOf should show the slot as incompatible when its save is of another version`() {
         // Given
-        val summary = saved().toDto().summary
+        val save = saved()
+        val dto = save.toDto()
+        val olderSave = Save.read(dto.copy(summary = dto.summary.copy(version = 0)))
         // When
-        val slots = listOf(Save.slotOf(1, null), Save.slotOf(2, summary), Save.slotOf(3, summary.copy(version = 0)))
+        val slots = listOf(Save.slotOf(1, null), Save.slotOf(2, save), Save.slotOf(3, olderSave))
         // Then
         slots.map(Save.Dto.SlotDto::state).shouldContainExactly(Save.Dto.SlotStateDto.EMPTY, Save.Dto.SlotStateDto.SAVED, Save.Dto.SlotStateDto.INCOMPATIBLE)
+        slots.map(Save.Dto.SlotDto::summary).shouldContainExactly(null, dto.summary, null)
     }
 }

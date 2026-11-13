@@ -1,7 +1,6 @@
 package com.mkz.rpg.save.adapters.storage
 
 import com.mkz.rpg.save.adapters.json.SaveFile
-import com.mkz.rpg.save.adapters.json.SaveSummaryFile
 import com.mkz.rpg.save.domain.Save
 import com.mkz.rpg.save.domain.SaveError.IncompatibleSave
 import com.mkz.rpg.save.domain.SaveRepository
@@ -15,7 +14,6 @@ class NativeStorageSaveRepository(
     override fun save(save: Save) {
         val dto = save.toDto()
         storage[saveKey(dto.slot)] = SaveFile.json.encodeToString(SaveFile.from(dto))
-        storage[summaryKey(dto.slot)] = SaveFile.json.encodeToString(SaveSummaryFile.from(dto.summary))
     }
 
     override fun search(slot: Int): Save? {
@@ -23,14 +21,9 @@ class NativeStorageSaveRepository(
         return decoding(slot) { Save.read(SaveFile.json.decodeFromString<SaveFile>(file).toDto(slot)) }
     }
 
-    override fun searchSummary(slot: Int): Save.Dto.SummaryDto? {
-        val file = storage.getOrNull(summaryKey(slot)) ?: return null
-        return decoding(slot) { SaveFile.json.decodeFromString<SaveSummaryFile>(file).toDto() }
-    }
-
     override fun delete(slot: Int) {
         storage.remove(saveKey(slot))
-        storage.remove(summaryKey(slot))
+        storage.remove(leftoverSummaryKey(slot))
     }
 
     private fun <T> decoding(
@@ -45,5 +38,5 @@ class NativeStorageSaveRepository(
 
     private fun saveKey(slot: Int) = "save.slot$slot"
 
-    private fun summaryKey(slot: Int) = "save.slot$slot.summary"
+    private fun leftoverSummaryKey(slot: Int) = "save.slot$slot.summary"
 }

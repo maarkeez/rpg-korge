@@ -87,6 +87,6 @@ class PauseEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             // Then
             waitUntil { pauseView()?.isSavedShown() == true }
             withClue("Expected Saved on the pause screen") { pauseView()?.isSavedShown()?.shouldBeTrue() }
-            withClue("Expected the game saved in slot 1") { storage.keys().filter { key -> key.startsWith("save.") }.shouldContainExactlyInAnyOrder("save.slot1", "save.slot1.summary") }
+            withClue("Expected the game saved in slot 1") { storage.keys().filter { key -> key.startsWith("save.") }.shouldContainExactlyInAnyOrder("save.slot1") }
         }
 }

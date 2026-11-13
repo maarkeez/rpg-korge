@@ -5,7 +5,5 @@ interface SaveRepository {
 
     fun search(slot: Int): Save?
 
-    fun searchSummary(slot: Int): Save.Dto.SummaryDto?
-
     fun delete(slot: Int)
 }

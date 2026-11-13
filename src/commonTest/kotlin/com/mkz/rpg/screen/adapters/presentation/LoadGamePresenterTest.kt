@@ -34,9 +34,8 @@ class LoadGamePresenterTest {
     private val loadedSlots = mutableListOf<Int>()
 
     init {
-        storage["save.slot2.summary"] = """{"version":${Save.SAVE_VERSION},"savedAt":0.0,"leaderUnitId":"knight","partySize":3}"""
         storage["save.slot2"] = """{"summary":{"version":${Save.SAVE_VERSION},"savedAt":0.0,"leaderUnitId":"knight","partySize":3},"snapshots":{}}"""
-        storage["save.slot3.summary"] = """{"version":0,"savedAt":0.0,"leaderUnitId":"knight","partySize":1}"""
+        storage["save.slot3"] = """{"summary":{"version":0,"savedAt":0.0,"leaderUnitId":"knight","partySize":1},"snapshots":{}}"""
     }
 
     private fun presenter(incompatibleSlot: Int? = null) =

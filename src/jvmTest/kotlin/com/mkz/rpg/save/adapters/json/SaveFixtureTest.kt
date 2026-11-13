@@ -141,7 +141,6 @@ class SaveFixtureTest {
         fun load(fixture: File) {
             val save = Json.decodeFromString<SaveFile>(fixture.readText())
             storage["save.slot1"] = SaveFile.json.encodeToString(SaveFile.serializer(), save)
-            storage["save.slot1.summary"] = SaveFile.json.encodeToString(SaveSummaryFile.serializer(), save.summary)
             saveApi.loadGame(slot = 1)
             apis.eventBus.dispatch()
         }

@@ -49,12 +49,12 @@ data class Save private constructor(
 
         fun slotOf(
             slot: Int,
-            summary: Dto.SummaryDto?,
+            save: Save?,
         ): Dto.SlotDto =
             when {
-                summary == null -> Dto.SlotDto(slot = slot, state = Dto.SlotStateDto.EMPTY, summary = null)
-                summary.version != SAVE_VERSION -> Dto.SlotDto(slot = slot, state = Dto.SlotStateDto.INCOMPATIBLE, summary = null)
-                else -> Dto.SlotDto(slot = slot, state = Dto.SlotStateDto.SAVED, summary = summary)
+                save == null -> Dto.SlotDto(slot = slot, state = Dto.SlotStateDto.EMPTY, summary = null)
+                save.version.value != SAVE_VERSION -> Dto.SlotDto(slot = slot, state = Dto.SlotStateDto.INCOMPATIBLE, summary = null)
+                else -> Dto.SlotDto(slot = slot, state = Dto.SlotStateDto.SAVED, summary = save.summary.toDto(save.version))
             }
     }
 

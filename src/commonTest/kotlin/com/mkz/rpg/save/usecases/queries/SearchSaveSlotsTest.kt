@@ -17,7 +17,7 @@ class SearchSaveSlotsTest {
     fun `SearchSaveSlots should list the 3 slots, empty, saved or incompatible, when some are saved`() {
         // Given
         saveRepository.save(Save.save(slot = 2, savedAt = 0.0, leaderUnitId = "knight", partySize = 3, snapshots = emptyMap()))
-        storage["save.slot3.summary"] = """{"version":0,"savedAt":0.0,"leaderUnitId":"knight","partySize":1}"""
+        storage["save.slot3"] = """{"summary":{"version":0,"savedAt":0.0,"leaderUnitId":"knight","partySize":1},"snapshots":{}}"""
         // When
         val slots = searchSaveSlots()
         // Then
@@ -27,9 +27,9 @@ class SearchSaveSlotsTest {
     }
 
     @Test
-    fun `SearchSaveSlots should show a slot as incompatible when its summary can not be read`() {
+    fun `SearchSaveSlots should show a slot as incompatible when its save can not be read`() {
         // Given
-        storage["save.slot1.summary"] = "not a save"
+        storage["save.slot1"] = "not a save"
         // When
         val slots = searchSaveSlots()
         // Then

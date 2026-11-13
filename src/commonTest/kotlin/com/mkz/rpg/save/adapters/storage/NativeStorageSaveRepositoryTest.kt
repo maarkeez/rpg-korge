@@ -23,8 +23,7 @@ class NativeStorageSaveRepositoryTest {
         val found = repository.search(2)
         // Then
         found shouldBe save
-        repository.searchSummary(2) shouldBe save.toDto().summary
-        storage.keys().shouldContainExactlyInAnyOrder("save.slot2", "save.slot2.summary")
+        storage.keys().shouldContainExactlyInAnyOrder("save.slot2")
     }
 
     @Test
@@ -33,7 +32,6 @@ class NativeStorageSaveRepositoryTest {
         val found = repository.search(1)
         // Then
         found.shouldBeNull()
-        repository.searchSummary(1).shouldBeNull()
     }
 
     @Test
@@ -47,9 +45,10 @@ class NativeStorageSaveRepositoryTest {
     }
 
     @Test
-    fun `Delete should empty the slot`() {
+    fun `Delete should empty the slot and remove the summary an earlier version left`() {
         // Given
         repository.save(save)
+        storage["save.slot2.summary"] = """{"version":9,"savedAt":0.0,"leaderUnitId":"knight","partySize":3}"""
         // When
         repository.delete(2)
         // Then

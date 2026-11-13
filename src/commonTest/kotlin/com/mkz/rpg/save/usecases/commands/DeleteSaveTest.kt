@@ -23,7 +23,7 @@ class DeleteSaveTest {
         // When
         deleteSave(slot = 3)
         // Then
-        saveRepository.searchSummary(3).shouldBeNull()
+        saveRepository.search(3).shouldBeNull()
         eventBus.shouldHavePublishedEvents(SaveEvent.SaveDeleted(slot = 3))
     }
 
