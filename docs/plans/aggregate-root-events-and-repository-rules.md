@@ -1,6 +1,6 @@
 # Plan: product events become telemetry events, and the architecture tests check every aggregate root's events and every repository
 
-> **Status:** in progress: M1 built on `main`.
+> **Status:** in progress: M1 and M2 built on `main`.
 >
 > **Summary:** Today `Telemetry` is the only aggregate root without `pullEvents()`: its `pullProductEvents()` returns
 > `Telemetry.Dto.ProductEventDto`, a Dto of state it never stores, and `RecordProductEvent` hands each one to
@@ -54,7 +54,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 | #  | Milestone               | Done when                                                                                                                                                              | Status | Done in |
 |----|-------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | Product events recorded | `Telemetry.pullEvents()` returns `ProductEventRecorded`, `TelemetryRepository` has only `search` and `save`, and product events are queued and sent in the background. | ✅      | d8bdd181|
-| M2 | Events rule             | `DomainArchitectureTest` checks that the 23 aggregate roots pull their own subdomain's events, with the return type written out in each.                               | ⬜      |         |
+| M2 | Events rule             | `DomainArchitectureTest` checks that the 23 aggregate roots pull their own subdomain's events, with the return type written out in each.                               | ✅      | 0054fca4|
 | M3 | Repository rule         | `SaveRepository.searchSummary` is gone and `DomainArchitectureTest` checks the functions of every repository interface.                                                | ⬜      |         |
 
 ### M1 commits
@@ -186,3 +186,9 @@ Each milestone is a few commits straight on `main`, green on CI.
 - The tests share a `RecordingRemoteTelemetryRepository`, recording each batch and able to throw or hold a batch in
   flight, and a `ProductEventMother`, and run the sender in a `TestScope(UnconfinedTestDispatcher())`. `GiveConsentTest`
   builds the sender too.
+- The events rule also allows `Pair<Set<DomainEvent>, <Subdomain>>`: `Inventory`, `BattleUnit`, `Npc`,
+  `CpuWanderBrain` and `Building` also emit the request events of the subdomain asked to act, such as
+  `BattlefieldEvent.RequestOccupyTile`, so they can not pull only their own. Chosen with the player over moving those
+  request events, a redesign beyond this plan.
+- The events rule checks that there are 23 aggregate roots, and runs only with `--rerun` after a change to a return
+  type alone, as Konsist reads the sources, which are not inputs of `jvmTest`.
