@@ -3,12 +3,10 @@ package com.mkz.rpg.telemetry.adapters.storage
 import com.mkz.rpg.telemetry.domain.TelemetryEvent.ProductEventRecorded
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-/**
- * The JSON of product events: the queue kept on the device, and the batch sent to the telemetry collector, whose shape
- * `src/jvmTest/fixtures/telemetry/product-events.json` holds for the tests of the telemetry collector.
- */
 object ProductEventJson {
     private val json = Json { ignoreUnknownKeys = false }
 
