@@ -1,0 +1,160 @@
+{
+    "productEvents": [
+        {
+            "name": "MAIN_MENU_OPENED",
+            "installId": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+            "sessionId": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+            "gameId": null,
+            "occurredAt": 1.794607613037E12,
+            "questId": null,
+            "slot": null,
+            "lootableItemId": null,
+            "price": null,
+            "unitId": null
+        },
+        {
+            "name": "GAME_STARTED",
+            "installId": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+            "sessionId": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+            "gameId": "00112233445566778899aabbccddeeff",
+            "occurredAt": 1.794607613038E12,
+            "questId": null,
+            "slot": null,
+            "lootableItemId": null,
+            "price": null,
+            "unitId": null
+        },
+        {
+            "name": "GAME_SAVED",
+            "installId": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+            "sessionId": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+            "gameId": "00112233445566778899aabbccddeeff",
+            "occurredAt": 1.794607613039E12,
+            "questId": null,
+            "slot": 1,
+            "lootableItemId": null,
+            "price": null,
+            "unitId": null
+        },
+        {
+            "name": "GAME_LOADED",
+            "installId": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+            "sessionId": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+            "gameId": "00112233445566778899aabbccddeeff",
+            "occurredAt": 1.79460761304E12,
+            "questId": null,
+            "slot": 1,
+            "lootableItemId": null,
+            "price": null,
+            "unitId": null
+        },
+        {
+            "name": "QUEST_STARTED",
+            "installId": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+            "sessionId": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+            "gameId": "00112233445566778899aabbccddeeff",
+            "occurredAt": 1.794607613041E12,
+            "questId": "bats-in-the-meadow",
+            "slot": null,
+            "lootableItemId": null,
+            "price": null,
+            "unitId": null
+        },
+        {
+            "name": "BATTLE_STARTED",
+            "installId": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+            "sessionId": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+            "gameId": "00112233445566778899aabbccddeeff",
+            "occurredAt": 1.794607613042E12,
+            "questId": null,
+            "slot": null,
+            "lootableItemId": null,
+            "price": null,
+            "unitId": null
+        },
+        {
+            "name": "BATTLE_FINISHED",
+            "installId": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+            "sessionId": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+            "gameId": "00112233445566778899aabbccddeeff",
+            "occurredAt": 1.794607613043E12,
+            "questId": null,
+            "slot": null,
+            "lootableItemId": null,
+            "price": null,
+            "unitId": null
+        },
+        {
+            "name": "QUEST_COMPLETED",
+            "installId": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+            "sessionId": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+            "gameId": "00112233445566778899aabbccddeeff",
+            "occurredAt": 1.794607613044E12,
+            "questId": "bats-in-the-meadow",
+            "slot": null,
+            "lootableItemId": null,
+            "price": null,
+            "unitId": null
+        },
+        {
+            "name": "ITEM_BOUGHT",
+            "installId": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+            "sessionId": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+            "gameId": "00112233445566778899aabbccddeeff",
+            "occurredAt": 1.794607613045E12,
+            "questId": null,
+            "slot": null,
+            "lootableItemId": "health-potion",
+            "price": 10,
+            "unitId": null
+        },
+        {
+            "name": "ITEM_SOLD",
+            "installId": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+            "sessionId": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+            "gameId": "00112233445566778899aabbccddeeff",
+            "occurredAt": 1.794607613046E12,
+            "questId": null,
+            "slot": null,
+            "lootableItemId": "bee-essence",
+            "price": 3,
+            "unitId": null
+        },
+        {
+            "name": "MEMBER_RECRUITED",
+            "installId": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+            "sessionId": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+            "gameId": "00112233445566778899aabbccddeeff",
+            "occurredAt": 1.794607613047E12,
+            "questId": null,
+            "slot": null,
+            "lootableItemId": null,
+            "price": null,
+            "unitId": "viking-warrior"
+        },
+        {
+            "name": "QUEST_ABANDONED",
+            "installId": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+            "sessionId": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+            "gameId": "00112233445566778899aabbccddeeff",
+            "occurredAt": 1.794607613048E12,
+            "questId": "rats-in-the-fields",
+            "slot": null,
+            "lootableItemId": null,
+            "price": null,
+            "unitId": null
+        },
+        {
+            "name": "GAME_OVER",
+            "installId": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+            "sessionId": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+            "gameId": "00112233445566778899aabbccddeeff",
+            "occurredAt": 1.794607613049E12,
+            "questId": null,
+            "slot": null,
+            "lootableItemId": null,
+            "price": null,
+            "unitId": null
+        }
+    ]
+}

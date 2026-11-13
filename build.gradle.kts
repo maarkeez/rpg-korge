@@ -92,6 +92,8 @@ tasks.withType<Test>().configureEach {
     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
     // Rewrites the golden save of the current version, e.g.: ./gradlew jvmTest -Drpg.updateSaveFixtures=true. See docs/adr/0011-no-save-migrations.md.
     systemProperty("rpg.updateSaveFixtures", providers.systemProperty("rpg.updateSaveFixtures").getOrElse("false"))
+    // Rewrites the sample batch of product events the tests of the telemetry collector read, e.g.: ./gradlew jvmTest -Drpg.updateTelemetryFixtures=true.
+    systemProperty("rpg.updateTelemetryFixtures", providers.systemProperty("rpg.updateTelemetryFixtures").getOrElse("false"))
 }
 
 // The Storybook starts from the same `main` as the game, which reads this system property.
