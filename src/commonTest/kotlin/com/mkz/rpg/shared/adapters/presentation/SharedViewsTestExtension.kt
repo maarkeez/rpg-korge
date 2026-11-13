@@ -15,6 +15,8 @@ import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
+private const val FRAMES_BETWEEN_BROWSER_PAUSES = 4
+
 @OptIn(KorgeInternal::class)
 fun ViewsForTesting.sharedViewsTest(block: suspend Stage.() -> Unit): TestResult =
     runTest(timeout = 60.seconds) {
@@ -34,11 +36,12 @@ fun ViewsForTesting.sharedViewsTest(block: suspend Stage.() -> Unit): TestResult
                 }
             }
         })
+        var frame = 0
         while (!completed) {
             time += frameTime
             gameWindow.dispatchRenderEvent()
             dispatcher.executePending(availableTime = 1.seconds)
-            withContext(Dispatchers.Default) { delay(1.milliseconds) }
+            if (++frame % FRAMES_BETWEEN_BROWSER_PAUSES == 0) withContext(Dispatchers.Default) { delay(1.milliseconds) }
         }
         failure?.let { throw it }
     }
