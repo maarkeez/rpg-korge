@@ -88,6 +88,8 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    // Runs the test classes in a fork per two cores, leaving the other cores to the JS tests and Gradle.
+    maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
     // Rewrites the golden save of the current version, e.g.: ./gradlew jvmTest -Drpg.updateSaveFixtures=true. See docs/adr/0011-no-save-migrations.md.
     systemProperty("rpg.updateSaveFixtures", providers.systemProperty("rpg.updateSaveFixtures").getOrElse("false"))
 }
