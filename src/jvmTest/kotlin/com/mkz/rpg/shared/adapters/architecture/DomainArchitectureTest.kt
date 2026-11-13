@@ -182,6 +182,46 @@ class DomainArchitectureTest {
     }
 
     @Test
+    fun `should take and give only its aggregate root or primitives when it is a repository`() {
+        val primitives = setOf("String", "Int", "Long", "Double", "Float", "Boolean")
+        val repositories =
+            Konsist
+                .scopeFromProduction()
+                .interfaces()
+                .filter { it.isTopLevel && it.packagee?.fullyQualifiedName?.endsWith(".domain") == true && it.name.endsWith("Repository") }
+
+        withClue("Expected a repository interface in the domain packages.") {
+            repositories.isNotEmpty().shouldBeTrue()
+        }
+
+        assertSoftly {
+            repositories.forEach { repository ->
+                val aggregateName =
+                    repository.packagee!!
+                        .fullyQualifiedName
+                        .substringBeforeLast(".domain")
+                        .substringAfterLast(".")
+                        .replaceFirstChar { it.uppercase() }
+                val allowedParameterTypes = primitives + primitives.map { "$it?" } + aggregateName
+                val allowedReturnTypes = setOf(null, "Unit", aggregateName, "$aggregateName?", "List<$aggregateName>")
+
+                repository.functions(includeNested = false, includeLocal = false).forEach { function ->
+                    val functionName = "${repository.name}.${function.name}"
+                    withClue("Repository function '$functionName' must take only its aggregate root '$aggregateName' or primitives $primitives.") {
+                        function.parameters
+                            .map { it.type.text }
+                            .filterNot { it in allowedParameterTypes }
+                            .shouldBeEmpty()
+                    }
+                    withClue("Repository function '$functionName' must return $aggregateName, nullable or a List of it, or nothing, but returns ${function.returnType?.text}.") {
+                        (function.returnType?.text in allowedReturnTypes).shouldBeTrue()
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
     fun `should not declare extensions on the Dto of an aggregate root`() {
         val dtoNames =
             aggregateRoots()
