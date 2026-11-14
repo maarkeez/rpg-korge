@@ -1,7 +1,7 @@
 package dependencyreport
 
 object KotlinSourceFileMother {
-    const val BASE_PACKAGE = "com.mkz.rpg"
+    const val BASE_PACKAGE = "com.mkz.tessavar"
 
     fun kotlinFile(
         packageName: String,

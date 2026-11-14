@@ -1,0 +1,54 @@
+package com.mkz.tessavar.battlefield.usecases.services
+
+import com.mkz.tessavar.battlefield.domain.Battlefield
+import com.mkz.tessavar.battlefield.domain.Battlefield.Dto.TerrainTransitionRuleDto
+import com.mkz.tessavar.battlefield.domain.BattlefieldEvent
+import com.mkz.tessavar.battlefield.domain.BattlefieldRepository
+import com.mkz.tessavar.terrain.usecases.queries.SearchTerrainById
+
+class BattlefieldCreation(
+    private val battlefieldRepository: BattlefieldRepository,
+    private val searchTerrainById: SearchTerrainById,
+) {
+    fun create(
+        rows: Int,
+        columns: Int,
+        tiles: List<List<String>>,
+    ): Set<BattlefieldEvent> {
+        if (battlefieldRepository.search() != null) return emptySet()
+        val (events, battlefield) = build(rows = rows, columns = columns, tiles = tiles).pullEvents()
+        battlefieldRepository.create(battlefield)
+        return events
+    }
+
+    fun preview(tiles: List<List<String>>): Battlefield.Dto = build(rows = tiles.size, columns = tiles.firstOrNull()?.size ?: 0, tiles = tiles).toDto()
+
+    private fun build(
+        rows: Int,
+        columns: Int,
+        tiles: List<List<String>>,
+    ): Battlefield =
+        Battlefield.create(
+            rows = rows,
+            columns = columns,
+            tiles = tiles,
+            terrainCanBeOccupied = terrainOccupancy(tiles),
+            terrainTransitionRules = terrainTransitionRules(tiles),
+        )
+
+    private fun terrainOccupancy(tiles: List<List<String>>): Map<String, Boolean> =
+        tiles
+            .flatten()
+            .distinct()
+            .associateWith { terrainId -> searchTerrainById(terrainId)?.canBeOccupied ?: false }
+
+    private fun terrainTransitionRules(tiles: List<List<String>>): Set<TerrainTransitionRuleDto> =
+        tiles
+            .flatten()
+            .distinct()
+            .flatMap { terrainId ->
+                (searchTerrainById(terrainId)?.transitionsTo ?: emptySet())
+                    .filter { it != terrainId }
+                    .map { TerrainTransitionRuleDto(terrainId, it) }
+            }.toSet()
+}

@@ -1,0 +1,11 @@
+package com.mkz.tessavar.terrain.domain
+
+sealed class TerrainError(
+    message: String,
+) : Throwable(message = message) {
+    class TerrainAlreadyExists : TerrainError(message = "Terrain already exists")
+
+    class TerrainNotFound(
+        val terrainId: String,
+    ) : TerrainError(message = "Terrain '$terrainId' not found")
+}

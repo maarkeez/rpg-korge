@@ -1,0 +1,36 @@
+package com.mkz.tessavar.player.usecases.queries
+
+import com.mkz.tessavar.player.adapters.storage.InMemoryPlayerRepository
+import com.mkz.tessavar.player.domain.PlayerMother.id
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import kotlin.test.Test
+
+class SearchPlayerByIdTest {
+    private val playerRepository = InMemoryPlayerRepository()
+    private val searchPlayerById = SearchPlayerById(playerRepository)
+
+    @Test
+    fun `should return player when it exists`() {
+        // Given
+        val player =
+            com.mkz.tessavar.player.domain.PlayerMother
+                .player()
+        val playerDto = player.toDto()
+        playerRepository.create(player)
+        // When
+        val storedPlayer = searchPlayerById(playerDto.id)
+        // Then
+        storedPlayer shouldBe playerDto
+    }
+
+    @Test
+    fun `should return null when player does not exist`() {
+        // Given
+        val unknownPlayerId = id()
+        // When
+        val storedPlayer = searchPlayerById(unknownPlayerId)
+        // Then
+        storedPlayer.shouldBeNull()
+    }
+}

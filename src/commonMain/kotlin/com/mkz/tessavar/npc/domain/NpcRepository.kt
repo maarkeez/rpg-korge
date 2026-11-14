@@ -1,0 +1,11 @@
+package com.mkz.tessavar.npc.domain
+
+interface NpcRepository {
+    fun save(npc: Npc)
+
+    fun searchById(id: String): Npc?
+
+    fun searchAll(): List<Npc>
+
+    fun delete(id: String)
+}

@@ -1,0 +1,150 @@
+package com.mkz.tessavar.shared.usecases.acceptance
+
+import com.mkz.tessavar.ability.adapters.presentation.AbilityApi
+import com.mkz.tessavar.ability.adapters.resources.ResourcesAbilityLoader
+import com.mkz.tessavar.ability.domain.Ability.Dto.EffectTargetDto
+import com.mkz.tessavar.ability.domain.Ability.Dto.TargetingDto
+import com.mkz.tessavar.ability.domain.AbilityMother
+import com.mkz.tessavar.battle.adapters.presentation.BattleApi
+import com.mkz.tessavar.battle.adapters.presentation.startBattleWithEveryBattleUnit
+import com.mkz.tessavar.battleUnit.adapters.presentation.BattleUnitApi
+import com.mkz.tessavar.battleUnit.adapters.resources.ResourcesBattleUnitLoader
+import com.mkz.tessavar.battlefield.adapters.presentation.BattlefieldApi
+import com.mkz.tessavar.battlefield.adapters.resources.ResourcesBattlefieldLoader
+import com.mkz.tessavar.battlefield.adapters.resources.TomlBattlefieldDecoder
+import com.mkz.tessavar.battlefield.adapters.resources.TomlBattlefieldEncoder
+import com.mkz.tessavar.battlefield.domain.Battlefield.Dto.PositionDto
+import com.mkz.tessavar.effect.adapters.presentation.EffectApi
+import com.mkz.tessavar.effect.adapters.resources.ResourcesEffectLoader
+import com.mkz.tessavar.effect.domain.EffectMother
+import com.mkz.tessavar.inventory.adapters.presentation.InventoryApi
+import com.mkz.tessavar.lootDrop.adapters.presentation.LootDropApi
+import com.mkz.tessavar.lootDrop.domain.LootDrop
+import com.mkz.tessavar.lootDrop.domain.LootDropMother.lootDrop
+import com.mkz.tessavar.lootDrop.usecases.services.FakeLootDropLoader
+import com.mkz.tessavar.lootTable.adapters.presentation.LootTableApi
+import com.mkz.tessavar.lootTable.domain.LootTableMother.lootTable
+import com.mkz.tessavar.lootTable.domain.LootTableMother.nothingEntry
+import com.mkz.tessavar.lootTable.usecases.services.FakeLootTableLoader
+import com.mkz.tessavar.lootableItem.adapters.presentation.LootableItemApi
+import com.mkz.tessavar.lootableItem.adapters.resources.ResourcesLootableItemLoader
+import com.mkz.tessavar.npc.adapters.presentation.NpcApi
+import com.mkz.tessavar.npc.adapters.resources.ResourcesNpcLoader
+import com.mkz.tessavar.party.adapters.presentation.PartyApi
+import com.mkz.tessavar.player.adapters.presentation.PlayerApi
+import com.mkz.tessavar.player.adapters.resources.ResourcesPlayerLoader
+import com.mkz.tessavar.player.usecases.commands.RequestPlayerCreation.PlayerType.HUMAN
+import com.mkz.tessavar.shared.adapters.events.InMemoryEventBus
+import com.mkz.tessavar.terrain.adapters.presentation.TerrainApi
+import com.mkz.tessavar.terrain.adapters.resources.ResourcesTerrainLoader
+import com.mkz.tessavar.unit.adapters.presentation.UnitApi
+import com.mkz.tessavar.unit.adapters.resources.ResourcesUnitLoader
+import com.mkz.tessavar.unit.domain.UnitMother
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.maps.shouldNotContainKey
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import kotlin.random.Random
+import kotlin.test.Test
+
+class SummonLootingAcceptanceTest {
+    private val eventBus = InMemoryEventBus()
+    private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
+    private val unitApi = UnitApi(eventBus, ResourcesUnitLoader())
+    private val playerApi = PlayerApi(eventBus, ResourcesPlayerLoader())
+    private val battlefieldApi = BattlefieldApi(terrainApi, eventBus, ResourcesBattlefieldLoader(), TomlBattlefieldEncoder(), TomlBattlefieldDecoder())
+    private val effectApi = EffectApi(eventBus, ResourcesEffectLoader())
+    private val abilityApi = AbilityApi(effectApi, eventBus, ResourcesAbilityLoader())
+    private val lootableItemApi = LootableItemApi(effectApi, eventBus, ResourcesLootableItemLoader())
+    private val lootTableApi = LootTableApi(lootableItemApi, eventBus, FakeLootTableLoader(listOf(lootTable(id = "enemy-loot", entries = listOf(nothingEntry())).toDto())))
+    private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
+    private val lootDropApi = LootDropApi(unitApi, lootTableApi, eventBus, FakeLootDropLoader(listOf(lootDrop(unitId = "enemy", lootTableIds = listOf("enemy-loot")).toDto())), Random.Default)
+    private val battleApi = BattleApi(eventBus)
+    private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
+    private val npcApi = NpcApi(battlefieldApi, lootableItemApi, partyApi, eventBus, ResourcesNpcLoader())
+    private val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
+
+    private val humanPlayerId = "human"
+    private val opponentId = "enemy"
+    private val knightId = "knight-1"
+    private val potionTile = LootDrop.Dto.PositionDto(row = 1, column = 4)
+
+    private suspend fun setUp() {
+        playerApi.requestPlayerCreation(humanPlayerId, HUMAN)
+        playerApi.requestPlayerCreation(opponentId, HUMAN)
+        terrainApi.init()
+        terrainApi.initialiseTerrains()
+        effectApi.init()
+        effectApi.initialiseEffects()
+        lootableItemApi.init()
+        lootableItemApi.initialiseLootableItems()
+        battlefieldApi.requestBattlefieldCreation(8, 8, List(8) { List(8) { "sand" } })
+
+        effectApi.requestEffectCreation(EffectMother.summonEffect(id = "deploy-summon", unitId = "summon").toDto())
+        abilityApi.requestAbilityCreation(
+            AbilityMother
+                .ability(
+                    id = "summon",
+                    manaCost = 0,
+                    cooldown = 0,
+                    abilityEffects = listOf(AbilityMother.abilityEffect(effectId = "deploy-summon", target = EffectTargetDto.Type.TARGETED_TILE)),
+                    targeting = TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER,
+                    summonDuration = 5,
+                ).toDto(),
+        )
+        unitApi.requestUnitCreation(UnitMother.unit(id = "knight", baseMaximumHealth = 20, baseMaximumMana = 10, startingAbilities = listOf("summon"), maximumSteps = 3).toDto())
+        unitApi.requestUnitCreation(UnitMother.unit(id = "summon", baseMaximumHealth = 20, baseMaximumMana = 10, startingAbilities = emptyList(), maximumSteps = 3).toDto())
+        unitApi.requestUnitCreation(UnitMother.unit(id = "enemy", baseMaximumHealth = 20, baseMaximumMana = 10, startingAbilities = emptyList(), maximumSteps = 3).toDto())
+        lootTableApi.initialiseLootTables()
+        lootDropApi.initialiseLootDrops()
+
+        battleUnitApi.deployBattleUnit(battleUnitId = knightId, unitId = "knight", playerId = humanPlayerId, deployAtRow = 2, deployAtColumn = 2)
+        battleUnitApi.deployBattleUnit(battleUnitId = "enemy-1", unitId = "enemy", playerId = opponentId, deployAtRow = 7, deployAtColumn = 7)
+        eventBus.dispatch()
+        partyApi.startExploration()
+        eventBus.dispatch()
+        battleApi.startBattleWithEveryBattleUnit(battleUnitApi, humanPlayerId, opponentId)
+        eventBus.dispatch()
+        lootDropApi.dropItemWithoutRolling(unitId = "enemy", lootableItemId = "health-potion", row = potionTile.row, column = potionTile.column)
+        eventBus.dispatch()
+    }
+
+    private fun summonBee(): String {
+        val castGroup = battleUnitApi.whereCanCast(knightId, "summon").first { castGroup -> castGroup.positions.any { tile -> tile.row == 1 && tile.column == 2 } }
+        battleUnitApi.castAbility(battleUnitId = knightId, abilityId = "summon", castGroup = castGroup)
+        eventBus.dispatch()
+        return battlefieldApi.searchOccupant(row = 1, column = 2).shouldNotBeNull()
+    }
+
+    private fun walkBeeOverThePotion(beeId: String) {
+        battleUnitApi.walkBattleUnitInBattle(battleUnitId = beeId, walkToRow = 1, walkToColumn = 5)
+        eventBus.dispatch()
+        require(battlefieldApi.searchPosition(beeId) == PositionDto(row = 1, column = 5))
+    }
+
+    @Test
+    fun `should leave the item on its tile when a summoned battle unit walks over it`() =
+        scenarioTest(::setUp) {
+            // Given
+            val beeId = summonBee()
+            // When
+            walkBeeOverThePotion(beeId)
+            // Then
+            lootDropApi.searchDroppedItems()[potionTile].shouldNotBeNull().shouldContainExactly("health-potion")
+            inventoryApi.searchInventoryByBattleUnitId(beeId).shouldBeNull()
+        }
+
+    @Test
+    fun `should let a battle unit with an inventory loot the item a summoned battle unit walked over`() =
+        scenarioTest(::setUp) {
+            // Given
+            walkBeeOverThePotion(summonBee())
+            // When
+            battleUnitApi.walkBattleUnitInBattle(battleUnitId = knightId, walkToRow = potionTile.row, walkToColumn = potionTile.column)
+            eventBus.dispatch()
+            // Then
+            inventoryApi.searchInventoryByBattleUnitId(knightId)!!.storedItems shouldBe listOf("health-potion")
+            lootDropApi.searchDroppedItems() shouldNotContainKey potionTile
+        }
+}

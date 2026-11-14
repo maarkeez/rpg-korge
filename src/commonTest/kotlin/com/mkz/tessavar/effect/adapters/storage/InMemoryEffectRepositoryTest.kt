@@ -1,0 +1,40 @@
+package com.mkz.tessavar.effect.adapters.storage
+
+import com.mkz.tessavar.effect.domain.EffectMother
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import kotlin.test.Test
+
+class InMemoryEffectRepositoryTest {
+    private val effectRepository = InMemoryEffectRepository()
+
+    @Test
+    fun `Create should store the effect when the effect is created`() {
+        // Given
+        val effect = EffectMother.damageEffect()
+        // When
+        effectRepository.create(effect)
+        // Then
+        val storedEffect = effectRepository.searchById(effect.toDto().id)
+        storedEffect shouldBe effect
+    }
+
+    @Test
+    fun `SearchById should return the effect when the effect is stored`() {
+        // Given
+        val effect = EffectMother.damageEffect()
+        effectRepository.create(effect)
+        // When
+        val storedEffect = effectRepository.searchById(effect.toDto().id)
+        // Then
+        storedEffect shouldBe effect
+    }
+
+    @Test
+    fun `SearchById should return null when the effect is not stored`() {
+        // When
+        val storedEffect = effectRepository.searchById("effect-unknown")
+        // Then
+        storedEffect.shouldBeNull()
+    }
+}

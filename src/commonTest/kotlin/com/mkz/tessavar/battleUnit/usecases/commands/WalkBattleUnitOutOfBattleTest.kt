@@ -1,0 +1,75 @@
+package com.mkz.tessavar.battleUnit.usecases.commands
+
+import com.mkz.tessavar.battleUnit.domain.BattleUnitEvent
+import com.mkz.tessavar.battleUnit.domain.BattleUnitMother.battleUnit
+import com.mkz.tessavar.battlefield.domain.Battlefield.Dto.PositionDto
+import com.mkz.tessavar.battlefield.domain.BattlefieldEvent
+import com.mkz.tessavar.battlefield.domain.BattlefieldMother.battlefield
+import com.mkz.tessavar.shared.domain.FakeEventBus
+import com.mkz.tessavar.shared.domain.shouldHavePublishedEvents
+import com.mkz.tessavar.shared.domain.shouldNotHavePublishedEvents
+import com.mkz.tessavar.shared.usecases.InMemoryQueries
+import com.mkz.tessavar.unit.domain.UnitMother.unit
+import io.kotest.matchers.shouldBe
+import kotlin.test.Test
+
+class WalkBattleUnitOutOfBattleTest {
+    private val queries = InMemoryQueries()
+    private val eventBus = FakeEventBus()
+    private val walkBattleUnitOutOfBattle =
+        WalkBattleUnitOutOfBattle(
+            battleUnitRepository = queries.battleUnitRepository,
+            eventBus = eventBus,
+            searchPosition = queries.searchPosition,
+            searchShortestPath = queries.searchShortestPath,
+        )
+
+    @Test
+    fun `should walk the battle unit along the shortest path without spending steps when the tile can be reached`() {
+        // Given
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(maximumSteps = 1).toDto()))
+        queries.battlefieldRepository.create(
+            battlefield(
+                """
+                K #
+                . #
+                . .
+                """,
+                occupants = mapOf('K' to "knight-1"),
+            ),
+        )
+        // When
+        walkBattleUnitOutOfBattle(battleUnitId = "knight-1", walkToRow = 2, walkToColumn = 1)
+        // Then
+        queries.battleUnitRepository
+            .searchById("knight-1")!!
+            .toDto()
+            .remainingActions.remainingSteps shouldBe 1
+        eventBus.shouldHavePublishedEvents(
+            BattleUnitEvent.BattleUnitMoved("knight-1", 0, 0, 2, 1, listOf(PositionDto(1, 0), PositionDto(2, 0), PositionDto(2, 1))),
+            BattlefieldEvent.RequestMoveOccupant("knight-1", 2, 1),
+        )
+    }
+
+    @Test
+    fun `should not walk when the tile can not be reached`() {
+        // Given
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1"))
+        queries.battlefieldRepository.create(battlefield("K # .", occupants = mapOf('K' to "knight-1")))
+        // When
+        walkBattleUnitOutOfBattle(battleUnitId = "knight-1", walkToRow = 0, walkToColumn = 2)
+        // Then
+        eventBus.shouldNotHavePublishedEvents()
+    }
+
+    @Test
+    fun `should not walk when the battle unit is already on the tile`() {
+        // Given
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1"))
+        queries.battlefieldRepository.create(battlefield("K .", occupants = mapOf('K' to "knight-1")))
+        // When
+        walkBattleUnitOutOfBattle(battleUnitId = "knight-1", walkToRow = 0, walkToColumn = 0)
+        // Then
+        eventBus.shouldNotHavePublishedEvents()
+    }
+}

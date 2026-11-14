@@ -46,10 +46,10 @@ val pitest by configurations.creating
 
 korge {
     id = "com.sample.demo"
-    jvmMainClassName = "com.mkz.rpg.MainKt"
+    jvmMainClassName = "com.mkz.tessavar.MainKt"
 
     // Adds `runJvmStorybook` and `runJvmStorybookAutoreload`, which start the Storybook instead of the game. See below.
-    entrypoint("storybook", "com.mkz.rpg.MainKt")
+    entrypoint("storybook", "com.mkz.tessavar.MainKt")
 
     // To enable all targets at once
     // targetAll()
@@ -100,7 +100,7 @@ tasks.withType<Test>().configureEach {
 // The end-to-end test of the game against the telemetry collector, run by `wrangler dev`, is left out of jvmTest, and run
 // by jvmTelemetryCollectorTest only, e.g.: ./gradlew jvmTelemetryCollectorTest -Prpg.telemetryCollectorUrl=http://localhost:8787.
 // See telemetry-collector/README.md.
-val telemetryCollectorEndToEndTest = "com.mkz.rpg.telemetry.adapters.storage.RemoteTelemetryRepositoryEndToEndTest"
+val telemetryCollectorEndToEndTest = "com.mkz.tessavar.telemetry.adapters.storage.RemoteTelemetryRepositoryEndToEndTest"
 
 tasks.named<Test>("jvmTest") {
     filter.excludeTestsMatching(telemetryCollectorEndToEndTest)
@@ -160,7 +160,7 @@ val testCatalogs =
         description = "Generates the test source holding the localization catalogs."
 
         localizationDirectory.set(file("resources/localization"))
-        packageName.set("com.mkz.rpg.localization.adapters.resources")
+        packageName.set("com.mkz.tessavar.localization.adapters.resources")
         objectName.set("TestCatalogs")
         outputDirectory.set(layout.buildDirectory.dir("generated/testCatalogs"))
     }
@@ -178,7 +178,7 @@ val telemetryCollectorUrl =
         description = "Generates the source holding the address of the telemetry collector, or null."
 
         collectorUrl.set(providers.gradleProperty("rpg.telemetryCollectorUrl"))
-        packageName.set("com.mkz.rpg.telemetry.adapters.storage")
+        packageName.set("com.mkz.tessavar.telemetry.adapters.storage")
         outputDirectory.set(layout.buildDirectory.dir("generated/telemetryCollector"))
     }
 
@@ -200,7 +200,7 @@ tasks.register<DependencyReportTask>("dependencyReport") {
     description = "Generates the interactive report of the dependencies between the subdomains."
 
     sourceDirectory.set(file("src/commonMain/kotlin"))
-    basePackage.set("com.mkz.rpg")
+    basePackage.set("com.mkz.tessavar")
     reportFile.set(file("docs/architecture/dependencies.html"))
 }
 
@@ -267,14 +267,14 @@ val pitestReport = tasks.register<JavaExec>("pitest") {
 
     args(
         "--reportDir=$reportDir",
-        "--targetClasses=com.mkz.rpg.*",
-        "--targetTests=com.mkz.rpg.*",
+        "--targetClasses=com.mkz.tessavar.*",
+        "--targetTests=com.mkz.tessavar.*",
         // A leading '~' makes PIT read the pattern as a regex. Only classes declared directly in a
         // `<subdomain>.adapters.presentation` package are excluded, so nested presentation subdomains
         // (e.g.: `screen.adapters.presentation.selection`) are still mutation tested.
         // Note: PIT escapes '+' and the CLI splits on ',', so neither can be used in the regex.
-        """--excludedClasses=~com\.mkz\.rpg\.[^.]*\.adapters\.presentation\.[^.]*""",
-        "--excludedTestClasses=com.mkz.rpg.shared.adapters.architecture.*,com.mkz.rpg.shared.adapters.e2e.*",
+        """--excludedClasses=~com\.mkz\.tessavar\.[^.]*\.adapters\.presentation\.[^.]*""",
+        "--excludedTestClasses=com.mkz.tessavar.shared.adapters.architecture.*,com.mkz.tessavar.shared.adapters.e2e.*",
         "--sourceDirs=${commonMainSources.absolutePath},${jvmMainSources.absolutePath}",
         "--mutableCodePaths=${jvmMainClasses.absolutePath}",
         "--outputFormats=HTML,XML",

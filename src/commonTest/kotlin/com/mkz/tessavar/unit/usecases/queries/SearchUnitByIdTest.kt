@@ -1,0 +1,34 @@
+package com.mkz.tessavar.unit.usecases.queries
+
+import com.mkz.tessavar.unit.adapters.storage.InMemoryUnitRepository
+import com.mkz.tessavar.unit.domain.UnitMother
+import com.mkz.tessavar.unit.domain.UnitMother.unit
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import kotlin.test.Test
+
+class SearchUnitByIdTest {
+    private val unitRepository = InMemoryUnitRepository()
+    private val searchUnitById = SearchUnitById(unitRepository = unitRepository)
+
+    @Test
+    fun `should find unit when exists`() {
+        // Given
+        val unit = unit()
+        unitRepository.create(unit)
+        // When
+        val unitFound = searchUnitById(id = unit.toDto().id)
+        // Then
+        unitFound shouldBe unit.toDto()
+    }
+
+    @Test
+    fun `should not find unit when it does not exist`() {
+        // Given
+        val unitId = UnitMother.id()
+        // When
+        val unitFound = searchUnitById(id = unitId)
+        // Then
+        unitFound.shouldBeNull()
+    }
+}

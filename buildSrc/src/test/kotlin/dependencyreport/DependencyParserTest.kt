@@ -21,7 +21,7 @@ class DependencyParserTest {
         // Then
         graph.edges.flatMap { it.imports }.shouldContainExactly(
             ImportDependency(
-                sourceFile = "com/mkz/rpg/battle/adapters/OnBattleUnitDefeated.kt",
+                sourceFile = "com/mkz/tessavar/battle/adapters/OnBattleUnitDefeated.kt",
                 sourceSubdomain = "battle",
                 sourceLayer = "adapters",
                 targetSubdomain = "battleUnit",

@@ -1,0 +1,27 @@
+package com.mkz.tessavar.effect.adapters.events
+
+import com.mkz.tessavar.effect.adapters.storage.InMemoryEffectRepository
+import com.mkz.tessavar.effect.domain.EffectEvent
+import com.mkz.tessavar.effect.domain.EffectMother.damageEffect
+import com.mkz.tessavar.effect.usecases.commands.InitialiseEffects
+import com.mkz.tessavar.effect.usecases.services.FakeEffectLoader
+import com.mkz.tessavar.shared.adapters.events.InMemoryEventBus
+import io.kotest.matchers.shouldBe
+import kotlin.test.Test
+
+class OnRequestInitialiseEffectsTest {
+    private val eventBus = InMemoryEventBus()
+    private val effectRepository = InMemoryEffectRepository()
+    private val venom = damageEffect(id = "venom").toDto()
+    private val onRequestInitialiseEffects = OnRequestInitialiseEffects(InitialiseEffects(FakeEffectLoader(effects = listOf(venom)), effectRepository, eventBus), eventBus)
+
+    @Test
+    fun `should initialise the effects when the request is dispatched`() {
+        // Given
+        eventBus.publish(EffectEvent.RequestInitialiseEffects)
+        // When
+        eventBus.dispatch()
+        // Then
+        effectRepository.searchById("venom")?.toDto() shouldBe venom
+    }
+}

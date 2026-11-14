@@ -1,0 +1,11 @@
+package com.mkz.tessavar.inventory.domain
+
+interface InventoryRepository {
+    fun create(inventory: Inventory)
+
+    fun searchByBattleUnitId(battleUnitId: String): Inventory?
+
+    fun searchAll(): List<Inventory>
+
+    fun deleteAll()
+}

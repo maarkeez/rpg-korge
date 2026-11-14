@@ -1,0 +1,173 @@
+package com.mkz.tessavar.screen.adapters.presentation
+
+import com.mkz.tessavar.battleUnit.usecases.services.BattleUnitLoader.Deployment
+import com.mkz.tessavar.party.domain.PartyEvent
+import com.mkz.tessavar.player.domain.Player.Dto.PlayerTypeDto.CPU
+import com.mkz.tessavar.player.domain.Player.Dto.PlayerTypeDto.HUMAN
+import com.mkz.tessavar.player.domain.PlayerMother.player
+import com.mkz.tessavar.screen.adapters.presentation.GameSceneTimelineMother.gameSceneTimeline
+import com.mkz.tessavar.screen.adapters.presentation.GameSceneTimelineMother.playLongStep
+import com.mkz.tessavar.shared.adapters.presentation.SubdomainApis
+import com.mkz.tessavar.shared.domain.subscribe
+import com.mkz.tessavar.terrain.domain.TerrainMother.terrainThatCanBeOccupied
+import com.mkz.tessavar.unit.domain.UnitMother.unit
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
+import kotlin.test.Test
+
+class FormationPresenterTest {
+    private val apis =
+        SubdomainApis(
+            terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
+            units = listOf(unit(id = "knight").toDto(), unit(id = "viking").toDto(), unit(id = "herbalist").toDto()),
+            players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
+            tiles = List(3) { List(3) { "sand" } },
+            deployments =
+                listOf(
+                    Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 1, column = 1),
+                    Deployment(battleUnitId = "viking-1", unitId = "viking", playerId = "human", row = 2, column = 1),
+                    Deployment(battleUnitId = "herbalist-1", unitId = "herbalist", playerId = "human", row = 2, column = 2),
+                ),
+        ).also(SubdomainApis::initialise)
+    private val eventBus = apis.eventBus
+    private val formationView = FormationView(GameSceneResourcesLoader())
+    private val battlefieldView = FakeBattlefieldView()
+    private val timeline = gameSceneTimeline()
+    private val callToActionView = FakeCallToActionView()
+    private val presenter = FormationPresenter(formationView, battlefieldView, callToActionView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, MessagesMother.messages(), timeline)
+
+    private val knightTile = TilePosition(row = 1, column = 1)
+    private val vikingTile = TilePosition(row = 2, column = 1)
+    private val herbalistTile = TilePosition(row = 2, column = 2)
+
+    private fun openTheFormation() {
+        apis.partyApi.startExploration()
+        eventBus.dispatch()
+        apis.partyApi.openFormation()
+        eventBus.dispatch()
+        timeline.play { presenter.open() }
+    }
+
+    @Test
+    fun `Init should hide the formation when is created`() {
+        // Then
+        formationView.visible.shouldBeFalse()
+        presenter.isOpen.shouldBeFalse()
+    }
+
+    @Test
+    fun `Open should display the party in order, the leader crowned, and dim every tile but the party's`() {
+        // When
+        openTheFormation()
+        // Then
+        presenter.isOpen.shouldBeTrue()
+        formationView.visible.shouldBeTrue()
+        formationView.names().shouldContainExactly("Knight", "Viking", "Herbalist")
+        formationView.crownedRowIndexes().shouldContainExactly(0)
+        formationView.selectedRowIndexes().shouldBeEmpty()
+        formationView.hint() shouldBe "Tap two members to reorder them"
+        battlefieldView.tilesNotDimmed.last() shouldBe setOf(knightTile, vikingTile, herbalistTile)
+    }
+
+    @Test
+    fun `FormationRowSelected should select the member, framing its row and its tile`() {
+        // Given
+        openTheFormation()
+        // When
+        presenter.formationRowSelected(2)
+        // Then
+        formationView.selectedRowIndexes().shouldContainExactly(2)
+        formationView.hint() shouldBe "Reorder Herbalist with..."
+        battlefieldView.tileSelections.last() shouldBe herbalistTile
+        battlefieldView.tilesNotDimmed.last() shouldBe setOf(knightTile, vikingTile, herbalistTile)
+    }
+
+    @Test
+    fun `FormationRowSelected should reorder both members and clear the selection when another member is tapped`() {
+        // Given
+        openTheFormation()
+        presenter.formationRowSelected(2)
+        // When
+        presenter.formationRowSelected(0)
+        // Then
+        formationView.names().shouldContainExactly("Herbalist", "Viking", "Knight")
+        formationView.crownedRowIndexes().shouldContainExactly(0)
+        formationView.selectedRowIndexes().shouldBeEmpty()
+        formationView.hint() shouldBe "Tap two members to reorder them"
+    }
+
+    @Test
+    fun `FormationRowSelected should clear the selection when the selected member is tapped again`() {
+        // Given
+        openTheFormation()
+        presenter.formationRowSelected(1)
+        val resetTilesCount = battlefieldView.resetTilesCount
+        // When
+        presenter.formationRowSelected(1)
+        // Then
+        formationView.names().shouldContainExactly("Knight", "Viking", "Herbalist")
+        formationView.selectedRowIndexes().shouldBeEmpty()
+        battlefieldView.resetTilesCount shouldBe resetTilesCount + 1
+    }
+
+    @Test
+    fun `FormationRowSelected should do nothing while the scene plays the previous steps`() {
+        // Given
+        openTheFormation()
+        timeline.playLongStep()
+        // When
+        presenter.formationRowSelected(1)
+        // Then
+        formationView.selectedRowIndexes().shouldBeEmpty()
+    }
+
+    @Test
+    fun `FormationCloseSelected should apply the order displayed to the party, the first member leading`() {
+        // Given
+        openTheFormation()
+        presenter.formationRowSelected(2)
+        presenter.formationRowSelected(0)
+        val closed = mutableListOf<PartyEvent.FormationClosed>()
+        eventBus.subscribe<PartyEvent.FormationClosed> { event -> closed += event }
+        // When
+        callToActionView.chooseAction("Close")
+        eventBus.dispatch()
+        // Then
+        val party = apis.partyApi.searchParty()!!
+        party.leaderBattleUnitId shouldBe "herbalist-1"
+        party.battleUnitIds.shouldContainExactly("herbalist-1", "viking-1", "knight-1")
+        party.isExploring.shouldBeTrue()
+        closed.shouldContainExactly(PartyEvent.FormationClosed(playerId = "human", battleUnitIds = listOf("herbalist-1", "viking-1", "knight-1")))
+    }
+
+    @Test
+    fun `Close should hide the formation and restore the tiles`() {
+        // Given
+        openTheFormation()
+        val resetTilesCount = battlefieldView.resetTilesCount
+        // When
+        presenter.close()
+        // Then
+        presenter.isOpen.shouldBeFalse()
+        formationView.visible.shouldBeFalse()
+        battlefieldView.resetTilesCount shouldBe resetTilesCount + 1
+    }
+
+    @Test
+    fun `open should display Close, which closes the formation`() {
+        // When
+        openTheFormation()
+        // Then
+        callToActionView.actionLabels().shouldContainExactly("Close")
+        // When
+        callToActionView.chooseAction("Close")
+        // Then
+        apis.partyApi
+            .searchParty()!!
+            .isExploring
+            .shouldBeTrue()
+    }
+}

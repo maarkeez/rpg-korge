@@ -1,0 +1,44 @@
+package com.mkz.tessavar.player.adapters.resources
+
+import com.mkz.tessavar.player.domain.Player.Dto.PlayerTypeDto.CPU
+import com.mkz.tessavar.player.domain.Player.Dto.PlayerTypeDto.HUMAN
+import com.mkz.tessavar.player.domain.PlayerMother.player
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.string.shouldContain
+import korlibs.io.file.std.MemoryVfsMix
+import kotlinx.coroutines.test.runTest
+import kotlin.test.Test
+
+class ResourcesPlayerLoaderTest {
+    @Test
+    fun `should load one player per toml file when player resources are initialised`() =
+        runTest {
+            // Given
+            val playerRoot =
+                MemoryVfsMix(
+                    "player/player-one.toml" to "type = \"HUMAN\"\n",
+                    "player/player-two.toml" to "type = \"CPU\"\n",
+                )["player"]
+            val loader = ResourcesPlayerLoader(playerRoot = playerRoot)
+            // When
+            loader.initResources()
+            // Then
+            loader.loadPlayers().shouldContainExactly(
+                player(id = "player-one", type = HUMAN).toDto(),
+                player(id = "player-two", type = CPU).toDto(),
+            )
+        }
+
+    @Test
+    fun `should fail with the file when the player type is unknown`() =
+        runTest {
+            // Given
+            val playerRoot = MemoryVfsMix("player/player-one.toml" to "type = \"ROBOT\"\n")["player"]
+            val loader = ResourcesPlayerLoader(playerRoot = playerRoot)
+            // When
+            val initialisation = suspend { loader.initResources() }
+            // Then
+            shouldThrow<IllegalStateException> { initialisation() }.message.shouldContain("player/player-one.toml").shouldContain("ROBOT")
+        }
+}

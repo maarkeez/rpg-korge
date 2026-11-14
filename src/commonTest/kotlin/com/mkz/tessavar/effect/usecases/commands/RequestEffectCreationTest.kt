@@ -1,0 +1,45 @@
+package com.mkz.tessavar.effect.usecases.commands
+
+import com.mkz.tessavar.effect.adapters.storage.InMemoryEffectRepository
+import com.mkz.tessavar.effect.domain.EffectEvent
+import com.mkz.tessavar.effect.domain.EffectMother.damageEffect
+import com.mkz.tessavar.shared.domain.FakeEventBus
+import com.mkz.tessavar.shared.domain.shouldHavePublishedEvents
+import io.kotest.matchers.shouldBe
+import kotlin.test.Test
+
+class RequestEffectCreationTest {
+    private val effectRepository = InMemoryEffectRepository()
+    private val eventBus = FakeEventBus()
+    private val requestEffectCreation =
+        RequestEffectCreation(
+            effectRepository = effectRepository,
+            eventBus = eventBus,
+        )
+
+    @Test
+    fun `should create effect when it does not exist`() {
+        // Given
+        val effect = damageEffect().toDto()
+        // When
+        requestEffectCreation(effectDto = effect)
+        // Then
+        val storedEffect = effectRepository.searchById(effect.id)?.toDto()
+        storedEffect shouldBe effect
+        eventBus.shouldHavePublishedEvents(EffectEvent.EffectCreated(effect.id))
+    }
+
+    @Test
+    fun `should not create effect when it already exists`() {
+        // Given
+        val existingEffect = damageEffect(damage = 3)
+        val duplicateEffect = damageEffect(existingEffect.toDto().id, damage = 10)
+        effectRepository.create(existingEffect)
+        // When
+        requestEffectCreation(effectDto = duplicateEffect.toDto())
+        // Then
+        val storedEffect = effectRepository.searchById(existingEffect.toDto().id)?.toDto()
+        storedEffect shouldBe existingEffect.toDto()
+        eventBus.shouldHavePublishedEvents()
+    }
+}

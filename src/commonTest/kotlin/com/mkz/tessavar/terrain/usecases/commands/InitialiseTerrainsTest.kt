@@ -1,0 +1,89 @@
+package com.mkz.tessavar.terrain.usecases.commands
+
+import com.mkz.tessavar.shared.domain.FakeEventBus
+import com.mkz.tessavar.shared.domain.shouldHavePublishedEvents
+import com.mkz.tessavar.terrain.adapters.storage.InMemoryTerrainRepository
+import com.mkz.tessavar.terrain.domain.Terrain
+import com.mkz.tessavar.terrain.domain.TerrainError.TerrainAlreadyExists
+import com.mkz.tessavar.terrain.domain.TerrainEvent
+import com.mkz.tessavar.terrain.domain.TerrainMother.terrainThatCanBeOccupied
+import com.mkz.tessavar.terrain.usecases.services.FakeTerrainLoader
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import kotlin.test.Test
+
+class InitialiseTerrainsTest {
+    private val terrainRepository = InMemoryTerrainRepository()
+    private val eventBus = FakeEventBus()
+
+    @Test
+    fun `should create and store all the terrains when terrains are loaded`() {
+        // Given
+        val initialiseTerrains =
+            InitialiseTerrains(
+                FakeTerrainLoader(
+                    terrains =
+                        listOf(
+                            Terrain.Dto(id = "sand", canBeOccupied = true, transitionsTo = setOf("sand", "void"), effectId = null),
+                            Terrain.Dto(id = "void", canBeOccupied = false, transitionsTo = setOf("void", "sand"), effectId = null),
+                        ),
+                ),
+                terrainRepository,
+                eventBus,
+            )
+        // When
+        initialiseTerrains()
+        // Then
+        terrainRepository.searchById("sand")?.toDto() shouldBe Terrain.Dto(id = "sand", canBeOccupied = true, transitionsTo = setOf("sand", "void"), effectId = null)
+        terrainRepository.searchById("void")?.toDto() shouldBe Terrain.Dto(id = "void", canBeOccupied = false, transitionsTo = setOf("void", "sand"), effectId = null)
+    }
+
+    @Test
+    fun `should publish a terrain created event per terrain when the terrains are created`() {
+        // Given
+        val initialiseTerrains =
+            InitialiseTerrains(
+                FakeTerrainLoader(
+                    terrains =
+                        listOf(
+                            Terrain.Dto(id = "sand", canBeOccupied = true, transitionsTo = emptySet(), effectId = null),
+                            Terrain.Dto(id = "void", canBeOccupied = false, transitionsTo = emptySet(), effectId = null),
+                        ),
+                ),
+                terrainRepository,
+                eventBus,
+            )
+        // When
+        initialiseTerrains()
+        // Then
+        eventBus.shouldHavePublishedEvents(
+            TerrainEvent.TerrainCreated(terrainId = "sand"),
+            TerrainEvent.TerrainCreated(terrainId = "void"),
+        )
+    }
+
+    @Test
+    fun `should fail when a terrain already exists`() {
+        // Given
+        terrainRepository.create(terrainThatCanBeOccupied(id = "sand"))
+        val initialiseTerrains =
+            InitialiseTerrains(FakeTerrainLoader(terrains = listOf(Terrain.Dto(id = "sand", canBeOccupied = true, transitionsTo = emptySet(), effectId = null))), terrainRepository, eventBus)
+        // When
+        val result = runCatching { initialiseTerrains() }
+        // Then
+        result.exceptionOrNull().shouldBeInstanceOf<TerrainAlreadyExists>()
+    }
+
+    @Test
+    fun `should not create any terrain when no terrains are loaded`() {
+        // Given
+        val initialiseTerrains = InitialiseTerrains(FakeTerrainLoader(terrains = emptyList()), terrainRepository, eventBus)
+        // When
+        initialiseTerrains()
+        // Then
+        terrainRepository.searchById("sand").shouldBeNull()
+        eventBus.publishedEvents.shouldBeEmpty()
+    }
+}

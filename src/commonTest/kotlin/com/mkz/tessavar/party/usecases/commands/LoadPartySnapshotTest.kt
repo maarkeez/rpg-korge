@@ -1,0 +1,54 @@
+package com.mkz.tessavar.party.usecases.commands
+
+import com.mkz.tessavar.battleUnit.adapters.storage.InMemoryBattleUnitRepository
+import com.mkz.tessavar.battleUnit.domain.BattleUnitMother.battleUnit
+import com.mkz.tessavar.battleUnit.usecases.queries.SearchBattleUnitById
+import com.mkz.tessavar.party.adapters.storage.InMemoryPartyRepository
+import com.mkz.tessavar.party.domain.Party.Dto.PositionDto
+import com.mkz.tessavar.party.domain.PartyMother.party
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import kotlin.test.Test
+
+class LoadPartySnapshotTest {
+    private val searchBattleUnitById = SearchBattleUnitById(InMemoryBattleUnitRepository().apply { listOf("knight-1", "knight-2", "knight-3").forEach { id -> create(battleUnit(id = id)) } })
+    private val partyRepository = InMemoryPartyRepository()
+    private val loadPartySnapshot = LoadPartySnapshot(partyRepository, searchBattleUnitById)
+
+    private val party =
+        party(battleUnitIds = listOf("knight-1", "knight-2", "knight-3"))
+            .swapLeader(followerId = "knight-3", positions = mapOf("knight-1" to PositionDto(0, 3), "knight-2" to PositionDto(0, 4), "knight-3" to PositionDto(0, 2)))
+            .resolveStep(battleUnitId = "knight-1", row = 0, column = 2)
+            .pullEvents()
+            .second
+
+    @Test
+    fun `should rebuild the same state when it loads the snapshot it took`() {
+        // Given
+        partyRepository.save(party(battleUnitIds = listOf("knight-2")).openPause().pullEvents().second)
+        // When
+        loadPartySnapshot(party.toSnapshot())
+        // Then
+        val loaded = partyRepository.search()!!
+        loaded shouldBe party
+        loaded.canStep().shouldBeTrue()
+    }
+
+    @Test
+    fun `should keep no party when the snapshot has none`() {
+        // When
+        loadPartySnapshot(null)
+        // Then
+        partyRepository.search().shouldBeNull()
+    }
+
+    @Test
+    fun `should fail when a member is not a battle unit`() {
+        // When
+        val result = runCatching { loadPartySnapshot(party(battleUnitIds = listOf("knight-1", "ghost-1")).toSnapshot()) }
+        // Then
+        result.exceptionOrNull()?.message.orEmpty() shouldContain "ghost-1"
+    }
+}

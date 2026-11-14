@@ -1,0 +1,62 @@
+package com.mkz.tessavar.battlefield.usecases.queries
+
+import com.mkz.tessavar.battlefield.adapters.storage.InMemoryBattlefieldRepository
+import com.mkz.tessavar.battlefield.domain.Battlefield.Dto.PositionDto
+import com.mkz.tessavar.battlefield.domain.BattlefieldError.TileTerrainTransitionNotAllowed
+import com.mkz.tessavar.battlefield.usecases.services.BattlefieldCreation
+import com.mkz.tessavar.terrain.adapters.storage.InMemoryTerrainRepository
+import com.mkz.tessavar.terrain.domain.TerrainMother.terrainThatCanBeOccupied
+import com.mkz.tessavar.terrain.domain.TerrainMother.terrainThatCanNotBeOccupied
+import com.mkz.tessavar.terrain.usecases.queries.SearchTerrainById
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import kotlin.test.Test
+
+class PreviewBattlefieldTest {
+    private val battlefieldRepository = InMemoryBattlefieldRepository()
+    private val terrainRepository =
+        InMemoryTerrainRepository().apply {
+            create(terrainThatCanBeOccupied(id = "sand", transitionsTo = setOf("lava", "water")))
+            create(terrainThatCanNotBeOccupied(id = "lava"))
+            create(terrainThatCanBeOccupied(id = "water"))
+        }
+    private val previewBattlefield = PreviewBattlefield(BattlefieldCreation(battlefieldRepository, SearchTerrainById(terrainRepository)))
+
+    @Test
+    fun `should build the battlefield the battle would create when the tiles are previewed`() {
+        // Given
+        val tiles = listOf(listOf("sand", "lava", "sand"), listOf("sand", "sand", "water"))
+        val battleRepository = InMemoryBattlefieldRepository()
+        BattlefieldCreation(battleRepository, SearchTerrainById(terrainRepository)).create(rows = 2, columns = 3, tiles = tiles)
+        // When
+        val battlefield = previewBattlefield(tiles)
+        // Then
+        battlefield shouldBe battleRepository.search()!!.toDto()
+        battlefield.tiles
+            .getValue(PositionDto(0, 0))
+            .terrainTransition
+            ?.toTerrainId shouldBe "lava"
+    }
+
+    @Test
+    fun `should not store the battlefield when the tiles are previewed`() {
+        // Given
+        val tiles = listOf(listOf("sand"))
+        // When
+        previewBattlefield(tiles)
+        // Then
+        battlefieldRepository.search().shouldBeNull()
+    }
+
+    @Test
+    fun `should fail with the terrains when two terrains without a transition are next to each other`() {
+        // Given
+        val tiles = listOf(listOf("lava", "water"))
+        // When
+        val preview = { previewBattlefield(tiles) }
+        // Then
+        val error = shouldThrow<TileTerrainTransitionNotAllowed> { preview() }
+        (error.terrainId to error.transitionToTerrainId) shouldBe ("lava" to "water")
+    }
+}

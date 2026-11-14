@@ -1,0 +1,279 @@
+package com.mkz.tessavar.shared.usecases.acceptance
+
+import com.mkz.tessavar.ability.adapters.presentation.AbilityApi
+import com.mkz.tessavar.ability.adapters.resources.ResourcesAbilityLoader
+import com.mkz.tessavar.battle.adapters.presentation.BattleApi
+import com.mkz.tessavar.battleUnit.adapters.presentation.BattleUnitApi
+import com.mkz.tessavar.battleUnit.adapters.resources.ResourcesBattleUnitLoader
+import com.mkz.tessavar.battleUnit.domain.BattleUnitEvent
+import com.mkz.tessavar.battlefield.adapters.presentation.BattlefieldApi
+import com.mkz.tessavar.battlefield.adapters.resources.ResourcesBattlefieldLoader
+import com.mkz.tessavar.battlefield.adapters.resources.TomlBattlefieldDecoder
+import com.mkz.tessavar.battlefield.adapters.resources.TomlBattlefieldEncoder
+import com.mkz.tessavar.battlefield.domain.Battlefield.Dto.PositionDto
+import com.mkz.tessavar.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
+import com.mkz.tessavar.cpuWanderBrain.adapters.presentation.CpuWanderBrainApi
+import com.mkz.tessavar.effect.adapters.presentation.EffectApi
+import com.mkz.tessavar.effect.adapters.resources.ResourcesEffectLoader
+import com.mkz.tessavar.effect.domain.Effect.Dto.EffectApplicationDto
+import com.mkz.tessavar.effect.domain.Effect.Dto.EffectApplicationDto.SourceDto
+import com.mkz.tessavar.effect.domain.Effect.Dto.RecipientDto
+import com.mkz.tessavar.party.adapters.presentation.PartyApi
+import com.mkz.tessavar.player.adapters.presentation.PlayerApi
+import com.mkz.tessavar.player.adapters.resources.ResourcesPlayerLoader
+import com.mkz.tessavar.player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
+import com.mkz.tessavar.player.usecases.commands.RequestPlayerCreation.PlayerType.HUMAN
+import com.mkz.tessavar.shared.adapters.events.InMemoryEventBus
+import com.mkz.tessavar.shared.domain.FixedDoublesRandom
+import com.mkz.tessavar.shared.domain.subscribe
+import com.mkz.tessavar.terrain.adapters.presentation.TerrainApi
+import com.mkz.tessavar.terrain.adapters.resources.ResourcesTerrainLoader
+import com.mkz.tessavar.unit.adapters.presentation.UnitApi
+import com.mkz.tessavar.unit.adapters.resources.ResourcesUnitLoader
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldNotContain
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import kotlin.test.Test
+
+class WanderingAcceptanceTest {
+    private val humanPlayerId = "human"
+    private val cpuPlayerId = "cpu"
+
+    private inner class Game(
+        vararg rolls: Double,
+    ) {
+        val eventBus = InMemoryEventBus()
+        val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
+        val unitApi = UnitApi(eventBus, ResourcesUnitLoader())
+        val playerApi = PlayerApi(eventBus, ResourcesPlayerLoader())
+        val battlefieldApi = BattlefieldApi(terrainApi, eventBus, ResourcesBattlefieldLoader(), TomlBattlefieldEncoder(), TomlBattlefieldDecoder())
+        val effectApi = EffectApi(eventBus, ResourcesEffectLoader())
+        val abilityApi = AbilityApi(effectApi, eventBus, ResourcesAbilityLoader())
+        val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
+        val battleApi = BattleApi(eventBus)
+        val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(*rolls))
+        val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
+        val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, partyApi, eventBus)
+
+        suspend fun start(
+            ratRow: Int,
+            ratColumn: Int,
+            knightRow: Int,
+            otherRats: Map<String, Pair<Int, Int>> = emptyMap(),
+            knightColumn: Int = 0,
+            tiles: List<List<String>> = List(8) { List(8) { "sand" } },
+        ) {
+            terrainApi.init()
+            effectApi.init()
+            abilityApi.init()
+            unitApi.init()
+            terrainApi.initialiseTerrains()
+            effectApi.initialiseEffects()
+            abilityApi.initialiseAbilities()
+            unitApi.initialiseUnits()
+            playerApi.requestPlayerCreation(humanPlayerId, HUMAN)
+            playerApi.requestPlayerCreation(cpuPlayerId, CPU)
+            battlefieldApi.requestBattlefieldCreation(tiles.size, tiles.first().size, tiles)
+            battleUnitApi.deployBattleUnit("knight-1", "knight", humanPlayerId, deployAtRow = knightRow, deployAtColumn = knightColumn)
+            battleUnitApi.deployBattleUnit("knight-2", "knight", humanPlayerId, deployAtRow = knightRow + 1, deployAtColumn = knightColumn)
+            battleUnitApi.deployBattleUnit("rat-1", "rat", cpuPlayerId, deployAtRow = ratRow, deployAtColumn = ratColumn)
+            otherRats.forEach { (battleUnitId, tile) -> battleUnitApi.deployBattleUnit(battleUnitId, "rat", cpuPlayerId, deployAtRow = tile.first, deployAtColumn = tile.second) }
+            partyApi.startExploration()
+            eventBus.dispatch()
+        }
+
+        fun waitASecond() {
+            partyApi.applyStandingTerrainEffects()
+            eventBus.dispatch()
+        }
+
+        fun ratPosition() = battlefieldApi.searchPosition("rat-1")
+
+        fun ratHealth() = battleUnitApi.searchBattleUnitById("rat-1")!!.remainingHealth
+
+        fun hitRat() {
+            battleUnitApi.applyEffect(
+                EffectApplicationDto(
+                    source = SourceDto.terrain("lava"),
+                    recipient = RecipientDto.battleUnit("rat-1"),
+                    effectId = "low-physical-damage",
+                    destination = null,
+                ),
+            )
+            eventBus.dispatch()
+        }
+    }
+
+    @Test
+    fun `should wander around its home, up to the edge of its territory, every second while exploring`() {
+        // Given
+        val game = Game(0.9)
+        scenarioTest({ game.start(ratRow = 0, ratColumn = 7, knightRow = 6) }) {
+            // When
+            val positions =
+                List(5) {
+                    game.waitASecond()
+                    game.ratPosition()
+                }
+            // Then
+            positions.shouldContainExactly(
+                PositionDto(0, 6),
+                PositionDto(0, 5),
+                PositionDto(0, 4),
+                PositionDto(0, 5),
+                PositionDto(0, 4),
+            )
+            game.battleApi.searchBattle().shouldBeNull()
+        }
+    }
+
+    @Test
+    fun `should stand still while it rests`() {
+        // Given
+        val game = Game(0.0)
+        scenarioTest({ game.start(ratRow = 0, ratColumn = 7, knightRow = 6) }) {
+            // When
+            repeat(5) { game.waitASecond() }
+            // Then
+            game.ratPosition() shouldBe PositionDto(0, 7)
+        }
+    }
+
+    @Test
+    fun `should engage the party when it wanders within its reach`() {
+        // Given
+        val game = Game(0.9)
+        scenarioTest({ game.start(ratRow = 0, ratColumn = 6, knightRow = 0) }) {
+            game.battleApi.searchBattle().shouldBeNull()
+            // When
+            game.waitASecond()
+            // Then
+            val battle = game.battleApi.searchBattle()!!
+            battle.isFinished.shouldBeFalse()
+            battle.battleUnitIds shouldContain "rat-1"
+            game.partyApi
+                .searchParty()!!
+                .isExploring
+                .shouldBeFalse()
+        }
+    }
+
+    @Test
+    fun `should walk all the way back home without resting when it is left outside its territory`() {
+        // Given
+        val game = Game(0.0)
+        scenarioTest({ game.start(ratRow = 0, ratColumn = 7, knightRow = 6) }) {
+            game.battleUnitApi.walkBattleUnitOutOfBattle(battleUnitId = "rat-1", walkToRow = 5, walkToColumn = 7)
+            game.eventBus.dispatch()
+            // When
+            val positions =
+                List(6) {
+                    game.waitASecond()
+                    game.ratPosition()
+                }
+            // Then
+            positions.shouldContainExactly(
+                PositionDto(4, 7),
+                PositionDto(3, 7),
+                PositionDto(2, 7),
+                PositionDto(1, 7),
+                PositionDto(0, 7),
+                PositionDto(0, 7),
+            )
+        }
+    }
+
+    @Test
+    fun `should walk around the lava on its way back home`() {
+        // Given
+        val tiles = List(8) { row -> List(8) { column -> if (row == 3 && column in 1..3) "lava" else "sand" } }
+        val game = Game(0.9)
+        scenarioTest({ game.start(ratRow = 0, ratColumn = 2, knightRow = 6, knightColumn = 7, tiles = tiles) }) {
+            game.battleUnitApi.walkBattleUnitOutOfBattle(battleUnitId = "rat-1", walkToRow = 5, walkToColumn = 2)
+            game.eventBus.dispatch()
+            // When
+            val positions =
+                List(9) {
+                    game.waitASecond()
+                    game.ratPosition()
+                }
+            // Then
+            positions.shouldContainExactly(
+                PositionDto(5, 1),
+                PositionDto(5, 0),
+                PositionDto(4, 0),
+                PositionDto(3, 0),
+                PositionDto(2, 0),
+                PositionDto(2, 1),
+                PositionDto(2, 2),
+                PositionDto(1, 2),
+                PositionDto(0, 2),
+            )
+        }
+    }
+
+    @Test
+    fun `should join the battle when it wanders within reach of the party once a round finishes`() {
+        // Given
+        val game = Game(0.9)
+        scenarioTest({ game.start(ratRow = 0, ratColumn = 6, knightRow = 0, otherRats = mapOf("rat-2" to (3 to 0))) }) {
+            game.battleApi.searchBattle()!!.battleUnitIds shouldNotContain "rat-1"
+            val ratMoves = mutableListOf<PositionDto>()
+            game.eventBus.subscribe<BattleUnitEvent.BattleUnitMoved> { event -> if (event.battleUnitId == "rat-1") ratMoves += PositionDto(event.toRow, event.toColumn) }
+            // When
+            game.battleApi.finishPlayerTurn()
+            game.eventBus.dispatch()
+            // Then
+            ratMoves.first() shouldBe PositionDto(0, 5)
+            game.battleApi.searchBattle()!!.battleUnitIds shouldContain "rat-1"
+        }
+    }
+
+    @Test
+    fun `should recover a tenth of its health every second while it wanders`() {
+        // Given
+        val game = Game(0.0)
+        scenarioTest({ game.start(ratRow = 0, ratColumn = 7, knightRow = 6) }) {
+            game.hitRat()
+            // When
+            val healths =
+                List(3) {
+                    game.waitASecond()
+                    game.ratHealth()
+                }
+            // Then
+            healths.shouldContainExactly(12, 14, 16)
+        }
+    }
+
+    @Test
+    fun `should not recover once it is defeated`() {
+        // Given
+        val game = Game(0.0)
+        scenarioTest({ game.start(ratRow = 0, ratColumn = 7, knightRow = 6) }) {
+            game.hitRat()
+            game.hitRat()
+            // When
+            game.waitASecond()
+            // Then
+            game.ratHealth() shouldBe 0
+        }
+    }
+
+    @Test
+    fun `should recover a tenth of its health once per round while it is out of the battle`() {
+        // Given
+        val game = Game(0.0)
+        scenarioTest({ game.start(ratRow = 0, ratColumn = 7, knightRow = 0, otherRats = mapOf("rat-2" to (3 to 0))) }) {
+            game.hitRat()
+            // When
+            game.battleApi.finishPlayerTurn()
+            game.eventBus.dispatch()
+            // Then
+            game.ratHealth() shouldBe 12
+        }
+    }
+}

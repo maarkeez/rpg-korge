@@ -6,7 +6,7 @@ The game has a single context: one [`GLOSSARY.md`](../../../GLOSSARY.md) at the 
 ## Structure
 
 ```md
-# RPG
+# Tessavar
 
 {One or two sentence description of the game.}
 
@@ -26,7 +26,7 @@ _Avoid_: Target
 ```
 
 - Every subdomain has a `### <Subdomain>` section under `## Language`, in alphabetical order. The subdomains are the
-  packages under `src/commonMain/kotlin/com/mkz/rpg/`, and a section is named after its package in words:
+  packages under `src/commonMain/kotlin/com/mkz/tessavar/`, and a section is named after its package in words:
   `### Battle unit` for `battleUnit`.
 - Group terms under `####` headings within a section when natural clusters emerge.
 - A term is written as `**Term**:`, its definition on the next line, and `_Avoid_:` with the other words, if any.

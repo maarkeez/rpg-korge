@@ -1,0 +1,84 @@
+package com.mkz.tessavar.battleUnit.usecases.commands
+
+import com.mkz.tessavar.battleUnit.adapters.storage.InMemoryBattleUnitRepository
+import com.mkz.tessavar.battlefield.domain.Battlefield
+import com.mkz.tessavar.player.domain.PlayerMother.player
+import com.mkz.tessavar.unit.domain.UnitMother.unit
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.shouldBe
+import kotlin.test.Test
+
+class ReplenishManaTest {
+    private val battleUnitRepository = InMemoryBattleUnitRepository()
+    private val replenishMana = ReplenishMana(battleUnitRepository)
+
+    @Test
+    fun `should replenish mana when the battle unit has mana below the maximum`() {
+        // Given
+        val unit =
+            unit(baseMaximumMana = 20, startingAbilities = listOf("ability-1"))
+                .toDto()
+        val player =
+            player(id = "player-1")
+                .toDto()
+        val depletedBattleUnit =
+            com.mkz.tessavar.battleUnit.domain.BattleUnitMother
+                .battleUnit(unit = unit, player = player)
+                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityManaCost = 15, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .pullEvents()
+                .second
+        battleUnitRepository.create(depletedBattleUnit)
+        // When
+        replenishMana("player-1", setOf(depletedBattleUnit.toDto().id))
+        // Then
+        val storedBattleUnit = battleUnitRepository.searchById(depletedBattleUnit.toDto().id)?.toDto()
+        storedBattleUnit!!.remainingMana shouldBe 15
+    }
+
+    @Test
+    fun `should not exceed maximum mana when replenishing`() {
+        // Given
+        val unit = unit(baseMaximumMana = 12, startingAbilities = listOf("ability-1")).toDto()
+        val player = player(id = "player-1").toDto()
+        val depletedBattleUnit =
+            com.mkz.tessavar.battleUnit.domain.BattleUnitMother
+                .battleUnit(unit = unit, player = player)
+                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityManaCost = 5, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .pullEvents()
+                .second
+        battleUnitRepository.create(depletedBattleUnit)
+        // When
+        replenishMana("player-1", setOf(depletedBattleUnit.toDto().id))
+        // Then
+        val storedBattleUnit = battleUnitRepository.searchById(depletedBattleUnit.toDto().id)?.toDto()
+        storedBattleUnit!!.remainingMana shouldBe 12
+    }
+
+    @Test
+    fun `should not replenish mana when the battle unit is not in the battle`() {
+        // Given
+        val unit = unit(baseMaximumMana = 20, startingAbilities = listOf("ability-1")).toDto()
+        val player = player(id = "player-1").toDto()
+        val depletedBattleUnit =
+            com.mkz.tessavar.battleUnit.domain.BattleUnitMother
+                .battleUnit(unit = unit, player = player)
+                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityManaCost = 15, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .pullEvents()
+                .second
+        battleUnitRepository.create(depletedBattleUnit)
+        // When
+        replenishMana("player-1", setOf("another-battle-unit"))
+        // Then
+        val storedBattleUnit = battleUnitRepository.searchById(depletedBattleUnit.toDto().id)?.toDto()
+        storedBattleUnit!!.remainingMana shouldBe 5
+    }
+
+    @Test
+    fun `should not update any battle unit when the player has no battle units`() {
+        // Given
+        // When
+        replenishMana("player-1", emptySet())
+        // Then
+        battleUnitRepository.searchAll().shouldBeEmpty()
+    }
+}

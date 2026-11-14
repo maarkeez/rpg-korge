@@ -18,14 +18,14 @@ and saves a PNG you then read. Every command runs from the repository root.
 ## 1. Find the story id
 
 Every component and story id is listed in
-[`StorySmokeTest`](../../../src/commonTest/kotlin/com/mkz/rpg/storybook/adapters/presentation/StorySmokeTest.kt):
+[`StorySmokeTest`](../../../src/commonTest/kotlin/com/mkz/tessavar/storybook/adapters/presentation/StorySmokeTest.kt):
 
 ```shell
-grep -oE '"[a-z]+(-[a-z0-9]+)*--[a-z0-9-]+"' src/commonTest/kotlin/com/mkz/rpg/storybook/adapters/presentation/StorySmokeTest.kt
+grep -oE '"[a-z]+(-[a-z0-9]+)*--[a-z0-9-]+"' src/commonTest/kotlin/com/mkz/tessavar/storybook/adapters/presentation/StorySmokeTest.kt
 ```
 
 A story id is `<component id>--<story>`, e.g.: `screen-shop--sell`. The arg names are the control names of the
-component, in its `<View>Stories` binding under `src/commonMain/kotlin/com/mkz/rpg/storybook/adapters/presentation/`
+component, in its `<View>Stories` binding under `src/commonMain/kotlin/com/mkz/tessavar/storybook/adapters/presentation/`
 (e.g.: `gold`, `selectedSlot` in `ShopViewStories.kt`). The only global is `language` (`en`, `es`, ...).
 
 ## 2. Build and serve it

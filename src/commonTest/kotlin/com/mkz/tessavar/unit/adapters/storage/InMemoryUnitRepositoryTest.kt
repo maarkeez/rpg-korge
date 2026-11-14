@@ -1,0 +1,40 @@
+package com.mkz.tessavar.unit.adapters.storage
+
+import com.mkz.tessavar.unit.domain.UnitMother
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import kotlin.test.Test
+
+class InMemoryUnitRepositoryTest {
+    private val unitRepository = InMemoryUnitRepository()
+
+    @Test
+    fun `Create should store the unit when the unit is created`() {
+        // Given
+        val unit = UnitMother.unit()
+        // When
+        unitRepository.create(unit)
+        // Then
+        val storedUnit = unitRepository.searchById(unit.toDto().id)
+        storedUnit shouldBe unit
+    }
+
+    @Test
+    fun `SearchById should return the unit when the unit is stored`() {
+        // Given
+        val unit = UnitMother.unit()
+        unitRepository.create(unit)
+        // When
+        val storedUnit = unitRepository.searchById(unit.toDto().id)
+        // Then
+        storedUnit shouldBe unit
+    }
+
+    @Test
+    fun `SearchById should return null when the unit is not stored`() {
+        // When
+        val storedUnit = unitRepository.searchById("unit-unknown")
+        // Then
+        storedUnit.shouldBeNull()
+    }
+}

@@ -1,0 +1,518 @@
+package com.mkz.tessavar.inventory.domain
+
+import com.mkz.tessavar.inventory.domain.Inventory.Dto.GiveItemRefusalDto
+import com.mkz.tessavar.inventory.domain.Inventory.Dto.TradeRefusalDto
+import com.mkz.tessavar.inventory.domain.InventoryError.EquippedItemCanNotBeDiscarded
+import com.mkz.tessavar.inventory.domain.InventoryError.EquippedItemCanNotBeGiven
+import com.mkz.tessavar.inventory.domain.InventoryError.EquippedItemCanNotBeSold
+import com.mkz.tessavar.inventory.domain.InventoryError.GoldAboveMaximum
+import com.mkz.tessavar.inventory.domain.InventoryError.InvalidGoldAmount
+import com.mkz.tessavar.inventory.domain.InventoryError.ItemAlreadyEquipped
+import com.mkz.tessavar.inventory.domain.InventoryError.ItemNotEquipped
+import com.mkz.tessavar.inventory.domain.InventoryError.ItemNotStored
+import com.mkz.tessavar.inventory.domain.InventoryError.NegativeGold
+import com.mkz.tessavar.inventory.domain.InventoryError.NoStorageSpaceLeft
+import com.mkz.tessavar.inventory.domain.InventoryError.NotEnoughGold
+import com.mkz.tessavar.inventory.domain.InventoryEvent.GoldGiven
+import com.mkz.tessavar.inventory.domain.InventoryEvent.GoldReceived
+import com.mkz.tessavar.inventory.domain.InventoryEvent.InventoryFull
+import com.mkz.tessavar.inventory.domain.InventoryEvent.ItemBought
+import com.mkz.tessavar.inventory.domain.InventoryEvent.ItemConsumed
+import com.mkz.tessavar.inventory.domain.InventoryEvent.ItemDiscarded
+import com.mkz.tessavar.inventory.domain.InventoryEvent.ItemEquipped
+import com.mkz.tessavar.inventory.domain.InventoryEvent.ItemGiven
+import com.mkz.tessavar.inventory.domain.InventoryEvent.ItemReceived
+import com.mkz.tessavar.inventory.domain.InventoryEvent.ItemSold
+import com.mkz.tessavar.inventory.domain.InventoryEvent.ItemStored
+import com.mkz.tessavar.inventory.domain.InventoryEvent.ItemUnequipped
+import com.mkz.tessavar.inventory.domain.InventoryEvent.RewardGranted
+import com.mkz.tessavar.inventory.domain.InventoryMother.fullInventory
+import com.mkz.tessavar.inventory.domain.InventoryMother.inventory
+import com.mkz.tessavar.lootDrop.domain.LootDropEvent.RequestDropItems
+import com.mkz.tessavar.lootDrop.domain.LootDropEvent.RequestLootDroppedItem
+import com.mkz.tessavar.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto.HEAD
+import com.mkz.tessavar.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto.WEAPON
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeTypeOf
+import kotlin.test.Test
+
+class InventoryTest {
+    @Test
+    fun `Create should create an empty inventory with 12 storage spaces and the starting gold when the battle unit is deployed`() {
+        // Given
+        val battleUnitId = "knight-1"
+        // When
+        val createdInventory = Inventory.create(battleUnitId, gold = 20)
+        // Then
+        createdInventory.toDto() shouldBe Inventory.Dto(battleUnitId = "knight-1", maximumStorageSpace = 12, storedItems = emptyList(), equippedItems = emptyMap(), gold = 20)
+    }
+
+    @Test
+    fun `Create should create an inventory with up to 99,999 gold, and fail below 0 or above it`() {
+        // Then
+        Inventory.create("knight-1", gold = 99_999).toDto().gold shouldBe 99_999
+        runCatching { Inventory.create("knight-1", gold = -1) }.exceptionOrNull().shouldBeTypeOf<NegativeGold>()
+        runCatching { Inventory.create("knight-1", gold = 100_000) }.exceptionOrNull().shouldBeTypeOf<GoldAboveMaximum>()
+    }
+
+    @Test
+    fun `Buy should pay the price and store the item when it can afford it and has space left`() {
+        // Given
+        val inventory = inventory(battleUnitId = "viking-1", storedItems = listOf("health-potion"), gold = 100)
+        // When
+        val (events, updatedInventory) = inventory.buy("hammer", price = 50).pullEvents()
+        // Then
+        updatedInventory.toDto().storedItems.shouldContainExactly("health-potion", "hammer")
+        updatedInventory.toDto().gold shouldBe 50
+        events.shouldContainExactly(ItemBought(battleUnitId = "viking-1", lootableItemId = "hammer", price = 50))
+    }
+
+    @Test
+    fun `Buy should spend all the gold when the price is exactly the gold`() {
+        // When
+        val updatedInventory = inventory(gold = 10).buy("health-potion", price = 10)
+        // Then
+        updatedInventory.toDto().gold shouldBe 0
+    }
+
+    @Test
+    fun `Buy should fail when it can not afford the price`() {
+        // When
+        val result = runCatching { inventory(gold = 20).buy("hammer", price = 50) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<NotEnoughGold>()
+    }
+
+    @Test
+    fun `Buy should fail when there is no space left`() {
+        // When
+        val result = runCatching { fullInventory(gold = 100).buy("hammer", price = 50) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<NoStorageSpaceLeft>()
+    }
+
+    @Test
+    fun `BuyRefusal should tell whether it can not afford the price, or has no space left`() {
+        // Then
+        inventory(gold = 50).buyRefusal(price = 50).shouldBeNull()
+        inventory(gold = 49).buyRefusal(price = 50) shouldBe TradeRefusalDto.NOT_ENOUGH_GOLD
+        fullInventory(gold = 100).buyRefusal(price = 50) shouldBe TradeRefusalDto.INVENTORY_FULL
+        fullInventory(gold = 0).buyRefusal(price = 50) shouldBe TradeRefusalDto.INVENTORY_FULL
+    }
+
+    @Test
+    fun `Sell should remove one of the stored items and receive its price when the item is stored`() {
+        // Given
+        val inventory = inventory(battleUnitId = "viking-1", storedItems = listOf("hammer", "hammer"), gold = 50)
+        // When
+        val (events, updatedInventory) = inventory.sell("hammer", sellPrice = 25).pullEvents()
+        // Then
+        updatedInventory.toDto().storedItems.shouldContainExactly("hammer")
+        updatedInventory.toDto().gold shouldBe 75
+        events.shouldContainExactly(ItemSold(battleUnitId = "viking-1", lootableItemId = "hammer", sellPrice = 25))
+    }
+
+    @Test
+    fun `Sell should sell a copy that is not equipped when another copy is equipped`() {
+        // Given
+        val inventory = inventory(storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer"))
+        // When
+        val updatedInventory = inventory.sell("hammer", sellPrice = 25)
+        // Then
+        updatedInventory.toDto().storedItems.shouldContainExactly("hammer")
+        updatedInventory.toDto().equippedItems shouldBe mapOf(WEAPON to "hammer")
+    }
+
+    @Test
+    fun `Sell should fail when the only stored copy is equipped`() {
+        // When
+        val result = runCatching { inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")).sell("hammer", sellPrice = 25) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<EquippedItemCanNotBeSold>()
+    }
+
+    @Test
+    fun `Sell should fail when the item is not stored`() {
+        // When
+        val result = runCatching { inventory().sell("hammer", sellPrice = 25) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<ItemNotStored>()
+    }
+
+    @Test
+    fun `Sell should fail when the price takes the gold above 99,999`() {
+        // When
+        val result = runCatching { inventory(storedItems = listOf("hammer"), gold = 99_990).sell("hammer", sellPrice = 25) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<GoldAboveMaximum>()
+    }
+
+    @Test
+    fun `SellRefusal should tell whether no copy that is not equipped is stored, or the gold goes above 99,999`() {
+        // Then
+        inventory(storedItems = listOf("hammer"), gold = 99_974).sellRefusal("hammer", sellPrice = 25).shouldBeNull()
+        inventory(storedItems = listOf("hammer"), gold = 99_975).sellRefusal("hammer", sellPrice = 25) shouldBe TradeRefusalDto.GOLD_FULL
+        inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")).sellRefusal("hammer", sellPrice = 25) shouldBe TradeRefusalDto.EQUIPPED
+        inventory(storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer")).sellRefusal("hammer", sellPrice = 25).shouldBeNull()
+        inventory().sellRefusal("hammer", sellPrice = 25) shouldBe TradeRefusalDto.NOT_STORED
+    }
+
+    @Test
+    fun `GiveItem should remove one of the stored items, given to the receiver, when the item is stored`() {
+        // Given
+        val inventory = inventory(battleUnitId = "knight-1", storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer"))
+        // When
+        val (events, updatedInventory) = inventory.giveItem("hammer", receiverBattleUnitId = "viking-1").pullEvents()
+        // Then
+        updatedInventory.toDto().storedItems.shouldContainExactly("hammer")
+        updatedInventory.toDto().equippedItems shouldBe mapOf(WEAPON to "hammer")
+        events.shouldContainExactly(ItemGiven(battleUnitId = "knight-1", receiverBattleUnitId = "viking-1", lootableItemId = "hammer"))
+    }
+
+    @Test
+    fun `GiveItem should fail when the item is not stored, or the only stored copy is equipped`() {
+        // Then
+        runCatching { inventory().giveItem("hammer", receiverBattleUnitId = "viking-1") }.exceptionOrNull().shouldBeTypeOf<ItemNotStored>()
+        runCatching { inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")).giveItem("hammer", receiverBattleUnitId = "viking-1") }
+            .exceptionOrNull()
+            .shouldBeTypeOf<EquippedItemCanNotBeGiven>()
+    }
+
+    @Test
+    fun `GiveItemRefusal should tell whether no copy that is not equipped is stored`() {
+        // Then
+        inventory(storedItems = listOf("hammer")).giveItemRefusal("hammer").shouldBeNull()
+        inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")).giveItemRefusal("hammer") shouldBe GiveItemRefusalDto.EQUIPPED
+        inventory(storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer")).giveItemRefusal("hammer").shouldBeNull()
+        inventory().giveItemRefusal("hammer") shouldBe GiveItemRefusalDto.NOT_STORED
+    }
+
+    @Test
+    fun `ReceiveItem should store the given item last when there is space left`() {
+        // Given
+        val inventory = inventory(battleUnitId = "viking-1", storedItems = listOf("mana-potion"))
+        // When
+        val (events, updatedInventory) = inventory.receiveItem("hammer", giverBattleUnitId = "knight-1").pullEvents()
+        // Then
+        updatedInventory.toDto().storedItems.shouldContainExactly("mana-potion", "hammer")
+        updatedInventory.toDto().equippedItems shouldBe emptyMap()
+        events.shouldContainExactly(ItemReceived(battleUnitId = "viking-1", giverBattleUnitId = "knight-1", lootableItemId = "hammer"))
+    }
+
+    @Test
+    fun `ReceiveItem should fail when there is no space left`() {
+        // Then
+        runCatching { fullInventory().receiveItem("hammer", giverBattleUnitId = "knight-1") }.exceptionOrNull().shouldBeTypeOf<NoStorageSpaceLeft>()
+    }
+
+    @Test
+    fun `GiveGold should remove the gold and announce it when the amount is carried`() {
+        // Given
+        val inventory = inventory(battleUnitId = "knight-1", gold = 120)
+        // When
+        val (events, updatedInventory) = inventory.giveGold(120, receiverBattleUnitId = "viking-1").pullEvents()
+        // Then
+        updatedInventory.toDto().gold shouldBe 0
+        events.shouldContainExactly(GoldGiven(battleUnitId = "knight-1", receiverBattleUnitId = "viking-1", gold = 120))
+    }
+
+    @Test
+    fun `GiveGold should fail when the amount is below 1`() {
+        // Then
+        runCatching { inventory(gold = 120).giveGold(0, receiverBattleUnitId = "viking-1") }.exceptionOrNull().shouldBeTypeOf<InvalidGoldAmount>()
+        runCatching { inventory(gold = 120).giveGold(-5, receiverBattleUnitId = "viking-1") }.exceptionOrNull().shouldBeTypeOf<InvalidGoldAmount>()
+    }
+
+    @Test
+    fun `GiveGold should fail when the amount is above the gold carried`() {
+        // Then
+        runCatching { inventory(gold = 120).giveGold(121, receiverBattleUnitId = "viking-1") }.exceptionOrNull().shouldBeTypeOf<NotEnoughGold>()
+    }
+
+    @Test
+    fun `ReceiveGold should add the gold and announce it when it fits`() {
+        // Given
+        val inventory = inventory(battleUnitId = "viking-1", gold = 99_990)
+        // When
+        val (events, updatedInventory) = inventory.receiveGold(9, giverBattleUnitId = "knight-1").pullEvents()
+        // Then
+        updatedInventory.toDto().gold shouldBe 99_999
+        events.shouldContainExactly(GoldReceived(battleUnitId = "viking-1", giverBattleUnitId = "knight-1", gold = 9))
+    }
+
+    @Test
+    fun `ReceiveGold should fail when it goes above 99,999 G`() {
+        // Then
+        runCatching { inventory(gold = 99_990).receiveGold(10, giverBattleUnitId = "knight-1") }.exceptionOrNull().shouldBeTypeOf<GoldAboveMaximum>()
+    }
+
+    @Test
+    fun `GoldRoom should answer how much more gold it can carry`() {
+        // Then
+        inventory(gold = 0).goldRoom() shouldBe 99_999
+        inventory(gold = 99_990).goldRoom() shouldBe 9
+        inventory(gold = 99_999).goldRoom() shouldBe 0
+    }
+
+    @Test
+    fun `Store should store the item and request its looting when there is space left`() {
+        // Given
+        val inventory = inventory(battleUnitId = "knight-1", storedItems = listOf("health-potion"))
+        // When
+        val (events, updatedInventory) = inventory.store("health-potion", row = 1, column = 2).pullEvents()
+        // Then
+        updatedInventory.toDto().storedItems.shouldContainExactly("health-potion", "health-potion")
+        events.shouldContainExactly(
+            ItemStored(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 2),
+            RequestLootDroppedItem(lootableItemId = "health-potion", row = 1, column = 2),
+        )
+    }
+
+    @Test
+    fun `Store should store the item when it fills the last storage space`() {
+        // Given
+        val inventory = inventory(storedItems = List(11) { "health-potion" })
+        // When
+        val updatedInventory = inventory.store("helmet", row = 1, column = 2)
+        // Then
+        updatedInventory.toDto().storedItems.size shouldBe 12
+        updatedInventory.toDto().storedItems.last() shouldBe "helmet"
+    }
+
+    @Test
+    fun `Store should announce the inventory is full without storing the item when there is no space left`() {
+        // Given
+        val inventory = fullInventory(battleUnitId = "knight-1")
+        // When
+        val (events, updatedInventory) = inventory.store("health-potion", row = 1, column = 2).pullEvents()
+        // Then
+        updatedInventory.toDto() shouldBe inventory.toDto()
+        events.shouldContainExactly(InventoryFull(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 2))
+    }
+
+    @Test
+    fun `CanStore should allow storing when there is space left`() {
+        // Given
+        val inventory = inventory(storedItems = List(11) { "health-potion" })
+        // When
+        val canStore = inventory.canStore()
+        // Then
+        canStore.shouldBeTrue()
+    }
+
+    @Test
+    fun `CanStore should not allow storing when there is no space left`() {
+        // Given
+        val inventory = fullInventory()
+        // When
+        val canStore = inventory.canStore()
+        // Then
+        canStore.shouldBeFalse()
+    }
+
+    @Test
+    fun `CanConsume should tell whether the item is stored`() {
+        // Given
+        val inventory = inventory(storedItems = listOf("teleport-essence"))
+        // Then
+        inventory.canConsume("teleport-essence").shouldBeTrue()
+        inventory.canConsume("health-potion").shouldBeFalse()
+    }
+
+    @Test
+    fun `Consume should remove one of the stored items when the item is stored`() {
+        // Given
+        val inventory = inventory(battleUnitId = "knight-1", storedItems = listOf("health-potion", "helmet", "health-potion"))
+        // When
+        val (events, updatedInventory) = inventory.consume("health-potion").pullEvents()
+        // Then
+        updatedInventory.toDto().storedItems.shouldContainExactly("helmet", "health-potion")
+        events.shouldContainExactly(ItemConsumed(battleUnitId = "knight-1", lootableItemId = "health-potion"))
+    }
+
+    @Test
+    fun `Consume should fail when the item is not stored`() {
+        // Given
+        val inventory = inventory(storedItems = listOf("helmet"))
+        // When
+        val result = runCatching { inventory.consume("health-potion") }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<ItemNotStored>()
+    }
+
+    @Test
+    fun `Discard should remove one of the stored items and free its space when the item is stored`() {
+        // Given
+        val inventory = fullInventory(battleUnitId = "knight-1")
+        val discardedItem = inventory.toDto().storedItems.first()
+        // When
+        val (events, updatedInventory) = inventory.discard(discardedItem).pullEvents()
+        // Then
+        updatedInventory.toDto().storedItems shouldBe inventory.toDto().storedItems.drop(1)
+        updatedInventory.canStore().shouldBeTrue()
+        events.shouldContainExactly(ItemDiscarded(battleUnitId = "knight-1", lootableItemId = discardedItem))
+    }
+
+    @Test
+    fun `Discard should fail when the item is not stored`() {
+        // Given
+        val inventory = inventory(storedItems = listOf("helmet"))
+        // When
+        val result = runCatching { inventory.discard("health-potion") }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<ItemNotStored>()
+    }
+
+    @Test
+    fun `Discard should remove a copy that is not equipped when another copy is equipped`() {
+        // Given
+        val inventory = inventory(storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer"))
+        // When
+        val updatedInventory = inventory.discard("hammer")
+        // Then
+        updatedInventory.toDto().storedItems.shouldContainExactly("hammer")
+        updatedInventory.toDto().equippedItems shouldBe mapOf(WEAPON to "hammer")
+    }
+
+    @Test
+    fun `Discard should fail when the only stored copy is equipped`() {
+        // Given
+        val inventory = inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer"))
+        // When
+        val result = runCatching { inventory.discard("hammer") }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<EquippedItemCanNotBeDiscarded>()
+    }
+
+    @Test
+    fun `Equip should equip the item in its zone while it keeps its storage space when the item is stored`() {
+        // Given
+        val inventory = inventory(battleUnitId = "knight-1", storedItems = listOf("hammer", "helmet"), equippedItems = mapOf(HEAD to "helmet"))
+        // When
+        val (events, updatedInventory) = inventory.equip("hammer", WEAPON).pullEvents()
+        // Then
+        updatedInventory.toDto().storedItems.shouldContainExactly("hammer", "helmet")
+        updatedInventory.toDto().equippedItems shouldBe mapOf(HEAD to "helmet", WEAPON to "hammer")
+        events.shouldContainExactly(ItemEquipped(battleUnitId = "knight-1", lootableItemId = "hammer", equipmentZone = WEAPON))
+    }
+
+    @Test
+    fun `Equip should unequip the item the zone held when the zone is already used`() {
+        // Given
+        val inventory = inventory(battleUnitId = "knight-1", storedItems = listOf("hammer", "axe"), equippedItems = mapOf(WEAPON to "axe"))
+        // When
+        val (events, updatedInventory) = inventory.equip("hammer", WEAPON).pullEvents()
+        // Then
+        updatedInventory.toDto().storedItems.shouldContainExactly("hammer", "axe")
+        updatedInventory.toDto().equippedItems shouldBe mapOf(WEAPON to "hammer")
+        events.shouldContainExactly(
+            ItemUnequipped(battleUnitId = "knight-1", lootableItemId = "axe", equipmentZone = WEAPON),
+            ItemEquipped(battleUnitId = "knight-1", lootableItemId = "hammer", equipmentZone = WEAPON),
+        )
+    }
+
+    @Test
+    fun `Equip should fail when the item is not stored`() {
+        // Given
+        val inventory = inventory(storedItems = listOf("helmet"))
+        // When
+        val result = runCatching { inventory.equip("hammer", WEAPON) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<ItemNotStored>()
+    }
+
+    @Test
+    fun `Equip should fail when the item is already equipped`() {
+        // Given
+        val inventory = inventory(storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer"))
+        // When
+        val result = runCatching { inventory.equip("hammer", WEAPON) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<ItemAlreadyEquipped>()
+    }
+
+    @Test
+    fun `Unequip should unequip the item while it stays stored when the item is equipped`() {
+        // Given
+        val inventory = inventory(battleUnitId = "knight-1", storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer"))
+        // When
+        val (events, updatedInventory) = inventory.unequip("hammer").pullEvents()
+        // Then
+        updatedInventory.toDto().storedItems.shouldContainExactly("hammer")
+        updatedInventory.toDto().equippedItems shouldBe emptyMap()
+        events.shouldContainExactly(ItemUnequipped(battleUnitId = "knight-1", lootableItemId = "hammer", equipmentZone = WEAPON))
+    }
+
+    @Test
+    fun `Unequip should fail when the item is not equipped`() {
+        // Given
+        val inventory = inventory(storedItems = listOf("hammer"))
+        // When
+        val result = runCatching { inventory.unequip("hammer") }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<ItemNotEquipped>()
+    }
+
+    @Test
+    fun `Inventory should add the gold and store the items when a reward is granted`() {
+        // Given
+        val inventory = inventory(battleUnitId = "hero", storedItems = listOf("dagger"), gold = 30)
+        // When
+        val updatedInventory = inventory.grantReward(gold = 150, lootableItemIds = listOf("hammer", "health-potion"), row = 1, column = 2)
+        // Then
+        updatedInventory.toDto().gold shouldBe 180
+        updatedInventory.toDto().storedItems.shouldContainExactly("dagger", "hammer", "health-potion")
+        updatedInventory.pullEvents().first.shouldContainExactly(RewardGranted(battleUnitId = "hero", gold = 150, lootableItemIds = listOf("hammer", "health-potion")))
+    }
+
+    @Test
+    fun `Inventory should stop at the maximum gold when a reward takes it above`() {
+        // Given
+        val inventory = inventory(battleUnitId = "hero", gold = 99_950)
+        // When
+        val updatedInventory = inventory.grantReward(gold = 150, lootableItemIds = emptyList(), row = 1, column = 2)
+        // Then
+        updatedInventory.toDto().gold shouldBe 99_999
+        updatedInventory.pullEvents().first.shouldContainExactly(RewardGranted(battleUnitId = "hero", gold = 49, lootableItemIds = emptyList()))
+    }
+
+    @Test
+    fun `Inventory should request dropping the items left when the inventory is full`() {
+        // Given
+        val storedItems = List(11) { "dagger" }
+        val inventory = inventory(battleUnitId = "hero", storedItems = storedItems)
+        // When
+        val updatedInventory = inventory.grantReward(gold = 0, lootableItemIds = listOf("hammer", "health-potion", "health-potion"), row = 1, column = 2)
+        // Then
+        updatedInventory.toDto().storedItems shouldBe storedItems + "hammer"
+        updatedInventory.pullEvents().first.shouldContainExactly(
+            RewardGranted(battleUnitId = "hero", gold = 0, lootableItemIds = listOf("hammer")),
+            RequestDropItems(lootableItemIds = listOf("health-potion", "health-potion"), row = 1, column = 2),
+        )
+    }
+
+    @Test
+    fun `PullEvents should clear the pending events when the events are pulled`() {
+        // Given
+        val inventory = Inventory.create("knight-1").store("health-potion", row = 1, column = 2)
+        // When
+        val (_, clearedInventory) = inventory.pullEvents()
+        // Then
+        clearedInventory.pullEvents().first.shouldBeEmpty()
+    }
+
+    @Test
+    fun `PullEvents should not pull events when there are no pending events`() {
+        // Given
+        val inventory = Inventory.create("knight-1")
+        // When
+        val (events, _) = inventory.pullEvents()
+        // Then
+        events.shouldBeEmpty()
+    }
+}

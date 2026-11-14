@@ -1,0 +1,18 @@
+package com.mkz.tessavar.battlefield.domain
+
+sealed class BattlefieldError(
+    message: String,
+) : Throwable(message = message) {
+    class TileIsOccupied : BattlefieldError("Tile is occupied")
+
+    class TileNotFound : BattlefieldError("Tile not found")
+
+    class TileTerrainTransitionNotAllowed(
+        val terrainId: String,
+        val transitionToTerrainId: String,
+    ) : BattlefieldError("Tile terrain transition from '$terrainId' to '$transitionToTerrainId' is not allowed")
+
+    class InvalidBattlefieldFormat(
+        reason: String?,
+    ) : BattlefieldError("The text is not a battlefield: $reason")
+}

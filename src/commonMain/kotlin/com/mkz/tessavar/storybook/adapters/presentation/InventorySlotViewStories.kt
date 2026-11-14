@@ -1,0 +1,64 @@
+package com.mkz.tessavar.storybook.adapters.presentation
+
+import com.mkz.tessavar.screen.adapters.presentation.InventorySlotView
+import com.mkz.tessavar.storybook.domain.Storybook.Dto.ComponentDto
+import com.mkz.tessavar.storybook.domain.Storybook.Dto.ControlDto
+import com.mkz.tessavar.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.tessavar.storybook.domain.Storybook.Dto.ValueDto
+import korlibs.korge.view.View
+import korlibs.math.geom.Size
+
+object InventorySlotViewStories : StoryBinding {
+    private val SIZE = Size(60, 60)
+
+    private const val NO_ITEM = "none"
+    private const val DEFAULT_ITEM = "health-potion"
+
+    private const val ITEM = "item"
+    private const val EQUIPPED = "equipped"
+    private const val DIMMED = "dimmed"
+    private const val SELECTED = "selected"
+
+    private val empty = StoryDto(id = "screen-inventory-slot--empty", name = "Empty", description = "A storage space with no item.", args = mapOf(ITEM to ValueDto.text(NO_ITEM)))
+    private val stored = StoryDto(id = "screen-inventory-slot--stored", name = "Stored", description = "A storage space holding an item.", args = emptyMap())
+    private val equipped =
+        StoryDto(id = "screen-inventory-slot--equipped", name = "Equipped", description = "An item the battle unit wears, framed in gold.", args = mapOf(EQUIPPED to ValueDto.boolean(true)))
+    private val selected =
+        StoryDto(id = "screen-inventory-slot--selected", name = "Selected", description = "The slot tapped last, framed in white.", args = mapOf(SELECTED to ValueDto.boolean(true)))
+    private val dimmed =
+        StoryDto(
+            id = "screen-inventory-slot--dimmed",
+            name = "Dimmed",
+            description = "An item that can not be traded in the shop, e.g.: one the buyer can not afford.",
+            args =
+                mapOf(
+                    DIMMED to ValueDto.boolean(true),
+                ),
+        )
+
+    override fun component(context: StoryContext) =
+        ComponentDto(
+            id = "screen-inventory-slot",
+            group = "Screen",
+            title = "Inventory slot",
+            description = "One storage space of the inventory and the shop: empty, or the icon of the item it holds.",
+            controls =
+                listOf(
+                    ControlDto.pick(ITEM, listOf(NO_ITEM) + context.lootableItemIds()),
+                    ControlDto.boolean(EQUIPPED),
+                    ControlDto.boolean(DIMMED),
+                    ControlDto.boolean(SELECTED),
+                ),
+            args = mapOf(ITEM to ValueDto.text(DEFAULT_ITEM), EQUIPPED to ValueDto.boolean(false), DIMMED to ValueDto.boolean(false), SELECTED to ValueDto.boolean(false)),
+            stories = listOf(empty, stored, equipped, selected, dimmed),
+        )
+
+    override fun render(
+        args: Args,
+        context: StoryContext,
+    ): View =
+        InventorySlotView(SIZE, context.resourcesLoader).apply {
+            display(lootableItemId = args.text(ITEM).takeUnless { it == NO_ITEM }, isEquipped = args.boolean(EQUIPPED), isDimmed = args.boolean(DIMMED))
+            if (args.boolean(SELECTED)) select()
+        }
+}

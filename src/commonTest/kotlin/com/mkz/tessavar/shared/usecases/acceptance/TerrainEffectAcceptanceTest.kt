@@ -1,0 +1,150 @@
+package com.mkz.tessavar.shared.usecases.acceptance
+
+import com.mkz.tessavar.ability.adapters.presentation.AbilityApi
+import com.mkz.tessavar.ability.adapters.resources.ResourcesAbilityLoader
+import com.mkz.tessavar.battle.adapters.presentation.BattleApi
+import com.mkz.tessavar.battle.adapters.presentation.startBattleWithEveryBattleUnit
+import com.mkz.tessavar.battleUnit.adapters.presentation.BattleUnitApi
+import com.mkz.tessavar.battleUnit.adapters.resources.ResourcesBattleUnitLoader
+import com.mkz.tessavar.battlefield.adapters.presentation.BattlefieldApi
+import com.mkz.tessavar.battlefield.adapters.resources.ResourcesBattlefieldLoader
+import com.mkz.tessavar.battlefield.adapters.resources.TomlBattlefieldDecoder
+import com.mkz.tessavar.battlefield.adapters.resources.TomlBattlefieldEncoder
+import com.mkz.tessavar.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
+import com.mkz.tessavar.cpuWanderBrain.adapters.presentation.CpuWanderBrainApi
+import com.mkz.tessavar.effect.adapters.presentation.EffectApi
+import com.mkz.tessavar.effect.adapters.resources.ResourcesEffectLoader
+import com.mkz.tessavar.effect.domain.EffectMother
+import com.mkz.tessavar.party.adapters.presentation.PartyApi
+import com.mkz.tessavar.player.adapters.presentation.PlayerApi
+import com.mkz.tessavar.player.adapters.resources.ResourcesPlayerLoader
+import com.mkz.tessavar.player.usecases.commands.RequestPlayerCreation.PlayerType.HUMAN
+import com.mkz.tessavar.shared.adapters.events.InMemoryEventBus
+import com.mkz.tessavar.shared.domain.FixedDoublesRandom
+import com.mkz.tessavar.terrain.adapters.presentation.TerrainApi
+import com.mkz.tessavar.terrain.domain.Terrain
+import com.mkz.tessavar.terrain.usecases.services.TerrainLoader
+import com.mkz.tessavar.unit.adapters.presentation.UnitApi
+import com.mkz.tessavar.unit.adapters.resources.ResourcesUnitLoader
+import com.mkz.tessavar.unit.domain.UnitMother
+import io.kotest.matchers.shouldBe
+import kotlin.test.Test
+
+class TerrainEffectAcceptanceTest {
+    private class StubTerrainLoader(
+        private val terrains: List<Terrain.Dto>,
+    ) : TerrainLoader {
+        override fun loadTerrains() = terrains
+    }
+
+    private val eventBus = InMemoryEventBus()
+    private val terrainEffectId = "terrain-effect"
+    private val terrainApi =
+        TerrainApi(
+            eventBus,
+            StubTerrainLoader(
+                listOf(
+                    Terrain.Dto(id = "sand", canBeOccupied = true, transitionsTo = setOf("forest"), effectId = terrainEffectId),
+                    Terrain.Dto(id = "forest", canBeOccupied = true, transitionsTo = setOf("sand"), effectId = null),
+                ),
+            ),
+        )
+    private val unitApi = UnitApi(eventBus, ResourcesUnitLoader())
+    private val playerApi = PlayerApi(eventBus, ResourcesPlayerLoader())
+    private val battlefieldApi = BattlefieldApi(terrainApi, eventBus, ResourcesBattlefieldLoader(), TomlBattlefieldEncoder(), TomlBattlefieldDecoder())
+    private val effectApi = EffectApi(eventBus, ResourcesEffectLoader())
+    private val abilityApi = AbilityApi(effectApi, eventBus, ResourcesAbilityLoader())
+    private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
+    private val battleApi = BattleApi(eventBus)
+
+    private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom.cpuBattleUnitsAlwaysResting())
+    private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
+    private val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, partyApi, eventBus)
+
+    private val playerOneId = "player-one"
+    private val playerTwoId = "player-two"
+    private val sandBattleUnitId = "battle-unit-sand-1"
+    private val secondSandBattleUnitId = "battle-unit-sand-2"
+    private val forestBattleUnitId = "battle-unit-forest"
+
+    private suspend fun setUp() {
+        playerApi.requestPlayerCreation(playerOneId, HUMAN)
+        playerApi.requestPlayerCreation(playerTwoId, HUMAN)
+        terrainApi.init()
+        terrainApi.initialiseTerrains()
+
+        val terrainEffect = EffectMother.damageEffect(id = terrainEffectId, damage = 7, timingType = "IMMEDIATELY")
+        effectApi.requestEffectCreation(terrainEffect.toDto())
+
+        val tiles =
+            List(8) { row ->
+                List(8) { column ->
+                    if (row in 2..3 && column in 2..3) "sand" else "forest"
+                }
+            }
+        battlefieldApi.requestBattlefieldCreation(8, 8, tiles)
+
+        unitApi.requestUnitCreation(
+            UnitMother.unit(id = "unit-sand-1", baseMaximumHealth = 20, baseMaximumMana = 10, startingAbilities = emptyList(), maximumSteps = 3).toDto(),
+        )
+        unitApi.requestUnitCreation(
+            UnitMother.unit(id = "unit-sand-2", baseMaximumHealth = 40, baseMaximumMana = 10, startingAbilities = emptyList(), maximumSteps = 3).toDto(),
+        )
+        unitApi.requestUnitCreation(
+            UnitMother.unit(id = "unit-forest", baseMaximumHealth = 30, baseMaximumMana = 10, startingAbilities = emptyList(), maximumSteps = 3).toDto(),
+        )
+
+        battleUnitApi.deployBattleUnit(
+            battleUnitId = sandBattleUnitId,
+            unitId = "unit-sand-1",
+            playerId = playerOneId,
+            deployAtRow = 2,
+            deployAtColumn = 2,
+        )
+        battleUnitApi.deployBattleUnit(
+            battleUnitId = secondSandBattleUnitId,
+            unitId = "unit-sand-2",
+            playerId = playerOneId,
+            deployAtRow = 3,
+            deployAtColumn = 3,
+        )
+        battleUnitApi.deployBattleUnit(
+            battleUnitId = forestBattleUnitId,
+            unitId = "unit-forest",
+            playerId = playerOneId,
+            deployAtRow = 0,
+            deployAtColumn = 0,
+        )
+
+        battleUnitApi.deployBattleUnit(
+            battleUnitId = "battle-unit-player-two",
+            unitId = "unit-forest",
+            playerId = playerTwoId,
+            deployAtRow = 0,
+            deployAtColumn = 2,
+        )
+
+        battleApi.startBattleWithEveryBattleUnit(battleUnitApi, playerOneId, playerTwoId)
+        eventBus.dispatch()
+    }
+
+    @Test
+    fun `should apply the terrain effect to the occupants of the terrain tiles when a new round starts`() =
+        scenarioTest(::setUp) {
+            // Given
+            battleApi.searchBattle()!!.currentRound shouldBe 1
+            battleUnitApi.searchBattleUnitById(sandBattleUnitId)!!.remainingHealth shouldBe 20
+            battleUnitApi.searchBattleUnitById(secondSandBattleUnitId)!!.remainingHealth shouldBe 40
+            battleUnitApi.searchBattleUnitById(forestBattleUnitId)!!.remainingHealth shouldBe 30
+            // When
+            battleApi.finishPlayerTurn()
+            eventBus.dispatch()
+            battleApi.finishPlayerTurn()
+            eventBus.dispatch()
+            // Then
+            battleApi.searchBattle()!!.currentRound shouldBe 2
+            battleUnitApi.searchBattleUnitById(sandBattleUnitId)!!.remainingHealth shouldBe 13
+            battleUnitApi.searchBattleUnitById(secondSandBattleUnitId)!!.remainingHealth shouldBe 33
+            battleUnitApi.searchBattleUnitById(forestBattleUnitId)!!.remainingHealth shouldBe 30
+        }
+}

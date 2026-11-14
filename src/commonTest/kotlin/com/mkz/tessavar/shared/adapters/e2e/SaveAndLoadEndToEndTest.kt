@@ -1,0 +1,88 @@
+package com.mkz.tessavar.shared.adapters.e2e
+
+import com.mkz.tessavar.GAME_WINDOW_SIZE
+import com.mkz.tessavar.screen.adapters.presentation.VirtualPadView.Direction
+import com.mkz.tessavar.screen.adapters.presentation.battlefieldView
+import com.mkz.tessavar.screen.adapters.presentation.callToActionView
+import com.mkz.tessavar.screen.adapters.presentation.clickAction
+import com.mkz.tessavar.screen.adapters.presentation.clickArrow
+import com.mkz.tessavar.screen.adapters.presentation.clickConfirmation
+import com.mkz.tessavar.screen.adapters.presentation.clickLoadGame
+import com.mkz.tessavar.screen.adapters.presentation.clickQuit
+import com.mkz.tessavar.screen.adapters.presentation.clickSave
+import com.mkz.tessavar.screen.adapters.presentation.clickSlot
+import com.mkz.tessavar.screen.adapters.presentation.clickStart
+import com.mkz.tessavar.screen.adapters.presentation.confirmDialogView
+import com.mkz.tessavar.screen.adapters.presentation.hasBattleUnitAt
+import com.mkz.tessavar.screen.adapters.presentation.isDisplayingNothing
+import com.mkz.tessavar.screen.adapters.presentation.isPadShown
+import com.mkz.tessavar.screen.adapters.presentation.isSavedShown
+import com.mkz.tessavar.screen.adapters.presentation.menuView
+import com.mkz.tessavar.screen.adapters.presentation.pauseView
+import com.mkz.tessavar.screen.adapters.presentation.saveSlotsView
+import com.mkz.tessavar.screen.adapters.presentation.virtualPadView
+import com.mkz.tessavar.shared.adapters.presentation.isShown
+import com.mkz.tessavar.shared.adapters.presentation.sharedViewsTest
+import com.mkz.tessavar.startApp
+import io.kotest.assertions.withClue
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
+import korlibs.korge.service.storage.InmemoryStorage
+import korlibs.korge.tests.ViewsForTesting
+import kotlin.test.Test
+
+class SaveAndLoadEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
+    private val savedRow = KNIGHT_START_ROW
+    private val savedColumn = KNIGHT_START_COLUMN + 2
+
+    private val storage = InmemoryStorage()
+
+    @Test
+    fun `Game should be back where it was saved when the slot is loaded after quitting to the menu`() =
+        sharedViewsTest {
+            // Given
+            startNewGame(storage = storage)
+            waitUntil { virtualPadView()?.isPadShown() == true && battlefieldView()?.hasBattleUnitAt(KNIGHT_START_ROW, KNIGHT_START_COLUMN) == true }
+            repeat(2) { step ->
+                clickArrow(requireNotNull(virtualPadView()), Direction.EAST)
+                waitUntil { battlefieldView()?.hasBattleUnitAt(KNIGHT_START_ROW, KNIGHT_START_COLUMN + step + 1) == true && virtualPadView()?.isPadShown() == true }
+            }
+            clickStart(requireNotNull(virtualPadView()))
+            waitUntil { pauseView()?.isShown() == true }
+            clickSave(requireNotNull(pauseView()))
+            waitUntil { saveSlotsView()?.isShown() == true }
+            clickSlot(requireNotNull(saveSlotsView()), 1)
+            waitUntil { pauseView()?.isSavedShown() == true }
+            clickQuit(requireNotNull(pauseView()))
+            waitUntil { confirmDialogView()?.isShown() == true }
+            clickConfirmation(requireNotNull(stage.callToActionView()))
+            waitUntil { menuView()?.isShown() == true }
+            // When
+            clickLoadGame(requireNotNull(menuView()))
+            waitUntil { saveSlotsView()?.isShown() == true }
+            clickSlot(requireNotNull(saveSlotsView()), 1)
+            // Then
+            waitUntil { virtualPadView()?.isPadShown() == true && battlefieldView()?.hasBattleUnitAt(savedRow, savedColumn) == true }
+            withClue("Expected the hero where the game was saved") { battlefieldView()?.hasBattleUnitAt(savedRow, savedColumn)?.shouldBeTrue() }
+            withClue("Expected nobody where the hero starts a new game") { battlefieldView()?.hasBattleUnitAt(KNIGHT_START_ROW, KNIGHT_START_COLUMN)?.shouldBeFalse() }
+            withClue("Expected the virtual pad, as the game is loaded exploring") { virtualPadView()?.isPadShown()?.shouldBeTrue() }
+        }
+
+    @Test
+    fun `Back should display the options again, from the row directly below the save slots, when Load game is open in the menu`() =
+        sharedViewsTest {
+            // Given
+            stage.startApp(storage = storage)
+            clickLoadGame(openMenu())
+            waitUntil { saveSlotsView()?.isShown() == true }
+            val callToAction = requireNotNull(stage.callToActionView())
+            callToAction.y shouldBe 587.0
+            // When
+            clickAction(callToAction, "Back")
+            waitUntil { menuView()?.isShown() == true }
+            // Then
+            withClue("Expected the save slots to be hidden") { saveSlotsView()?.isShown()?.shouldBeFalse() }
+            withClue("Expected the row to be hidden") { callToAction.isDisplayingNothing().shouldBeTrue() }
+        }
+}

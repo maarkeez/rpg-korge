@@ -1,0 +1,56 @@
+package com.mkz.tessavar.battleUnit.usecases.queries
+
+import com.mkz.tessavar.ability.domain.AbilityMother.ability
+import com.mkz.tessavar.battleUnit.domain.BattleUnitMother.battleUnit
+import com.mkz.tessavar.shared.usecases.InMemoryQueries
+import com.mkz.tessavar.unit.domain.UnitMother.unit
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import kotlin.test.Test
+
+class CanCastAbilityTest {
+    private val queries = InMemoryQueries()
+    private val canCastAbility = queries.canCastAbility
+
+    @Test
+    fun `should return true when the battle unit can cast the ability`() {
+        // Given
+        queries.abilityRepository.create(ability(id = "ability-1", manaCost = 0, cooldown = 0))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(startingAbilities = listOf("ability-1"), baseMaximumMana = 10).toDto()))
+        // When
+        val result = canCastAbility(battleUnitId = "knight-1", abilityId = "ability-1")
+        // Then
+        result.shouldBeTrue()
+    }
+
+    @Test
+    fun `should return false when the ability does not exist`() {
+        // Given
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1"))
+        // When
+        val result = canCastAbility(battleUnitId = "knight-1", abilityId = "unknown-ability")
+        // Then
+        result.shouldBeFalse()
+    }
+
+    @Test
+    fun `should return false when the battle unit does not have the ability`() {
+        // Given
+        queries.abilityRepository.create(ability(id = "ability-1"))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(startingAbilities = listOf("other-ability"), baseMaximumMana = 10).toDto()))
+        // When
+        val result = canCastAbility(battleUnitId = "knight-1", abilityId = "ability-1")
+        // Then
+        result.shouldBeFalse()
+    }
+
+    @Test
+    fun `should return false when the battle unit does not exist`() {
+        // Given
+        queries.abilityRepository.create(ability(id = "ability-1"))
+        // When
+        val result = canCastAbility(battleUnitId = "unknown-battle-unit", abilityId = "ability-1")
+        // Then
+        result.shouldBeFalse()
+    }
+}

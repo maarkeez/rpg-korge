@@ -1,0 +1,120 @@
+package com.mkz.tessavar.shared.usecases.acceptance
+
+import com.mkz.tessavar.ability.adapters.presentation.AbilityApi
+import com.mkz.tessavar.ability.adapters.resources.ResourcesAbilityLoader
+import com.mkz.tessavar.battle.adapters.presentation.BattleApi
+import com.mkz.tessavar.battleUnit.adapters.presentation.BattleUnitApi
+import com.mkz.tessavar.battleUnit.adapters.resources.ResourcesBattleUnitLoader
+import com.mkz.tessavar.battlefield.adapters.presentation.BattlefieldApi
+import com.mkz.tessavar.battlefield.adapters.resources.ResourcesBattlefieldLoader
+import com.mkz.tessavar.battlefield.adapters.resources.TomlBattlefieldDecoder
+import com.mkz.tessavar.battlefield.adapters.resources.TomlBattlefieldEncoder
+import com.mkz.tessavar.battlefield.domain.Battlefield.Dto.PositionDto
+import com.mkz.tessavar.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
+import com.mkz.tessavar.cpuWanderBrain.adapters.presentation.CpuWanderBrainApi
+import com.mkz.tessavar.effect.adapters.presentation.EffectApi
+import com.mkz.tessavar.effect.adapters.resources.ResourcesEffectLoader
+import com.mkz.tessavar.party.adapters.presentation.PartyApi
+import com.mkz.tessavar.party.domain.Party.Dto.DirectionDto
+import com.mkz.tessavar.player.adapters.presentation.PlayerApi
+import com.mkz.tessavar.player.adapters.resources.ResourcesPlayerLoader
+import com.mkz.tessavar.player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
+import com.mkz.tessavar.player.usecases.commands.RequestPlayerCreation.PlayerType.HUMAN
+import com.mkz.tessavar.shared.adapters.events.InMemoryEventBus
+import com.mkz.tessavar.shared.domain.FixedDoublesRandom
+import com.mkz.tessavar.terrain.adapters.presentation.TerrainApi
+import com.mkz.tessavar.terrain.adapters.resources.ResourcesTerrainLoader
+import com.mkz.tessavar.unit.adapters.presentation.UnitApi
+import com.mkz.tessavar.unit.adapters.resources.ResourcesUnitLoader
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import kotlin.test.Test
+
+class ExplorationAcceptanceTest {
+    private val eventBus = InMemoryEventBus()
+    private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
+    private val unitApi = UnitApi(eventBus, ResourcesUnitLoader())
+    private val playerApi = PlayerApi(eventBus, ResourcesPlayerLoader())
+    private val battlefieldApi = BattlefieldApi(terrainApi, eventBus, ResourcesBattlefieldLoader(), TomlBattlefieldEncoder(), TomlBattlefieldDecoder())
+    private val effectApi = EffectApi(eventBus, ResourcesEffectLoader())
+    private val abilityApi = AbilityApi(effectApi, eventBus, ResourcesAbilityLoader())
+    private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
+    private val battleApi = BattleApi(eventBus)
+
+    private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom.cpuBattleUnitsAlwaysResting())
+    private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
+    private val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, partyApi, eventBus)
+
+    private val humanPlayerId = "human"
+    private val cpuPlayerId = "cpu"
+
+    private suspend fun setUp() {
+        terrainApi.init()
+        effectApi.init()
+        abilityApi.init()
+        unitApi.init()
+        terrainApi.initialiseTerrains()
+        effectApi.initialiseEffects()
+        abilityApi.initialiseAbilities()
+        unitApi.initialiseUnits()
+        playerApi.requestPlayerCreation(humanPlayerId, HUMAN)
+        playerApi.requestPlayerCreation(cpuPlayerId, CPU)
+        battlefieldApi.requestBattlefieldCreation(8, 8, List(8) { List(8) { "sand" } })
+        battleUnitApi.deployBattleUnit("knight-1", "knight", humanPlayerId, deployAtRow = 6, deployAtColumn = 1)
+        battleUnitApi.deployBattleUnit("knight-2", "knight", humanPlayerId, deployAtRow = 7, deployAtColumn = 1)
+        battleUnitApi.deployBattleUnit("rat-1", "rat", cpuPlayerId, deployAtRow = 0, deployAtColumn = 1)
+        partyApi.startExploration()
+        eventBus.dispatch()
+    }
+
+    private fun walk(direction: DirectionDto) {
+        partyApi.stepParty(direction)
+        eventBus.dispatch()
+    }
+
+    @Test
+    fun `should explore without a battle while no cpu battle unit has the party within reach`() =
+        scenarioTest(::setUp) {
+            // Then
+            partyApi.searchParty()!!.isExploring.shouldBeTrue()
+            battleApi.searchBattle().shouldBeNull()
+        }
+
+    @Test
+    fun `should walk the leader and have the other knight follow it without spending steps when the party steps`() =
+        scenarioTest(::setUp) {
+            // When
+            walk(DirectionDto.EAST)
+            // Then
+            battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 6, column = 2)
+            battlefieldApi.searchPosition("knight-2") shouldBe PositionDto(row = 6, column = 1)
+            battleUnitApi.searchBattleUnitById("knight-1")!!.remainingActions.remainingSteps shouldBe 3
+            battleUnitApi.searchBattleUnitById("knight-2")!!.remainingActions.remainingSteps shouldBe 3
+        }
+
+    @Test
+    fun `should keep the party in walking order when it steps several tiles`() =
+        scenarioTest(::setUp) {
+            // When
+            repeat(4) { walk(DirectionDto.EAST) }
+            // Then
+            battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 6, column = 5)
+            battlefieldApi.searchPosition("knight-2") shouldBe PositionDto(row = 6, column = 4)
+            partyApi.searchParty()!!.isExploring.shouldBeTrue()
+        }
+
+    @Test
+    fun `should start the battle and stop exploring when the party steps within reach of the cpu rat`() =
+        scenarioTest(::setUp) {
+            // When
+            walk(DirectionDto.NORTH)
+            // Then
+            battleApi.searchBattle().shouldNotBeNull().currentPlayerId shouldBe humanPlayerId
+            partyApi.searchParty()!!.isExploring.shouldBeFalse()
+            walk(DirectionDto.NORTH)
+            battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 5, column = 1)
+        }
+}

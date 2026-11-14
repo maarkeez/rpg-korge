@@ -1,0 +1,125 @@
+package com.mkz.tessavar.unit.domain
+
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeTypeOf
+import kotlin.test.Test
+
+class UnitTest {
+    @Test
+    fun `Create should create unit when the dto is valid`() {
+        // Given
+        val unitDto =
+            UnitMother
+                .unit()
+                .toDto()
+        // When
+        val createdUnit = Unit.create(unitDto)
+        // Then
+        createdUnit.toDto() shouldBe unitDto
+    }
+
+    @Test
+    fun `Create should create a unit with its starting gold, from 0`() {
+        // Then
+        UnitMother.unit(startingGold = 0).toDto().startingGold shouldBe 0
+        UnitMother.unit(startingGold = 100).toDto().startingGold shouldBe 100
+    }
+
+    @Test
+    fun `Create should fail when the starting gold is negative`() {
+        // Then
+        runCatching { UnitMother.unit(startingGold = -1) }.exceptionOrNull().shouldBeTypeOf<UnitError.NegativeStartingGold>()
+    }
+
+    @Test
+    fun `Create should create a unit with up to 6 starting abilities, one per button of the ability bar`() {
+        // Given
+        val startingAbilities = List(6) { index -> "ability-$index" }
+        // When
+        val unit = UnitMother.unit(startingAbilities = startingAbilities)
+        // Then
+        unit.toDto().startingAbilities shouldBe startingAbilities
+    }
+
+    @Test
+    fun `Create should fail when the unit has more than 6 starting abilities`() {
+        // Given
+        val startingAbilities = List(7) { index -> "ability-$index" }
+        // When
+        val result = runCatching { UnitMother.unit(startingAbilities = startingAbilities) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<UnitError.StartingAbilitiesAboveMaximum>()
+    }
+
+    @Test
+    fun `MaximumAbilities should be 6, one per button of the ability bar`() {
+        // Then
+        Unit.maximumAbilities() shouldBe 6
+    }
+
+    @Test
+    fun `Create should publish the unit created event when the unit is created`() {
+        // Given
+        val unitDto =
+            UnitMother
+                .unit()
+                .toDto()
+        // When
+        val createdUnit = Unit.create(unitDto)
+        // Then
+        val (events, _) = createdUnit.pullEvents()
+        events.shouldContainExactly(UnitEvent.UnitCreated(unitId = unitDto.id))
+    }
+
+    @Test
+    fun `ToDto should expose the unit data when converted to dto`() {
+        // Given
+        val unit =
+            UnitMother.unit(
+                id = "unit-1",
+                baseMaximumHealth = 10,
+                baseMaximumMana = 5,
+                startingAbilities = listOf("ability-1"),
+                maximumSteps = 3,
+            )
+        // When
+        val result = unit.toDto()
+        // Then
+        result shouldBe
+            Unit.Dto(
+                id = "unit-1",
+                baseMaximumHealth = 10,
+                baseMaximumMana = 5,
+                startingAbilities = listOf("ability-1"),
+                maximumSteps = 3,
+                startingGold = 0,
+            )
+    }
+
+    @Test
+    fun `PullEvents should pull the created event when the unit has pending events`() {
+        // Given
+        val createdUnit =
+            Unit.create(
+                UnitMother
+                    .unit()
+                    .toDto(),
+            )
+        // When
+        val (events, _) = createdUnit.pullEvents()
+        // Then
+        events.shouldContainExactly(UnitEvent.UnitCreated(unitId = createdUnit.toDto().id))
+    }
+
+    @Test
+    fun `PullEvents should not pull events when there are no pending events`() {
+        // Given
+        val unit = UnitMother.unit()
+        // When
+        val (events, _) = unit.pullEvents()
+        // Then
+        events.shouldBeEmpty()
+    }
+}

@@ -13,11 +13,11 @@
 
 ### 1. Write the binding
 
-Create `src/commonMain/kotlin/com/mkz/rpg/storybook/adapters/presentation/<View>Stories.kt`, an `object` named after
+Create `src/commonMain/kotlin/com/mkz/tessavar/storybook/adapters/presentation/<View>Stories.kt`, an `object` named after
 the view, implementing `StoryBinding`. Start from
-[`HealthBarViewStories`](../../src/commonMain/kotlin/com/mkz/rpg/storybook/adapters/presentation/HealthBarViewStories.kt)
+[`HealthBarViewStories`](../../src/commonMain/kotlin/com/mkz/tessavar/storybook/adapters/presentation/HealthBarViewStories.kt)
 for a view without callbacks, or
-[`ShopViewStories`](../../src/commonMain/kotlin/com/mkz/rpg/storybook/adapters/presentation/ShopViewStories.kt) for
+[`ShopViewStories`](../../src/commonMain/kotlin/com/mkz/tessavar/storybook/adapters/presentation/ShopViewStories.kt) for
 one with a `Delegate`:
 
 ```kotlin
@@ -105,17 +105,17 @@ map to nothing (`setArg = null`), e.g.: stepping past the last party member.
 ### 4. Register it
 
 Add the binding to `StorybookApi.STORY_BINDINGS`, in
-[`StorybookApi.kt`](../../src/commonMain/kotlin/com/mkz/rpg/storybook/adapters/presentation/StorybookApi.kt), where the
+[`StorybookApi.kt`](../../src/commonMain/kotlin/com/mkz/tessavar/storybook/adapters/presentation/StorybookApi.kt), where the
 sidebar should list it.
 
 ### 5. Update the tests
 
 - Add the component id and its story ids to the list of `StoryBindings should keep the ids...` in
-  [`StorySmokeTest`](../../src/commonTest/kotlin/com/mkz/rpg/storybook/adapters/presentation/StorySmokeTest.kt), in the
+  [`StorySmokeTest`](../../src/commonTest/kotlin/com/mkz/tessavar/storybook/adapters/presentation/StorySmokeTest.kt), in the
   order of the bindings.
-- Nothing to allow: [`StoryCoverageArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/StoryCoverageArchitectureTest.kt)
+- Nothing to allow: [`StoryCoverageArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/tessavar/shared/adapters/architecture/StoryCoverageArchitectureTest.kt)
   fails for every view with no story, and there is no list to put it in. A view MUST NOT import the domain nor the use
-  cases ([`ViewArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/ViewArchitectureTest.kt)):
+  cases ([`ViewArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/tessavar/shared/adapters/architecture/ViewArchitectureTest.kt)):
   it takes view data, which its presenter maps from the domain, so a story can feed it plain data.
 - Run them:
 

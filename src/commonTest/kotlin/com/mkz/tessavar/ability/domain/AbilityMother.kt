@@ -1,0 +1,47 @@
+package com.mkz.tessavar.ability.domain
+
+import com.mkz.tessavar.ability.domain.Ability.Dto.EffectTargetDto
+import com.mkz.tessavar.effect.domain.EffectMother.effectId
+import korlibs.io.util.UUID
+import kotlin.random.Random
+
+object AbilityMother {
+    fun ability(
+        id: String = id(),
+        manaCost: Int = manaCost(),
+        cooldown: Int = cooldown(),
+        abilityEffects: List<Ability.Dto.AbilityEffectDto> = abilityEffects(),
+        targeting: Ability.Dto.TargetingDto = targeting(),
+        summonDuration: Int? = null,
+    ) = Ability.create(
+        dto =
+            Ability.Dto(
+                id = id,
+                manaCost = manaCost,
+                cooldown = cooldown,
+                abilityEffects = abilityEffects,
+                targeting = targeting,
+                summonDuration = summonDuration,
+            ),
+    )
+
+    fun id() = "ability-${UUID.randomUUID()}"
+
+    fun manaCost() = Random.nextInt(0, 999)
+
+    fun cooldown() = Random.nextInt(0, 99)
+
+    fun abilityEffects() = List(Random.nextInt(1, 4)) { abilityEffect() }
+
+    fun abilityEffect(
+        effectId: String = effectId(),
+        target: EffectTargetDto.Type = targetExpression(),
+    ) = Ability.Dto.AbilityEffectDto(effectId = effectId, target = EffectTargetDto(type = target))
+
+    fun targetExpression() = EffectTargetDto.Type.values().random()
+
+    fun targeting() =
+        Ability.Dto.TargetingDto
+            .values()
+            .random()
+}

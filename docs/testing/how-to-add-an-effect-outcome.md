@@ -1,6 +1,6 @@
 # How to add a new effect outcome
 
-An effect outcome describes what happens when an [`Effect`](../../src/commonMain/kotlin/com/mkz/rpg/effect/domain/Effect.kt) is applied.
+An effect outcome describes what happens when an [`Effect`](../../src/commonMain/kotlin/com/mkz/tessavar/effect/domain/Effect.kt) is applied.
 
 Examples of existing outcomes are:
 
@@ -38,11 +38,11 @@ An `Effect` currently contains common properties such as:
 - `outcome`
 - `timing`
 
-The outcome property is therefore the part that identifies the effect outcome.  [Effect](../../src/commonMain/kotlin/com/mkz/rpg/effect/domain/Effect.kt)
+The outcome property is therefore the part that identifies the effect outcome.  [Effect](../../src/commonMain/kotlin/com/mkz/tessavar/effect/domain/Effect.kt)
 
 ## 2. Add the outcome to `Effect`
 
-Add the new outcome to both representations of the effect type in  [Effect](../../src/commonMain/kotlin/com/mkz/rpg/effect/domain/Effect.kt)
+Add the new outcome to both representations of the effect type in  [Effect](../../src/commonMain/kotlin/com/mkz/tessavar/effect/domain/Effect.kt)
 
 The internal domain representation is the private `Outcome` interface:
 
@@ -119,7 +119,7 @@ The important rule is:
 
 An ability contains a list of effect IDs. Its responsibility is to reference effects; the effect/application flow is responsible for determining what those effects do.
 
-The `Ability` domain confirms this separation: its `effects` value is a list of `String` IDs, and ability creation verifies that those IDs correspond to existing effects. [Ability](../../src/commonMain/kotlin/com/mkz/rpg/ability/domain/Ability.kt)
+The `Ability` domain confirms this separation: its `effects` value is a list of `String` IDs, and ability creation verifies that those IDs correspond to existing effects. [Ability](../../src/commonMain/kotlin/com/mkz/tessavar/ability/domain/Ability.kt)
 
 ## 5. Make the outcome work with the effect's timing
 
@@ -131,7 +131,7 @@ An effect's outcome does not necessarily trigger as soon as it is applied.
 - `ON_PLAYER_TURN_STARTED`
 - `BEFORE_APPLYING_EFFECT`
 
-The timing is part of the effect itself. [Effect](../../src/commonMain/kotlin/com/mkz/rpg/effect/domain/Effect.kt)
+The timing is part of the effect itself. [Effect](../../src/commonMain/kotlin/com/mkz/tessavar/effect/domain/Effect.kt)
 
 When implementing a new outcome, make sure it behaves correctly in every timing that the game allows for that outcome.
 
@@ -152,9 +152,9 @@ Abilities do not embed effects directly. They contain effect IDs:
 effects: List<String>
 ```
 
-and an ability can contain between one and three effect IDs. [Ability](../../src/commonMain/kotlin/com/mkz/rpg/ability/domain/Ability.kt)
+and an ability can contain between one and three effect IDs. [Ability](../../src/commonMain/kotlin/com/mkz/tessavar/ability/domain/Ability.kt)
 
-When an ability is created, `RequestAbilityCreation` resolves every referenced effect using `SearchEffectById`. If any effect does not exist, the ability is rejected. [RequestAbilityCreation](../../src/commonMain/kotlin/com/mkz/rpg/ability/usecases/commands/RequestAbilityCreation.kt)
+When an ability is created, `RequestAbilityCreation` resolves every referenced effect using `SearchEffectById`. If any effect does not exist, the ability is rejected. [RequestAbilityCreation](../../src/commonMain/kotlin/com/mkz/tessavar/ability/usecases/commands/RequestAbilityCreation.kt)
 
 Therefore, no additional ability-type enum is normally required for a new effect outcome.
 
@@ -164,7 +164,7 @@ Instead, make sure the new effect can be created and stored through the existing
 effectApi.requestEffectCreation(...)
 ```
 
-`EffectApi` exposes `RequestEffectCreation` and `SearchEffectById`. [EffectApi](../../src/commonMain/kotlin/com/mkz/rpg/effect/adapters/presentation/EffectApi.kt)
+`EffectApi` exposes `RequestEffectCreation` and `SearchEffectById`. [EffectApi](../../src/commonMain/kotlin/com/mkz/tessavar/effect/adapters/presentation/EffectApi.kt)
 
 The workflow should therefore be:
 
@@ -188,7 +188,7 @@ effect application flow
 new outcome is performed
 ```
 
-`RequestEffectCreation` creates the effect only if an effect with the same ID does not already exist. [RequestEffectCreation](../../src/commonMain/kotlin/com/mkz/rpg/effect/usecases/commands/RequestEffectCreation.kt)
+`RequestEffectCreation` creates the effect only if an effect with the same ID does not already exist. [RequestEffectCreation](../../src/commonMain/kotlin/com/mkz/tessavar/effect/usecases/commands/RequestEffectCreation.kt)
 
 ## 7. Add unit tests for the new behavior
 
@@ -245,16 +245,16 @@ The project defines use-case acceptance tests as tests for features that integra
 Put the acceptance test under:
 
 ```text
-src/commonTest/kotlin/com/mkz/rpg/shared/usecases/acceptance
+src/commonTest/kotlin/com/mkz/tessavar/shared/usecases/acceptance
 ```
 
 Use the relevant subdomain APIs, such as:
 
 ```kotlin
-com.mkz.rpg.effect.adapters.presentation.EffectApi
+com.mkz.tessavar.effect.adapters.presentation.EffectApi
 ```
 
-and the corresponding APIs for the subdomains involved in applying the effect. The existing `EffectApi` is specifically intended to expose the effect subdomain's use cases to this kind of integration test. [EffectApi](../../src/commonMain/kotlin/com/mkz/rpg/effect/adapters/presentation/EffectApi.kt)
+and the corresponding APIs for the subdomains involved in applying the effect. The existing `EffectApi` is specifically intended to expose the effect subdomain's use cases to this kind of integration test. [EffectApi](../../src/commonMain/kotlin/com/mkz/tessavar/effect/adapters/presentation/EffectApi.kt)
 
 ### What the acceptance test should prove
 
