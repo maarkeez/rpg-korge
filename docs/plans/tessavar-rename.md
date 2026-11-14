@@ -1,6 +1,6 @@
 # Plan: Rename the game to Tessavar, from its packages to its URLs
 
-> **Status:** to do.
+> **Status:** M1 done and M2 built on `main`, the screenshots of M2 still to be approved; M3 waits for the GitHub and Cloudflare renames.
 >
 > **Summary:** The game has no name. The repository is `maarkeez/rpg-korge` and the Gradle project is still the
 > template's `hello-world`, which builds `hello-world.js`. The packages are `com.mkz.rpg.*`, and KorGE's id is the
@@ -44,7 +44,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 | #  | Milestone          | Done when                                                                                                                                                  | Status | Done in |
 |----|--------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | Code names         | No `com.mkz.rpg`, `rpg.` property, `hello-world` or `com.sample.demo` is left outside the README, the done plans and the devlog, `jvmTest` and `jsTest` pass, and the Storybook loads `tessavar.js`. | ✅      | 93190c78 |
-| M2 | The name shown     | The browser tab and the desktop window say "Tessavar", and **Screen / Menu › Options** shows the gold title above the buttons, in English and in Spanish.        | ⬜      |         |
+| M2 | The name shown     | The browser tab and the desktop window say "Tessavar", and **Screen / Menu › Options** shows the gold title above the buttons, in English and in Spanish.        | ✅      | 3a658aed |
 | M3 | Repository and URLs | `maarkeez.github.io/tessavar/` plays the game, and a product event sent from it is in D1 through `telemetry-collector.tessavar.workers.dev`.                 | ⬜      |         |
 
 ### M1 commits
