@@ -43,7 +43,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 
 | #  | Milestone          | Done when                                                                                                                                                  | Status | Done in |
 |----|--------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
-| M1 | Code names         | No `com.mkz.rpg`, `rpg.` property, `hello-world` or `com.sample.demo` is left outside the README, the done plans and the devlog, `jvmTest` and `jsTest` pass, and the Storybook loads `tessavar.js`. | ⬜      |         |
+| M1 | Code names         | No `com.mkz.rpg`, `rpg.` property, `hello-world` or `com.sample.demo` is left outside the README, the done plans and the devlog, `jvmTest` and `jsTest` pass, and the Storybook loads `tessavar.js`. | ✅      | 93190c78 |
 | M2 | The name shown     | The browser tab and the desktop window say "Tessavar", and **Screen / Menu › Options** shows the gold title above the buttons, in English and in Spanish.        | ⬜      |         |
 | M3 | Repository and URLs | `maarkeez.github.io/tessavar/` plays the game, and a product event sent from it is in D1 through `telemetry-collector.tessavar.workers.dev`.                 | ⬜      |         |
 
