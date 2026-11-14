@@ -1043,7 +1043,12 @@ and the call to action.
 _Avoid_: Battle scene
 
 **Main menu**:
-Where the player plays a new game, loads a save, builds a world or selects a language.
+Where the player plays a new game, loads a save, builds a world, selects a language or joins the mailing list.
+
+**Mailing list**:
+The players who left their email to be told of a new version of the game, a new demo or a new release. They join it
+from Wishlist on the main menu.
+_Avoid_: Newsletter, subscribers
 
 **New game**:
 A game played from its start, not loaded from a save.
