@@ -1,5 +1,5 @@
 {
-  "name": "rpg-telemetry-collector",
+  "name": "telemetry-collector",
   "private": true,
   "type": "module",
   "engines": {

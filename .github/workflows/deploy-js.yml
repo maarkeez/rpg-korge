@@ -42,7 +42,7 @@ jobs:
       - { name: Prepare Gradle, uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 } # v3.1.0
       #- { name: Buid JS bundle, run: ./gradlew browserReleaseEsbuild }
       # The only build that sends product events, to the telemetry collector: see telemetry-collector/README.md
-      - { name: Buid JS bundle, run: ./gradlew browserReleaseWebpack -Ptessavar.telemetryCollectorUrl=https://rpg-telemetry-collector.rpg-korge.workers.dev } # available after 6.0.0-beta3
+      - { name: Buid JS bundle, run: ./gradlew browserReleaseWebpack -Ptessavar.telemetryCollectorUrl=https://telemetry-collector.tessavar.workers.dev } # available after 6.0.0-beta3
       # Served at /storybook/: the same bundle, which starts the Storybook from that folder. The storybook skill runs the
       # same script, so what Claude screenshots is what is deployed
       - { name: Add Storybook, run: bash tools/storybook/add-storybook.sh }

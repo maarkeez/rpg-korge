@@ -10,7 +10,7 @@ const DAY = 86_400_000;
 const IncomingRequest = Request<unknown, IncomingRequestCfProperties>;
 
 async function send(body: unknown, origin: string = ORIGIN): Promise<Response> {
-  const request = new IncomingRequest("https://rpg-telemetry-collector.example.workers.dev/product-events", {
+  const request = new IncomingRequest("https://telemetry-collector.example.workers.dev/product-events", {
     method: "POST",
     headers: { "Content-Type": "application/json", Origin: origin, "CF-Connecting-IP": "203.0.113.7" },
     body: JSON.stringify(body),

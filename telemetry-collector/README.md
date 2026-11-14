@@ -1,8 +1,8 @@
 # Telemetry collector
 
 The telemetry collector receives the product events of the game deployed to GitHub Pages and keeps them in a D1
-database in the EU for 3 months. It is a Cloudflare Worker, `rpg-telemetry-collector`, on the free plan. Why it is
-built this way is in [ADR 0018](../docs/adr/0018-product-events-kept-by-our-own-telemetry-collector-on-cloudflare.md),
+database in the EU for 3 months. It is a Cloudflare Worker, `telemetry-collector`, on the free plan, at
+`https://telemetry-collector.tessavar.workers.dev`. Why it is built this way is in [ADR 0018](../docs/adr/0018-product-events-kept-by-our-own-telemetry-collector-on-cloudflare.md),
 and what it does in the [telemetry collector plan](../docs/plans/telemetry-collector.md).
 
 - `POST /product-events` with `{"productEvents": [...]}`, 1 to 100 product events and at most 64 KB, from

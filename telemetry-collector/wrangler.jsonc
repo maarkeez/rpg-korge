@@ -2,7 +2,7 @@
 // EU, for 3 months. See docs/plans/telemetry-collector.md and docs/adr/0018.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "rpg-telemetry-collector",
+  "name": "telemetry-collector",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-20",
   "workers_dev": true,

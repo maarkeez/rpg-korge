@@ -17,7 +17,7 @@ import kotlin.test.Test
 
 class RemoteTelemetryRepositoryTest {
     private companion object {
-        const val COLLECTOR_URL = "https://rpg-telemetry-collector.example.workers.dev"
+        const val COLLECTOR_URL = "https://telemetry-collector.example.workers.dev"
     }
 
     private val productEvents = listOf(productEventRecorded(Name.QUEST_STARTED), productEventRecorded(Name.QUEST_COMPLETED))
