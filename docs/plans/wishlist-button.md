@@ -1,6 +1,6 @@
 # Plan: Wishlist on the main menu opens the signup form of the mailing list
 
-> **Status:** to do.
+> **Status:** built on `main` in `2de9017f`, its screenshots still to be approved.
 >
 > **Summary:** Today a player who likes the game has no way to hear of its next version: the main menu offers Play new
 > game, Load game, Build a world, Language and Privacy, and the game never asks for, nor keeps, anything that reaches
@@ -97,3 +97,13 @@ Made by hand, on Brevo's free plan, before the first commit, as its address goes
 - A Spanish player reads the form in English.
 - The mailing list sends nothing yet: the first announcement needs the sender's postal address in its footer, decided
   then.
+
+## Changes while building
+
+- **Screen / Confirm button › Gold** is drawn from a new `gold` control of the component, a boolean, false in its
+  other stories: the stories of a component share one `render`, so the colors follow an arg.
+- `GameWindowBrowser` calls KorGE's `browse` through `korlibs.render.browse`, an extension of the window's dialogs,
+  not a function of `GameWindow` itself.
+- The Brevo form is live at `SIGNUP_FORM_URL`, but still shows Brevo's default text ("Newsletter", "Subscribe to our
+  newsletter and stay updated.") rather than the text above, and no confirmation email has arrived yet in a signup
+  test: both are fixed in Brevo, not in the game.
