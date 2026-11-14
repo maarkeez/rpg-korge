@@ -13,5 +13,5 @@ fi
 mkdir -p "$www/storybook"
 find "$www" -maxdepth 1 -type f -exec cp {} "$www/storybook/" \;
 test -f "$www/storybook/resources.zip"
-grep -q 'hello-world.js' "$www/storybook/index.html"
+grep -q 'tessavar.js' "$www/storybook/index.html"
 echo "Storybook added at $www/storybook/"

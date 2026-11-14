@@ -66,7 +66,7 @@ It exits with:
 node measure.mjs --profile
 ```
 
-It also samples where the time goes while walking, and writes it to `frame-times.cpuprofile`. Open it in Chrome DevTools: the Performance panel, then Load profile. The long frames are the wide blocks of the flame chart. The production bundle is minified, so the function names are short. The source map next to the bundle, `hello-world.js.map`, maps them back to the Kotlin sources, e.g.: with the [`source-map`](https://www.npmjs.com/package/source-map) package.
+It also samples where the time goes while walking, and writes it to `frame-times.cpuprofile`. Open it in Chrome DevTools: the Performance panel, then Load profile. The long frames are the wide blocks of the flame chart. The production bundle is minified, so the function names are short. The source map next to the bundle, `tessavar.js.map`, maps them back to the Kotlin sources, e.g.: with the [`source-map`](https://www.npmjs.com/package/source-map) package.
 
 ## Troubleshooting
 

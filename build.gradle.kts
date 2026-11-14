@@ -45,7 +45,7 @@ plugins {
 val pitest by configurations.creating
 
 korge {
-    id = "com.sample.demo"
+    id = "com.mkz.tessavar"
     jvmMainClassName = "com.mkz.tessavar.MainKt"
 
     // Adds `runJvmStorybook` and `runJvmStorybookAutoreload`, which start the Storybook instead of the game. See below.
@@ -91,14 +91,14 @@ tasks.withType<Test>().configureEach {
     useJUnitPlatform()
     // Runs the test classes in a fork per two cores, leaving the other cores to the JS tests and Gradle.
     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
-    // Rewrites the golden save of the current version, e.g.: ./gradlew jvmTest -Drpg.updateSaveFixtures=true. See docs/adr/0011-no-save-migrations.md.
-    systemProperty("rpg.updateSaveFixtures", providers.systemProperty("rpg.updateSaveFixtures").getOrElse("false"))
-    // Rewrites the sample batch of product events the tests of the telemetry collector read, e.g.: ./gradlew jvmTest -Drpg.updateTelemetryFixtures=true.
-    systemProperty("rpg.updateTelemetryFixtures", providers.systemProperty("rpg.updateTelemetryFixtures").getOrElse("false"))
+    // Rewrites the golden save of the current version, e.g.: ./gradlew jvmTest -Dtessavar.updateSaveFixtures=true. See docs/adr/0011-no-save-migrations.md.
+    systemProperty("tessavar.updateSaveFixtures", providers.systemProperty("tessavar.updateSaveFixtures").getOrElse("false"))
+    // Rewrites the sample batch of product events the tests of the telemetry collector read, e.g.: ./gradlew jvmTest -Dtessavar.updateTelemetryFixtures=true.
+    systemProperty("tessavar.updateTelemetryFixtures", providers.systemProperty("tessavar.updateTelemetryFixtures").getOrElse("false"))
 }
 
 // The end-to-end test of the game against the telemetry collector, run by `wrangler dev`, is left out of jvmTest, and run
-// by jvmTelemetryCollectorTest only, e.g.: ./gradlew jvmTelemetryCollectorTest -Prpg.telemetryCollectorUrl=http://localhost:8787.
+// by jvmTelemetryCollectorTest only, e.g.: ./gradlew jvmTelemetryCollectorTest -Ptessavar.telemetryCollectorUrl=http://localhost:8787.
 // See telemetry-collector/README.md.
 val telemetryCollectorEndToEndTest = "com.mkz.tessavar.telemetry.adapters.storage.RemoteTelemetryRepositoryEndToEndTest"
 
@@ -108,19 +108,19 @@ tasks.named<Test>("jvmTest") {
 
 tasks.register<Test>("jvmTelemetryCollectorTest") {
     group = "verification"
-    description = "Sends product events from the game to the telemetry collector at rpg.telemetryCollectorUrl."
+    description = "Sends product events from the game to the telemetry collector at tessavar.telemetryCollectorUrl."
 
     val jvmTest = tasks.named<Test>("jvmTest")
     testClassesDirs = files(jvmTest.map { it.testClassesDirs })
     classpath = files(jvmTest.map { it.classpath })
     filter.includeTestsMatching(telemetryCollectorEndToEndTest)
-    systemProperty("rpg.telemetryCollectorUrl", providers.gradleProperty("rpg.telemetryCollectorUrl").getOrElse(""))
+    systemProperty("tessavar.telemetryCollectorUrl", providers.gradleProperty("tessavar.telemetryCollectorUrl").getOrElse(""))
     outputs.upToDateWhen { false }
 }
 
 // The Storybook starts from the same `main` as the game, which reads this system property.
 tasks.matching { it.name in setOf("runJvmStorybook", "runJvmStorybookAutoreload") }.configureEach {
-    (this as JavaExec).systemProperty("rpg.entry", "storybook")
+    (this as JavaExec).systemProperty("tessavar.entry", "storybook")
 }
 
 tasks.withType<ConfigurableKtLintTask>().configureEach {
@@ -170,14 +170,14 @@ extensions.getByType<KotlinMultiplatformExtension>().sourceSets.named("commonTes
 }
 
 // The address of the telemetry collector the game sends its product events to. Only the deploy to GitHub Pages passes
-// it, e.g.: ./gradlew browserReleaseWebpack -Prpg.telemetryCollectorUrl=https://rpg-telemetry-collector.rpg-korge.workers.dev,
+// it, e.g.: ./gradlew browserReleaseWebpack -Ptessavar.telemetryCollectorUrl=https://rpg-telemetry-collector.rpg-korge.workers.dev,
 // so playing locally, on the JVM, in the tests or in the Storybook sends nothing. See docs/plans/telemetry-collector.md.
 val telemetryCollectorUrl =
     tasks.register<TelemetryCollectorUrlTask>("telemetryCollectorUrl") {
         group = "build"
         description = "Generates the source holding the address of the telemetry collector, or null."
 
-        collectorUrl.set(providers.gradleProperty("rpg.telemetryCollectorUrl"))
+        collectorUrl.set(providers.gradleProperty("tessavar.telemetryCollectorUrl"))
         packageName.set("com.mkz.tessavar.telemetry.adapters.storage")
         outputDirectory.set(layout.buildDirectory.dir("generated/telemetryCollector"))
     }

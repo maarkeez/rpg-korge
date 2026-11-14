@@ -24,14 +24,14 @@ abstract class TelemetryCollectorUrlTask : DefaultTask() {
     @TaskAction
     fun generate() {
         val url = collectorUrl.orNull?.trimEnd('/')
-        require(url == null || Regex("https?://[A-Za-z0-9.:-]+").matches(url)) { "rpg.telemetryCollectorUrl is not an http(s) address without a path: $url" }
+        require(url == null || Regex("https?://[A-Za-z0-9.:-]+").matches(url)) { "tessavar.telemetryCollectorUrl is not an http(s) address without a path: $url" }
         val outputRoot = outputDirectory.get().asFile
         outputRoot.deleteRecursively()
         val source = outputRoot.resolve(packageName.get().replace('.', '/')).resolve("TelemetryCollectorUrl.kt")
         source.parentFile.mkdirs()
         source.writeText(
             buildString {
-                appendLine("// Generated from the Gradle property rpg.telemetryCollectorUrl by the telemetryCollectorUrl task. Do not edit.")
+                appendLine("// Generated from the Gradle property tessavar.telemetryCollectorUrl by the telemetryCollectorUrl task. Do not edit.")
                 appendLine("package ${packageName.get()}")
                 appendLine()
                 appendLine("val TELEMETRY_COLLECTOR_URL: String? = ${if (url == null) "null" else "\"$url\""}")

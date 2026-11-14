@@ -51,7 +51,7 @@ import kotlin.test.Test
 class SaveFixtureTest {
     private val fixtures = File("src/jvmTest/fixtures/save")
     private val currentFixture = File(fixtures, "v${Save.SAVE_VERSION}.json")
-    private val isUpdating = System.getProperty("rpg.updateSaveFixtures") == "true"
+    private val isUpdating = System.getProperty("tessavar.updateSaveFixtures") == "true"
     private val prettyJson = Json { prettyPrint = true }
 
     private class Game(
@@ -157,7 +157,7 @@ class SaveFixtureTest {
         val saved = Game(isPlayed = true).playAndSave()
         // Then
         if (isUpdating) currentFixture.writeText(prettyJson.encodeToString(JsonElement.serializer(), json(saved)) + "\n")
-        withClue("The save differs from ${currentFixture.path}: bump Save.SAVE_VERSION and write the new fixture with -Drpg.updateSaveFixtures=true") {
+        withClue("The save differs from ${currentFixture.path}: bump Save.SAVE_VERSION and write the new fixture with -Dtessavar.updateSaveFixtures=true") {
             json(saved) shouldBe json(currentFixture.readText())
         }
     }

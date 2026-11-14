@@ -10,8 +10,8 @@ import kotlin.test.Test
 
 class RemoteTelemetryRepositoryEndToEndTest {
     private val collectorUrl =
-        checkNotNull(System.getProperty("rpg.telemetryCollectorUrl")?.takeIf(String::isNotBlank)) {
-            "Run it with ./gradlew jvmTelemetryCollectorTest -Prpg.telemetryCollectorUrl=http://localhost:8787, against wrangler dev: see telemetry-collector/README.md"
+        checkNotNull(System.getProperty("tessavar.telemetryCollectorUrl")?.takeIf(String::isNotBlank)) {
+            "Run it with ./gradlew jvmTelemetryCollectorTest -Ptessavar.telemetryCollectorUrl=http://localhost:8787, against wrangler dev: see telemetry-collector/README.md"
         }
     private val remoteTelemetryRepository = RemoteTelemetryRepository(collectorUrl, createHttpClient())
     private val sampleBatch = ProductEventJson.decodeBatch(File("src/jvmTest/fixtures/telemetry/product-events.json").readText())

@@ -19,7 +19,7 @@ class ProductEventBatchFixtureTest {
     }
 
     private val fixture = File("src/jvmTest/fixtures/telemetry/product-events.json")
-    private val isUpdating = System.getProperty("rpg.updateTelemetryFixtures") == "true"
+    private val isUpdating = System.getProperty("tessavar.updateTelemetryFixtures") == "true"
     private val prettyJson = Json { prettyPrint = true }
 
     @Test
@@ -51,7 +51,7 @@ class ProductEventBatchFixtureTest {
         // Then
         productEvents.map(ProductEventRecorded::name).shouldContainExactlyInAnyOrder(ProductEventRecorded.Name.entries)
         if (isUpdating) fixture.writeText(prettyJson.encodeToString(JsonElement.serializer(), json(batch)) + "\n")
-        withClue("The batch the game sends differs from ${fixture.path}: write it again with -Drpg.updateTelemetryFixtures=true, and update the telemetry collector to read it") {
+        withClue("The batch the game sends differs from ${fixture.path}: write it again with -Dtessavar.updateTelemetryFixtures=true, and update the telemetry collector to read it") {
             json(batch) shouldBe json(fixture.readText())
         }
     }
