@@ -10,7 +10,8 @@ class MenuView(
     onLoadGameSelected: () -> Unit,
     onWorldBuilderSelected: () -> Unit,
     onPrivacySelected: () -> Unit,
-) : UIContainer(Size(width = BUTTON_WIDTH, height = 5 * BUTTON_HEIGHT + 4 * BUTTON_GAP)) {
+    onWishlistSelected: () -> Unit,
+) : UIContainer(Size(width = BUTTON_WIDTH, height = 6 * BUTTON_HEIGHT + 5 * BUTTON_GAP)) {
     companion object {
         const val BUTTON_WIDTH = 250.0
         const val BUTTON_HEIGHT = 32.0
@@ -27,6 +28,15 @@ class MenuView(
         CancelButton(label = messages[UiMessage.MENU_LANGUAGE], buttonWidth = BUTTON_WIDTH, onCancelled = { displayLanguages(isDisplayed = true) })
     internal val privacyButton =
         CancelButton(label = messages[UiMessage.MENU_PRIVACY], buttonWidth = BUTTON_WIDTH, onCancelled = onPrivacySelected)
+    internal val wishlistButton =
+        ConfirmButton(
+            label = messages[UiMessage.MENU_WISHLIST],
+            buttonWidth = BUTTON_WIDTH,
+            color = HudStyle.COIN_MIDDLE,
+            pressedColor = HudStyle.COIN_PRESSED,
+            textColor = HudStyle.PANEL,
+            onConfirmed = onWishlistSelected,
+        )
 
     internal val options =
         uiVerticalStack(padding = BUTTON_GAP) {
@@ -35,6 +45,7 @@ class MenuView(
             addChild(buildWorldButton)
             addChild(languageButton)
             addChild(privacyButton)
+            addChild(wishlistButton)
         }
 
     internal val languageButtons =
@@ -67,6 +78,7 @@ class MenuView(
         buildWorldButton.cancelButton.text = messages[UiMessage.MENU_BUILD_WORLD]
         languageButton.cancelButton.text = messages[UiMessage.MENU_LANGUAGE]
         privacyButton.cancelButton.text = messages[UiMessage.MENU_PRIVACY]
+        wishlistButton.confirmButton.text = messages[UiMessage.MENU_WISHLIST]
         displayLanguages(isDisplayed = false)
     }
 }

@@ -13,12 +13,14 @@ class MenuViewTest : ViewsForTesting() {
     private val messages = MessagesMother.messages()
 
     private fun newMenuView() =
-        MenuView(messages, onNewGameSelected = {
-            selections += "new game"
-        }, onLoadGameSelected = { selections += "load game" }, onWorldBuilderSelected = { selections += "world builder" }, onPrivacySelected = {
-            selections +=
-                "privacy"
-        })
+        MenuView(
+            messages,
+            onNewGameSelected = { selections += "new game" },
+            onLoadGameSelected = { selections += "load game" },
+            onWorldBuilderSelected = { selections += "world builder" },
+            onPrivacySelected = { selections += "privacy" },
+            onWishlistSelected = { selections += "wishlist" },
+        )
 
     @Test
     fun `MenuView should display playing a new game, building a world and the language when it is displayed`() =
@@ -31,6 +33,7 @@ class MenuViewTest : ViewsForTesting() {
             menuView.buildWorldLabel() shouldBe "Build a world"
             menuView.languageLabel() shouldBe "Language"
             menuView.privacyLabel() shouldBe "Privacy"
+            menuView.wishlistLabel() shouldBe "Wishlist"
             menuView.areLanguagesShown() shouldBe false
         }
 
@@ -63,6 +66,7 @@ class MenuViewTest : ViewsForTesting() {
             menuView.buildWorldLabel() shouldBe "Construir un mundo"
             menuView.languageLabel() shouldBe "Idioma"
             menuView.privacyLabel() shouldBe "Privacidad"
+            menuView.wishlistLabel() shouldBe "Lista de deseados"
             menuView.areOptionsShown() shouldBe true
             menuView.areLanguagesShown() shouldBe false
             messages[UiMessage.BANNER_EXPLORING] shouldBe "Explorando"
@@ -192,5 +196,29 @@ class MenuViewTest : ViewsForTesting() {
             clickPrivacy(menuView)
             // Then
             selections.shouldContainExactly("privacy")
+        }
+
+    @Test
+    fun `Wishlist should ask to open the signup form when it is clicked`() =
+        sharedViewsTest {
+            // Given
+            val menuView = newMenuView()
+            addChild(menuView)
+            // When
+            clickWishlist(menuView)
+            // Then
+            selections.shouldContainExactly("wishlist")
+        }
+
+    @Test
+    fun `Wishlist should keep the options shown when it is clicked`() =
+        sharedViewsTest {
+            // Given
+            val menuView = newMenuView()
+            addChild(menuView)
+            // When
+            clickWishlist(menuView)
+            // Then
+            menuView.areOptionsShown() shouldBe true
         }
 }

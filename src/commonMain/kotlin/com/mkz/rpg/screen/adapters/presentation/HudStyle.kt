@@ -28,6 +28,7 @@ object HudStyle {
     val DEFEATED = RGBA(0x8A, 0x8A, 0xA0)
 
     val COIN_MIDDLE = RGBA(0xC7, 0x8A, 0x1E)
+    val COIN_PRESSED = RGBA(0xA6, 0x73, 0x1A)
 
     val DANGER = RGBA(211, 47, 47)
     val DANGER_PRESSED = RGBA(183, 35, 35)

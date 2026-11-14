@@ -128,6 +128,7 @@ class StorySmokeTest : ViewsForTesting() {
                     "screen-confirm-button--default",
                     "screen-confirm-button--wide",
                     "screen-confirm-button--long-label",
+                    "screen-confirm-button--gold",
                     "screen-cancel-and-confirm",
                     "screen-cancel-and-confirm--default",
                     "screen-cancel-and-confirm--export-and-back",

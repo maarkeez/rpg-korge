@@ -38,3 +38,7 @@ suspend fun ViewsForTesting.pickLanguage(
 fun MenuView.privacyLabel(): String = privacyButton.cancelButton.text
 
 suspend fun ViewsForTesting.clickPrivacy(menuView: MenuView) = clickOn(menuView.privacyButton.cancelButton)
+
+fun MenuView.wishlistLabel(): String = wishlistButton.confirmButton.text
+
+suspend fun ViewsForTesting.clickWishlist(menuView: MenuView) = clickOn(menuView.wishlistButton.confirmButton)

@@ -29,4 +29,13 @@ class ConfirmButtonTest : ViewsForTesting() {
             // Then
             confirmed.shouldBeTrue()
         }
+
+    @Test
+    fun `ConfirmButton should write its label in the text color when it is given one`() =
+        sharedViewsTest {
+            // When
+            val confirmButton = ConfirmButton(label = "Wishlist", textColor = HudStyle.PANEL, onConfirmed = {})
+            // Then
+            confirmButton.buttonTextColor() shouldBe HudStyle.PANEL
+        }
 }

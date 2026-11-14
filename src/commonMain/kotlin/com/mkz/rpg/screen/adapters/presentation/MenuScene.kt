@@ -15,12 +15,17 @@ import korlibs.korge.view.addUpdater
 import korlibs.time.DateTime
 import kotlin.random.Random
 
+const val SIGNUP_FORM_URL =
+    "https://6ecb7558.sibforms.com/serve/" +
+        "MUIFAMiQ4UezjxlhEUvRO3oDcVvD4q-Yj7gRRY5R2RY7chTwnIgZPQpX9Hj2oXNl0A6obLKhgcV6YQO5feVIJNoZhZiAdrHOo52br5CeTwDiZlRmR_tAZbqak97rgvttUAk86vbpd32JmS8CbrKQK_XzfFJsGMkm7UE53M7Nn3IKVuQqmqfazm4oVuUm7TyyOae2nZxsmc0BAqnphA=="
+
 class MenuScene(
     private val localizationApi: LocalizationApi,
     private val telemetryApi: TelemetryApi,
     private val storage: IStorage? = null,
     private val random: Random = Random.Default,
     private val incompatibleSlot: Int? = null,
+    private val browser: Browser? = null,
 ) : Scene() {
     private companion object {
         const val PANEL_HEIGHT = 300.0
@@ -54,6 +59,7 @@ class MenuScene(
                 onLoadGameSelected = { loadGamePresenter.open() },
                 onWorldBuilderSelected = { launchImmediately { sceneContainer.changeTo { WorldBuilderScene(localizationApi, telemetryApi, storage) } } },
                 onPrivacySelected = { consentPresenter.open() },
+                onWishlistSelected = { launchImmediately { (browser ?: GameWindowBrowser(views.gameWindow)).open(SIGNUP_FORM_URL) } },
             )
         val saveSlotsView = SaveSlotsView(messages)
         val confirmDialogView = ConfirmDialogView()

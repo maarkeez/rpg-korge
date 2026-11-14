@@ -13,6 +13,7 @@ class ConfirmButton(
     buttonWidth: Double = 190.0,
     color: RGBA = COLOR,
     pressedColor: RGBA = PRESSED_COLOR,
+    textColor: RGBA = Colors.WHITE,
     val onConfirmed: () -> Unit,
 ) : Container() {
     companion object {
@@ -23,6 +24,7 @@ class ConfirmButton(
     internal val confirmButton: UIButton =
         uiButton {
             text = label
+            this.textColor = textColor
             width = buttonWidth
             bgColorOut = color
             bgColorOver = pressedColor

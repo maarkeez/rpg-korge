@@ -9,6 +9,7 @@ enum class UiMessage(
     MENU_BUILD_WORLD("ui.menu.buildWorld"),
     MENU_LANGUAGE("ui.menu.language"),
     MENU_PRIVACY("ui.menu.privacy"),
+    MENU_WISHLIST("ui.menu.wishlist"),
     CONSENT_TITLE("ui.consent.title"),
     CONSENT_BODY("ui.consent.body"),
     CONSENT_ACCEPT("ui.consent.accept"),

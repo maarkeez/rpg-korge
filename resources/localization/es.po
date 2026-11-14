@@ -36,6 +36,11 @@ msgctxt "ui.menu.privacy"
 msgid "Privacy"
 msgstr "Privacidad"
 
+#. Opens, in the browser, the signup form of the mailing list, to be told of a new demo or a new release of the game.
+msgctxt "ui.menu.wishlist"
+msgid "Wishlist"
+msgstr "Lista de deseados"
+
 #. The title of the panel asking, at the first launch, to record how the game is played.
 msgctxt "ui.consent.title"
 msgid "Help improve the game"
