@@ -1,6 +1,6 @@
-# RPG
+# Tessavar
 
-A turn-based RPG where a party explores the battlefield and fights battles on its tiles.
+Tessavar is a turn-based RPG where a party explores the battlefield and fights battles on its tiles.
 
 ## Language
 
