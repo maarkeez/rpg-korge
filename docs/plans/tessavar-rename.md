@@ -1,6 +1,6 @@
 # Plan: Rename the game to Tessavar, from its packages to its URLs
 
-> **Status:** M1 and M2 done on `main`; M3 waits for the GitHub and Cloudflare renames.
+> **Status:** done.
 >
 > **Summary:** The game has no name. The repository is `maarkeez/rpg-korge` and the Gradle project is still the
 > template's `hello-world`, which builds `hello-world.js`. The packages are `com.mkz.rpg.*`, and KorGE's id is the
@@ -45,7 +45,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 |----|--------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | Code names         | No `com.mkz.rpg`, `rpg.` property, `hello-world` or `com.sample.demo` is left outside the README, the done plans and the devlog, `jvmTest` and `jsTest` pass, and the Storybook loads `tessavar.js`. | ✅      | 93190c78 |
 | M2 | The name shown     | The browser tab and the desktop window say "Tessavar", and **Screen / Menu › Options** shows the gold title above the buttons, in English and in Spanish.        | ✅      | 3a658aed |
-| M3 | Repository and URLs | `maarkeez.github.io/tessavar/` plays the game, and a product event sent from it is in D1 through `telemetry-collector.tessavar.workers.dev`.                 | ⬜      |         |
+| M3 | Repository and URLs | `maarkeez.github.io/tessavar/` plays the game, and a product event sent from it is in D1 through `telemetry-collector.tessavar.workers.dev`.                 | ✅      | e52a9097 |
 
 ### M1 commits
 
@@ -127,3 +127,10 @@ After them, you do these by hand:
   `maarkeez/tessavar` again after the rename.
 - The D1 database keeps its name, `rpg-telemetry`, as D1 can't rename one, and moving its data isn't worth the risk.
 - On the desktop, the window title says Tessavar, but the saves stay in KorGE's default settings folder.
+
+## Changes while building
+
+- **M3**: the first deploy of the new Worker uploaded it, then failed with "This Worker does not exist on your account"
+  (code 10007), Cloudflare's API lagging behind a Worker created a moment before, so its `workers.dev` address answered
+  with error 1042 until you re-ran the failed job. Batches the game sent in between got a 4xx answer, so it dropped them.
+- **M3**: the collector's README also names its address, `https://telemetry-collector.tessavar.workers.dev`.
