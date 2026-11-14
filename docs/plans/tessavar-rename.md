@@ -1,6 +1,6 @@
 # Plan: Rename the game to Tessavar, from its packages to its URLs
 
-> **Status:** M1 done and M2 built on `main`, the screenshots of M2 still to be approved; M3 waits for the GitHub and Cloudflare renames.
+> **Status:** M1 and M2 done on `main`; M3 waits for the GitHub and Cloudflare renames.
 >
 > **Summary:** The game has no name. The repository is `maarkeez/rpg-korge` and the Gradle project is still the
 > template's `hello-world`, which builds `hello-world.js`. The packages are `com.mkz.rpg.*`, and KorGE's id is the
