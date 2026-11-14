@@ -1,7 +1,9 @@
 package com.mkz.tessavar.screen.adapters.presentation
 
+import com.mkz.tessavar.GAME_TITLE
 import korlibs.korge.ui.UIContainer
 import korlibs.korge.ui.uiVerticalStack
+import korlibs.korge.view.text
 import korlibs.math.geom.Size
 
 class MenuView(
@@ -11,12 +13,19 @@ class MenuView(
     onWorldBuilderSelected: () -> Unit,
     onPrivacySelected: () -> Unit,
     onWishlistSelected: () -> Unit,
-) : UIContainer(Size(width = BUTTON_WIDTH, height = 6 * BUTTON_HEIGHT + 5 * BUTTON_GAP)) {
+) : UIContainer(Size(width = BUTTON_WIDTH, height = TITLE_HEIGHT + TITLE_GAP + 6 * BUTTON_HEIGHT + 5 * BUTTON_GAP)) {
     companion object {
         const val BUTTON_WIDTH = 250.0
         const val BUTTON_HEIGHT = 32.0
         const val BUTTON_GAP = 15.0
+        const val TITLE_HEIGHT = 40.0
+        const val TITLE_GAP = 30.0
     }
+
+    internal val title =
+        text(text = GAME_TITLE, textSize = TITLE_HEIGHT, color = HudStyle.COIN_MIDDLE) {
+            x = (BUTTON_WIDTH - width) / 2
+        }
 
     internal val playNewGameButton =
         ConfirmButton(label = messages[UiMessage.MENU_PLAY_NEW_GAME], buttonWidth = BUTTON_WIDTH, onConfirmed = { select(onNewGameSelected) })
@@ -40,6 +49,7 @@ class MenuView(
 
     internal val options =
         uiVerticalStack(padding = BUTTON_GAP) {
+            y = TITLE_HEIGHT + TITLE_GAP
             addChild(playNewGameButton)
             addChild(loadGameButton)
             addChild(buildWorldButton)
@@ -55,6 +65,7 @@ class MenuView(
 
     internal val languages =
         uiVerticalStack(padding = BUTTON_GAP) {
+            y = TITLE_HEIGHT + TITLE_GAP
             visible = false
             languageButtons.forEach(::addChild)
         }

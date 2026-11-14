@@ -46,6 +46,7 @@ val pitest by configurations.creating
 
 korge {
     id = "com.mkz.tessavar"
+    name = "Tessavar"
     jvmMainClassName = "com.mkz.tessavar.MainKt"
 
     // Adds `runJvmStorybook` and `runJvmStorybookAutoreload`, which start the Storybook instead of the game. See below.

@@ -38,6 +38,44 @@ class MenuViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `MenuView should show Tessavar in gold above the buttons when it opens`() =
+        sharedViewsTest {
+            // When
+            val menuView = newMenuView()
+            // Then
+            menuView.titleText() shouldBe "Tessavar"
+            menuView.titleColor() shouldBe HudStyle.COIN_MIDDLE
+            menuView.isTitleAboveTheOptions() shouldBe true
+            menuView.isTitleCentred() shouldBe true
+        }
+
+    @Test
+    fun `MenuView should keep showing Tessavar when the languages are listed`() =
+        sharedViewsTest {
+            // Given
+            val menuView = newMenuView()
+            addChild(menuView)
+            // When
+            clickLanguage(menuView)
+            // Then
+            menuView.isTitleShown() shouldBe true
+            menuView.titleText() shouldBe "Tessavar"
+        }
+
+    @Test
+    fun `MenuView should keep Tessavar untranslated when Spanish is picked`() =
+        sharedViewsTest {
+            // Given
+            val menuView = newMenuView()
+            addChild(menuView)
+            clickLanguage(menuView)
+            // When
+            pickLanguage(menuView, "Español")
+            // Then
+            menuView.titleText() shouldBe "Tessavar"
+        }
+
+    @Test
     fun `Language should list the languages, named in their language, in place of the options when it is clicked`() =
         sharedViewsTest {
             // Given

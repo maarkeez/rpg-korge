@@ -28,6 +28,8 @@ import korlibs.time.DateTime
 import kotlinx.coroutines.CoroutineScope
 import kotlin.random.Random
 
+const val GAME_TITLE = "Tessavar"
+
 val GAME_WINDOW_SIZE = Size(390, 844)
 
 val STORYBOOK_WINDOW_SIZE = Size(1280, 900)
@@ -39,7 +41,7 @@ suspend fun main() =
             startStorybook()
         }
     } else {
-        Korge(windowSize = GAME_WINDOW_SIZE, backgroundColor = Colors["#2b2b2b"]) {
+        Korge(title = GAME_TITLE, windowSize = GAME_WINDOW_SIZE, backgroundColor = Colors["#2b2b2b"]) {
             startApp()
         }
     }

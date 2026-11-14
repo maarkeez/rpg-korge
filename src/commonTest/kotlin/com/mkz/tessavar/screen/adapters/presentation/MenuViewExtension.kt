@@ -3,8 +3,10 @@ package com.mkz.tessavar.screen.adapters.presentation
 import com.mkz.tessavar.shared.adapters.presentation.clickOn
 import com.mkz.tessavar.shared.adapters.presentation.descendants
 import com.mkz.tessavar.shared.adapters.presentation.isShown
+import korlibs.image.color.RGBA
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.view.Stage
+import kotlin.math.abs
 
 fun Stage.menuView(): MenuView? = descendants().filterIsInstance<MenuView>().firstOrNull()
 
@@ -42,3 +44,13 @@ suspend fun ViewsForTesting.clickPrivacy(menuView: MenuView) = clickOn(menuView.
 fun MenuView.wishlistLabel(): String = wishlistButton.confirmButton.text
 
 suspend fun ViewsForTesting.clickWishlist(menuView: MenuView) = clickOn(menuView.wishlistButton.confirmButton)
+
+fun MenuView.titleText(): String = title.text
+
+fun MenuView.titleColor(): RGBA = title.color
+
+fun MenuView.isTitleShown(): Boolean = title.isShown()
+
+fun MenuView.isTitleAboveTheOptions(): Boolean = title.y + title.height <= options.y
+
+fun MenuView.isTitleCentred(): Boolean = abs(title.x + title.width / 2 - width / 2) < 1.0

@@ -10,7 +10,7 @@ object MenuViewStories : StoryBinding {
         StoryDto(
             id = "screen-menu--options",
             name = "Options",
-            description = "Play new game, Load game, Build world, Language, Privacy and Wishlist in gold. Language lists the languages, Privacy opens the consent panel, Wishlist the signup form.",
+            description = "Tessavar in gold, over Play new game, Load game, Build world, Language, Privacy and Wishlist in gold. Language lists the languages, Privacy the consent, Wishlist the form.",
             args = emptyMap(),
         )
 
