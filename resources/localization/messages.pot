@@ -2,7 +2,7 @@
 # Edit it by hand, then merge it into each translation, see docs/localization/how-to-add-a-language.md.
 msgid ""
 msgstr ""
-"Project-Id-Version: rpg-korge\n"
+"Project-Id-Version: tessavar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -77,7 +77,7 @@ msgid ""
 "Why: to learn how the game is played and make it better.\n\n"
 "Who receives it and for how long: the game's own server, run by Cloudflare in the European Union, which deletes it 3 months after receiving it. It never keeps your IP address.\n\n"
 "Changing your mind: Privacy on the main menu, at any time. Declining there stops recording, deletes the id of this copy of the game and what is still waiting to be sent. What was already sent is deleted after 3 months.\n\n"
-"Questions: open an issue at github.com/maarkeez/rpg-korge/issues."
+"Questions: open an issue at github.com/maarkeez/tessavar/issues."
 msgstr ""
 
 #. Goes back to the consent panel.

@@ -1,19 +1,14 @@
-# Korge Hello World and Template
+# Tessavar
 
-This is a Hello World and Template for the KorGe game engine. Using gradle with kotlin-dsl.
-You can open this project in IntelliJ IDEA by opening the folder or the build.gradle.kts file.
+Tessavar is a turn-based RPG where a party explores the battlefield and fights battles on its tiles: recruit members in
+the village, take on quests, trade with its merchants, and face the goat wizard. It is built with Kotlin and
+[KorGE](https://docs.korge.org/korge/), and plays in the browser, on a phone or a computer.
 
-You can find this template at GitHub: <https://github.com/korlibs/korge-hello-world>
-
-
-You can find the KorGE documentation here: <https://docs.korge.org/korge/>
-# rpg-korge
-
-You can play this game at https://maarkeez.github.io/rpg-korge/
+You can play it at https://maarkeez.github.io/tessavar/
 
 ## Storybook
 
-Every view of the game, in each of its states, can be browsed at https://maarkeez.github.io/rpg-korge/storybook/, and
+Every view of the game, in each of its states, can be browsed at https://maarkeez.github.io/tessavar/storybook/, and
 shared with a link. See [ADR 0008](docs/adr/0008-in-game-storybook.md), and [How to add a story](docs/testing/how-to-add-a-story.md).
 
 ## Translations

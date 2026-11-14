@@ -53,7 +53,7 @@ class CommentArchitectureTest {
         // Given
         val text =
             listOf(
-                "val url = \"https://maarkeez.github.io/rpg-korge/storybook/\"",
+                "val url = \"https://maarkeez.github.io/tessavar/storybook/\"",
                 "val quote = \"\\\" // still the string\"",
                 "val raw = \"\"\"/* still */ // the raw string\"\"\"",
                 "val slash = '/'",

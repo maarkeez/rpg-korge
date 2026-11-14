@@ -21,7 +21,7 @@ is chaining effects on your enemies until the player defeats them.
   [Voice](#voice)).
 - What was built: `git log`, and the commits around the topic with `git show --stat <hash>`. Then the plans in
   `docs/plans/` and the ADRs in `docs/adr/` the commits touch. A link to a GitHub file of this
-  repository (`github.com/maarkeez/rpg-korge/blob/<hash>/<path>`) is read locally with `git show <hash>:<path>`.
+  repository (`github.com/maarkeez/tessavar/blob/<hash>/<path>`, or `rpg-korge`, its old name) is read locally with `git show <hash>:<path>`.
 
 Finding facts is your job, never the user's: don't ask anything the repository answers. Use what you find to word the
 suggested answers, so the user mostly clicks.
